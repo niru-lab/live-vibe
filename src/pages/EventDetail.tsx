@@ -12,6 +12,7 @@ import {
 } from '@/hooks/useEventAttendees';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
+import { usePendingAttendees } from '@/hooks/useEventMessages';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -25,6 +26,7 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import { useToast } from '@/hooks/use-toast';
+import { AttendeeManager } from '@/components/events/AttendeeManager';
 import {
   ArrowLeft,
   Calendar,
@@ -45,6 +47,7 @@ import {
   Flame,
   UserCheck,
   Crown,
+  Settings,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -71,6 +74,9 @@ export default function EventDetail() {
   const rsvpMutation = useRSVP();
 
   const [showAttendees, setShowAttendees] = useState(false);
+  const [showAttendeeManager, setShowAttendeeManager] = useState(false);
+  
+  const { data: pendingAttendees } = usePendingAttendees(id);
 
   if (isLoading) {
     return (
@@ -167,12 +173,39 @@ export default function EventDetail() {
             <Share2 className="h-5 w-5" />
           </Button>
           {isCreator && (
-            <Button variant="outline" size="sm" onClick={() => navigate(`/events/${id}/edit`)}>
-              Bearbeiten
-            </Button>
+            <>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setShowAttendeeManager(true)}
+                className="gap-1.5 relative"
+              >
+                <Users className="h-4 w-4" />
+                Gäste
+                {pendingAttendees && pendingAttendees.length > 0 && (
+                  <Badge className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 text-[10px] bg-red-500 animate-pulse">
+                    {pendingAttendees.length}
+                  </Badge>
+                )}
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => navigate(`/events/${id}/edit`)}>
+                Bearbeiten
+              </Button>
+            </>
           )}
         </div>
       </header>
+
+      {/* Attendee Manager for Host */}
+      {isCreator && (
+        <AttendeeManager
+          open={showAttendeeManager}
+          onOpenChange={setShowAttendeeManager}
+          eventId={event?.id || ''}
+          eventName={event?.name || ''}
+          eventAddress={`${event?.address}, ${event?.city}`}
+        />
+      )}
 
       <div className="pb-24">
         {/* Cover Image */}
