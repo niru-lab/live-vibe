@@ -51,6 +51,89 @@ const stuttgartLocations: Location[] = [
   { name: 'Café Moody', address: 'Uhlandstraße 26, 70182 Stuttgart', category: 'cafe', coordinates: [48.7728, 9.1868] },
 ];
 
+// Stuttgart area coordinates for events without exact lat/lng
+const stuttgartAreas: Record<string, [number, number]> = {
+  'stuttgart': [48.7758, 9.1829],
+  'mitte': [48.7758, 9.1829],
+  'stuttgart mitte': [48.7758, 9.1829],
+  'west': [48.7720, 9.1550],
+  'stuttgart west': [48.7720, 9.1550],
+  'ost': [48.7850, 9.2100],
+  'stuttgart ost': [48.7850, 9.2100],
+  'süd': [48.7550, 9.1750],
+  'stuttgart süd': [48.7550, 9.1750],
+  'nord': [48.8050, 9.1800],
+  'stuttgart nord': [48.8050, 9.1800],
+  'bad cannstatt': [48.8060, 9.2150],
+  'cannstatt': [48.8060, 9.2150],
+  'vaihingen': [48.7300, 9.1050],
+  'stuttgart vaihingen': [48.7300, 9.1050],
+  'degerloch': [48.7450, 9.1700],
+  'stuttgart degerloch': [48.7450, 9.1700],
+  'feuerbach': [48.8100, 9.1550],
+  'stuttgart feuerbach': [48.8100, 9.1550],
+  'zuffenhausen': [48.8350, 9.1700],
+  'stuttgart zuffenhausen': [48.8350, 9.1700],
+  'untertürkheim': [48.7750, 9.2450],
+  'stuttgart untertürkheim': [48.7750, 9.2450],
+  'heslach': [48.7580, 9.1650],
+  'stuttgart heslach': [48.7580, 9.1650],
+  'killesberg': [48.8000, 9.1680],
+  'botnang': [48.7850, 9.1380],
+  'weilimdorf': [48.8150, 9.1100],
+  'möhringen': [48.7250, 9.1500],
+  'sillenbuch': [48.7450, 9.2150],
+  'plieningen': [48.7100, 9.2050],
+  'stammheim': [48.8400, 9.1500],
+  'mühlhausen': [48.8350, 9.2100],
+  'wangen': [48.7700, 9.2350],
+  'hedelfingen': [48.7650, 9.2500],
+  'obertürkheim': [48.7600, 9.2550],
+  'rotenberg': [48.7850, 9.2450],
+  // Other cities
+  'berlin': [52.5200, 13.4050],
+  'berlin mitte': [52.5200, 13.4050],
+  'hamburg': [53.5511, 9.9937],
+  'münchen': [48.1351, 11.5820],
+  'köln': [50.9375, 6.9603],
+  'frankfurt': [50.1109, 8.6821],
+  'düsseldorf': [51.2277, 6.7735],
+  'leipzig': [51.3397, 12.3731],
+  'dortmund': [51.5136, 7.4653],
+  'essen': [51.4556, 7.0116],
+  'bremen': [53.0793, 8.8017],
+  'dresden': [51.0504, 13.7373],
+};
+
+// Get coordinates for an event based on city and area
+const getEventCoordinates = (city: string, area: string): [number, number] | null => {
+  const areaLower = area?.toLowerCase().trim() || '';
+  const cityLower = city?.toLowerCase().trim() || '';
+  
+  // First try exact area match
+  if (stuttgartAreas[areaLower]) {
+    return stuttgartAreas[areaLower];
+  }
+  
+  // Try with city prefix
+  const withCity = `${cityLower} ${areaLower}`;
+  if (stuttgartAreas[withCity]) {
+    return stuttgartAreas[withCity];
+  }
+  
+  // Try city alone
+  if (stuttgartAreas[cityLower]) {
+    return stuttgartAreas[cityLower];
+  }
+  
+  // Default to Stuttgart center if it's a Stuttgart event
+  if (cityLower.includes('stuttgart')) {
+    return stuttgartAreas['stuttgart'];
+  }
+  
+  return null;
+};
+
 const categoryColors: Record<string, string> = {
   bar: '#f97316',
   club: '#a855f7',
@@ -110,21 +193,47 @@ export function StuttgartMap() {
   const { data: events } = useEvents();
   const navigate = useNavigate();
 
-  // Convert events to locations
+  // Convert events to locations - now uses area-based coordinates if no lat/lng
   const eventLocations: Location[] = (events || [])
-    .filter(event => event.latitude && event.longitude)
-    .map(event => ({
-      id: event.id,
-      name: event.name,
-      address: event.city || event.address,
-      category: 'event' as const,
-      coordinates: [event.latitude!, event.longitude!] as [number, number],
-      eventData: {
-        id: event.id,
-        starts_at: event.starts_at,
-        expected_attendees: event.expected_attendees || undefined,
-      },
-    }));
+    .map(event => {
+      // First try exact coordinates
+      if (event.latitude && event.longitude) {
+        return {
+          id: event.id,
+          name: event.name,
+          address: `${event.address}, ${event.city}`,
+          category: 'event' as const,
+          coordinates: [event.latitude, event.longitude] as [number, number],
+          eventData: {
+            id: event.id,
+            starts_at: event.starts_at,
+            expected_attendees: event.expected_attendees || undefined,
+          },
+        };
+      }
+      
+      // Try to get coordinates from area/city
+      const coords = getEventCoordinates(event.city, event.address);
+      if (coords) {
+        // Add small random offset to prevent overlapping markers
+        const jitter = () => (Math.random() - 0.5) * 0.005;
+        return {
+          id: event.id,
+          name: event.name,
+          address: `${event.address}, ${event.city}`,
+          category: 'event' as const,
+          coordinates: [coords[0] + jitter(), coords[1] + jitter()] as [number, number],
+          eventData: {
+            id: event.id,
+            starts_at: event.starts_at,
+            expected_attendees: event.expected_attendees || undefined,
+          },
+        };
+      }
+      
+      return null;
+    })
+    .filter((loc): loc is NonNullable<typeof loc> => loc !== null);
 
   // Combine static locations with events
   const allLocations = [...stuttgartLocations, ...eventLocations];
