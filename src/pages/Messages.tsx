@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Mail, Send, Inbox, MapPin, Calendar, ChevronRight, MessageCircle } from 'lucide-react';
+import { Mail, MapPin, Calendar, ChevronRight, MessageCircle, ArrowUp, ArrowDown } from 'lucide-react';
 import { useEventMessages, useMarkMessageRead } from '@/hooks/useEventMessages';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
@@ -18,10 +17,9 @@ export default function Messages() {
   const { data: profile } = useProfile();
   const { data: receivedMessages, isLoading: receivedLoading, refetch } = useEventMessages();
   const markRead = useMarkMessageRead();
-  const [activeTab, setActiveTab] = useState('received');
 
   // Fetch sent messages
-  const { data: sentMessages, isLoading: sentLoading } = useQuery({
+  const { data: sentMessages, isLoading: sentLoading, refetch: refetchSent } = useQuery({
     queryKey: ['sent-messages', profile?.id],
     queryFn: async () => {
       if (!profile) return [];
@@ -42,6 +40,12 @@ export default function Messages() {
     enabled: !!profile,
   });
 
+  // Combine and sort all messages
+  const allMessages = [
+    ...(receivedMessages || []).map(msg => ({ ...msg, isSent: false })),
+    ...(sentMessages || []).map((msg: any) => ({ ...msg, isSent: true })),
+  ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
   // Real-time subscription for new messages
   useEffect(() => {
     if (!profile?.id) return;
@@ -60,21 +64,34 @@ export default function Messages() {
           refetch();
         }
       )
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'event_messages',
+          filter: `sender_id=eq.${profile.id}`,
+        },
+        () => {
+          refetchSent();
+        }
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [profile?.id, refetch]);
+  }, [profile?.id, refetch, refetchSent]);
 
-  const handleMessageClick = async (message: any, isSent: boolean) => {
-    if (!isSent && !message.is_read) {
+  const handleMessageClick = async (message: any) => {
+    if (!message.isSent && !message.is_read) {
       await markRead.mutateAsync(message.id);
     }
     navigate(`/events/${message.event_id}`);
   };
 
   const unreadCount = receivedMessages?.filter(m => !m.is_read).length || 0;
+  const isLoading = receivedLoading || sentLoading;
 
   return (
     <AppLayout>
@@ -94,77 +111,24 @@ export default function Messages() {
             )}
           </div>
         </div>
-
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="px-4 pb-2">
-          <TabsList className="w-full glass rounded-2xl p-1">
-            <TabsTrigger 
-              value="received" 
-              className="flex-1 rounded-xl data-[state=active]:bg-gradient-neon data-[state=active]:text-white gap-2"
-            >
-              <Inbox className="h-4 w-4" />
-              Empfangen
-              {unreadCount > 0 && (
-                <Badge className="bg-white/20 text-white text-xs px-1.5">
-                  {unreadCount}
-                </Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger 
-              value="sent" 
-              className="flex-1 rounded-xl data-[state=active]:bg-gradient-neon data-[state=active]:text-white gap-2"
-            >
-              <Send className="h-4 w-4" />
-              Gesendet
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
       </header>
 
       {/* Content */}
-      <div className="p-4 pb-24">
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsContent value="received" className="mt-0 space-y-3">
-            {receivedLoading ? (
-              <MessagesSkeleton />
-            ) : receivedMessages && receivedMessages.length > 0 ? (
-              receivedMessages.map((message) => (
-                <MessageCard
-                  key={message.id}
-                  message={message}
-                  isSent={false}
-                  onClick={() => handleMessageClick(message, false)}
-                />
-              ))
-            ) : (
-              <EmptyState 
-                icon={<Inbox className="h-10 w-10" />}
-                title="Keine Nachrichten"
-                description="Wenn du für Events akzeptiert wirst, erhältst du hier Nachrichten mit Details."
-              />
-            )}
-          </TabsContent>
-
-          <TabsContent value="sent" className="mt-0 space-y-3">
-            {sentLoading ? (
-              <MessagesSkeleton />
-            ) : sentMessages && sentMessages.length > 0 ? (
-              sentMessages.map((message: any) => (
-                <MessageCard
-                  key={message.id}
-                  message={message}
-                  isSent={true}
-                  onClick={() => handleMessageClick(message, true)}
-                />
-              ))
-            ) : (
-              <EmptyState 
-                icon={<Send className="h-10 w-10" />}
-                title="Keine gesendeten Nachrichten"
-                description="Wenn du Events erstellst und Gäste akzeptierst, kannst du ihnen hier Nachrichten senden."
-              />
-            )}
-          </TabsContent>
-        </Tabs>
+      <div className="p-4 pb-24 space-y-3">
+        {isLoading ? (
+          <MessagesSkeleton />
+        ) : allMessages.length > 0 ? (
+          allMessages.map((message) => (
+            <MessageCard
+              key={`${message.id}-${message.isSent ? 'sent' : 'received'}`}
+              message={message}
+              isSent={message.isSent}
+              onClick={() => handleMessageClick(message)}
+            />
+          ))
+        ) : (
+          <EmptyState />
+        )}
       </div>
     </AppLayout>
   );
@@ -187,17 +151,30 @@ function MessageCard({ message, isSent, onClick }: MessageCardProps) {
       }`}
     >
       <div className="flex items-start gap-3">
-        <Avatar className="h-12 w-12 ring-2 ring-primary/30">
-          <AvatarImage src={person?.avatar_url || ''} />
-          <AvatarFallback className="bg-gradient-neon text-white">
-            {person?.display_name?.charAt(0) || '?'}
-          </AvatarFallback>
-        </Avatar>
+        {/* Direction indicator */}
+        <div className="relative">
+          <Avatar className="h-12 w-12 ring-2 ring-primary/30">
+            <AvatarImage src={person?.avatar_url || ''} />
+            <AvatarFallback className="bg-gradient-neon text-white">
+              {person?.display_name?.charAt(0) || '?'}
+            </AvatarFallback>
+          </Avatar>
+          <div className={`absolute -bottom-1 -right-1 rounded-full p-1 ${isSent ? 'bg-blue-500' : 'bg-green-500'}`}>
+            {isSent ? (
+              <ArrowUp className="h-2.5 w-2.5 text-white" />
+            ) : (
+              <ArrowDown className="h-2.5 w-2.5 text-white" />
+            )}
+          </div>
+        </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs text-muted-foreground">
+              {isSent ? 'An:' : 'Von:'}
+            </span>
             <p className="font-semibold truncate">
-              {isSent ? 'An: ' : ''}{person?.display_name}
+              {person?.display_name}
             </p>
             {!isSent && !message.is_read && (
               <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -256,14 +233,16 @@ function MessagesSkeleton() {
   );
 }
 
-function EmptyState({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-16 text-center">
       <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full glass neon-glow-sm text-muted-foreground">
-        {icon}
+        <MessageCircle className="h-10 w-10" />
       </div>
-      <h3 className="font-semibold gradient-text mb-1">{title}</h3>
-      <p className="text-sm text-muted-foreground max-w-xs">{description}</p>
+      <h3 className="font-semibold gradient-text mb-1">Keine Nachrichten</h3>
+      <p className="text-sm text-muted-foreground max-w-xs">
+        Wenn du Events erstellst oder für Events akzeptiert wirst, erscheinen hier deine Nachrichten.
+      </p>
     </div>
   );
 }
