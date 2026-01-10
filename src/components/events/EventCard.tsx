@@ -1,9 +1,14 @@
-import { Calendar, MapPin, Users, Clock } from 'lucide-react';
+import { Calendar, MapPin, Users, Clock, UserCheck, Flame } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
+import { useEventAttendees, useFriendsAttending, useUserEventRSVP, useRSVP } from '@/hooks/useEventAttendees';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import type { EventWithCreator } from '@/hooks/useEvents';
 
 const categoryEmojis: Record<string, string> = {
@@ -18,12 +23,37 @@ const categoryEmojis: Record<string, string> = {
 interface EventCardProps {
   event: EventWithCreator;
   onClick: () => void;
+  compact?: boolean;
 }
 
-export const EventCard = ({ event, onClick }: EventCardProps) => {
+export const EventCard = ({ event, onClick, compact = false }: EventCardProps) => {
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const startsAt = new Date(event.starts_at);
   const isToday = new Date().toDateString() === startsAt.toDateString();
-  const isSoon = startsAt.getTime() - Date.now() < 3 * 60 * 60 * 1000; // Within 3 hours
+  const isSoon = startsAt.getTime() - Date.now() < 3 * 60 * 60 * 1000;
+
+  const { data: attendees } = useEventAttendees(event.id);
+  const { data: friendsAttending } = useFriendsAttending(event.id);
+  const { data: userRSVP } = useUserEventRSVP(event.id);
+  const rsvpMutation = useRSVP();
+
+  const goingCount = attendees?.goingCount || 0;
+  const expectedAttendees = event.expected_attendees || 100;
+  const fillPercentage = Math.min((goingCount / expectedAttendees) * 100, 100);
+  const isGoing = userRSVP?.status === 'going';
+
+  const handleRSVP = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+    await rsvpMutation.mutateAsync({
+      eventId: event.id,
+      status: isGoing ? null : 'going',
+    });
+  };
 
   return (
     <article
@@ -70,6 +100,16 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
             {categoryEmojis[event.category]} {event.category.replace('_', ' ')}
           </Badge>
         </div>
+
+        {/* Going badge if user is attending */}
+        {isGoing && (
+          <div className="absolute bottom-3 right-3">
+            <Badge className="bg-green-500/90 backdrop-blur">
+              <UserCheck className="mr-1 h-3 w-3" />
+              Du gehst hin
+            </Badge>
+          </div>
+        )}
       </div>
 
       {/* Content */}
@@ -78,11 +118,46 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
           {event.name}
         </h3>
 
+        {/* Attendees bar */}
+        <div className="mb-3">
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">
+                {goingCount}/{expectedAttendees} zugesagt
+              </span>
+              {fillPercentage > 70 && (
+                <Flame className="h-4 w-4 text-orange-500" />
+              )}
+            </div>
+            <span className="text-xs text-muted-foreground">{Math.round(fillPercentage)}%</span>
+          </div>
+          <Progress value={fillPercentage} className="h-1.5" />
+        </div>
+
+        {/* Friends attending */}
+        {friendsAttending && friendsAttending.length > 0 && (
+          <div className="flex items-center gap-2 mb-3 py-2 px-3 rounded-lg bg-muted/50">
+            <div className="flex -space-x-2">
+              {friendsAttending.slice(0, 3).map((friend) => (
+                <Avatar key={friend.id} className="h-5 w-5 border-2 border-background">
+                  <AvatarImage src={friend.profile?.avatar_url || ''} />
+                  <AvatarFallback className="text-xs">
+                    {friend.profile?.display_name?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {friendsAttending.length} Freunde gehen
+            </span>
+          </div>
+        )}
+
         <div className="mb-3 space-y-1.5 text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <Calendar className="h-4 w-4 text-primary" />
             <span>
-              {format(startsAt, 'EEEE, d. MMMM', { locale: de })}
+              {format(startsAt, 'EEEE, d. MMM', { locale: de })}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -93,17 +168,30 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
             <MapPin className="h-4 w-4 text-primary" />
             <span className="line-clamp-1">{event.location_name}, {event.city}</span>
           </div>
-          {event.expected_attendees && (
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4 text-primary" />
-              <span>~{event.expected_attendees} erwartet</span>
-            </div>
-          )}
+        </div>
+
+        {/* RSVP Button */}
+        <div className="flex gap-2">
+          <Button
+            onClick={handleRSVP}
+            variant={isGoing ? 'outline' : 'default'}
+            size="sm"
+            className={cn(
+              'flex-1 gap-1.5',
+              isGoing
+                ? 'border-green-500 text-green-500 hover:bg-green-500/10'
+                : 'bg-gradient-to-r from-primary to-accent'
+            )}
+            disabled={rsvpMutation.isPending}
+          >
+            <UserCheck className="h-4 w-4" />
+            {isGoing ? 'Zugesagt ✓' : 'Zusagen'}
+          </Button>
         </div>
 
         {/* Creator */}
         {event.creator && (
-          <div className="flex items-center gap-2 border-t border-border/50 pt-3">
+          <div className="flex items-center gap-2 border-t border-border/50 pt-3 mt-3">
             <Avatar className="h-6 w-6">
               <AvatarImage src={event.creator.avatar_url || ''} />
               <AvatarFallback className="text-xs">
@@ -111,7 +199,7 @@ export const EventCard = ({ event, onClick }: EventCardProps) => {
               </AvatarFallback>
             </Avatar>
             <span className="text-xs text-muted-foreground">
-              von <span className="font-medium text-foreground">{event.creator.display_name}</span>
+              von <span className="font-medium text-foreground">@{event.creator.username}</span>
             </span>
           </div>
         )}

@@ -13,6 +13,7 @@ import CreateEvent from "./pages/CreateEvent";
 import CreatePost from "./pages/CreatePost";
 import CreateCarousel from "./pages/CreateCarousel";
 import Profile from "./pages/Profile";
+import EventDetail from "./pages/EventDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/discover" element={<Discover />} />
               <Route path="/events" element={<Events />} />
               <Route path="/events/create" element={<CreateEvent />} />
+              <Route path="/events/:id" element={<EventDetail />} />
               <Route path="/create" element={<CreatePost />} />
               <Route path="/create/carousel" element={<CreateCarousel />} />
               <Route path="/profile" element={<Profile />} />
