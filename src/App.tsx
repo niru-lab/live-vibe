@@ -11,6 +11,7 @@ import Discover from "./pages/Discover";
 import Events from "./pages/Events";
 import CreateEvent from "./pages/CreateEvent";
 import CreatePost from "./pages/CreatePost";
+import CreateCarousel from "./pages/CreateCarousel";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -31,6 +32,7 @@ const App = () => (
               <Route path="/events" element={<Events />} />
               <Route path="/events/create" element={<CreateEvent />} />
               <Route path="/create" element={<CreatePost />} />
+              <Route path="/create/carousel" element={<CreateCarousel />} />
               <Route path="/profile" element={<Profile />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
