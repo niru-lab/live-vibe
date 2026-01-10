@@ -261,6 +261,9 @@ export type Database = {
           longitude: number | null
           media_type: string
           media_url: string
+          music_artist: string | null
+          music_title: string | null
+          music_url: string | null
         }
         Insert: {
           author_id: string
@@ -278,6 +281,9 @@ export type Database = {
           longitude?: number | null
           media_type?: string
           media_url: string
+          music_artist?: string | null
+          music_title?: string | null
+          music_url?: string | null
         }
         Update: {
           author_id?: string
@@ -295,6 +301,9 @@ export type Database = {
           longitude?: number | null
           media_type?: string
           media_url?: string
+          music_artist?: string | null
+          music_title?: string | null
+          music_url?: string | null
         }
         Relationships: [
           {

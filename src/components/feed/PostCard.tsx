@@ -1,4 +1,5 @@
-import { Heart, MessageCircle, Share2, MapPin, Clock } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Heart, MessageCircle, Share2, MapPin, Clock, Music, Volume2, VolumeX } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -20,8 +21,66 @@ export const PostCard = ({ post, isLiked, onLike }: PostCardProps) => {
     locale: de,
   });
 
+  const [isMuted, setIsMuted] = useState(true);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Auto-play music when post is in view (TikTok-style)
+  useEffect(() => {
+    if (!post.music_url) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            if (audioRef.current) {
+              audioRef.current.play().catch(() => {});
+              setIsPlaying(true);
+            }
+          } else {
+            if (audioRef.current) {
+              audioRef.current.pause();
+              setIsPlaying(false);
+            }
+          }
+        });
+      },
+      { threshold: 0.5 }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+    };
+  }, [post.music_url]);
+
+  const toggleMute = () => {
+    if (audioRef.current) {
+      audioRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
   return (
-    <article className="animate-fade-in overflow-hidden rounded-2xl border border-border/50 bg-card">
+    <article ref={cardRef} className="animate-fade-in overflow-hidden rounded-2xl border border-border/50 bg-card">
+      {/* Hidden audio element for music */}
+      {post.music_url && (
+        <audio
+          ref={audioRef}
+          src={post.music_url}
+          loop
+          muted={isMuted}
+          preload="metadata"
+        />
+      )}
+
       {/* Header */}
       <div className="flex items-center gap-3 p-4">
         <Avatar className="h-10 w-10 ring-2 ring-primary/20">
@@ -78,6 +137,37 @@ export const PostCard = ({ post, isLiked, onLike }: PostCardProps) => {
           />
         )}
         
+        {/* Music overlay */}
+        {post.music_url && post.music_title && (
+          <div className="absolute bottom-3 right-3 flex items-center gap-2">
+            <div className="flex items-center gap-2 rounded-full bg-background/80 px-3 py-1.5 backdrop-blur">
+              <Music className={cn("h-4 w-4 text-primary", isPlaying && "animate-pulse")} />
+              <div className="max-w-[120px] overflow-hidden">
+                <p className="truncate text-xs font-medium text-foreground">
+                  {post.music_title}
+                </p>
+                {post.music_artist && (
+                  <p className="truncate text-xs text-muted-foreground">
+                    {post.music_artist}
+                  </p>
+                )}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={toggleMute}
+              >
+                {isMuted ? (
+                  <VolumeX className="h-3 w-3" />
+                ) : (
+                  <Volume2 className="h-3 w-3" />
+                )}
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Event badge overlay */}
         {post.event && (
           <div className="absolute bottom-3 left-3 right-3">
