@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useEvents } from '@/hooks/useEvents';
@@ -16,7 +16,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Search, MapPin, Calendar, Filter, Sparkles, Map, List } from 'lucide-react';
-import { StuttgartMap } from '@/components/maps/StuttgartMap';
+
+const StuttgartMap = lazy(() => import('@/components/maps/StuttgartMap').then(m => ({ default: m.StuttgartMap })));
 
 const categories = [
   { value: 'all', label: 'Alle' },
@@ -154,7 +155,9 @@ export default function Discover() {
         </div>
 
         <TabsContent value="map" className="mt-0 p-4">
-          <StuttgartMap />
+          <Suspense fallback={<Skeleton className="h-[500px] w-full rounded-xl" />}>
+            <StuttgartMap />
+          </Suspense>
         </TabsContent>
 
         <TabsContent value="events" className="mt-0 p-4">
