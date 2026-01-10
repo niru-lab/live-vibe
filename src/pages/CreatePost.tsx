@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
 import {
   ArrowLeft,
   Camera,
@@ -34,6 +35,7 @@ export default function CreatePost() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -86,6 +88,9 @@ export default function CreatePost() {
         caption: caption || null,
         location_name: location || null,
         is_moment_x: isMomentX,
+        music_url: selectedMusic?.url || null,
+        music_title: selectedMusic?.title || null,
+        music_artist: selectedMusic?.artist || null,
       });
 
       toast({
@@ -205,6 +210,15 @@ export default function CreatePost() {
               </div>
             </label>
           )}
+        </div>
+
+        {/* Music Selector */}
+        <div className="space-y-2">
+          <Label>Musik</Label>
+          <MusicSelector
+            selectedTrack={selectedMusic}
+            onSelect={setSelectedMusic}
+          />
         </div>
 
         {/* Caption */}
