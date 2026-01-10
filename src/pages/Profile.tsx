@@ -18,19 +18,19 @@ export default function Profile() {
   if (!authLoading && !user) {
     return (
       <AppLayout>
-        <div className="flex flex-col items-center justify-center px-4 py-20 text-center">
-          <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-            <Users className="h-10 w-10 text-muted-foreground" />
+        <div className="min-h-screen flex flex-col items-center justify-center px-4 py-20 text-center bg-gradient-hero">
+          <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full glass neon-glow">
+            <Users className="h-12 w-12 text-primary" />
           </div>
-          <h2 className="mb-2 text-xl font-semibold text-foreground">
+          <h2 className="mb-3 text-2xl font-bold gradient-text">
             Nicht angemeldet
           </h2>
-          <p className="mb-6 max-w-xs text-muted-foreground">
+          <p className="mb-8 max-w-xs text-muted-foreground">
             Melde dich an, um dein Profil zu sehen und Events zu erstellen.
           </p>
           <Button
             onClick={() => navigate('/auth')}
-            className="bg-gradient-to-r from-primary to-accent"
+            className="bg-gradient-neon hover:opacity-90 text-white font-semibold px-8 py-6 rounded-2xl neon-glow"
           >
             Anmelden
           </Button>
@@ -43,23 +43,28 @@ export default function Profile() {
 
   return (
     <AppLayout>
-      {/* Header */}
-      <header className="flex items-center justify-between border-b border-border/50 bg-background/80 p-4 backdrop-blur-xl">
-        <h1 className="font-display text-xl font-bold">Profil</h1>
-      </header>
+      {/* Gradient Background */}
+      <div className="fixed inset-0 bg-gradient-hero -z-10" />
+      
+      <div className="min-h-screen">
+        {/* Minimal Header */}
+        <header className="flex items-center justify-center py-4">
+          <h1 className="font-display text-lg font-bold text-foreground/80">Profil</h1>
+        </header>
 
-      <div className="p-4">
-        {/* Profile Header with Stats */}
-        <ProfileHeader
-          profile={profile || null}
-          isLoading={isLoading}
-          followersCount={followStats?.followers || 0}
-          followingCount={followStats?.following || 0}
-          postsCount={postsCount || 0}
-        />
+        <div className="px-4 pb-24">
+          {/* Profile Header with Stats */}
+          <ProfileHeader
+            profile={profile || null}
+            isLoading={isLoading}
+            followersCount={followStats?.followers || 0}
+            followingCount={followStats?.following || 0}
+            postsCount={postsCount || 0}
+          />
 
-        {/* Posts Grid */}
-        <ProfilePostsGrid profileId={profile?.id} />
+          {/* Posts Grid */}
+          <ProfilePostsGrid profileId={profile?.id} />
+        </div>
       </div>
     </AppLayout>
   );

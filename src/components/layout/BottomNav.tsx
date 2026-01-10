@@ -1,15 +1,15 @@
 import { useState } from 'react';
-import { Home, Search, PlusCircle, Calendar, Gem } from 'lucide-react';
+import { Home, Search, PlusCircle, Calendar, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { PostTypeSelector } from '@/components/create/PostTypeSelector';
 
 const navItems = [
   { icon: Home, label: 'Feed', path: '/', emoji: '🏠' },
-  { icon: Search, label: 'Discovery', path: '/discover', emoji: '🔍' },
+  { icon: Search, label: 'Discover', path: '/discover', emoji: '🔍' },
   { icon: PlusCircle, label: 'Post', path: '/create', isCenter: true },
   { icon: Calendar, label: 'Events', path: '/events', emoji: '🎉' },
-  { icon: Gem, label: 'Profil', path: '/profile', emoji: '💎' },
+  { icon: User, label: 'Profil', path: '/profile', emoji: '👤' },
 ];
 
 export const BottomNav = () => {
@@ -18,49 +18,56 @@ export const BottomNav = () => {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background/95 backdrop-blur-xl safe-area-pb">
-        <div className="mx-auto flex h-16 max-w-md items-center justify-around px-2">
-          {navItems.map(({ icon: Icon, label, path, isCenter, emoji }) => {
-            const isActive = location.pathname === path;
+      <nav className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md">
+        <div className="glass rounded-[28px] px-2 py-3 neon-glow-sm">
+          <div className="flex items-center justify-around">
+            {navItems.map(({ icon: Icon, label, path, isCenter, emoji }) => {
+              const isActive = location.pathname === path;
 
-            if (isCenter) {
+              if (isCenter) {
+                return (
+                  <button
+                    key={path}
+                    onClick={() => setShowPostSelector(true)}
+                    className="relative -mt-8 flex flex-col items-center"
+                  >
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-neon shadow-lg neon-glow transition-all duration-300 hover:scale-110 active:scale-95">
+                      <Icon className="h-8 w-8 text-white" />
+                    </div>
+                  </button>
+                );
+              }
+
               return (
-                <button
+                <Link
                   key={path}
-                  onClick={() => setShowPostSelector(true)}
-                  className="relative -mt-6 flex flex-col items-center transition-all duration-200"
-                >
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-r from-primary to-accent shadow-lg shadow-primary/30 transition-transform hover:scale-110 active:scale-95">
-                    <Icon className="h-7 w-7 text-primary-foreground" />
-                  </div>
-                </button>
-              );
-            }
-
-            return (
-              <Link
-                key={path}
-                to={path}
-                className={cn(
-                  'flex flex-col items-center gap-0.5 px-3 py-1 transition-all duration-200',
-                  isActive && 'scale-105'
-                )}
-              >
-                <span className="text-lg">{emoji}</span>
-                <span
+                  to={path}
                   className={cn(
-                    'text-[10px] font-semibold transition-colors',
-                    isActive ? 'text-primary' : 'text-muted-foreground'
+                    'relative flex flex-col items-center gap-1 px-4 py-2 rounded-2xl transition-all duration-300',
+                    isActive && 'bg-white/10'
                   )}
                 >
-                  {label}
-                </span>
-                {isActive && (
-                  <div className="absolute -bottom-0.5 h-0.5 w-6 rounded-full bg-primary" />
-                )}
-              </Link>
-            );
-          })}
+                  <span className={cn(
+                    "text-2xl transition-transform duration-300",
+                    isActive && "scale-110"
+                  )}>
+                    {emoji}
+                  </span>
+                  <span
+                    className={cn(
+                      'text-[11px] font-semibold transition-colors',
+                      isActive ? 'text-primary' : 'text-muted-foreground'
+                    )}
+                  >
+                    {label}
+                  </span>
+                  {isActive && (
+                    <div className="absolute -bottom-1 h-1 w-8 rounded-full bg-gradient-neon neon-glow-sm" />
+                  )}
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </nav>
 
