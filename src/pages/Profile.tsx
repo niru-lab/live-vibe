@@ -148,14 +148,7 @@ export default function Profile() {
         </div>
 
         {/* Stats */}
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          <StatCard
-            icon={Zap}
-            label="Social Cloud"
-            value={profile?.social_cloud_points || 0}
-            isLoading={isLoading}
-            highlight
-          />
+        <div className="mt-4 grid grid-cols-2 gap-3">
           <StatCard
             icon={Users}
             label="Follower"
@@ -163,8 +156,8 @@ export default function Profile() {
             isLoading={isLoading}
           />
           <StatCard
-            icon={Heart}
-            label="Likes"
+            icon={Users}
+            label="Following"
             value={0}
             isLoading={isLoading}
           />
