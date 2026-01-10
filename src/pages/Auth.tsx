@@ -98,7 +98,7 @@ export default function Auth() {
       });
     } else {
       toast({
-        title: 'Willkommen bei Moment-X! 🎉',
+        title: 'Willkommen bei Feyrn! 🎉',
         description: 'Dein Account wurde erfolgreich erstellt.',
       });
     }
@@ -120,7 +120,7 @@ export default function Auth() {
           </div>
         </div>
         <h1 className="font-display text-4xl font-bold tracking-tight text-foreground">
-          Moment-X
+          Feyrn
         </h1>
         <p className="mt-2 text-muted-foreground">
           Entdecke, was gerade abgeht
