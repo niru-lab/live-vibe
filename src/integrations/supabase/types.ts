@@ -252,6 +252,7 @@ export type Database = {
           comments_count: number
           created_at: string
           event_id: string | null
+          expires_at: string | null
           id: string
           is_moment_x: boolean
           latitude: number | null
@@ -272,6 +273,7 @@ export type Database = {
           comments_count?: number
           created_at?: string
           event_id?: string | null
+          expires_at?: string | null
           id?: string
           is_moment_x?: boolean
           latitude?: number | null
@@ -292,6 +294,7 @@ export type Database = {
           comments_count?: number
           created_at?: string
           event_id?: string | null
+          expires_at?: string | null
           id?: string
           is_moment_x?: boolean
           latitude?: number | null
@@ -379,7 +382,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      delete_expired_posts: { Args: never; Returns: undefined }
     }
     Enums: {
       event_category:

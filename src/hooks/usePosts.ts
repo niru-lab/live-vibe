@@ -116,3 +116,26 @@ export const useUserLikes = () => {
     enabled: !!profile,
   });
 };
+
+export const useDeletePost = () => {
+  const queryClient = useQueryClient();
+  const { data: profile } = useProfile();
+
+  return useMutation({
+    mutationFn: async (postId: string) => {
+      if (!profile) throw new Error('Not authenticated');
+      
+      const { error } = await supabase
+        .from('posts')
+        .delete()
+        .eq('id', postId)
+        .eq('author_id', profile.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['userPosts'] });
+    },
+  });
+};

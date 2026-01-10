@@ -20,6 +20,7 @@ import {
   Sparkles,
   Zap,
   Loader2,
+  Clock,
 } from 'lucide-react';
 
 export default function CreatePost() {
@@ -36,6 +37,7 @@ export default function CreatePost() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
+  const [is24hPost, setIs24hPost] = useState(false);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -82,6 +84,11 @@ export default function CreatePost() {
       // Create post
       const mediaType = selectedFile.type.startsWith('video') ? 'video' : 'image';
       
+      // Calculate expires_at if 24h post is enabled
+      const expiresAt = is24hPost 
+        ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() 
+        : null;
+
       await createPost.mutateAsync({
         media_url: publicUrl,
         media_type: mediaType,
@@ -91,6 +98,7 @@ export default function CreatePost() {
         music_url: selectedMusic?.url || null,
         music_title: selectedMusic?.title || null,
         music_artist: selectedMusic?.artist || null,
+        expires_at: expiresAt,
       });
 
       toast({
@@ -152,6 +160,22 @@ export default function CreatePost() {
             </div>
           </div>
           <Switch checked={isMomentX} onCheckedChange={setIsMomentX} />
+        </div>
+
+        {/* 24h Story Toggle */}
+        <div className="flex items-center justify-between rounded-2xl border border-accent/30 bg-accent/5 p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-accent to-orange-500">
+              <Clock className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Nur 24 Stunden</h3>
+              <p className="text-sm text-muted-foreground">
+                Post löscht sich automatisch
+              </p>
+            </div>
+          </div>
+          <Switch checked={is24hPost} onCheckedChange={setIs24hPost} />
         </div>
 
         {/* Media Upload */}

@@ -65,6 +65,7 @@ export const ProfilePostsGrid = ({ profileId }: ProfilePostsGridProps) => {
               post={selectedPost}
               isLiked={likedPosts.includes(selectedPost.id)}
               onLike={handleLike}
+              onDeleted={() => setSelectedPost(null)}
             />
           )}
         </DialogContent>
