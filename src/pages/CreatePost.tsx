@@ -2,6 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
+import { useCreatePost } from '@/hooks/usePosts';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -15,19 +18,22 @@ import {
   MapPin,
   Sparkles,
   Zap,
-  Upload,
+  Loader2,
 } from 'lucide-react';
 
 export default function CreatePost() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: profile } = useProfile();
   const { toast } = useToast();
+  const createPost = useCreatePost();
 
   const [caption, setCaption] = useState('');
   const [location, setLocation] = useState('');
   const [isMomentX, setIsMomentX] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -39,7 +45,7 @@ export default function CreatePost() {
   };
 
   const handleSubmit = async () => {
-    if (!user) {
+    if (!user || !profile) {
       navigate('/auth');
       return;
     }
@@ -53,11 +59,51 @@ export default function CreatePost() {
       return;
     }
 
-    // TODO: Upload file to storage and create post
-    toast({
-      title: 'Coming Soon! 🎉',
-      description: 'Post-Upload wird bald verfügbar sein.',
-    });
+    setIsUploading(true);
+
+    try {
+      // Upload file to storage
+      const fileExt = selectedFile.name.split('.').pop();
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('post-media')
+        .upload(fileName, selectedFile);
+
+      if (uploadError) throw uploadError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('post-media')
+        .getPublicUrl(fileName);
+
+      // Create post
+      const mediaType = selectedFile.type.startsWith('video') ? 'video' : 'image';
+      
+      await createPost.mutateAsync({
+        media_url: publicUrl,
+        media_type: mediaType,
+        caption: caption || null,
+        location_name: location || null,
+        is_moment_x: isMomentX,
+      });
+
+      toast({
+        title: 'Gepostet! 🎉',
+        description: 'Dein Beitrag wurde erfolgreich geteilt.',
+      });
+
+      navigate('/');
+    } catch (error: any) {
+      console.error('Upload error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Fehler beim Upload',
+        description: error.message || 'Bitte versuche es erneut.',
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -73,9 +119,16 @@ export default function CreatePost() {
         <Button
           onClick={handleSubmit}
           className="bg-gradient-to-r from-primary to-accent"
-          disabled={!selectedFile}
+          disabled={!selectedFile || isUploading}
         >
-          Teilen
+          {isUploading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Lädt...
+            </>
+          ) : (
+            'Teilen'
+          )}
         </Button>
       </header>
 
