@@ -71,7 +71,7 @@ const eventSchema = z.object({
   name: z.string().min(3, 'Name muss mindestens 3 Zeichen haben'),
   description: z.string().optional(),
   location_name: z.string().min(2, 'Location ist erforderlich'),
-  address: z.string().min(5, 'Adresse ist erforderlich'),
+  area: z.string().min(2, 'Gebiet ist erforderlich (z.B. Stuttgart West)'),
   city: z.string().min(2, 'Stadt ist erforderlich'),
   starts_at: z.date({ required_error: 'Datum ist erforderlich' }),
   starts_at_time: z.string().min(1, 'Startzeit ist erforderlich'),
@@ -125,7 +125,7 @@ export default function CreateEvent() {
       name: '',
       description: '',
       location_name: '',
-      address: '',
+      area: '',
       city: '',
       is_free: true,
       entry_price: 0,
@@ -216,7 +216,7 @@ export default function CreateEvent() {
         name: data.name,
         description: data.description || null,
         location_name: data.location_name,
-        address: data.address,
+        address: data.area, // Gebiet wird als address gespeichert für Heatmap
         city: data.city,
         starts_at: startsAt.toISOString(),
         ends_at: endsAt?.toISOString() || null,
@@ -506,13 +506,16 @@ export default function CreateEvent() {
 
             <FormField
               control={form.control}
-              name="address"
+              name="area"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Adresse *</FormLabel>
+                  <FormLabel>Gebiet / Stadtteil *</FormLabel>
                   <FormControl>
-                    <Input placeholder="Straße, Hausnummer" {...field} />
+                    <Input placeholder="z.B. Stuttgart West, Mitte, Ost..." {...field} />
                   </FormControl>
+                  <FormDescription className="text-xs">
+                    Wichtig für die Heatmap - genaue Adresse erst nach Zusage
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
