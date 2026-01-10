@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Settings, Cloud, Trophy, MapPin, Calendar } from 'lucide-react';
+import { Settings, Trophy } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -97,7 +97,7 @@ export const ProfileHeader = ({
             </Button>
           </div>
 
-          {/* Badge & Level Display */}
+          {/* Badge Display - Only Badge and Name */}
           {!isLoading && badgeData && (
             <button
               onClick={() => setAchievementsOpen(true)}
@@ -109,9 +109,6 @@ export const ProfileHeader = ({
                   <div>
                     <p className={cn('font-bold', badgeData.color)}>
                       {badgeData.name}
-                      <span className="ml-1 text-xs text-muted-foreground">
-                        ({badgeData.level}/9)
-                      </span>
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {profile?.bio || 'Noch keine Bio'}
@@ -120,46 +117,7 @@ export const ProfileHeader = ({
                 </div>
                 <Trophy className="h-5 w-5 text-muted-foreground" />
               </div>
-
-              {/* Progress to next level */}
-              {badgeData.nextLevel && (
-                <div className="mt-2">
-                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-                    <span>{Math.round(badgeData.progressToNext)}% → {badgeData.nextLevel.emoji} {badgeData.nextLevel.name}</span>
-                  </div>
-                  <Progress value={badgeData.progressToNext} className="h-1.5" />
-                </div>
-              )}
             </button>
-          )}
-
-          {/* Quick Stats Row */}
-          {!isLoading && (
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
-                <Cloud className="h-4 w-4 text-primary animate-pulse" />
-                <div>
-                  <p className="font-bold text-foreground">{(profile?.social_cloud_points || 0).toLocaleString()}</p>
-                  <p className="text-[10px] text-muted-foreground">Social Cloud</p>
-                </div>
-              </div>
-              {badgeData?.cityRank && (
-                <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
-                  <MapPin className="h-4 w-4 text-primary" />
-                  <div>
-                    <p className="font-bold text-foreground">Top {badgeData.cityRank}</p>
-                    <p className="text-[10px] text-muted-foreground">{profile?.city}</p>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
-                <Calendar className="h-4 w-4 text-primary" />
-                <div>
-                  <p className="font-bold text-foreground">{badgeData?.appDays || 0}</p>
-                  <p className="text-[10px] text-muted-foreground">App-Tage</p>
-                </div>
-              </div>
-            </div>
           )}
 
           {/* Stats Row: Followers | Following | Posts */}
