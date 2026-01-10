@@ -14,6 +14,7 @@ import CreatePost from "./pages/CreatePost";
 import CreateCarousel from "./pages/CreateCarousel";
 import Profile from "./pages/Profile";
 import EventDetail from "./pages/EventDetail";
+import Messages from "./pages/Messages";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -36,6 +37,7 @@ const App = () => (
               <Route path="/create" element={<CreatePost />} />
               <Route path="/create/carousel" element={<CreateCarousel />} />
               <Route path="/profile" element={<Profile />} />
+              <Route path="/messages" element={<Messages />} />
               {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
