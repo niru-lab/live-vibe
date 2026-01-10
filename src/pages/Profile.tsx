@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ProfilePostsGrid } from '@/components/profile/ProfilePostsGrid';
 import {
   Settings,
   LogOut,
@@ -168,6 +169,9 @@ export default function Profile() {
             isLoading={isLoading}
           />
         </div>
+
+        {/* Posts Grid */}
+        <ProfilePostsGrid profileId={profile?.id} />
 
         {/* Actions */}
         <div className="mt-6 space-y-3">
