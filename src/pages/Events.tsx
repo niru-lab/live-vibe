@@ -24,33 +24,45 @@ export default function Events() {
 
   return (
     <AppLayout>
+      {/* Gradient Background */}
+      <div className="fixed inset-0 bg-gradient-hero -z-10" />
+      
       {/* Header */}
-      <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 glass">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <Calendar className="h-5 w-5 text-primary" />
-            <h1 className="font-display text-xl font-bold">Events</h1>
+            <span className="text-2xl">🎉</span>
+            <h1 className="font-display text-xl font-bold gradient-text">Events</h1>
           </div>
           <Button
             onClick={() => navigate('/events/create')}
             size="sm"
-            className="gap-1.5 bg-gradient-to-r from-primary to-accent"
+            className="gap-1.5 bg-gradient-neon neon-glow-sm"
           >
             <Plus className="h-4 w-4" />
             Erstellen
           </Button>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="px-4">
-          <TabsList className="w-full">
-            <TabsTrigger value="upcoming" className="flex-1">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="px-4 pb-2">
+          <TabsList className="w-full glass rounded-2xl p-1">
+            <TabsTrigger 
+              value="upcoming" 
+              className="flex-1 rounded-xl data-[state=active]:bg-gradient-neon data-[state=active]:text-white"
+            >
               Anstehend
             </TabsTrigger>
-            <TabsTrigger value="my-rsvps" className="flex-1">
-              Meine Zusagen
+            <TabsTrigger 
+              value="my-rsvps" 
+              className="flex-1 rounded-xl data-[state=active]:bg-gradient-neon data-[state=active]:text-white"
+            >
+              Zusagen
             </TabsTrigger>
-            <TabsTrigger value="my-events" className="flex-1">
-              Meine Events
+            <TabsTrigger 
+              value="my-events" 
+              className="flex-1 rounded-xl data-[state=active]:bg-gradient-neon data-[state=active]:text-white"
+            >
+              Meine
             </TabsTrigger>
           </TabsList>
         </Tabs>
@@ -245,12 +257,12 @@ interface EmptyStateProps {
 function EmptyState({ title, description, onAction, actionLabel }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-        <PartyPopper className="h-10 w-10 text-muted-foreground" />
+      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full glass neon-glow">
+        <PartyPopper className="h-10 w-10 text-primary" />
       </div>
-      <h2 className="mb-2 text-xl font-semibold text-foreground">{title}</h2>
+      <h2 className="mb-2 text-xl font-semibold gradient-text">{title}</h2>
       <p className="mb-6 max-w-xs text-muted-foreground">{description}</p>
-      <Button onClick={onAction} className="bg-gradient-to-r from-primary to-accent">
+      <Button onClick={onAction} className="bg-gradient-neon neon-glow-sm">
         {actionLabel}
       </Button>
     </div>
