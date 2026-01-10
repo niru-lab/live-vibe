@@ -18,7 +18,7 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <ThemeProvider defaultTheme="dark" storageKey="moment-x-theme">
+    <ThemeProvider defaultTheme="dark" storageKey="feyrn-theme">
       <AuthProvider>
         <TooltipProvider>
           <Toaster />

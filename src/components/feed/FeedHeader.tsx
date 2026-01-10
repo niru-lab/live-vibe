@@ -41,7 +41,7 @@ export const FeedHeader = ({ selectedCity, onCityChange }: FeedHeaderProps) => {
             <Zap className="h-5 w-5 text-primary-foreground" />
           </div>
           <span className="font-display text-xl font-bold text-foreground">
-            Moment-X
+            Feyrn
           </span>
         </div>
 
