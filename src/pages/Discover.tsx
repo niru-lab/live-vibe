@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Select,
   SelectContent,
@@ -14,7 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Search, MapPin, Calendar, Filter, Sparkles } from 'lucide-react';
+import { Search, MapPin, Calendar, Filter, Sparkles, Map, List } from 'lucide-react';
+import { StuttgartMap } from '@/components/maps/StuttgartMap';
 
 const categories = [
   { value: 'all', label: 'Alle' },
@@ -136,48 +138,67 @@ export default function Discover() {
         </div>
       </header>
 
-      {/* Events Grid */}
-      <div className="p-4">
-        {isLoading ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="space-y-3">
-                <Skeleton className="aspect-[16/9] w-full rounded-xl" />
-                <Skeleton className="h-5 w-3/4" />
-                <Skeleton className="h-4 w-1/2" />
-              </div>
-            ))}
-          </div>
-        ) : filteredEvents && filteredEvents.length > 0 ? (
-          <div className="grid gap-4 sm:grid-cols-2">
-            {filteredEvents.map((event) => (
-              <EventCard
-                key={event.id}
-                event={event}
-                onClick={() => navigate(`/events/${event.id}`)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-              <Calendar className="h-10 w-10 text-muted-foreground" />
+      {/* Content Tabs */}
+      <Tabs defaultValue="map" className="flex-1">
+        <div className="px-4 pt-2">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="map" className="gap-2">
+              <Map className="h-4 w-4" />
+              Karte
+            </TabsTrigger>
+            <TabsTrigger value="events" className="gap-2">
+              <List className="h-4 w-4" />
+              Events
+            </TabsTrigger>
+          </TabsList>
+        </div>
+
+        <TabsContent value="map" className="mt-0 p-4">
+          <StuttgartMap />
+        </TabsContent>
+
+        <TabsContent value="events" className="mt-0 p-4">
+          {isLoading ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="space-y-3">
+                  <Skeleton className="aspect-[16/9] w-full rounded-xl" />
+                  <Skeleton className="h-5 w-3/4" />
+                  <Skeleton className="h-4 w-1/2" />
+                </div>
+              ))}
             </div>
-            <h2 className="mb-2 text-xl font-semibold text-foreground">
-              Keine Events gefunden
-            </h2>
-            <p className="mb-6 max-w-xs text-muted-foreground">
-              Ändere deine Filter oder erstelle selbst ein Event!
-            </p>
-            <Button
-              onClick={() => navigate('/events/create')}
-              className="bg-gradient-to-r from-primary to-accent"
-            >
-              Event erstellen
-            </Button>
-          </div>
-        )}
-      </div>
+          ) : filteredEvents && filteredEvents.length > 0 ? (
+            <div className="grid gap-4 sm:grid-cols-2">
+              {filteredEvents.map((event) => (
+                <EventCard
+                  key={event.id}
+                  event={event}
+                  onClick={() => navigate(`/events/${event.id}`)}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-center">
+              <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
+                <Calendar className="h-10 w-10 text-muted-foreground" />
+              </div>
+              <h2 className="mb-2 text-xl font-semibold text-foreground">
+                Keine Events gefunden
+              </h2>
+              <p className="mb-6 max-w-xs text-muted-foreground">
+                Ändere deine Filter oder erstelle selbst ein Event!
+              </p>
+              <Button
+                onClick={() => navigate('/events/create')}
+                className="bg-gradient-to-r from-primary to-accent"
+              >
+                Event erstellen
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </AppLayout>
   );
 }
