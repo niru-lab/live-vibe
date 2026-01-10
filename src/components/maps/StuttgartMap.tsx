@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -39,17 +39,25 @@ const stuttgartLocations: Location[] = [
   { name: 'Café Moody', address: 'Uhlandstraße 26, 70182 Stuttgart', category: 'cafe', coordinates: [48.7728, 9.1868] },
 ];
 
-const categoryColors = {
-  bar: '#f97316', // Orange
-  club: '#a855f7', // Purple
-  cafe: '#22c55e', // Green
+const categoryColors: Record<string, string> = {
+  bar: '#f97316',
+  club: '#a855f7',
+  cafe: '#22c55e',
 };
 
-const categoryLabels = {
+const categoryLabels: Record<string, string> = {
   bar: '🍸 Bar',
   club: '🎧 Club',
   cafe: '☕ Café',
 };
+
+// Fix default marker icon issue
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+});
 
 // Create custom marker icons for each category
 const createCustomIcon = (color: string) => {
@@ -69,7 +77,7 @@ const createCustomIcon = (color: string) => {
   });
 };
 
-const categoryIcons = {
+const categoryIcons: Record<string, L.DivIcon> = {
   bar: createCustomIcon(categoryColors.bar),
   club: createCustomIcon(categoryColors.club),
   cafe: createCustomIcon(categoryColors.cafe),
@@ -96,16 +104,16 @@ export function StuttgartMap() {
         />
         {filteredLocations.map((location, index) => (
           <Marker
-            key={index}
+            key={`${location.name}-${index}`}
             position={location.coordinates}
             icon={categoryIcons[location.category]}
           >
             <Popup>
               <div className="p-1 min-w-[180px]">
-                <h3 className="font-bold mb-1 text-foreground text-sm">{location.name}</h3>
-                <p className="text-xs text-muted-foreground mb-2">{location.address}</p>
+                <h3 className="font-bold mb-1 text-gray-900 text-sm">{location.name}</h3>
+                <p className="text-xs text-gray-600 mb-2">{location.address}</p>
                 <span 
-                  className="text-white px-2 py-0.5 rounded-full text-xs"
+                  className="text-white px-2 py-0.5 rounded-full text-xs inline-block"
                   style={{ backgroundColor: categoryColors[location.category] }}
                 >
                   {categoryLabels[location.category]}
@@ -130,7 +138,7 @@ export function StuttgartMap() {
             >
               <div 
                 className="w-3 h-3 rounded-full" 
-                style={{ backgroundColor: categoryColors[key as keyof typeof categoryColors] }}
+                style={{ backgroundColor: categoryColors[key] }}
               />
               <span>{label}</span>
               <span className="text-muted-foreground ml-auto">
