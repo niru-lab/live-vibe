@@ -1,10 +1,15 @@
 import { useState } from 'react';
-import { Settings, Cloud } from 'lucide-react';
+import { Settings, Cloud, Trophy, MapPin, Calendar } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Progress } from '@/components/ui/progress';
 import { ProfileSettings } from './ProfileSettings';
+import { AchievementsView } from './AchievementsView';
+import { BadgeOverlay } from './BadgeDisplay';
+import { useBadgeSystem } from '@/hooks/useBadgeSystem';
+import { cn } from '@/lib/utils';
 import type { Profile } from '@/hooks/useProfile';
 
 interface ProfileHeaderProps {
@@ -23,6 +28,8 @@ export const ProfileHeader = ({
   postsCount,
 }: ProfileHeaderProps) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const { data: badgeData } = useBadgeSystem(profile?.id);
 
   return (
     <>
@@ -37,12 +44,18 @@ export const ProfileHeader = ({
               {isLoading ? (
                 <Skeleton className="h-[100px] w-[100px] rounded-full" />
               ) : (
-                <Avatar className="h-[100px] w-[100px] ring-4 ring-background shadow-xl">
-                  <AvatarImage src={profile?.avatar_url || ''} />
-                  <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-3xl text-primary-foreground">
-                    {profile?.display_name?.charAt(0).toUpperCase() || '?'}
-                  </AvatarFallback>
-                </Avatar>
+                <div className="relative">
+                  <Avatar className="h-[100px] w-[100px] ring-4 ring-background shadow-xl">
+                    <AvatarImage src={profile?.avatar_url || ''} />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-3xl text-primary-foreground">
+                      {profile?.display_name?.charAt(0).toUpperCase() || '?'}
+                    </AvatarFallback>
+                  </Avatar>
+                  {/* Badge overlay */}
+                  {badgeData && (
+                    <BadgeOverlay points={profile?.social_cloud_points || 0} className="h-8 w-8 text-lg" />
+                  )}
+                </div>
               )}
 
               <div className="flex flex-col">
@@ -61,7 +74,14 @@ export const ProfileHeader = ({
                         <Badge className="h-5 bg-primary px-1.5 text-primary-foreground">✓</Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">@{profile?.username}</p>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm text-muted-foreground">@{profile?.username}</span>
+                      {badgeData && (
+                        <span className={cn('text-sm font-semibold', badgeData.color)}>
+                          {badgeData.emoji}
+                        </span>
+                      )}
+                    </div>
                   </>
                 )}
               </div>
@@ -77,21 +97,67 @@ export const ProfileHeader = ({
             </Button>
           </div>
 
-          {/* Bio / Status with Social Cloud */}
+          {/* Badge & Level Display */}
+          {!isLoading && badgeData && (
+            <button
+              onClick={() => setAchievementsOpen(true)}
+              className="mt-4 w-full rounded-xl border border-border/50 bg-gradient-to-r from-muted/50 to-card p-3 text-left transition-all hover:border-primary/50"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">{badgeData.emoji}</span>
+                  <div>
+                    <p className={cn('font-bold', badgeData.color)}>
+                      {badgeData.name}
+                      <span className="ml-1 text-xs text-muted-foreground">
+                        ({badgeData.level}/9)
+                      </span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {profile?.bio || 'Noch keine Bio'}
+                    </p>
+                  </div>
+                </div>
+                <Trophy className="h-5 w-5 text-muted-foreground" />
+              </div>
+
+              {/* Progress to next level */}
+              {badgeData.nextLevel && (
+                <div className="mt-2">
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+                    <span>{Math.round(badgeData.progressToNext)}% → {badgeData.nextLevel.emoji} {badgeData.nextLevel.name}</span>
+                  </div>
+                  <Progress value={badgeData.progressToNext} className="h-1.5" />
+                </div>
+              )}
+            </button>
+          )}
+
+          {/* Quick Stats Row */}
           {!isLoading && (
-            <div className="mt-4 text-center">
-              <p className="text-sm text-muted-foreground">
-                {profile?.bio || 'Noch keine Bio'}
-                {profile?.city && ` 📍 ${profile.city}`}
-              </p>
-              
-              {/* Social Cloud Badge */}
-              <div className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-primary/20 to-accent/20 px-3 py-1">
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
                 <Cloud className="h-4 w-4 text-primary animate-pulse" />
-                <span className="text-sm font-semibold text-foreground">
-                  {profile?.social_cloud_points || 0}
-                </span>
-                <span className="text-xs text-muted-foreground">Social Cloud</span>
+                <div>
+                  <p className="font-bold text-foreground">{(profile?.social_cloud_points || 0).toLocaleString()}</p>
+                  <p className="text-[10px] text-muted-foreground">Social Cloud</p>
+                </div>
+              </div>
+              {badgeData?.cityRank && (
+                <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+                  <MapPin className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="font-bold text-foreground">Top {badgeData.cityRank}</p>
+                    <p className="text-[10px] text-muted-foreground">{profile?.city}</p>
+                  </div>
+                </div>
+              )}
+              <div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
+                <Calendar className="h-4 w-4 text-primary" />
+                <div>
+                  <p className="font-bold text-foreground">{badgeData?.appDays || 0}</p>
+                  <p className="text-[10px] text-muted-foreground">App-Tage</p>
+                </div>
               </div>
             </div>
           )}
@@ -110,6 +176,13 @@ export const ProfileHeader = ({
         onOpenChange={setSettingsOpen} 
         profile={profile}
       />
+
+      <AchievementsView
+        open={achievementsOpen}
+        onOpenChange={setAchievementsOpen}
+        badgeData={badgeData || null}
+        city={profile?.city}
+      />
     </>
   );
 };
@@ -125,7 +198,7 @@ const StatItem = ({ label, value, isLoading }: StatItemProps) => (
     {isLoading ? (
       <Skeleton className="h-6 w-10" />
     ) : (
-      <span className="text-lg font-bold text-foreground">{value}</span>
+      <span className="text-lg font-bold text-foreground">{value.toLocaleString()}</span>
     )}
     <span className="text-xs text-muted-foreground">{label}</span>
   </div>

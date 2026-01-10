@@ -24,6 +24,7 @@ import {
 import { cn } from '@/lib/utils';
 import { useProfile } from '@/hooks/useProfile';
 import { useDeletePost } from '@/hooks/usePosts';
+import { BadgeDisplay } from '@/components/profile/BadgeDisplay';
 import type { PostWithAuthor } from '@/hooks/usePosts';
 
 interface PostCardProps {
@@ -142,6 +143,9 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
               <span className="font-semibold text-foreground">
                 {author?.display_name || 'Unbekannt'}
               </span>
+              {author?.social_cloud_points !== undefined && (
+                <BadgeDisplay points={author.social_cloud_points} size="sm" />
+              )}
               {author?.is_verified && (
                 <Badge variant="secondary" className="h-5 px-1.5 text-xs">
                   ✓

@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { useEventAttendees, useFriendsAttending, useUserEventRSVP, useRSVP } from '@/hooks/useEventAttendees';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { BadgeDisplay } from '@/components/profile/BadgeDisplay';
 import type { EventWithCreator } from '@/hooks/useEvents';
 
 const categoryEmojis: Record<string, string> = {
@@ -201,6 +202,9 @@ export const EventCard = ({ event, onClick, compact = false }: EventCardProps) =
             <span className="text-xs text-muted-foreground">
               von <span className="font-medium text-foreground">@{event.creator.username}</span>
             </span>
+            {event.creator.social_cloud_points !== undefined && (
+              <BadgeDisplay points={event.creator.social_cloud_points} size="sm" />
+            )}
           </div>
         )}
       </div>
