@@ -17,7 +17,7 @@ import {
 import { Search, MapPin, Calendar, Filter, Sparkles } from 'lucide-react';
 
 const categories = [
-  { value: '', label: 'Alle' },
+  { value: 'all', label: 'Alle' },
   { value: 'club', label: '🎧 Club' },
   { value: 'house_party', label: '🏠 Hausparty' },
   { value: 'bar', label: '🍸 Bar' },
@@ -40,12 +40,12 @@ const germanCities = [
 export default function Discover() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCity, setSelectedCity] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const [selectedCity, setSelectedCity] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const { data: events, isLoading } = useEvents({
-    city: selectedCity || undefined,
-    category: selectedCategory || undefined,
+    city: selectedCity === 'all' ? undefined : selectedCity,
+    category: selectedCategory === 'all' ? undefined : selectedCategory,
   });
 
   const filteredEvents = events?.filter(event =>
@@ -82,7 +82,7 @@ export default function Discover() {
                 <SelectValue placeholder="Stadt" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Alle Städte</SelectItem>
+                <SelectItem value="all">Alle Städte</SelectItem>
                 {germanCities.map((city) => (
                   <SelectItem key={city} value={city}>
                     {city}

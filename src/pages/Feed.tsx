@@ -12,9 +12,9 @@ import { Zap, PartyPopper } from 'lucide-react';
 export default function Feed() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const [selectedCity, setSelectedCity] = useState<string>('');
+  const [selectedCity, setSelectedCity] = useState<string>('all');
   
-  const { data: posts, isLoading: postsLoading } = usePosts(selectedCity || undefined);
+  const { data: posts, isLoading: postsLoading } = usePosts(selectedCity === 'all' ? undefined : selectedCity);
   const { data: likedPosts = [] } = useUserLikes();
   const likeMutation = useLikePost();
 
