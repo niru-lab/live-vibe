@@ -3,7 +3,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import { Filter, Music, Users, Clock, DollarSign, X } from 'lucide-react';
+import { Filter, Music, Users, Clock, DollarSign, MapPin, Star, X } from 'lucide-react';
 
 interface DiscoverFiltersProps {
   onFiltersChange?: (filters: FilterState) => void;
@@ -14,12 +14,16 @@ export interface FilterState {
   vibes: string | null;
   time: string | null;
   price: string | null;
+  radius: string | null;
+  socialCloud: string | null;
 }
 
 const musicOptions = ['Alle', 'Techno', 'House', 'Hip-Hop', 'Latin', 'Pop', 'Mixed'];
-const vibesOptions = ['Alle', 'Wild', 'Chill', 'Romantic', 'Underground', 'Mainstream'];
+const vibesOptions = ['Alle', 'Wild', 'Casual', 'Exklusiv', 'Chill', 'Underground'];
 const timeOptions = ['Alle', 'Jetzt', 'Heute', 'Morgen', 'Wochenende'];
 const priceOptions = ['Alle', 'Kostenlos', '< 10€', '< 20€', '< 50€'];
+const radiusOptions = ['Alle', '500m', '2km', '5km', 'Stadt'];
+const socialCloudOptions = ['Alle', 'Top 10', 'Top 50', 'Top 100'];
 
 export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
   const [open, setOpen] = useState(false);
@@ -28,6 +32,8 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
     vibes: null,
     time: null,
     price: null,
+    radius: null,
+    socialCloud: null,
   });
 
   const activeFiltersCount = Object.values(filters).filter(v => v && v !== 'Alle').length;
@@ -39,10 +45,48 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
   };
 
   const clearFilters = () => {
-    const cleared = { music: null, vibes: null, time: null, price: null };
+    const cleared: FilterState = { 
+      music: null, 
+      vibes: null, 
+      time: null, 
+      price: null, 
+      radius: null, 
+      socialCloud: null 
+    };
     setFilters(cleared);
     onFiltersChange?.(cleared);
   };
+
+  const FilterSection = ({ 
+    icon: Icon, 
+    label, 
+    options, 
+    filterKey 
+  }: { 
+    icon: any; 
+    label: string; 
+    options: string[]; 
+    filterKey: keyof FilterState;
+  }) => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-sm font-semibold">
+        <Icon className="h-4 w-4 text-primary" />
+        {label}
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => (
+          <Badge
+            key={option}
+            variant={filters[filterKey] === option || (!filters[filterKey] && option === 'Alle') ? 'default' : 'outline'}
+            className="cursor-pointer px-3 py-1.5 transition-all hover:scale-105 active:scale-95"
+            onClick={() => updateFilter(filterKey, option)}
+          >
+            {option}
+          </Badge>
+        ))}
+      </div>
+    </div>
+  );
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
@@ -50,21 +94,21 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
         <Button 
           variant="outline" 
           size="sm" 
-          className="relative gap-2"
+          className="relative gap-2 bg-muted/50"
         >
           <Filter className="h-4 w-4" />
           Filter
           {activeFiltersCount > 0 && (
-            <Badge className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 text-[10px]">
+            <Badge className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 text-[10px] animate-pulse">
               {activeFiltersCount}
             </Badge>
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent side="bottom" className="h-[70vh] rounded-t-3xl">
+      <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl">
         <SheetHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <SheetTitle className="text-xl font-bold">Filter</SheetTitle>
+            <SheetTitle className="text-xl font-bold">🎛️ Filter</SheetTitle>
             {activeFiltersCount > 0 && (
               <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
                 <X className="mr-1 h-4 w-4" />
@@ -72,98 +116,28 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
               </Button>
             )}
           </div>
+          <p className="text-sm text-muted-foreground">
+            Finde genau das, was du suchst
+          </p>
         </SheetHeader>
 
-        <div className="space-y-6 overflow-y-auto pb-8">
-          {/* Music Filter */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Music className="h-4 w-4 text-primary" />
-              Musik
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {musicOptions.map((option) => (
-                <Badge
-                  key={option}
-                  variant={filters.music === option || (!filters.music && option === 'Alle') ? 'default' : 'outline'}
-                  className="cursor-pointer px-3 py-1.5 transition-all hover:scale-105"
-                  onClick={() => updateFilter('music', option)}
-                >
-                  {option}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Vibes Filter */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Users className="h-4 w-4 text-primary" />
-              Vibes
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {vibesOptions.map((option) => (
-                <Badge
-                  key={option}
-                  variant={filters.vibes === option || (!filters.vibes && option === 'Alle') ? 'default' : 'outline'}
-                  className="cursor-pointer px-3 py-1.5 transition-all hover:scale-105"
-                  onClick={() => updateFilter('vibes', option)}
-                >
-                  {option}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Time Filter */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <Clock className="h-4 w-4 text-primary" />
-              Zeit
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {timeOptions.map((option) => (
-                <Badge
-                  key={option}
-                  variant={filters.time === option || (!filters.time && option === 'Alle') ? 'default' : 'outline'}
-                  className="cursor-pointer px-3 py-1.5 transition-all hover:scale-105"
-                  onClick={() => updateFilter('time', option)}
-                >
-                  {option}
-                </Badge>
-              ))}
-            </div>
-          </div>
-
-          {/* Price Filter */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <DollarSign className="h-4 w-4 text-primary" />
-              Preis
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {priceOptions.map((option) => (
-                <Badge
-                  key={option}
-                  variant={filters.price === option || (!filters.price && option === 'Alle') ? 'default' : 'outline'}
-                  className="cursor-pointer px-3 py-1.5 transition-all hover:scale-105"
-                  onClick={() => updateFilter('price', option)}
-                >
-                  {option}
-                </Badge>
-              ))}
-            </div>
-          </div>
+        <div className="space-y-6 overflow-y-auto pb-24 pr-2">
+          <FilterSection icon={Music} label="🎵 Musik" options={musicOptions} filterKey="music" />
+          <FilterSection icon={Users} label="👥 Vibes" options={vibesOptions} filterKey="vibes" />
+          <FilterSection icon={Clock} label="⏰ Zeit" options={timeOptions} filterKey="time" />
+          <FilterSection icon={DollarSign} label="💰 Preis" options={priceOptions} filterKey="price" />
+          <FilterSection icon={MapPin} label="📍 Radius" options={radiusOptions} filterKey="radius" />
+          <FilterSection icon={Star} label="⭐ Social Cloud" options={socialCloudOptions} filterKey="socialCloud" />
         </div>
 
-        <div className="absolute bottom-0 left-0 right-0 border-t bg-background p-4">
+        <div className="absolute bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur-xl p-4 safe-area-pb">
           <Button 
-            className="w-full bg-gradient-to-r from-primary to-accent"
+            className="w-full bg-gradient-to-r from-primary to-accent text-lg font-semibold h-12"
             onClick={() => setOpen(false)}
           >
             {activeFiltersCount > 0 
-              ? `${activeFiltersCount} Filter anwenden` 
-              : 'Ergebnisse anzeigen'}
+              ? `🔥 ${activeFiltersCount} Filter anwenden` 
+              : '✨ Ergebnisse anzeigen'}
           </Button>
         </div>
       </SheetContent>
