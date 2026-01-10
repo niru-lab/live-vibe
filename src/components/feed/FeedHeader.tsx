@@ -53,7 +53,7 @@ export const FeedHeader = ({ selectedCity, onCityChange }: FeedHeaderProps) => {
               <SelectValue placeholder="Stadt" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Alle Städte</SelectItem>
+              <SelectItem value="all">Alle Städte</SelectItem>
               {germanCities.map((city) => (
                 <SelectItem key={city} value={city}>
                   {city}
