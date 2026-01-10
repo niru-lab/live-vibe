@@ -57,6 +57,9 @@ export type Database = {
         Row: {
           created_at: string
           event_id: string
+          host_accepted: boolean | null
+          host_message: string | null
+          host_responded_at: string | null
           id: string
           status: string
           user_id: string
@@ -64,6 +67,9 @@ export type Database = {
         Insert: {
           created_at?: string
           event_id: string
+          host_accepted?: boolean | null
+          host_message?: string | null
+          host_responded_at?: string | null
           id?: string
           status?: string
           user_id: string
@@ -71,6 +77,9 @@ export type Database = {
         Update: {
           created_at?: string
           event_id?: string
+          host_accepted?: boolean | null
+          host_message?: string | null
+          host_responded_at?: string | null
           id?: string
           status?: string
           user_id?: string
@@ -86,6 +95,61 @@ export type Database = {
           {
             foreignKeyName: "event_attendees_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_messages: {
+        Row: {
+          content: string
+          created_at: string
+          event_id: string
+          id: string
+          includes_address: boolean | null
+          is_read: boolean | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          event_id: string
+          id?: string
+          includes_address?: boolean | null
+          is_read?: boolean | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          event_id?: string
+          id?: string
+          includes_address?: boolean | null
+          is_read?: boolean | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_messages_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_messages_sender_id_fkey"
+            columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]

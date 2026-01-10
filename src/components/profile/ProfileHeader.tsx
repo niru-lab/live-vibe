@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { MoreHorizontal, Cloud } from 'lucide-react';
+import { MoreHorizontal, Cloud, Mail } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 import { ProfileSettings } from './ProfileSettings';
 import { AchievementsView } from './AchievementsView';
+import { MessagesInbox } from '@/components/events/MessagesInbox';
 import { useBadgeSystem } from '@/hooks/useBadgeSystem';
+import { useUnreadMessageCount } from '@/hooks/useEventMessages';
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/hooks/useProfile';
 
@@ -26,7 +29,9 @@ export const ProfileHeader = ({
 }: ProfileHeaderProps) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [messagesOpen, setMessagesOpen] = useState(false);
   const { data: badgeData } = useBadgeSystem(profile?.id);
+  const { data: unreadCount } = useUnreadMessageCount();
 
   const formatNumber = (num: number) => {
     if (num >= 1000) {
@@ -44,8 +49,21 @@ export const ProfileHeader = ({
         <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
 
         <div className="relative p-6">
-          {/* Top Right Settings */}
-          <div className="absolute right-4 top-4">
+          {/* Top Right Actions */}
+          <div className="absolute right-4 top-4 flex gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 rounded-full glass hover:bg-white/20 relative"
+              onClick={() => setMessagesOpen(true)}
+            >
+              <Mail className="h-5 w-5" />
+              {unreadCount && unreadCount > 0 && (
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white animate-pulse">
+                  {unreadCount > 9 ? '9+' : unreadCount}
+                </span>
+              )}
+            </Button>
             <Button
               variant="ghost"
               size="icon"
@@ -139,6 +157,11 @@ export const ProfileHeader = ({
         onOpenChange={setAchievementsOpen}
         badgeData={badgeData || null}
         city={profile?.city}
+      />
+
+      <MessagesInbox
+        open={messagesOpen}
+        onOpenChange={setMessagesOpen}
       />
     </>
   );
