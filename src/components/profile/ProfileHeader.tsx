@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ProfileSettings } from './ProfileSettings';
 import { AchievementsView } from './AchievementsView';
+import { FollowListDialog } from './FollowListDialog';
 import { useBadgeSystem } from '@/hooks/useBadgeSystem';
 import { cn } from '@/lib/utils';
 import type { Profile } from '@/hooks/useProfile';
@@ -26,6 +27,8 @@ export const ProfileHeader = ({
 }: ProfileHeaderProps) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [followListOpen, setFollowListOpen] = useState(false);
+  const [followListTab, setFollowListTab] = useState<'followers' | 'following'>('followers');
   const { data: badgeData } = useBadgeSystem(profile?.id);
 
   const formatNumber = (num: number) => {
@@ -122,7 +125,16 @@ export const ProfileHeader = ({
             <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
               <StatChip label="Posts" value={postsCount} isLoading={isLoading} />
               <StatChip label="Events" value={0} icon="🎉" isLoading={isLoading} />
-              <StatChip label="" value={followersCount} icon="👥" isLoading={isLoading} />
+              <StatChip 
+                label="" 
+                value={followersCount} 
+                icon="👥" 
+                isLoading={isLoading} 
+                onClick={() => {
+                  setFollowListTab('followers');
+                  setFollowListOpen(true);
+                }}
+              />
             </div>
           </div>
         </div>
@@ -140,6 +152,15 @@ export const ProfileHeader = ({
         badgeData={badgeData || null}
         city={profile?.city}
       />
+
+      <FollowListDialog
+        open={followListOpen}
+        onOpenChange={setFollowListOpen}
+        profileId={profile?.id}
+        defaultTab={followListTab}
+        followersCount={followersCount}
+        followingCount={followingCount}
+      />
     </>
   );
 };
@@ -149,9 +170,10 @@ interface StatChipProps {
   value: number;
   icon?: string;
   isLoading: boolean;
+  onClick?: () => void;
 }
 
-const StatChip = ({ label, value, icon, isLoading }: StatChipProps) => {
+const StatChip = ({ label, value, icon, isLoading, onClick }: StatChipProps) => {
   const formatNumber = (num: number) => {
     if (num >= 1000) {
       return (num / 1000).toFixed(1).replace('.0', '') + 'k';
@@ -159,17 +181,28 @@ const StatChip = ({ label, value, icon, isLoading }: StatChipProps) => {
     return num.toString();
   };
 
+  const ChipContent = (
+    <>
+      {icon && <span>{icon}</span>}
+      <span className="font-bold text-foreground">{formatNumber(value)}</span>
+      {label && <span className="text-muted-foreground">{label}</span>}
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button 
+        onClick={onClick}
+        className="stat-chip neon-glow-sm hover:bg-white/20 transition-colors cursor-pointer"
+      >
+        {isLoading ? <Skeleton className="h-4 w-12" /> : ChipContent}
+      </button>
+    );
+  }
+
   return (
     <div className="stat-chip neon-glow-sm">
-      {isLoading ? (
-        <Skeleton className="h-4 w-12" />
-      ) : (
-        <>
-          {icon && <span>{icon}</span>}
-          <span className="font-bold text-foreground">{formatNumber(value)}</span>
-          {label && <span className="text-muted-foreground">{label}</span>}
-        </>
-      )}
+      {isLoading ? <Skeleton className="h-4 w-12" /> : ChipContent}
     </div>
   );
 };
