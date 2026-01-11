@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { useEvents } from '@/hooks/useEvents';
+import { useEvents, useVenues } from '@/hooks/useEvents';
 import { Button } from '@/components/ui/button';
 import { Calendar, MapPin, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -13,44 +13,15 @@ interface Location {
   id?: string;
   name: string;
   address: string;
-  category: 'bar' | 'club' | 'cafe' | 'event';
+  category: 'bar' | 'club' | 'cafe' | 'event' | 'restaurant' | 'other';
   coordinates: [number, number];
-  areaKey?: string; // For grouping events by area
+  areaKey?: string;
   eventData?: {
     id: string;
     starts_at: string;
     expected_attendees?: number;
   };
 }
-
-const stuttgartLocations: Location[] = [
-  // Bars
-  { name: 'Schwarz Weiß Bar', address: 'Wilhelmstraße 8A, 70182 Stuttgart', category: 'bar', coordinates: [48.7738, 9.1850] },
-  { name: 'anderthalb Bar', address: 'Königstraße 47, 70173 Stuttgart', category: 'bar', coordinates: [48.7784, 9.1793] },
-  { name: 'reBOOTS Bar', address: 'Bopserstraße 9, 70180 Stuttgart', category: 'bar', coordinates: [48.7695, 9.1882] },
-  { name: 'Weißes Roß Bar', address: 'Hauptstätter Straße 41, 70173 Stuttgart', category: 'bar', coordinates: [48.7686, 9.1755] },
-  { name: 'Jigger & Spoon', address: 'Gymnasiumstraße 33, 70174 Stuttgart', category: 'bar', coordinates: [48.7812, 9.1752] },
-  { name: 'WXYZ Bar (im Aloft)', address: 'Heilbronner Straße 70, 70191 Stuttgart', category: 'bar', coordinates: [48.7945, 9.1795] },
-  
-  // Clubs
-  { name: 'Boa Discothek Stuttgart', address: 'Tübinger Straße 12–16, 70178 Stuttgart', category: 'club', coordinates: [48.7689, 9.1758] },
-  { name: 'Rumors Club', address: 'Hauptstätter Straße 40, 70173 Stuttgart', category: 'club', coordinates: [48.7688, 9.1752] },
-  { name: 'Proton The Club', address: 'Königstraße 49, 70173 Stuttgart', category: 'club', coordinates: [48.7786, 9.1790] },
-  { name: 'Universum', address: 'Charlottenplatz 1, 70173 Stuttgart', category: 'club', coordinates: [48.7756, 9.1829] },
-  { name: 'MICA Club', address: 'Kronprinzplatz, 70173 Stuttgart', category: 'club', coordinates: [48.7762, 9.1805] },
-  { name: 'WONDERS Club', address: 'Friedrichstraße 13, 70174 Stuttgart', category: 'club', coordinates: [48.7797, 9.1768] },
-  
-  // Cafés
-  { name: 'Kaffeerösterei Café Moulu', address: 'Senefelderstraße 58, 70176 Stuttgart', category: 'cafe', coordinates: [48.7765, 9.1625] },
-  { name: 'Cafe Hegel', address: 'Eberhardstraße 35, 70173 Stuttgart', category: 'cafe', coordinates: [48.7752, 9.1778] },
-  { name: 'Café Zuhause', address: 'Landhausstraße 201, 70188 Stuttgart', category: 'cafe', coordinates: [48.7885, 9.2055] },
-  { name: 'Weltcafé Stuttgart', address: 'Charlottenplatz 17, 70173 Stuttgart', category: 'cafe', coordinates: [48.7758, 9.1835] },
-  { name: 'Caffè-Bar', address: 'Torstraße 27, 70173 Stuttgart', category: 'cafe', coordinates: [48.7748, 9.1812] },
-  { name: 'Mela Kaffee & Cafe', address: 'Königstraße 7, 70173 Stuttgart', category: 'cafe', coordinates: [48.7795, 9.1768] },
-  { name: 'Glora Kaffeehaus', address: 'Calwer Straße 31, 70173 Stuttgart', category: 'cafe', coordinates: [48.7778, 9.1745] },
-  { name: 'GLORA Kaffeehaus (Filiale)', address: 'Sophienstraße 24b, 70178 Stuttgart', category: 'cafe', coordinates: [48.7715, 9.1702] },
-  { name: 'Café Moody', address: 'Uhlandstraße 26, 70182 Stuttgart', category: 'cafe', coordinates: [48.7728, 9.1868] },
-];
 
 // Stuttgart area coordinates for events without exact lat/lng
 const stuttgartAreas: Record<string, [number, number]> = {
@@ -204,7 +175,17 @@ const categoryIcons: Record<string, L.DivIcon> = {
 export function StuttgartMap() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { data: events } = useEvents();
+  const { data: venues } = useVenues();
   const navigate = useNavigate();
+
+  // Convert venues from database to Location format
+  const venueLocations: Location[] = (venues || []).map(venue => ({
+    id: venue.id,
+    name: venue.name,
+    address: venue.address,
+    category: venue.category as Location['category'],
+    coordinates: [venue.latitude, venue.longitude] as [number, number],
+  }));
 
   // Group events by area for heatmap effect
   const eventsByArea = (events || []).reduce((acc, event) => {
@@ -269,8 +250,8 @@ export function StuttgartMap() {
     })
     .filter((loc): loc is NonNullable<typeof loc> => loc !== null);
 
-  // Combine static locations with grouped events
-  const allLocations = [...stuttgartLocations, ...groupedEventLocations];
+  // Combine venue locations from DB with grouped events
+  const allLocations = [...venueLocations, ...groupedEventLocations];
 
   const filteredLocations = selectedCategory
     ? allLocations.filter(l => l.category === selectedCategory)
@@ -280,13 +261,13 @@ export function StuttgartMap() {
     if (category === 'event') {
       return (events || []).length;
     }
-    return stuttgartLocations.filter(l => l.category === category).length;
+    return venueLocations.filter(l => l.category === category).length;
   };
 
   // Get dynamic icon for event based on count
   const getEventIcon = (location: Location | GroupedLocation) => {
     if (location.category !== 'event') {
-      return categoryIcons[location.category];
+      return categoryIcons[location.category] || createCustomIcon(categoryColors.bar);
     }
     const count = 'eventCount' in location ? location.eventCount : 1;
     return createCustomIcon(categoryColors.event, true, count);

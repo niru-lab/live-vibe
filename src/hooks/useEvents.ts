@@ -145,17 +145,21 @@ export const useDeleteEvent = () => {
   });
 };
 
-// Get venues (clubs, bars, etc.) for tagging in posts
-export const useVenues = () => {
+// Get venues from database
+export const useVenues = (city?: string) => {
   return useQuery({
-    queryKey: ['venues'],
+    queryKey: ['venues', city],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('profiles')
+      let query = supabase
+        .from('venues')
         .select('*')
-        .in('profile_type', ['club', 'organizer'])
-        .order('display_name');
-      
+        .order('name');
+
+      if (city) {
+        query = query.ilike('city', `%${city}%`);
+      }
+
+      const { data, error } = await query;
       if (error) throw error;
       return data;
     },
@@ -163,9 +167,9 @@ export const useVenues = () => {
 };
 
 // Get posts tagged to a specific venue/event
-export const useTaggedPosts = (locationId?: string, eventId?: string) => {
+export const useTaggedPosts = (venueId?: string, eventId?: string) => {
   return useQuery({
-    queryKey: ['tagged-posts', locationId, eventId],
+    queryKey: ['tagged-posts', venueId, eventId],
     queryFn: async () => {
       let query = supabase
         .from('posts')
@@ -175,8 +179,8 @@ export const useTaggedPosts = (locationId?: string, eventId?: string) => {
         `)
         .order('created_at', { ascending: false });
 
-      if (locationId) {
-        query = query.eq('location_id', locationId);
+      if (venueId) {
+        query = query.eq('venue_id', venueId);
       }
       if (eventId) {
         query = query.eq('event_id', eventId);
@@ -186,6 +190,6 @@ export const useTaggedPosts = (locationId?: string, eventId?: string) => {
       if (error) throw error;
       return data;
     },
-    enabled: !!(locationId || eventId),
+    enabled: !!(venueId || eventId),
   });
 };

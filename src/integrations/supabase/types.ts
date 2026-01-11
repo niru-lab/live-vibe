@@ -329,6 +329,7 @@ export type Database = {
           music_artist: string | null
           music_title: string | null
           music_url: string | null
+          venue_id: string | null
         }
         Insert: {
           author_id: string
@@ -350,6 +351,7 @@ export type Database = {
           music_artist?: string | null
           music_title?: string | null
           music_url?: string | null
+          venue_id?: string | null
         }
         Update: {
           author_id?: string
@@ -371,6 +373,7 @@ export type Database = {
           music_artist?: string | null
           music_title?: string | null
           music_url?: string | null
+          venue_id?: string | null
         }
         Relationships: [
           {
@@ -392,6 +395,13 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
             referencedColumns: ["id"]
           },
         ]
@@ -440,6 +450,62 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      venues: {
+        Row: {
+          address: string
+          category: string
+          city: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          is_verified: boolean
+          latitude: number
+          longitude: number
+          name: string
+          owner_profile_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          category: string
+          city?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_verified?: boolean
+          latitude: number
+          longitude: number
+          name: string
+          owner_profile_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          category?: string
+          city?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          is_verified?: boolean
+          latitude?: number
+          longitude?: number
+          name?: string
+          owner_profile_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venues_owner_profile_id_fkey"
+            columns: ["owner_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

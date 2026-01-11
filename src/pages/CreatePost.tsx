@@ -104,7 +104,7 @@ export default function CreatePost() {
         music_title: selectedMusic?.title || null,
         music_artist: selectedMusic?.artist || null,
         expires_at: expiresAt,
-        location_id: selectedTag?.type === 'venue' ? selectedTag.id : null,
+        venue_id: selectedTag?.type === 'venue' ? selectedTag.id : null,
         event_id: selectedTag?.type === 'event' ? selectedTag.id : null,
       });
 
