@@ -15,6 +15,7 @@ interface Location {
   address: string;
   category: 'bar' | 'club' | 'cafe' | 'event';
   coordinates: [number, number];
+  areaKey?: string; // For grouping events by area
   eventData?: {
     id: string;
     starts_at: string;
@@ -156,28 +157,40 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-// Create custom marker icons for each category
-const createCustomIcon = (color: string, isEvent = false) => {
+// Create custom marker icons for each category with dynamic size
+const createCustomIcon = (color: string, isEvent = false, eventCount = 1) => {
+  // Scale size based on event count (min 24px, max 56px for events)
+  const baseSize = isEvent ? 28 : 24;
+  const maxSize = isEvent ? 56 : 24;
+  const size = isEvent ? Math.min(baseSize + (eventCount - 1) * 8, maxSize) : baseSize;
+  const halfSize = size / 2;
+  
   return L.divIcon({
     className: 'custom-marker',
     html: `<div style="
-      width: ${isEvent ? '32px' : '24px'};
-      height: ${isEvent ? '32px' : '24px'};
+      width: ${size}px;
+      height: ${size}px;
       border-radius: 50%;
       background-color: ${color};
-      border: 3px solid white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      border: ${isEvent ? '3px' : '2px'} solid white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3), ${isEvent && eventCount > 1 ? `0 0 ${eventCount * 5}px ${color}` : 'none'};
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: ${Math.max(10, size / 3)}px;
       ${isEvent ? 'animation: pulse 2s ease-in-out infinite;' : ''}
-    "></div>
+    ">${isEvent && eventCount > 1 ? eventCount : ''}</div>
     ${isEvent ? `<style>
       @keyframes pulse {
         0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 ${color}80; }
-        50% { transform: scale(1.1); box-shadow: 0 0 20px 5px ${color}40; }
+        50% { transform: scale(1.05); box-shadow: 0 0 ${10 + eventCount * 3}px ${eventCount * 2}px ${color}40; }
       }
     </style>` : ''}`,
-    iconSize: [isEvent ? 32 : 24, isEvent ? 32 : 24],
-    iconAnchor: [isEvent ? 16 : 12, isEvent ? 16 : 12],
-    popupAnchor: [0, isEvent ? -16 : -12],
+    iconSize: [size, size],
+    iconAnchor: [halfSize, halfSize],
+    popupAnchor: [0, -halfSize],
   });
 };
 
@@ -193,58 +206,90 @@ export function StuttgartMap() {
   const { data: events } = useEvents();
   const navigate = useNavigate();
 
-  // Convert events to locations - now uses area-based coordinates if no lat/lng
-  const eventLocations: Location[] = (events || [])
-    .map(event => {
-      // First try exact coordinates
-      if (event.latitude && event.longitude) {
-        return {
-          id: event.id,
-          name: event.name,
-          address: `${event.address}, ${event.city}`,
-          category: 'event' as const,
-          coordinates: [event.latitude, event.longitude] as [number, number],
-          eventData: {
-            id: event.id,
-            starts_at: event.starts_at,
-            expected_attendees: event.expected_attendees || undefined,
-          },
-        };
+  // Group events by area for heatmap effect
+  const eventsByArea = (events || []).reduce((acc, event) => {
+    const areaKey = `${event.address?.toLowerCase().trim()}-${event.city?.toLowerCase().trim()}`;
+    if (!acc[areaKey]) {
+      acc[areaKey] = [];
+    }
+    acc[areaKey].push(event);
+    return acc;
+  }, {} as Record<string, typeof events>);
+
+  // Create grouped event locations with count
+  interface GroupedLocation extends Location {
+    eventCount: number;
+    allEvents: Array<{
+      id: string;
+      name: string;
+      starts_at: string;
+      expected_attendees?: number;
+    }>;
+  }
+
+  const groupedEventLocations: GroupedLocation[] = Object.entries(eventsByArea)
+    .map(([areaKey, areaEvents]) => {
+      if (!areaEvents || areaEvents.length === 0) return null;
+      
+      const firstEvent = areaEvents[0];
+      let coords: [number, number] | null = null;
+      
+      // First try exact coordinates from first event
+      if (firstEvent.latitude && firstEvent.longitude) {
+        coords = [firstEvent.latitude, firstEvent.longitude];
+      } else {
+        // Try to get coordinates from area/city
+        coords = getEventCoordinates(firstEvent.city, firstEvent.address);
       }
       
-      // Try to get coordinates from area/city
-      const coords = getEventCoordinates(event.city, event.address);
-      if (coords) {
-        // Add small random offset to prevent overlapping markers
-        const jitter = () => (Math.random() - 0.5) * 0.005;
-        return {
-          id: event.id,
-          name: event.name,
-          address: `${event.address}, ${event.city}`,
-          category: 'event' as const,
-          coordinates: [coords[0] + jitter(), coords[1] + jitter()] as [number, number],
-          eventData: {
-            id: event.id,
-            starts_at: event.starts_at,
-            expected_attendees: event.expected_attendees || undefined,
-          },
-        };
-      }
+      if (!coords) return null;
       
-      return null;
+      return {
+        id: firstEvent.id,
+        name: areaEvents.length > 1 
+          ? `${areaEvents.length} Events in ${firstEvent.address}` 
+          : firstEvent.name,
+        address: `${firstEvent.address}, ${firstEvent.city}`,
+        category: 'event' as const,
+        coordinates: coords,
+        areaKey,
+        eventCount: areaEvents.length,
+        allEvents: areaEvents.map(e => ({
+          id: e.id,
+          name: e.name,
+          starts_at: e.starts_at,
+          expected_attendees: e.expected_attendees || undefined,
+        })),
+        eventData: {
+          id: firstEvent.id,
+          starts_at: firstEvent.starts_at,
+          expected_attendees: firstEvent.expected_attendees || undefined,
+        },
+      };
     })
     .filter((loc): loc is NonNullable<typeof loc> => loc !== null);
 
-  // Combine static locations with events
-  const allLocations = [...stuttgartLocations, ...eventLocations];
+  // Combine static locations with grouped events
+  const allLocations = [...stuttgartLocations, ...groupedEventLocations];
 
   const filteredLocations = selectedCategory
     ? allLocations.filter(l => l.category === selectedCategory)
     : allLocations;
 
   const getCategoryCount = (category: string) => {
-    if (category === 'event') return eventLocations.length;
+    if (category === 'event') {
+      return (events || []).length;
+    }
     return stuttgartLocations.filter(l => l.category === category).length;
+  };
+
+  // Get dynamic icon for event based on count
+  const getEventIcon = (location: Location | GroupedLocation) => {
+    if (location.category !== 'event') {
+      return categoryIcons[location.category];
+    }
+    const count = 'eventCount' in location ? location.eventCount : 1;
+    return createCustomIcon(categoryColors.event, true, count);
   };
 
   return (
@@ -259,52 +304,78 @@ export function StuttgartMap() {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {filteredLocations.map((location, index) => (
-          <Marker
-            key={`${location.name}-${index}`}
-            position={location.coordinates}
-            icon={categoryIcons[location.category]}
-          >
-            <Popup>
-              <div className="p-1 min-w-[200px]">
-                <h3 className="font-bold mb-1 text-gray-900 text-sm">{location.name}</h3>
-                <p className="text-xs text-gray-600 mb-2 flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {location.address}
-                </p>
-                
-                {location.category === 'event' && location.eventData && (
-                  <div className="space-y-2 mb-2">
-                    <p className="text-xs text-gray-600 flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {format(new Date(location.eventData.starts_at), 'dd. MMM, HH:mm', { locale: de })} Uhr
-                    </p>
-                    {location.eventData.expected_attendees && (
-                      <p className="text-xs text-gray-600 flex items-center gap-1">
-                        <Users className="h-3 w-3" />
-                        ~{location.eventData.expected_attendees} erwartet
-                      </p>
-                    )}
-                    <Button
-                      size="sm"
-                      className="w-full mt-2 bg-gradient-neon text-white text-xs"
-                      onClick={() => navigate(`/events/${location.eventData!.id}`)}
+        {filteredLocations.map((location, index) => {
+          const isGrouped = 'allEvents' in location;
+          const eventCount = isGrouped ? (location as any).eventCount : 1;
+          const allEvents = isGrouped ? (location as any).allEvents : location.eventData ? [location.eventData] : [];
+          
+          return (
+            <Marker
+              key={`${location.name}-${index}`}
+              position={location.coordinates}
+              icon={getEventIcon(location)}
+            >
+              <Popup>
+                <div className="p-1 min-w-[220px] max-h-[300px] overflow-y-auto">
+                  {/* Header */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <span 
+                      className="text-white px-2 py-0.5 rounded-full text-xs inline-block"
+                      style={{ backgroundColor: categoryColors[location.category] }}
                     >
-                      Event ansehen
-                    </Button>
+                      {categoryLabels[location.category]}
+                    </span>
+                    {eventCount > 1 && (
+                      <span className="text-xs font-bold text-red-500">
+                        🔥 {eventCount} Events
+                      </span>
+                    )}
                   </div>
-                )}
-                
-                <span 
-                  className="text-white px-2 py-0.5 rounded-full text-xs inline-block"
-                  style={{ backgroundColor: categoryColors[location.category] }}
-                >
-                  {categoryLabels[location.category]}
-                </span>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
+                  
+                  <h3 className="font-bold mb-1 text-gray-900 text-sm">{location.name}</h3>
+                  <p className="text-xs text-gray-600 mb-2 flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {location.address}
+                  </p>
+                  
+                  {location.category === 'event' && allEvents.length > 0 && (
+                    <div className="space-y-3 mb-2">
+                      {allEvents.slice(0, 5).map((evt: any, i: number) => (
+                        <div key={evt.id} className={`${i > 0 ? 'pt-2 border-t border-gray-200' : ''}`}>
+                          {eventCount > 1 && (
+                            <p className="text-xs font-semibold text-gray-800 mb-1">{evt.name}</p>
+                          )}
+                          <p className="text-xs text-gray-600 flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {format(new Date(evt.starts_at), 'dd. MMM, HH:mm', { locale: de })} Uhr
+                          </p>
+                          {evt.expected_attendees && (
+                            <p className="text-xs text-gray-600 flex items-center gap-1">
+                              <Users className="h-3 w-3" />
+                              ~{evt.expected_attendees} erwartet
+                            </p>
+                          )}
+                          <Button
+                            size="sm"
+                            className="w-full mt-2 bg-gradient-neon text-white text-xs"
+                            onClick={() => navigate(`/events/${evt.id}`)}
+                          >
+                            {eventCount > 1 ? 'Ansehen' : 'Event ansehen'}
+                          </Button>
+                        </div>
+                      ))}
+                      {allEvents.length > 5 && (
+                        <p className="text-xs text-gray-500 text-center">
+                          +{allEvents.length - 5} weitere Events
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </Popup>
+            </Marker>
+          );
+        })}
       </MapContainer>
       
       {/* Legend */}
