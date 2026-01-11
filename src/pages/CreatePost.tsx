@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
+import { VenueEventSelector, type SelectedTag } from '@/components/create/VenueEventSelector';
 import {
   ArrowLeft,
   Camera,
@@ -21,6 +22,7 @@ import {
   Zap,
   Loader2,
   Clock,
+  Tag,
 } from 'lucide-react';
 
 export default function CreatePost() {
@@ -38,6 +40,7 @@ export default function CreatePost() {
   const [isUploading, setIsUploading] = useState(false);
   const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
   const [is24hPost, setIs24hPost] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<SelectedTag | null>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -84,8 +87,10 @@ export default function CreatePost() {
       // Create post
       const mediaType = selectedFile.type.startsWith('video') ? 'video' : 'image';
       
-      // Calculate expires_at if 24h post is enabled
-      const expiresAt = is24hPost 
+      // Calculate expires_at if 24h post is enabled OR if tagged to a venue/event
+      // Posts tagged to venues/events always expire after 24h
+      const shouldExpire = is24hPost || selectedTag !== null;
+      const expiresAt = shouldExpire 
         ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() 
         : null;
 
@@ -99,6 +104,8 @@ export default function CreatePost() {
         music_title: selectedMusic?.title || null,
         music_artist: selectedMusic?.artist || null,
         expires_at: expiresAt,
+        location_id: selectedTag?.type === 'venue' ? selectedTag.id : null,
+        event_id: selectedTag?.type === 'event' ? selectedTag.id : null,
       });
 
       toast({
@@ -243,6 +250,23 @@ export default function CreatePost() {
             selectedTrack={selectedMusic}
             onSelect={setSelectedMusic}
           />
+        </div>
+
+        {/* Venue/Event Tag */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Tag className="h-4 w-4 text-primary" />
+            <Label>Venue oder Event markieren</Label>
+          </div>
+          <VenueEventSelector
+            selectedTag={selectedTag}
+            onSelect={setSelectedTag}
+          />
+          {selectedTag && (
+            <p className="text-xs text-muted-foreground">
+              ⏱️ Post erscheint 24h im Feed von {selectedTag.name}
+            </p>
+          )}
         </div>
 
         {/* Caption */}
