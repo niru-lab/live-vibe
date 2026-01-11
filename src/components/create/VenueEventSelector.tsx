@@ -15,19 +15,27 @@ import {
 import { useVenues, useEvents } from '@/hooks/useEvents';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
 
 interface SelectedTag {
   type: 'venue' | 'event';
   id: string;
   name: string;
   imageUrl?: string;
+  category?: string;
 }
 
 interface VenueEventSelectorProps {
   selectedTag: SelectedTag | null;
   onSelect: (tag: SelectedTag | null) => void;
 }
+
+const categoryEmojis: Record<string, string> = {
+  bar: '🍸',
+  club: '🎧',
+  cafe: '☕',
+  restaurant: '🍽️',
+  other: '📍',
+};
 
 export function VenueEventSelector({ selectedTag, onSelect }: VenueEventSelectorProps) {
   const [open, setOpen] = useState(false);
@@ -38,8 +46,8 @@ export function VenueEventSelector({ selectedTag, onSelect }: VenueEventSelector
   const { data: events, isLoading: eventsLoading } = useEvents();
 
   const filteredVenues = (venues || []).filter(v => 
-    v.display_name.toLowerCase().includes(search.toLowerCase()) ||
-    v.username.toLowerCase().includes(search.toLowerCase())
+    v.name.toLowerCase().includes(search.toLowerCase()) ||
+    v.address.toLowerCase().includes(search.toLowerCase())
   );
 
   const filteredEvents = (events || []).filter(e => 
@@ -47,18 +55,19 @@ export function VenueEventSelector({ selectedTag, onSelect }: VenueEventSelector
     e.location_name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSelectVenue = (venue: typeof venues[0]) => {
+  const handleSelectVenue = (venue: NonNullable<typeof venues>[0]) => {
     onSelect({
       type: 'venue',
       id: venue.id,
-      name: venue.display_name,
-      imageUrl: venue.avatar_url || undefined,
+      name: venue.name,
+      imageUrl: venue.image_url || undefined,
+      category: venue.category,
     });
     setOpen(false);
     setSearch('');
   };
 
-  const handleSelectEvent = (event: typeof events[0]) => {
+  const handleSelectEvent = (event: NonNullable<typeof events>[0]) => {
     onSelect({
       type: 'event',
       id: event.id,
@@ -80,13 +89,17 @@ export function VenueEventSelector({ selectedTag, onSelect }: VenueEventSelector
           <Avatar className="h-10 w-10">
             <AvatarImage src={selectedTag.imageUrl} />
             <AvatarFallback className="bg-gradient-neon text-white">
-              {selectedTag.type === 'venue' ? <MapPin className="h-4 w-4" /> : <Calendar className="h-4 w-4" />}
+              {selectedTag.type === 'venue' 
+                ? categoryEmojis[selectedTag.category || 'other'] 
+                : '🎉'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
             <p className="font-medium truncate">{selectedTag.name}</p>
             <Badge variant="secondary" className="text-xs">
-              {selectedTag.type === 'venue' ? '📍 Venue' : '🎉 Event'}
+              {selectedTag.type === 'venue' 
+                ? `${categoryEmojis[selectedTag.category || 'other']} ${selectedTag.category}` 
+                : '🎉 Event'}
             </Badge>
           </div>
           <Button variant="ghost" size="icon" onClick={handleClear}>
@@ -123,11 +136,11 @@ export function VenueEventSelector({ selectedTag, onSelect }: VenueEventSelector
               <TabsList className="w-full">
                 <TabsTrigger value="venues" className="flex-1 gap-1.5">
                   <MapPin className="h-4 w-4" />
-                  Venues
+                  Venues ({filteredVenues.length})
                 </TabsTrigger>
                 <TabsTrigger value="events" className="flex-1 gap-1.5">
                   <Calendar className="h-4 w-4" />
-                  Events
+                  Events ({filteredEvents.length})
                 </TabsTrigger>
               </TabsList>
 
@@ -138,9 +151,6 @@ export function VenueEventSelector({ selectedTag, onSelect }: VenueEventSelector
                   <div className="text-center py-8">
                     <MapPin className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
                     <p className="text-muted-foreground">Keine Venues gefunden</p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      Clubs & Bars mit Profilen erscheinen hier
-                    </p>
                   </div>
                 ) : (
                   filteredVenues.map((venue) => (
@@ -150,17 +160,17 @@ export function VenueEventSelector({ selectedTag, onSelect }: VenueEventSelector
                       className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors text-left"
                     >
                       <Avatar className="h-12 w-12">
-                        <AvatarImage src={venue.avatar_url || ''} />
-                        <AvatarFallback className="bg-gradient-neon text-white">
-                          {venue.display_name.charAt(0)}
+                        <AvatarImage src={venue.image_url || ''} />
+                        <AvatarFallback className="bg-gradient-neon text-white text-lg">
+                          {categoryEmojis[venue.category] || '📍'}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{venue.display_name}</p>
-                        <p className="text-sm text-muted-foreground truncate">@{venue.username}</p>
+                        <p className="font-medium truncate">{venue.name}</p>
+                        <p className="text-sm text-muted-foreground truncate">{venue.address}</p>
                       </div>
                       <Badge variant="outline" className="shrink-0">
-                        {venue.profile_type === 'club' ? '🎧 Club' : '🎤 Organizer'}
+                        {categoryEmojis[venue.category]} {venue.category}
                       </Badge>
                     </button>
                   ))
@@ -204,7 +214,7 @@ export function VenueEventSelector({ selectedTag, onSelect }: VenueEventSelector
             </Tabs>
 
             <p className="text-xs text-center text-muted-foreground mt-2">
-              Dein Post erscheint im Feed des markierten Venues/Events
+              Dein Post erscheint 24h im Feed des markierten Venues/Events
             </p>
           </DialogContent>
         </Dialog>
