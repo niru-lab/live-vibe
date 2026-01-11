@@ -522,6 +522,7 @@ export type Database = {
         | "festival"
         | "concert"
         | "other"
+        | "sport"
       profile_type: "user" | "club" | "organizer"
     }
     CompositeTypes: {
@@ -657,6 +658,7 @@ export const Constants = {
         "festival",
         "concert",
         "other",
+        "sport",
       ],
       profile_type: ["user", "club", "organizer"],
     },
