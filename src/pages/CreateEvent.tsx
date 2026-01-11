@@ -81,7 +81,7 @@ const eventSchema = z.object({
   entry_price: z.number().min(0).optional(),
   dresscode: z.string().optional(),
   dos_and_donts: z.string().optional(),
-  category: z.enum(['club', 'house_party', 'bar', 'festival', 'concert', 'other']),
+  category: z.enum(['club', 'house_party', 'bar', 'festival', 'concert', 'sport', 'other']),
 });
 
 type EventFormData = z.infer<typeof eventSchema>;
@@ -92,6 +92,7 @@ const categories = [
   { value: 'bar', label: '🍸 Bar', emoji: '🍸' },
   { value: 'festival', label: '🎪 Festival', emoji: '🎪' },
   { value: 'concert', label: '🎤 Konzert', emoji: '🎤' },
+  { value: 'sport', label: '⚽ Sport', emoji: '⚽' },
   { value: 'other', label: '✨ Andere', emoji: '✨' },
 ];
 
