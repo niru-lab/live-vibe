@@ -121,3 +121,71 @@ export const useMyEvents = () => {
     enabled: !!profile,
   });
 };
+
+export const useDeleteEvent = () => {
+  const queryClient = useQueryClient();
+  const { data: profile } = useProfile();
+
+  return useMutation({
+    mutationFn: async (eventId: string) => {
+      if (!profile) throw new Error('Not authenticated');
+      
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .eq('id', eventId)
+        .eq('creator_id', profile.id);
+      
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['my-events'] });
+    },
+  });
+};
+
+// Get venues (clubs, bars, etc.) for tagging in posts
+export const useVenues = () => {
+  return useQuery({
+    queryKey: ['venues'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .in('profile_type', ['club', 'organizer'])
+        .order('display_name');
+      
+      if (error) throw error;
+      return data;
+    },
+  });
+};
+
+// Get posts tagged to a specific venue/event
+export const useTaggedPosts = (locationId?: string, eventId?: string) => {
+  return useQuery({
+    queryKey: ['tagged-posts', locationId, eventId],
+    queryFn: async () => {
+      let query = supabase
+        .from('posts')
+        .select(`
+          *,
+          author:profiles!posts_author_id_fkey(*)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (locationId) {
+        query = query.eq('location_id', locationId);
+      }
+      if (eventId) {
+        query = query.eq('event_id', eventId);
+      }
+
+      const { data, error } = await query;
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!(locationId || eventId),
+  });
+};

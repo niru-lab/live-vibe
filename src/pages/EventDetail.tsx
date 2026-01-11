@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { AppLayout } from '@/components/layout/AppLayout';
-import { useEventById } from '@/hooks/useEvents';
+import { useEventById, useDeleteEvent } from '@/hooks/useEvents';
 import {
   useEventAttendees,
   useUserEventRSVP,
@@ -28,6 +28,17 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { AttendeeManager } from '@/components/events/AttendeeManager';
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
+import {
   ArrowLeft,
   Calendar,
   Clock,
@@ -48,6 +59,7 @@ import {
   UserCheck,
   Crown,
   Settings,
+  Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -72,11 +84,31 @@ export default function EventDetail() {
   const { data: userRSVP } = useUserEventRSVP(id);
   const { data: friendsAttending } = useFriendsAttending(id);
   const rsvpMutation = useRSVP();
+  const deleteEventMutation = useDeleteEvent();
 
   const [showAttendees, setShowAttendees] = useState(false);
   const [showAttendeeManager, setShowAttendeeManager] = useState(false);
   
   const { data: pendingAttendees } = usePendingAttendees(id);
+
+  const handleDeleteEvent = async () => {
+    if (!event) return;
+    
+    try {
+      await deleteEventMutation.mutateAsync(event.id);
+      toast({
+        title: 'Event gelöscht',
+        description: 'Das Event wurde erfolgreich entfernt.',
+      });
+      navigate('/events');
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'Fehler',
+        description: 'Event konnte nicht gelöscht werden.',
+      });
+    }
+  };
 
   if (isLoading) {
     return (
@@ -191,6 +223,30 @@ export default function EventDetail() {
               <Button variant="outline" size="sm" onClick={() => navigate(`/events/${id}/edit`)}>
                 Bearbeiten
               </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="outline" size="icon" className="text-destructive hover:bg-destructive/10">
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Event löschen?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Das Event "{event.name}" wird unwiderruflich gelöscht. Alle Zusagen und Nachrichten gehen verloren.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteEvent}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    >
+                      Löschen
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </>
           )}
         </div>
