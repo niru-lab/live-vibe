@@ -3,8 +3,10 @@ import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEvents, useVenues } from '@/hooks/useEvents';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
-import { Calendar, MapPin, Users } from 'lucide-react';
+import { Calendar, MapPin, Users, Image } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -16,6 +18,7 @@ interface Location {
   category: 'bar' | 'club' | 'cafe' | 'event' | 'restaurant' | 'other';
   coordinates: [number, number];
   areaKey?: string;
+  postCount?: number;
   eventData?: {
     id: string;
     starts_at: string;
@@ -129,11 +132,11 @@ L.Icon.Default.mergeOptions({
 });
 
 // Create custom marker icons for each category with dynamic size
-const createCustomIcon = (color: string, isEvent = false, eventCount = 1) => {
-  // Scale size based on event count (min 24px, max 56px for events)
-  const baseSize = isEvent ? 28 : 24;
-  const maxSize = isEvent ? 56 : 24;
-  const size = isEvent ? Math.min(baseSize + (eventCount - 1) * 8, maxSize) : baseSize;
+const createCustomIcon = (color: string, isHot = false, count = 1) => {
+  // Scale size based on count (min 24px, max 56px for hot venues/events)
+  const baseSize = isHot ? 28 : 24;
+  const maxSize = 56;
+  const size = isHot ? Math.min(baseSize + (count - 1) * 8, maxSize) : baseSize;
   const halfSize = size / 2;
   
   return L.divIcon({
@@ -143,20 +146,20 @@ const createCustomIcon = (color: string, isEvent = false, eventCount = 1) => {
       height: ${size}px;
       border-radius: 50%;
       background-color: ${color};
-      border: ${isEvent ? '3px' : '2px'} solid white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3), ${isEvent && eventCount > 1 ? `0 0 ${eventCount * 5}px ${color}` : 'none'};
+      border: ${isHot ? '3px' : '2px'} solid white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3), ${isHot && count > 0 ? `0 0 ${Math.max(count * 5, 10)}px ${color}` : 'none'};
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
       color: white;
       font-size: ${Math.max(10, size / 3)}px;
-      ${isEvent ? 'animation: pulse 2s ease-in-out infinite;' : ''}
-    ">${isEvent && eventCount > 1 ? eventCount : ''}</div>
-    ${isEvent ? `<style>
+      ${isHot ? 'animation: pulse 2s ease-in-out infinite;' : ''}
+    ">${count > 0 ? count : ''}</div>
+    ${isHot ? `<style>
       @keyframes pulse {
         0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 ${color}80; }
-        50% { transform: scale(1.05); box-shadow: 0 0 ${10 + eventCount * 3}px ${eventCount * 2}px ${color}40; }
+        50% { transform: scale(1.05); box-shadow: 0 0 ${10 + count * 3}px ${count * 2}px ${color}40; }
       }
     </style>` : ''}`,
     iconSize: [size, size],
@@ -178,13 +181,36 @@ export function StuttgartMap() {
   const { data: venues } = useVenues();
   const navigate = useNavigate();
 
-  // Convert venues from database to Location format
+  // Fetch post counts per venue
+  const { data: venuePostCounts } = useQuery({
+    queryKey: ['venue-post-counts'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('posts')
+        .select('venue_id')
+        .not('venue_id', 'is', null);
+      
+      if (error) throw error;
+      
+      // Count posts per venue
+      const counts: Record<string, number> = {};
+      data?.forEach(post => {
+        if (post.venue_id) {
+          counts[post.venue_id] = (counts[post.venue_id] || 0) + 1;
+        }
+      });
+      return counts;
+    },
+  });
+
+  // Convert venues from database to Location format with post counts
   const venueLocations: Location[] = (venues || []).map(venue => ({
     id: venue.id,
     name: venue.name,
     address: venue.address,
     category: venue.category as Location['category'],
     coordinates: [venue.latitude, venue.longitude] as [number, number],
+    postCount: venuePostCounts?.[venue.id] || 0,
   }));
 
   // Group events by area for heatmap effect
@@ -264,13 +290,22 @@ export function StuttgartMap() {
     return venueLocations.filter(l => l.category === category).length;
   };
 
-  // Get dynamic icon for event based on count
-  const getEventIcon = (location: Location | GroupedLocation) => {
-    if (location.category !== 'event') {
-      return categoryIcons[location.category] || createCustomIcon(categoryColors.bar);
+  // Get dynamic icon for location based on activity (posts or events)
+  const getLocationIcon = (location: Location | GroupedLocation) => {
+    const color = categoryColors[location.category] || categoryColors.bar;
+    
+    if (location.category === 'event') {
+      const count = 'eventCount' in location ? location.eventCount : 1;
+      return createCustomIcon(color, true, count);
     }
-    const count = 'eventCount' in location ? location.eventCount : 1;
-    return createCustomIcon(categoryColors.event, true, count);
+    
+    // For venues, show post count
+    const postCount = location.postCount || 0;
+    if (postCount > 0) {
+      return createCustomIcon(color, true, postCount);
+    }
+    
+    return createCustomIcon(color, false, 0);
   };
 
   return (
@@ -289,26 +324,33 @@ export function StuttgartMap() {
           const isGrouped = 'allEvents' in location;
           const eventCount = isGrouped ? (location as any).eventCount : 1;
           const allEvents = isGrouped ? (location as any).allEvents : location.eventData ? [location.eventData] : [];
+          const postCount = location.postCount || 0;
           
           return (
             <Marker
               key={`${location.name}-${index}`}
               position={location.coordinates}
-              icon={getEventIcon(location)}
+              icon={getLocationIcon(location)}
             >
               <Popup>
                 <div className="p-1 min-w-[220px] max-h-[300px] overflow-y-auto">
                   {/* Header */}
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <span 
                       className="text-white px-2 py-0.5 rounded-full text-xs inline-block"
                       style={{ backgroundColor: categoryColors[location.category] }}
                     >
                       {categoryLabels[location.category]}
                     </span>
-                    {eventCount > 1 && (
+                    {location.category === 'event' && eventCount > 1 && (
                       <span className="text-xs font-bold text-red-500">
                         🔥 {eventCount} Events
+                      </span>
+                    )}
+                    {location.category !== 'event' && postCount > 0 && (
+                      <span className="text-xs font-bold text-purple-500 flex items-center gap-1">
+                        <Image className="h-3 w-3" />
+                        {postCount} {postCount === 1 ? 'Post' : 'Posts'}
                       </span>
                     )}
                   </div>
