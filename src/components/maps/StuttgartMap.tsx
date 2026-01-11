@@ -181,27 +181,44 @@ export function StuttgartMap() {
   const { data: venues } = useVenues();
   const navigate = useNavigate();
 
-  // Fetch post counts per venue
-  const { data: venuePostCounts } = useQuery({
-    queryKey: ['venue-post-counts'],
+  // Fetch posts per venue with media info
+  const { data: venuePosts } = useQuery({
+    queryKey: ['venue-posts-map'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('posts')
-        .select('venue_id')
-        .not('venue_id', 'is', null);
+        .select(`
+          id,
+          venue_id,
+          media_url,
+          media_type,
+          caption,
+          created_at,
+          author:profiles!posts_author_id_fkey(username, avatar_url)
+        `)
+        .not('venue_id', 'is', null)
+        .order('created_at', { ascending: false });
       
       if (error) throw error;
       
-      // Count posts per venue
-      const counts: Record<string, number> = {};
+      // Group posts by venue
+      const postsByVenue: Record<string, typeof data> = {};
       data?.forEach(post => {
         if (post.venue_id) {
-          counts[post.venue_id] = (counts[post.venue_id] || 0) + 1;
+          if (!postsByVenue[post.venue_id]) {
+            postsByVenue[post.venue_id] = [];
+          }
+          postsByVenue[post.venue_id].push(post);
         }
       });
-      return counts;
+      return postsByVenue;
     },
   });
+
+  // Get post count per venue
+  const venuePostCounts = Object.fromEntries(
+    Object.entries(venuePosts || {}).map(([venueId, posts]) => [venueId, posts?.length || 0])
+  );
 
   // Convert venues from database to Location format with post counts
   const venueLocations: Location[] = (venues || []).map(venue => ({
@@ -333,7 +350,7 @@ export function StuttgartMap() {
               icon={getLocationIcon(location)}
             >
               <Popup>
-                <div className="p-1 min-w-[220px] max-h-[300px] overflow-y-auto">
+                <div className="p-1 min-w-[240px] max-h-[350px] overflow-y-auto">
                   {/* Header */}
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
                     <span 
@@ -361,6 +378,47 @@ export function StuttgartMap() {
                     {location.address}
                   </p>
                   
+                  {/* Posts Preview for Venues */}
+                  {location.category !== 'event' && location.id && venuePosts?.[location.id] && venuePosts[location.id].length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-xs font-semibold text-gray-700 mb-2">📸 Neueste Posts</p>
+                      <div className="grid grid-cols-3 gap-1">
+                        {venuePosts[location.id].slice(0, 6).map((post: any) => (
+                          <div 
+                            key={post.id} 
+                            className="relative aspect-square rounded-md overflow-hidden cursor-pointer group"
+                            onClick={() => navigate(`/feed`)}
+                          >
+                            {post.media_type === 'video' ? (
+                              <video 
+                                src={post.media_url} 
+                                className="w-full h-full object-cover"
+                                muted
+                              />
+                            ) : (
+                              <img 
+                                src={post.media_url} 
+                                alt={post.caption || 'Post'} 
+                                className="w-full h-full object-cover"
+                              />
+                            )}
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
+                              <span className="text-white opacity-0 group-hover:opacity-100 text-xs">
+                                👁️
+                              </span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      {venuePosts[location.id].length > 6 && (
+                        <p className="text-xs text-gray-500 text-center mt-2">
+                          +{venuePosts[location.id].length - 6} weitere
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Events */}
                   {location.category === 'event' && allEvents.length > 0 && (
                     <div className="space-y-3 mb-2">
                       {allEvents.slice(0, 5).map((evt: any, i: number) => (
