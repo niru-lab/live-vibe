@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePosts } from '@/hooks/usePosts';
+import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
 import { useEvents } from '@/hooks/useEvents';
 import { useProfile } from '@/hooks/useProfile';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -16,14 +17,15 @@ interface DiscoverGridProps {
 
 export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
   const navigate = useNavigate();
-  const { data: posts, isLoading: postsLoading } = usePosts();
+  const { data: rawPosts, isLoading: postsLoading } = usePosts();
+  const rankedPosts = useFeedAlgorithm(rawPosts);
   const { data: events, isLoading: eventsLoading } = useEvents();
   const { data: profile } = useProfile();
 
   const isLoading = postsLoading || eventsLoading;
 
   // Filter posts
-  const filteredPosts = posts?.filter(post => {
+  const filteredPosts = rankedPosts?.filter(post => {
     if (!searchQuery && !filters) return true;
     
     const query = searchQuery?.toLowerCase() || '';
