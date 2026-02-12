@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePosts, useLikePost, useUserLikes } from '@/hooks/usePosts';
+import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
 import { PostCard } from '@/components/feed/PostCard';
 import { FeedHeader } from '@/components/feed/FeedHeader';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,7 +15,8 @@ export default function Feed() {
   const navigate = useNavigate();
   const [selectedCity, setSelectedCity] = useState<string>('all');
   
-  const { data: posts, isLoading: postsLoading } = usePosts(selectedCity === 'all' ? undefined : selectedCity);
+  const { data: rawPosts, isLoading: postsLoading } = usePosts(selectedCity === 'all' ? undefined : selectedCity);
+  const posts = useFeedAlgorithm(rawPosts);
   const { data: likedPosts = [] } = useUserLikes();
   const likeMutation = useLikePost();
 
