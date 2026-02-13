@@ -460,7 +460,7 @@ export function StuttgartMap() {
       </MapContainer>
       
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 glass rounded-xl p-3 z-[400]">
+      <div className="absolute bottom-4 left-4 glass rounded-xl p-3 z-[10]">
         <div className="text-xs font-semibold mb-2 text-foreground">Stuttgart Locations</div>
         <div className="flex flex-col gap-1.5">
           {Object.entries(categoryLabels).map(([key, label]) => (
