@@ -49,8 +49,6 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
       icon: Lock,
       items: [
         { icon: Edit, label: 'Profil bearbeiten', onClick: () => setEditOpen(true) },
-        { icon: Camera, label: 'Profilbild ändern', onClick: () => setEditOpen(true) },
-        { icon: FileText, label: 'Bio ändern', onClick: () => setEditOpen(true) },
         { icon: Star, label: 'Verifizierungsantrag (Clubs)', onClick: () => {} },
         { icon: Shield, label: 'Privacy-Einstellungen', onClick: () => {} },
       ],
