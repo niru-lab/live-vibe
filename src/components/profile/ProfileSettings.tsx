@@ -17,13 +17,12 @@ import {
   Settings,
   LogOut,
   Edit,
-  Camera,
-  FileText,
   Star,
   Shield,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { EditProfileDialog } from './EditProfileDialog';
+import { PrivacySettings } from './PrivacySettings';
 import type { Profile } from '@/hooks/useProfile';
 
 interface ProfileSettingsProps {
@@ -36,6 +35,7 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
   const navigate = useNavigate();
   const { signOut } = useAuth();
   const [editOpen, setEditOpen] = useState(false);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
 
   const handleSignOut = async () => {
     await signOut();
@@ -50,7 +50,7 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
       items: [
         { icon: Edit, label: 'Profil bearbeiten', onClick: () => setEditOpen(true) },
         { icon: Star, label: 'Verifizierungsantrag (Clubs)', onClick: () => {} },
-        { icon: Shield, label: 'Privacy-Einstellungen', onClick: () => {} },
+        { icon: Shield, label: 'Privacy-Einstellungen', onClick: () => setPrivacyOpen(true) },
       ],
     },
   ];
@@ -131,6 +131,11 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
         open={editOpen}
         onOpenChange={setEditOpen}
         profile={profile}
+      />
+
+      <PrivacySettings
+        open={privacyOpen}
+        onOpenChange={setPrivacyOpen}
       />
     </>
   );
