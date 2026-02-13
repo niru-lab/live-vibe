@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
+import { FollowerInviteSelector } from '@/components/create/FollowerInviteSelector';
 import {
   ArrowLeft,
   Calendar as CalendarIcon,
@@ -119,6 +120,7 @@ export default function CreateEvent() {
   const [visibility, setVisibility] = useState('public');
   const [isUploading, setIsUploading] = useState(false);
   const [generateQR, setGenerateQR] = useState(false);
+  const [invitedFollowers, setInvitedFollowers] = useState<string[]>([]);
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
@@ -213,11 +215,11 @@ export default function CreateEvent() {
         endsAt.setHours(endHours, endMinutes, 0, 0);
       }
 
-      await createEvent.mutateAsync({
+      const newEvent = await createEvent.mutateAsync({
         name: data.name,
         description: data.description || null,
         location_name: data.location_name,
-        address: data.area, // Gebiet wird als address gespeichert für Heatmap
+        address: data.area,
         city: data.city,
         starts_at: startsAt.toISOString(),
         ends_at: endsAt?.toISOString() || null,
@@ -230,9 +232,22 @@ export default function CreateEvent() {
         cover_image_url: coverImageUrl,
       });
 
+      // Send invitations to selected followers
+      if (invitedFollowers.length > 0 && newEvent?.id) {
+        const invitations = invitedFollowers.map((userId) => ({
+          event_id: newEvent.id,
+          user_id: userId,
+          status: 'invited' as const,
+        }));
+
+        await supabase.from('event_attendees').insert(invitations);
+      }
+
       toast({
         title: 'Event erstellt! 🎉',
-        description: 'Dein Event ist jetzt live und erscheint im Feed.',
+        description: invitedFollowers.length > 0
+          ? `Dein Event ist live. ${invitedFollowers.length} Einladung${invitedFollowers.length > 1 ? 'en' : ''} verschickt!`
+          : 'Dein Event ist jetzt live und erscheint im Feed.',
       });
 
       navigate('/events');
@@ -754,6 +769,14 @@ export default function CreateEvent() {
             </div>
           </div>
 
+
+          {/* Follower einladen */}
+          <div className="space-y-4 rounded-2xl border border-border/50 bg-card p-4">
+            <FollowerInviteSelector
+              selectedIds={invitedFollowers}
+              onSelectionChange={setInvitedFollowers}
+            />
+          </div>
 
           {/* Submit Button */}
           <Button

@@ -2,16 +2,17 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useEvents, useMyEvents } from '@/hooks/useEvents';
-import { useMyRSVPs } from '@/hooks/useEventAttendees';
+import { useMyRSVPs, useMyInvitations, useRespondToInvitation } from '@/hooks/useEventAttendees';
 import { useAuth } from '@/contexts/AuthContext';
 import { EventCard } from '@/components/events/EventCard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Calendar, PartyPopper, UserCheck, BarChart3, Eye, Share2 } from 'lucide-react';
+import { Plus, Calendar, PartyPopper, UserCheck, BarChart3, Eye, Share2, Mail, Check, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 export default function Events() {
   const navigate = useNavigate();
@@ -21,6 +22,19 @@ export default function Events() {
   const { data: upcomingEvents, isLoading: upcomingLoading } = useEvents();
   const { data: myEvents, isLoading: myEventsLoading } = useMyEvents();
   const { data: myRSVPs, isLoading: rsvpsLoading } = useMyRSVPs();
+  const { data: invitations = [], isLoading: invitationsLoading } = useMyInvitations();
+  const respondToInvite = useRespondToInvitation();
+
+  const handleInviteResponse = (attendeeId: string, accept: boolean) => {
+    respondToInvite.mutate(
+      { attendeeId, accept },
+      {
+        onSuccess: () => {
+          toast.success(accept ? 'Einladung angenommen! 🎉' : 'Einladung abgelehnt');
+        },
+      }
+    );
+  };
 
   return (
     <AppLayout>
@@ -43,6 +57,11 @@ export default function Events() {
               className="flex-1 rounded-xl data-[state=active]:bg-gradient-neon data-[state=active]:text-white"
             >
               Anstehend
+              {invitations.length > 0 && (
+                <Badge className="ml-1.5 h-5 w-5 rounded-full bg-destructive p-0 text-[10px] text-destructive-foreground">
+                  {invitations.length}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger 
               value="my-rsvps" 
@@ -63,7 +82,68 @@ export default function Events() {
       {/* Content */}
       <div className="p-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsContent value="upcoming" className="mt-0">
+          <TabsContent value="upcoming" className="mt-0 space-y-4">
+            {/* Invitations */}
+            {invitations.length > 0 && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                  <Mail className="h-4 w-4" />
+                  Einladungen ({invitations.length})
+                </div>
+                {invitations.map((invite: any) => (
+                  <div
+                    key={invite.id}
+                    className="rounded-xl border-2 border-primary/30 bg-card p-4 transition"
+                  >
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
+                        {invite.event?.cover_image_url ? (
+                          <img
+                            src={invite.event.cover_image_url}
+                            alt=""
+                            className="h-full w-full object-cover rounded-xl"
+                          />
+                        ) : (
+                          <span className="text-xl">🎉</span>
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="font-semibold truncate">{invite.event?.name}</h3>
+                        <p className="text-xs text-muted-foreground">
+                          {invite.event?.starts_at && format(new Date(invite.event.starts_at), 'EEE, d. MMM • HH:mm', { locale: de })}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          von @{invite.event?.creator?.username}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        className="flex-1 gap-1 bg-primary"
+                        onClick={() => handleInviteResponse(invite.id, true)}
+                        disabled={respondToInvite.isPending}
+                      >
+                        <Check className="h-4 w-4" />
+                        Annehmen
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="flex-1 gap-1"
+                        onClick={() => handleInviteResponse(invite.id, false)}
+                        disabled={respondToInvite.isPending}
+                      >
+                        <X className="h-4 w-4" />
+                        Ablehnen
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Upcoming Events */}
             {upcomingLoading ? (
               <EventsSkeleton />
             ) : upcomingEvents && upcomingEvents.length > 0 ? (
@@ -76,12 +156,12 @@ export default function Events() {
                   />
                 ))}
               </div>
-            ) : (
+            ) : invitations.length === 0 ? (
               <EmptyState
                 title="Keine Events"
                 description="Es gibt noch keine anstehenden Events. Erstelle eins über das + unten."
               />
-            )}
+            ) : null}
           </TabsContent>
 
           <TabsContent value="my-rsvps" className="mt-0">

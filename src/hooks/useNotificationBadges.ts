@@ -8,28 +8,38 @@ export const useNotificationBadges = () => {
   const { data: profile } = useProfile();
   const profileId = profile?.id;
 
-  // Event attendee requests (for events I created)
+  // Event attendee requests (for events I created) + my invitations
   const { data: eventBadge = 0 } = useQuery({
     queryKey: ['badge-events', profileId],
     queryFn: async () => {
       if (!profileId) return 0;
+
       // Count pending attendees for my events
       const { data: myEvents } = await supabase
         .from('events')
         .select('id')
         .eq('creator_id', profileId);
 
-      if (!myEvents?.length) return 0;
+      let pendingCount = 0;
+      if (myEvents?.length) {
+        const eventIds = myEvents.map((e) => e.id);
+        const { count } = await supabase
+          .from('event_attendees')
+          .select('id', { count: 'exact', head: true })
+          .in('event_id', eventIds)
+          .eq('status', 'interested')
+          .is('host_accepted', null);
+        pendingCount = count || 0;
+      }
 
-      const eventIds = myEvents.map((e) => e.id);
-      const { count } = await supabase
+      // Count my pending invitations
+      const { count: inviteCount } = await supabase
         .from('event_attendees')
         .select('id', { count: 'exact', head: true })
-        .in('event_id', eventIds)
-        .eq('status', 'interested')
-        .is('host_accepted', null);
+        .eq('user_id', profileId)
+        .eq('status', 'invited');
 
-      return count || 0;
+      return pendingCount + (inviteCount || 0);
     },
     enabled: !!profileId,
     refetchInterval: 30000,

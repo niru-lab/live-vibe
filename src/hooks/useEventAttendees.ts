@@ -157,12 +157,64 @@ export const useMyRSVPs = () => {
           )
         `)
         .eq('user_id', profile.id)
+        .neq('status', 'invited')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
       return data;
     },
     enabled: !!profile,
+  });
+};
+
+// Get events the user has been invited to
+export const useMyInvitations = () => {
+  const { data: profile } = useProfile();
+
+  return useQuery({
+    queryKey: ['my-invitations', profile?.id],
+    queryFn: async () => {
+      if (!profile) return [];
+
+      const { data, error } = await supabase
+        .from('event_attendees')
+        .select(`
+          *,
+          event:events(
+            *,
+            creator:profiles!events_creator_id_fkey(*)
+          )
+        `)
+        .eq('user_id', profile.id)
+        .eq('status', 'invited')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!profile,
+  });
+};
+
+// Respond to an invitation
+export const useRespondToInvitation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ attendeeId, accept }: { attendeeId: string; accept: boolean }) => {
+      const newStatus = accept ? 'going' : 'declined';
+      const { error } = await supabase
+        .from('event_attendees')
+        .update({ status: newStatus })
+        .eq('id', attendeeId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['my-invitations'] });
+      queryClient.invalidateQueries({ queryKey: ['my-rsvps'] });
+      queryClient.invalidateQueries({ queryKey: ['event-attendees'] });
+    },
   });
 };
 
