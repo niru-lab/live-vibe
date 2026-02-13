@@ -32,7 +32,6 @@ export default function Events() {
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <span className="text-2xl">🎉</span>
-            <h1 className="font-display text-xl font-bold gradient-text">Events</h1>
           </div>
           <Button
             onClick={() => navigate('/events/create')}

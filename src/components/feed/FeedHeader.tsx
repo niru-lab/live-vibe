@@ -40,9 +40,6 @@ export const FeedHeader = ({ selectedCity, onCityChange }: FeedHeaderProps) => {
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
             <Zap className="h-5 w-5 text-primary-foreground" />
           </div>
-          <span className="font-display text-xl font-bold text-foreground">
-            Feyrn
-          </span>
         </div>
 
         {/* City selector */}

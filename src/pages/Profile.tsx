@@ -49,7 +49,7 @@ export default function Profile() {
       <div className="min-h-screen">
         {/* Minimal Header */}
         <header className="flex items-center justify-center py-4">
-          <h1 className="font-display text-lg font-bold text-foreground/80">Profil</h1>
+          <span className="text-2xl">👤</span>
         </header>
 
         <div className="px-4 pb-24">
