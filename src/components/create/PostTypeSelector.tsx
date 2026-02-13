@@ -83,7 +83,7 @@ export const PostTypeSelector = ({
         <SheetHeader className="mb-6">
           <div className="mx-auto mb-2 h-1 w-12 rounded-full bg-muted" />
           <SheetTitle className="text-center font-display text-xl">
-            Was möchtest du posten?
+            Share your moment
           </SheetTitle>
         </SheetHeader>
 
