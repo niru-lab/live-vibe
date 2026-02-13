@@ -103,7 +103,6 @@ export default function Messages() {
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
             <span className="text-2xl">💬</span>
-            <h1 className="font-display text-xl font-bold gradient-text">Nachrichten</h1>
             {unreadCount > 0 && (
               <Badge className="bg-red-500 text-white animate-pulse">
                 {unreadCount} neu
