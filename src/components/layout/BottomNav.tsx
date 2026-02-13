@@ -3,30 +3,38 @@ import { Home, Search, PlusCircle, Calendar, User, MessageCircle } from 'lucide-
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { PostTypeSelector } from '@/components/create/PostTypeSelector';
-import { useUnreadMessageCount } from '@/hooks/useEventMessages';
+import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 
 const navItems = [
-  { icon: Home, label: 'Feed', path: '/', emoji: '🏠' },
-  { icon: Search, label: 'Discover', path: '/discover', emoji: '🔍' },
-  { icon: PlusCircle, label: 'Post', path: '/create', isCenter: true },
-  { icon: Calendar, label: 'Events', path: '/events', emoji: '🎉' },
-  { icon: MessageCircle, label: 'Messages', path: '/messages', emoji: '💬' },
-  { icon: User, label: 'Profil', path: '/profile', emoji: '👤' },
+  { icon: Home, label: 'Feed', path: '/', emoji: '🏠', badgeKey: null },
+  { icon: Search, label: 'Discover', path: '/discover', emoji: '🔍', badgeKey: null },
+  { icon: PlusCircle, label: 'Post', path: '/create', isCenter: true, badgeKey: null },
+  { icon: Calendar, label: 'Events', path: '/events', emoji: '🎉', badgeKey: 'events' as const },
+  { icon: MessageCircle, label: 'Messages', path: '/messages', emoji: '💬', badgeKey: 'messages' as const },
+  { icon: User, label: 'Profil', path: '/profile', emoji: '👤', badgeKey: 'profile' as const },
 ];
 
 export const BottomNav = () => {
   const location = useLocation();
   const [showPostSelector, setShowPostSelector] = useState(false);
-  const { data: unreadCount } = useUnreadMessageCount();
+  const { eventBadge, messagesBadge, profileBadge } = useNotificationBadges();
+
+  const getBadgeCount = (key: string | null): number => {
+    if (!key) return 0;
+    if (key === 'events') return eventBadge;
+    if (key === 'messages') return messagesBadge;
+    if (key === 'profile') return profileBadge;
+    return 0;
+  };
 
   return (
     <>
       <nav className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md">
         <div className="glass rounded-[28px] px-1 py-3 neon-glow-sm">
           <div className="flex items-center justify-around">
-            {navItems.map(({ icon: Icon, label, path, isCenter, emoji }) => {
+            {navItems.map(({ icon: Icon, label, path, isCenter, emoji, badgeKey }) => {
               const isActive = location.pathname === path;
-              const hasUnread = path === '/messages' && unreadCount && unreadCount > 0;
+              const badgeCount = getBadgeCount(badgeKey);
 
               if (isCenter) {
                 return (
@@ -58,9 +66,9 @@ export const BottomNav = () => {
                     )}>
                       {emoji}
                     </span>
-                    {hasUnread && (
-                      <span className="absolute -right-2 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white animate-pulse">
-                        {unreadCount > 9 ? '9+' : unreadCount}
+                    {badgeCount > 0 && (
+                      <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white animate-pulse">
+                        {badgeCount > 99 ? '99+' : badgeCount}
                       </span>
                     )}
                   </div>
