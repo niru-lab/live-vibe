@@ -476,15 +476,6 @@ export default function EventDetail() {
             </Button>
           </div>
 
-          {/* Social Cloud Reward */}
-          {!isGoing && (
-            <div className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 p-4">
-              <Sparkles className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">
-                +15 Social Cloud Punkte bei Zusage
-              </span>
-            </div>
-          )}
         </div>
       </div>
 

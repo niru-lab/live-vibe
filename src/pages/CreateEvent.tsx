@@ -623,7 +623,7 @@ export default function CreateEvent() {
                     </div>
                   </FormControl>
                   <FormDescription className="text-xs">
-                    Social Cloud Vorschlag basierend auf Location
+                    Vorschlag basierend auf Location
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -754,13 +754,6 @@ export default function CreateEvent() {
             </div>
           </div>
 
-          {/* Social Cloud Preview */}
-          <div className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-pink-500/10 to-orange-500/10 p-4">
-            <Sparkles className="h-5 w-5 text-pink-500" />
-            <span className="text-sm font-medium text-foreground">
-              +{estimatedPoints} Social Cloud Punkte für dieses Event
-            </span>
-          </div>
 
           {/* Submit Button */}
           <Button

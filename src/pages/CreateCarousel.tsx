@@ -416,13 +416,6 @@ export default function CreateCarousel() {
           </div>
         </div>
 
-        {/* Social Cloud Preview */}
-        <div className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 p-4">
-          <Sparkles className="h-5 w-5 text-primary" />
-          <span className="text-sm font-medium text-foreground">
-            +{Math.min(mediaItems.length * 10, 100)} Social Cloud Punkte
-          </span>
-        </div>
       </div>
     </AppLayout>
   );

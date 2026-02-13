@@ -145,13 +145,6 @@ export const PostTypeSelector = ({
           })}
         </div>
 
-        {/* Social Cloud Preview */}
-        <div className="mt-6 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-primary/10 to-accent/10 p-3">
-          <Zap className="h-5 w-5 text-primary" />
-          <span className="text-sm font-medium text-foreground">
-            +10 bis +25 Social Cloud Punkte
-          </span>
-        </div>
 
         <div className="mt-6 flex gap-3">
           <Button
