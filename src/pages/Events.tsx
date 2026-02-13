@@ -33,14 +33,7 @@ export default function Events() {
           <div className="flex items-center gap-2">
             <span className="text-2xl">🎉</span>
           </div>
-          <Button
-            onClick={() => navigate('/events/create')}
-            size="sm"
-            className="gap-1.5 bg-gradient-neon neon-glow-sm"
-          >
-            <Plus className="h-4 w-4" />
-            Erstellen
-          </Button>
+          <div />
         </div>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="px-4 pb-2">
@@ -86,9 +79,7 @@ export default function Events() {
             ) : (
               <EmptyState
                 title="Keine Events"
-                description="Es gibt noch keine anstehenden Events. Sei der Erste!"
-                onAction={() => navigate('/events/create')}
-                actionLabel="Event erstellen"
+                description="Es gibt noch keine anstehenden Events. Erstelle eins über das + unten."
               />
             )}
           </TabsContent>
@@ -249,8 +240,8 @@ function EventsSkeleton() {
 interface EmptyStateProps {
   title: string;
   description: string;
-  onAction: () => void;
-  actionLabel: string;
+  onAction?: () => void;
+  actionLabel?: string;
 }
 
 function EmptyState({ title, description, onAction, actionLabel }: EmptyStateProps) {
@@ -261,9 +252,11 @@ function EmptyState({ title, description, onAction, actionLabel }: EmptyStatePro
       </div>
       <h2 className="mb-2 text-xl font-semibold gradient-text">{title}</h2>
       <p className="mb-6 max-w-xs text-muted-foreground">{description}</p>
-      <Button onClick={onAction} className="bg-gradient-neon neon-glow-sm">
-        {actionLabel}
-      </Button>
+      {onAction && actionLabel && (
+        <Button onClick={onAction} className="bg-gradient-neon neon-glow-sm">
+          {actionLabel}
+        </Button>
+      )}
     </div>
   );
 }
