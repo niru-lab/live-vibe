@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      blocks: {
+        Row: {
+          blocked_id: string
+          blocker_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          blocked_id: string
+          blocker_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          blocked_id?: string
+          blocker_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "blocks_blocked_id_fkey"
+            columns: ["blocked_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "blocks_blocker_id_fkey"
+            columns: ["blocker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cities: {
+        Row: {
+          country_code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          latitude: number
+          longitude: number
+          name: string
+          timezone: string
+        }
+        Insert: {
+          country_code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude: number
+          longitude: number
+          name: string
+          timezone?: string
+        }
+        Update: {
+          country_code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          latitude?: number
+          longitude?: number
+          name?: string
+          timezone?: string
+        }
+        Relationships: []
+      }
       comments: {
         Row: {
           content: string
@@ -101,6 +170,58 @@ export type Database = {
           },
         ]
       }
+      event_invites: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          invited_by: string | null
+          invited_user_id: string
+          responded_at: string | null
+          status: Database["public"]["Enums"]["invite_status"]
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          invited_by?: string | null
+          invited_user_id: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["invite_status"]
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          invited_by?: string | null
+          invited_user_id?: string
+          responded_at?: string | null
+          status?: Database["public"]["Enums"]["invite_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_invites_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_invites_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_invites_invited_user_id_fkey"
+            columns: ["invited_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_messages: {
         Row: {
           content: string
@@ -164,6 +285,7 @@ export type Database = {
           cover_image_url: string | null
           created_at: string
           creator_id: string
+          deleted_at: string | null
           description: string | null
           dos_and_donts: string | null
           dresscode: string | null
@@ -179,6 +301,7 @@ export type Database = {
           name: string
           starts_at: string
           updated_at: string
+          visibility: Database["public"]["Enums"]["visibility_level"]
         }
         Insert: {
           address: string
@@ -187,6 +310,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           creator_id: string
+          deleted_at?: string | null
           description?: string | null
           dos_and_donts?: string | null
           dresscode?: string | null
@@ -202,6 +326,7 @@ export type Database = {
           name: string
           starts_at: string
           updated_at?: string
+          visibility?: Database["public"]["Enums"]["visibility_level"]
         }
         Update: {
           address?: string
@@ -210,6 +335,7 @@ export type Database = {
           cover_image_url?: string | null
           created_at?: string
           creator_id?: string
+          deleted_at?: string | null
           description?: string | null
           dos_and_donts?: string | null
           dresscode?: string | null
@@ -225,6 +351,7 @@ export type Database = {
           name?: string
           starts_at?: string
           updated_at?: string
+          visibility?: Database["public"]["Enums"]["visibility_level"]
         }
         Relationships: [
           {
@@ -272,6 +399,53 @@ export type Database = {
           },
         ]
       }
+      hotspot_cells: {
+        Row: {
+          cell_id: string
+          center_lat: number | null
+          center_lng: number | null
+          city_id: string
+          engagement_score: number
+          id: string
+          post_count: number
+          updated_at: string
+          window_end: string
+          window_start: string
+        }
+        Insert: {
+          cell_id: string
+          center_lat?: number | null
+          center_lng?: number | null
+          city_id: string
+          engagement_score?: number
+          id?: string
+          post_count?: number
+          updated_at?: string
+          window_end: string
+          window_start: string
+        }
+        Update: {
+          cell_id?: string
+          center_lat?: number | null
+          center_lng?: number | null
+          city_id?: string
+          engagement_score?: number
+          id?: string
+          post_count?: number
+          updated_at?: string
+          window_end?: string
+          window_start?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hotspot_cells_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       likes: {
         Row: {
           created_at: string
@@ -308,13 +482,220 @@ export type Database = {
           },
         ]
       }
+      message_reads: {
+        Row: {
+          id: string
+          message_id: string
+          read_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          message_id: string
+          read_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          message_id?: string
+          read_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reads_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "event_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reads_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          body: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          recipient_id: string
+          ref_id: string | null
+          ref_type: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Insert: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id: string
+          ref_id?: string | null
+          ref_type?: string | null
+          title: string
+          type: Database["public"]["Enums"]["notification_type"]
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id?: string
+          ref_id?: string | null
+          ref_type?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["notification_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      outbox_events: {
+        Row: {
+          attempts: number
+          created_at: string
+          error_message: string | null
+          event_type: string
+          id: string
+          max_attempts: number
+          payload: Json
+          processed_at: string | null
+          status: Database["public"]["Enums"]["outbox_status"]
+        }
+        Insert: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          event_type: string
+          id?: string
+          max_attempts?: number
+          payload?: Json
+          processed_at?: string | null
+          status?: Database["public"]["Enums"]["outbox_status"]
+        }
+        Update: {
+          attempts?: number
+          created_at?: string
+          error_message?: string | null
+          event_type?: string
+          id?: string
+          max_attempts?: number
+          payload?: Json
+          processed_at?: string | null
+          status?: Database["public"]["Enums"]["outbox_status"]
+        }
+        Relationships: []
+      }
+      point_ledger: {
+        Row: {
+          created_at: string
+          delta: number
+          id: string
+          profile_id: string
+          reason: string
+          ref_id: string | null
+          ref_type: string | null
+        }
+        Insert: {
+          created_at?: string
+          delta: number
+          id?: string
+          profile_id: string
+          reason: string
+          ref_id?: string | null
+          ref_type?: string | null
+        }
+        Update: {
+          created_at?: string
+          delta?: number
+          id?: string
+          profile_id?: string
+          reason?: string
+          ref_id?: string | null
+          ref_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "point_ledger_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_media: {
+        Row: {
+          created_at: string
+          height: number | null
+          id: string
+          media_type: string
+          media_url: string
+          post_id: string
+          sort_order: number
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          media_type?: string
+          media_url: string
+          post_id: string
+          sort_order?: number
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          height?: number | null
+          id?: string
+          media_type?: string
+          media_url?: string
+          post_id?: string
+          sort_order?: number
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_media_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       posts: {
         Row: {
           author_id: string
           caption: string | null
           city: string | null
+          city_id: string | null
           comments_count: number
           created_at: string
+          deleted_at: string | null
           event_id: string | null
           expires_at: string | null
           id: string
@@ -329,14 +710,17 @@ export type Database = {
           music_artist: string | null
           music_title: string | null
           music_url: string | null
+          post_type: Database["public"]["Enums"]["post_type"]
           venue_id: string | null
         }
         Insert: {
           author_id: string
           caption?: string | null
           city?: string | null
+          city_id?: string | null
           comments_count?: number
           created_at?: string
+          deleted_at?: string | null
           event_id?: string | null
           expires_at?: string | null
           id?: string
@@ -351,14 +735,17 @@ export type Database = {
           music_artist?: string | null
           music_title?: string | null
           music_url?: string | null
+          post_type?: Database["public"]["Enums"]["post_type"]
           venue_id?: string | null
         }
         Update: {
           author_id?: string
           caption?: string | null
           city?: string | null
+          city_id?: string | null
           comments_count?: number
           created_at?: string
+          deleted_at?: string | null
           event_id?: string | null
           expires_at?: string | null
           id?: string
@@ -373,6 +760,7 @@ export type Database = {
           music_artist?: string | null
           music_title?: string | null
           music_url?: string | null
+          post_type?: Database["public"]["Enums"]["post_type"]
           venue_id?: string | null
         }
         Relationships: [
@@ -381,6 +769,13 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_city_id_fkey"
+            columns: ["city_id"]
+            isOneToOne: false
+            referencedRelation: "cities"
             referencedColumns: ["id"]
           },
           {
@@ -402,6 +797,53 @@ export type Database = {
             columns: ["venue_id"]
             isOneToOne: false
             referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      privacy_settings: {
+        Row: {
+          created_at: string
+          discover_visible: boolean
+          dm_policy: Database["public"]["Enums"]["dm_policy"]
+          hide_event_attendance: boolean
+          id: string
+          location_enabled: boolean
+          online_status_visible: boolean
+          profile_id: string
+          profile_visibility: Database["public"]["Enums"]["visibility_level"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          discover_visible?: boolean
+          dm_policy?: Database["public"]["Enums"]["dm_policy"]
+          hide_event_attendance?: boolean
+          id?: string
+          location_enabled?: boolean
+          online_status_visible?: boolean
+          profile_id: string
+          profile_visibility?: Database["public"]["Enums"]["visibility_level"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          discover_visible?: boolean
+          dm_policy?: Database["public"]["Enums"]["dm_policy"]
+          hide_event_attendance?: boolean
+          id?: string
+          location_enabled?: boolean
+          online_status_visible?: boolean
+          profile_id?: string
+          profile_visibility?: Database["public"]["Enums"]["visibility_level"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "privacy_settings_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -450,6 +892,77 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      timeline_items: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          score: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          score?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          score?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "timeline_items_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "timeline_items_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_points: {
+        Row: {
+          id: string
+          level: number
+          points: number
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          level?: number
+          points?: number
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          level?: number
+          points?: number
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_points_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       venues: {
         Row: {
@@ -512,9 +1025,33 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_points: {
+        Args: {
+          p_delta: number
+          p_profile_id: string
+          p_reason: string
+          p_ref_id?: string
+          p_ref_type?: string
+        }
+        Returns: undefined
+      }
+      calculate_level: { Args: { pts: number }; Returns: number }
+      can_send_dm: {
+        Args: { recipient_id: string; sender_id: string }
+        Returns: boolean
+      }
+      can_view_profile: {
+        Args: { target_id: string; viewer_id: string }
+        Returns: boolean
+      }
       delete_expired_posts: { Args: never; Returns: undefined }
+      is_blocked: {
+        Args: { checker_id: string; target_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
+      dm_policy: "everyone" | "followers" | "nobody"
       event_category:
         | "club"
         | "house_party"
@@ -523,7 +1060,20 @@ export type Database = {
         | "concert"
         | "other"
         | "sport"
+      invite_status: "invited" | "interested" | "accepted" | "declined"
+      notification_type:
+        | "like"
+        | "comment"
+        | "follow"
+        | "event_invite"
+        | "event_message"
+        | "mention"
+        | "level_up"
+        | "moment_x_trending"
+      outbox_status: "pending" | "processing" | "done" | "failed"
+      post_type: "normal" | "moment_x"
       profile_type: "user" | "club" | "organizer"
+      visibility_level: "public" | "followers" | "private"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -651,6 +1201,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      dm_policy: ["everyone", "followers", "nobody"],
       event_category: [
         "club",
         "house_party",
@@ -660,7 +1211,21 @@ export const Constants = {
         "other",
         "sport",
       ],
+      invite_status: ["invited", "interested", "accepted", "declined"],
+      notification_type: [
+        "like",
+        "comment",
+        "follow",
+        "event_invite",
+        "event_message",
+        "mention",
+        "level_up",
+        "moment_x_trending",
+      ],
+      outbox_status: ["pending", "processing", "done", "failed"],
+      post_type: ["normal", "moment_x"],
       profile_type: ["user", "club", "organizer"],
+      visibility_level: ["public", "followers", "private"],
     },
   },
 } as const
