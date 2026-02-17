@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, Mic, Camera, Sparkles, RefreshCw } from 'lucide-react';
+import { DiscoverFilters } from '@/components/discover/DiscoverFilters';
 import { useQueryClient } from '@tanstack/react-query';
 
 const StuttgartMap = lazy(() => import('@/components/maps/StuttgartMap').then(m => ({ default: m.StuttgartMap })));
@@ -59,6 +60,11 @@ export default function Discover() {
                 </Button>
               </div>
             </div>
+          </div>
+
+          {/* Filter Row */}
+          <div className="flex items-center gap-3">
+            <DiscoverFilters />
           </div>
         </div>
       </header>
