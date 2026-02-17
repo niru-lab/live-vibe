@@ -3,38 +3,21 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { Search, Map, Grid3X3, Mic, Camera, Sparkles, RefreshCw } from 'lucide-react';
-import { DiscoverGrid } from '@/components/discover/DiscoverGrid';
-import { DiscoverFilters, FilterState } from '@/components/discover/DiscoverFilters';
+import { Search, Mic, Camera, Sparkles, RefreshCw } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 
 const StuttgartMap = lazy(() => import('@/components/maps/StuttgartMap').then(m => ({ default: m.StuttgartMap })));
 
 export default function Discover() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [viewMode, setViewMode] = useState<'grid' | 'map'>('grid');
-  const [filters, setFilters] = useState<FilterState>({
-    music: null,
-    vibes: null,
-    time: null,
-    price: null,
-    radius: null,
-    socialCloud: null,
-  });
   const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
-    await queryClient.invalidateQueries({ queryKey: ['posts'] });
     await queryClient.invalidateQueries({ queryKey: ['events'] });
     setTimeout(() => setIsRefreshing(false), 500);
   }, [queryClient]);
-
-  const handleFiltersChange = useCallback((newFilters: FilterState) => {
-    setFilters(newFilters);
-  }, []);
 
   return (
     <AppLayout>
@@ -77,49 +60,14 @@ export default function Discover() {
               </div>
             </div>
           </div>
-
-          {/* Filter + Toggle Row */}
-          <div className="flex items-center justify-between gap-3">
-            <DiscoverFilters onFiltersChange={handleFiltersChange} />
-            
-            <ToggleGroup 
-              type="single" 
-              value={viewMode} 
-              onValueChange={(v) => v && setViewMode(v as 'grid' | 'map')}
-              className="bg-muted/50 p-1 rounded-lg"
-            >
-              <ToggleGroupItem 
-                value="grid" 
-                aria-label="Grid-Ansicht"
-                className="gap-1.5 px-3 data-[state=on]:bg-background data-[state=on]:shadow-sm"
-              >
-                <Grid3X3 className="h-4 w-4" />
-                <span className="text-xs font-medium hidden sm:inline">Grid</span>
-              </ToggleGroupItem>
-              <ToggleGroupItem 
-                value="map" 
-                aria-label="Karten-Ansicht"
-                className="gap-1.5 px-3 data-[state=on]:bg-background data-[state=on]:shadow-sm"
-              >
-                <Map className="h-4 w-4" />
-                <span className="text-xs font-medium hidden sm:inline">Karte</span>
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
         </div>
       </header>
 
-      {/* Content */}
-      <div className="flex-1">
-        {viewMode === 'grid' ? (
-          <DiscoverGrid searchQuery={searchQuery} filters={filters} />
-        ) : (
-          <div className="p-4">
-            <Suspense fallback={<Skeleton className="h-[500px] w-full rounded-xl" />}>
-              <StuttgartMap />
-            </Suspense>
-          </div>
-        )}
+      {/* Map Content */}
+      <div className="flex-1 p-4">
+        <Suspense fallback={<Skeleton className="h-[500px] w-full rounded-xl" />}>
+          <StuttgartMap />
+        </Suspense>
       </div>
     </AppLayout>
   );
