@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { useState, useEffect } from 'react';
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEvents, useVenues } from '@/hooks/useEvents';
@@ -65,13 +65,29 @@ const stuttgartAreas: Record<string, [number, number]> = {
   'hedelfingen': [48.7650, 9.2500],
   'obertürkheim': [48.7600, 9.2550],
   'rotenberg': [48.7850, 9.2450],
+  // Aalen (BW)
+  'aalen': [48.8375, 10.0933],
+  'aalen (bw)': [48.8375, 10.0933],
+  'wasseralfingen': [48.8580, 10.0760],
+  'unterkochen': [48.8050, 10.0750],
+  'dewangen': [48.8700, 10.0550],
+  'ebnat': [48.8200, 10.1200],
+  // Frankfurt am Main
+  'frankfurt': [50.1109, 8.6821],
+  'frankfurt am main': [50.1109, 8.6821],
+  'sachsenhausen': [50.1000, 8.6850],
+  'bornheim': [50.1200, 8.7100],
+  'bockenheim': [50.1200, 8.6350],
+  'nordend': [50.1250, 8.6900],
+  'westend': [50.1200, 8.6600],
+  'bahnhofsviertel': [50.1070, 8.6650],
+  'altstadt': [50.1109, 8.6821],
   // Other cities
   'berlin': [52.5200, 13.4050],
   'berlin mitte': [52.5200, 13.4050],
   'hamburg': [53.5511, 9.9937],
   'münchen': [48.1351, 11.5820],
   'köln': [50.9375, 6.9603],
-  'frankfurt': [50.1109, 8.6821],
   'düsseldorf': [51.2277, 6.7735],
   'leipzig': [51.3397, 12.3731],
   'dortmund': [51.5136, 7.4653],
@@ -175,7 +191,34 @@ const categoryIcons: Record<string, L.DivIcon> = {
   event: createCustomIcon(categoryColors.event, true),
 };
 
-export function StuttgartMap() {
+// City center coordinates for filter
+const cityCenters: Record<string, { center: [number, number]; zoom: number }> = {
+  'Stuttgart': { center: [48.7758, 9.1829], zoom: 14 },
+  'Aalen (BW)': { center: [48.8375, 10.0933], zoom: 14 },
+  'Frankfurt am Main': { center: [50.1109, 8.6821], zoom: 13 },
+};
+
+// Helper component to update map center dynamically
+function MapCenterUpdater({ city }: { city: string | null }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (city && cityCenters[city]) {
+      map.flyTo(cityCenters[city].center, cityCenters[city].zoom, { duration: 1.5 });
+    } else {
+      // Default to Stuttgart
+      map.flyTo([48.7758, 9.1829], 14, { duration: 1.5 });
+    }
+  }, [city, map]);
+  
+  return null;
+}
+
+interface StuttgartMapProps {
+  selectedCity?: string | null;
+}
+
+export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const { data: events } = useEvents();
   const { data: venues } = useVenues();
@@ -333,6 +376,7 @@ export function StuttgartMap() {
         style={{ height: '100%', width: '100%' }}
         className="z-0"
       >
+        <MapCenterUpdater city={selectedCity || null} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
