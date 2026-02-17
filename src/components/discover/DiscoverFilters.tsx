@@ -3,13 +3,14 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
-import { Filter, Music, Users, Clock, DollarSign, MapPin, Star, X } from 'lucide-react';
+import { Filter, Music, Users, Clock, DollarSign, MapPin, Star, X, Building2 } from 'lucide-react';
 
 interface DiscoverFiltersProps {
   onFiltersChange?: (filters: FilterState) => void;
 }
 
 export interface FilterState {
+  city: string | null;
   music: string | null;
   vibes: string | null;
   time: string | null;
@@ -18,6 +19,7 @@ export interface FilterState {
   socialCloud: string | null;
 }
 
+const cityOptions = ['Alle', 'Stuttgart', 'Aalen (BW)', 'Frankfurt am Main'];
 const musicOptions = ['Alle', 'Techno', 'House', 'Hip-Hop', 'Latin', 'Pop', 'Mixed'];
 const vibesOptions = ['Alle', 'Wild', 'Casual', 'Exklusiv', 'Chill', 'Underground'];
 const timeOptions = ['Alle', 'Jetzt', 'Heute', 'Morgen', 'Wochenende'];
@@ -28,6 +30,7 @@ const socialCloudOptions = ['Alle', 'Top 10', 'Top 50', 'Top 100'];
 export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
+    city: null,
     music: null,
     vibes: null,
     time: null,
@@ -46,6 +49,7 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
 
   const clearFilters = () => {
     const cleared: FilterState = { 
+      city: null,
       music: null, 
       vibes: null, 
       time: null, 
@@ -122,6 +126,7 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
         </SheetHeader>
 
         <div className="space-y-6 overflow-y-auto pb-24 pr-2">
+          <FilterSection icon={Building2} label="🏙️ Stadt" options={cityOptions} filterKey="city" />
           <FilterSection icon={Music} label="🎵 Musik" options={musicOptions} filterKey="music" />
           <FilterSection icon={Users} label="👥 Vibes" options={vibesOptions} filterKey="vibes" />
           <FilterSection icon={Clock} label="⏰ Zeit" options={timeOptions} filterKey="time" />
