@@ -1,4 +1,5 @@
 import { useState, lazy, Suspense, useCallback } from 'react';
+import { FilterState } from '@/components/discover/DiscoverFilters';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ const StuttgartMap = lazy(() => import('@/components/maps/StuttgartMap').then(m 
 
 export default function Discover() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();
 
@@ -64,7 +66,7 @@ export default function Discover() {
 
           {/* Filter Row */}
           <div className="flex items-center gap-3">
-            <DiscoverFilters />
+            <DiscoverFilters onFiltersChange={(f) => setSelectedCity(f.city)} />
           </div>
         </div>
       </header>
@@ -72,7 +74,7 @@ export default function Discover() {
       {/* Map Content */}
       <div className="flex-1 p-4">
         <Suspense fallback={<Skeleton className="h-[500px] w-full rounded-xl" />}>
-          <StuttgartMap />
+          <StuttgartMap selectedCity={selectedCity} />
         </Suspense>
       </div>
     </AppLayout>
