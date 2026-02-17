@@ -343,12 +343,27 @@ export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
     ? allLocations.filter(l => l.category === selectedCategory)
     : allLocations;
 
+  // Filter venues and events by selected city
+  const cityFilteredVenues = selectedCity && selectedCity !== 'Alle'
+    ? venueLocations.filter(v => {
+        // Match venue city to selected city
+        const venueCity = (venues || []).find(dbv => dbv.id === v.id)?.city?.toLowerCase() || '';
+        return venueCity === selectedCity.toLowerCase();
+      })
+    : venueLocations;
+
+  const cityFilteredEvents = selectedCity && selectedCity !== 'Alle'
+    ? (events || []).filter(e => e.city?.toLowerCase() === selectedCity.toLowerCase())
+    : (events || []);
+
   const getCategoryCount = (category: string) => {
     if (category === 'event') {
-      return (events || []).length;
+      return cityFilteredEvents.length;
     }
-    return venueLocations.filter(l => l.category === category).length;
+    return cityFilteredVenues.filter(l => l.category === category).length;
   };
+
+  const legendTitle = selectedCity && selectedCity !== 'Alle' ? `${selectedCity} Locations` : 'Alle Locations';
 
   // Get dynamic icon for location based on activity (posts or events)
   const getLocationIcon = (location: Location | GroupedLocation) => {
@@ -505,7 +520,7 @@ export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
       
       {/* Legend */}
       <div className="absolute bottom-4 left-4 glass rounded-xl p-3 z-[10]">
-        <div className="text-xs font-semibold mb-2 text-foreground">Stuttgart Locations</div>
+        <div className="text-xs font-semibold mb-2 text-foreground">{legendTitle}</div>
         <div className="flex flex-col gap-1.5">
           {Object.entries(categoryLabels).map(([key, label]) => (
             <button
