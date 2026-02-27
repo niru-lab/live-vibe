@@ -46,7 +46,7 @@ export default function Events() {
             <TabsTrigger value="upcoming" className="flex-1 rounded-xl data-[state=active]:bg-gradient-neon data-[state=active]:text-white">
               Anstehend
               {invitations.length > 0 && (
-                <Badge className="ml-1.5 h-5 w-5 rounded-full bg-destructive p-0 text-[10px] text-destructive-foreground">{invitations.length}</Badge>
+                <Badge className="ml-1.5 h-5 w-5 rounded-full bg-destructive p-0 text-xs text-destructive-foreground">{invitations.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="my-rsvps" className="flex-1 rounded-xl data-[state=active]:bg-gradient-neon data-[state=active]:text-white">Zusagen</TabsTrigger>
@@ -142,10 +142,10 @@ export default function Events() {
                   <h3 className="font-semibold mb-3 flex items-center gap-2">
                     <ChartBar weight="thin" className="h-5 w-5 text-primary" /> Dein Event-Dashboard
                   </h3>
-                  <div className="grid grid-cols-3 gap-3 text-center">
-                    <div className="rounded-xl bg-background/50 p-3"><p className="text-2xl font-bold text-primary">{myEvents.length}</p><p className="text-xs text-muted-foreground">Events</p></div>
-                    <div className="rounded-xl bg-background/50 p-3"><p className="text-2xl font-bold text-accent">--</p><p className="text-xs text-muted-foreground">Zusagen</p></div>
-                    <div className="rounded-xl bg-background/50 p-3"><p className="text-2xl font-bold text-green-500">--</p><p className="text-xs text-muted-foreground">Views</p></div>
+                    <div className="grid grid-cols-3 gap-3 text-center">
+                     <div className="rounded-xl bg-background/50 p-3"><p className="text-xl font-bold text-primary">{myEvents.length}</p><p className="text-xs text-muted-foreground">Events</p></div>
+                     <div className="rounded-xl bg-background/50 p-3"><p className="text-xl font-bold text-accent">--</p><p className="text-xs text-muted-foreground">Zusagen</p></div>
+                     <div className="rounded-xl bg-background/50 p-3"><p className="text-xl font-bold text-green-500">--</p><p className="text-xs text-muted-foreground">Views</p></div>
                   </div>
                 </div>
                 <div className="space-y-3">
@@ -195,8 +195,8 @@ function EmptyState({ title, description, onAction, actionLabel }: EmptyStatePro
       <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full glass">
         <Confetti weight="thin" className="h-10 w-10 text-muted-foreground" />
       </div>
-      <h2 className="mb-2 text-xl font-semibold">{title}</h2>
-      <p className="mb-6 max-w-xs text-muted-foreground">{description}</p>
+      <h2 className="mb-2 text-lg font-semibold">{title}</h2>
+      <p className="mb-6 max-w-xs text-sm text-muted-foreground">{description}</p>
       {onAction && actionLabel && <Button onClick={onAction} variant="outline">{actionLabel}</Button>}
     </div>
   );

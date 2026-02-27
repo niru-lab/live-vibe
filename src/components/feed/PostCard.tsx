@@ -131,14 +131,14 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
           </Avatar>
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span className="font-semibold text-foreground">
+              <span className="font-semibold text-base text-foreground">
                 {author?.display_name || 'Unbekannt'}
               </span>
               {author?.social_cloud_points !== undefined && (
                 <BadgeDisplay points={author.social_cloud_points} size="sm" />
               )}
               {author?.is_verified && (
-                <Badge variant="secondary" className="h-5 px-1.5 text-xs">✓</Badge>
+                 <Badge variant="secondary" className="h-5 px-1.5 text-xs">✓</Badge>
               )}
               {post.is_moment_x && (
                 <Badge className="h-5 bg-gradient-to-r from-primary to-accent px-2 text-xs">Moment-X</Badge>
@@ -196,7 +196,7 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
               <div className="flex items-center gap-2 rounded-full bg-background/80 px-3 py-1.5 backdrop-blur">
                 <MusicNote weight={isPlaying ? "fill" : "thin"} className={cn("h-4 w-4 text-primary", isPlaying && "animate-pulse")} />
                 <div className="max-w-[120px] overflow-hidden">
-                  <p className="truncate text-xs font-medium text-foreground">{post.music_title}</p>
+                   <p className="truncate text-xs font-medium text-foreground">{post.music_title}</p>
                   {post.music_artist && (
                     <p className="truncate text-xs text-muted-foreground">{post.music_artist}</p>
                   )}

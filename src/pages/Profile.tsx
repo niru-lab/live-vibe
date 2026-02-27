@@ -22,9 +22,9 @@ export default function Profile() {
           <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full glass">
             <Users weight="thin" className="h-12 w-12 text-muted-foreground" />
           </div>
-          <h2 className="mb-3 text-2xl font-bold">Nicht angemeldet</h2>
-          <p className="mb-8 max-w-xs text-muted-foreground">Melde dich an, um dein Profil zu sehen und Events zu erstellen.</p>
-          <Button onClick={() => navigate('/auth')} variant="outline" className="px-8 py-6 rounded-2xl">Anmelden</Button>
+          <h2 className="mb-3 text-xl font-bold">Nicht angemeldet</h2>
+          <p className="mb-8 max-w-xs text-sm text-muted-foreground">Melde dich an, um dein Profil zu sehen und Events zu erstellen.</p>
+          <Button onClick={() => navigate('/auth')} variant="outline" className="px-8 py-6 rounded-2xl text-base">Anmelden</Button>
         </div>
       </AppLayout>
     );

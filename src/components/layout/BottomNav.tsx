@@ -68,14 +68,14 @@ export const BottomNav = () => {
                       )}
                     />
                     {badgeCount > 0 && (
-                      <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white">
+                      <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-xs font-bold text-white">
                         {badgeCount > 99 ? '99+' : badgeCount}
                       </span>
                     )}
                   </div>
                   <span
                     className={cn(
-                      'text-[10px] font-medium transition-colors',
+                      'text-xs font-medium transition-colors',
                       isActive ? 'text-white' : 'text-muted-foreground'
                     )}
                   >

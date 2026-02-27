@@ -96,7 +96,7 @@ function MessageCard({ message, isSent, onClick }: { message: any; isSent: boole
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs text-muted-foreground">{isSent ? 'An:' : 'Von:'}</span>
-            <p className="font-semibold truncate">{person?.display_name}</p>
+            <p className="font-semibold text-base truncate">{person?.display_name}</p>
             {!isSent && !message.is_read && <div className="h-2 w-2 rounded-full bg-primary animate-pulse" />}
           </div>
           <p className="text-sm text-muted-foreground truncate mb-2">Re: {message.event?.name}</p>
@@ -139,7 +139,7 @@ function EmptyState() {
       <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full glass text-muted-foreground">
         <ChatCircle weight="thin" className="h-10 w-10" />
       </div>
-      <h3 className="font-semibold mb-1">Keine Nachrichten</h3>
+      <h3 className="font-semibold text-base mb-1">Keine Nachrichten</h3>
       <p className="text-sm text-muted-foreground max-w-xs">Wenn du Events erstellst oder für Events akzeptiert wirst, erscheinen hier deine Nachrichten.</p>
     </div>
   );

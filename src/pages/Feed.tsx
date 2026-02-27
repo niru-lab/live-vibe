@@ -72,8 +72,8 @@ export default function Feed() {
             <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
               <Confetti weight="thin" className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h2 className="mb-2 text-xl font-semibold text-foreground">Noch keine Posts</h2>
-            <p className="mb-6 max-w-xs text-muted-foreground">
+            <h2 className="mb-2 text-lg font-semibold text-foreground">Noch keine Posts</h2>
+            <p className="mb-6 max-w-xs text-sm text-muted-foreground">
               Sei der Erste, der einen Moment teilt und zeige, wo es gerade abgeht!
             </p>
             <Button onClick={() => navigate('/create')} variant="outline">
