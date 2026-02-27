@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { House, MagnifyingGlass, PlusCircle, CalendarBlank, User, ChatCircle } from '@phosphor-icons/react';
+import { House, MagnifyingGlass, PlusCircle, CalendarBlank, User, ChatCircle, UsersThree } from '@phosphor-icons/react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { PostTypeSelector } from '@/components/create/PostTypeSelector';
@@ -8,6 +8,7 @@ import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 const navItems = [
   { icon: House, label: 'Feed', path: '/', badgeKey: null },
   { icon: MagnifyingGlass, label: 'Discover', path: '/discover', badgeKey: null },
+  { icon: UsersThree, label: 'Roomz', path: '/roomz', badgeKey: null },
   { icon: PlusCircle, label: 'Post', path: '/create', isCenter: true, badgeKey: null },
   { icon: CalendarBlank, label: 'Events', path: '/events', badgeKey: 'events' as const },
   { icon: ChatCircle, label: 'Messages', path: '/messages', badgeKey: 'messages' as const },
@@ -55,7 +56,7 @@ export const BottomNav = () => {
                   key={path}
                   to={path}
                   className={cn(
-                    'relative flex flex-col items-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-300',
+                    'relative flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl transition-all duration-300',
                     isActive && 'bg-white/10'
                   )}
                 >
@@ -63,7 +64,7 @@ export const BottomNav = () => {
                     <Icon
                       weight={isActive ? 'fill' : 'thin'}
                       className={cn(
-                        'h-6 w-6 transition-all duration-300',
+                        'h-5 w-5 transition-all duration-300',
                         isActive ? 'text-white' : 'text-muted-foreground'
                       )}
                     />

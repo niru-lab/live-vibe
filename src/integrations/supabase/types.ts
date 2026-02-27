@@ -899,6 +899,160 @@ export type Database = {
         }
         Relationships: []
       }
+      room_members: {
+        Row: {
+          id: string
+          joined_at: string
+          role: string
+          room_id: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          role?: string
+          room_id: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          role?: string
+          room_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_members_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      room_recurring_events: {
+        Row: {
+          address: string | null
+          created_at: string
+          day_of_month: number | null
+          day_of_week: number | null
+          id: string
+          is_active: boolean
+          location_name: string | null
+          recurrence: string
+          room_id: string
+          time_of_day: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          id?: string
+          is_active?: boolean
+          location_name?: string | null
+          recurrence?: string
+          room_id: string
+          time_of_day?: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          created_at?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          id?: string
+          is_active?: boolean
+          location_name?: string | null
+          recurrence?: string
+          room_id?: string
+          time_of_day?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_recurring_events_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rooms: {
+        Row: {
+          activity: string | null
+          address: string | null
+          category: string
+          city: string | null
+          cover_image_url: string | null
+          created_at: string
+          description: string | null
+          hoster_id: string
+          id: string
+          is_active: boolean
+          latitude: number | null
+          location_name: string | null
+          longitude: number | null
+          name: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          activity?: string | null
+          address?: string | null
+          category?: string
+          city?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          hoster_id: string
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          name: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          activity?: string | null
+          address?: string | null
+          category?: string
+          city?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          description?: string | null
+          hoster_id?: string
+          id?: string
+          is_active?: boolean
+          latitude?: number | null
+          location_name?: string | null
+          longitude?: number | null
+          name?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rooms_hoster_id_fkey"
+            columns: ["hoster_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       timeline_items: {
         Row: {
           created_at: string

@@ -16,6 +16,9 @@ import CreateCarousel from "./pages/CreateCarousel";
 import Profile from "./pages/Profile";
 import EventDetail from "./pages/EventDetail";
 import Messages from "./pages/Messages";
+import Roomz from "./pages/Roomz";
+import CreateRoom from "./pages/CreateRoom";
+import RoomDetail from "./pages/RoomDetail";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +43,9 @@ const App = () => (
                 <Route path="/create/carousel" element={<CreateCarousel />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/messages" element={<Messages />} />
+                <Route path="/roomz" element={<Roomz />} />
+                <Route path="/roomz/create" element={<CreateRoom />} />
+                <Route path="/roomz/:id" element={<RoomDetail />} />
                 {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
