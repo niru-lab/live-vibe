@@ -13,7 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
 import { VenueEventSelector, type SelectedTag } from '@/components/create/VenueEventSelector';
-import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag } from '@phosphor-icons/react';
+import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo } from '@phosphor-icons/react';
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -31,6 +31,7 @@ export default function CreatePost() {
   const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
   const [is24hPost, setIs24hPost] = useState(false);
   const [selectedTag, setSelectedTag] = useState<SelectedTag | null>(null);
+  const [shareToInstagram, setShareToInstagram] = useState(false);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -85,6 +86,27 @@ export default function CreatePost() {
           </div>
           <Switch checked={is24hPost} onCheckedChange={setIs24hPost} />
         </div>
+
+        {/* Instagram Share Toggle */}
+        <div className="flex items-center justify-between rounded-2xl border border-pink-500/30 bg-pink-500/5 p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-pink-500 via-purple-500 to-orange-400">
+              <InstagramLogo weight="fill" className="h-5 w-5 text-white" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-foreground">Auf Instagram teilen</h3>
+              <p className="text-sm text-muted-foreground">Auch als Instagram Story posten</p>
+            </div>
+          </div>
+          <Switch checked={shareToInstagram} onCheckedChange={setShareToInstagram} />
+        </div>
+        {shareToInstagram && (
+          <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/5 p-3">
+            <p className="text-xs text-yellow-200/80">
+              ⚠️ Instagram-Integration wird noch eingerichtet. Dein Post wird vorerst nur auf feyrn veröffentlicht.
+            </p>
+          </div>
+        )}
         <div className="space-y-3">
           <Label>Foto oder Video</Label>
           {previewUrl ? (

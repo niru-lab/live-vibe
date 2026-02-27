@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Heart, ChatCircle, ShareNetwork, MapPin, Clock, MusicNote, SpeakerHigh, SpeakerX, DotsThreeVertical, Trash, Timer } from '@phosphor-icons/react';
+import { Heart, ChatCircle, ShareNetwork, MapPin, Clock, MusicNote, SpeakerHigh, SpeakerX, DotsThreeVertical, Trash, Timer, InstagramLogo } from '@phosphor-icons/react';
 import { formatDistanceToNow, differenceInHours } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -247,9 +247,36 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
               <span>{post.comments_count}</span>
             </Button>
           </div>
-          <Button variant="ghost" size="icon">
-            <ShareNetwork weight="thin" className="h-5 w-5" />
-          </Button>
+          <div className="flex items-center gap-1">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <ShareNetwork weight="thin" className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="gap-2" onClick={() => {
+                  if (navigator.share) {
+                    navigator.share({ title: post.caption || 'feyrn Post', url: window.location.origin });
+                  }
+                }}>
+                  <ShareNetwork weight="thin" className="h-4 w-4" />
+                  Teilen
+                </DropdownMenuItem>
+                <DropdownMenuItem className="gap-2" onClick={() => {
+                  // Instagram Story sharing - placeholder for Graph API integration
+                  const toast = document.createElement('div');
+                  toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] rounded-full bg-pink-500/90 px-4 py-2 text-sm text-white backdrop-blur animate-in fade-in slide-in-from-bottom-4';
+                  toast.textContent = '📸 Instagram-Integration wird eingerichtet...';
+                  document.body.appendChild(toast);
+                  setTimeout(() => toast.remove(), 3000);
+                }}>
+                  <InstagramLogo weight="fill" className="h-4 w-4 text-pink-400" />
+                  In Instagram Story teilen
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         </div>
 
         {/* Caption */}
