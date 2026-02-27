@@ -1,17 +1,17 @@
 import { useState } from 'react';
-import { Home, Search, PlusCircle, Calendar, User, MessageCircle } from 'lucide-react';
+import { House, MagnifyingGlass, PlusCircle, CalendarBlank, User, ChatCircle } from '@phosphor-icons/react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { PostTypeSelector } from '@/components/create/PostTypeSelector';
 import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 
 const navItems = [
-  { icon: Home, label: 'Feed', path: '/', emoji: '🏠', badgeKey: null },
-  { icon: Search, label: 'Discover', path: '/discover', emoji: '🔍', badgeKey: null },
+  { icon: House, label: 'Feed', path: '/', badgeKey: null },
+  { icon: MagnifyingGlass, label: 'Discover', path: '/discover', badgeKey: null },
   { icon: PlusCircle, label: 'Post', path: '/create', isCenter: true, badgeKey: null },
-  { icon: Calendar, label: 'Events', path: '/events', emoji: '🎉', badgeKey: 'events' as const },
-  { icon: MessageCircle, label: 'Messages', path: '/messages', emoji: '💬', badgeKey: 'messages' as const },
-  { icon: User, label: 'Profil', path: '/profile', emoji: '👤', badgeKey: 'profile' as const },
+  { icon: CalendarBlank, label: 'Events', path: '/events', badgeKey: 'events' as const },
+  { icon: ChatCircle, label: 'Messages', path: '/messages', badgeKey: 'messages' as const },
+  { icon: User, label: 'Profil', path: '/profile', badgeKey: 'profile' as const },
 ];
 
 export const BottomNav = () => {
@@ -32,7 +32,7 @@ export const BottomNav = () => {
       <nav className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md">
         <div className="glass rounded-[28px] px-1 py-3 neon-glow-sm">
           <div className="flex items-center justify-around">
-            {navItems.map(({ icon: Icon, label, path, isCenter, emoji, badgeKey }) => {
+            {navItems.map(({ icon: Icon, label, path, isCenter, badgeKey }) => {
               const isActive = location.pathname === path;
               const badgeCount = getBadgeCount(badgeKey);
 
@@ -43,8 +43,8 @@ export const BottomNav = () => {
                     onClick={() => setShowPostSelector(true)}
                     className="relative -mt-8 flex flex-col items-center"
                   >
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-neon shadow-lg neon-glow transition-all duration-300 hover:scale-110 active:scale-95">
-                      <Icon className="h-7 w-7 text-white" />
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full border border-foreground/20 bg-background shadow-lg transition-all duration-300 hover:scale-110 active:scale-95">
+                      <Icon weight="thin" className="h-7 w-7 text-foreground" />
                     </div>
                   </button>
                 );
@@ -60,14 +60,15 @@ export const BottomNav = () => {
                   )}
                 >
                   <div className="relative">
-                    <span className={cn(
-                      "text-xl transition-transform duration-300",
-                      isActive && "scale-110"
-                    )}>
-                      {emoji}
-                    </span>
+                    <Icon
+                      weight={isActive ? 'fill' : 'thin'}
+                      className={cn(
+                        'h-6 w-6 transition-all duration-300',
+                        isActive ? 'text-white' : 'text-muted-foreground'
+                      )}
+                    />
                     {badgeCount > 0 && (
-                      <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white animate-pulse">
+                      <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-[9px] font-bold text-white">
                         {badgeCount > 99 ? '99+' : badgeCount}
                       </span>
                     )}
@@ -75,13 +76,13 @@ export const BottomNav = () => {
                   <span
                     className={cn(
                       'text-[10px] font-medium transition-colors',
-                      isActive ? 'text-primary' : 'text-muted-foreground'
+                      isActive ? 'text-white' : 'text-muted-foreground'
                     )}
                   >
                     {label}
                   </span>
                   {isActive && (
-                    <div className="absolute -bottom-0.5 h-0.5 w-6 rounded-full bg-gradient-neon neon-glow-sm" />
+                    <div className="absolute -bottom-0.5 h-0.5 w-6 rounded-full bg-white" />
                   )}
                 </Link>
               );

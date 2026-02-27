@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Slider } from '@/components/ui/slider';
-import { Filter, Music, Users, Clock, DollarSign, MapPin, Star, X, Building2 } from 'lucide-react';
+import { Funnel, MusicNote, Users, Clock, CurrencyDollar, MapPin, Star, X, Buildings } from '@phosphor-icons/react';
 
 interface DiscoverFiltersProps {
   onFiltersChange?: (filters: FilterState) => void;
@@ -74,7 +73,7 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
   }) => (
     <div className="space-y-3">
       <div className="flex items-center gap-2 text-sm font-semibold">
-        <Icon className="h-4 w-4 text-primary" />
+        <Icon weight="thin" className="h-4 w-4" />
         {label}
       </div>
       <div className="flex flex-wrap gap-2">
@@ -100,10 +99,10 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
           size="sm" 
           className="relative gap-2 bg-muted/50"
         >
-          <Filter className="h-4 w-4" />
+          <Funnel weight="thin" className="h-4 w-4" />
           Filter
           {activeFiltersCount > 0 && (
-            <Badge className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 text-[10px] animate-pulse">
+            <Badge className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 text-[10px]">
               {activeFiltersCount}
             </Badge>
           )}
@@ -115,7 +114,7 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
             <SheetTitle className="text-xl font-bold">🎛️ Filter</SheetTitle>
             {activeFiltersCount > 0 && (
               <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground">
-                <X className="mr-1 h-4 w-4" />
+                <X weight="thin" className="mr-1 h-4 w-4" />
                 Zurücksetzen
               </Button>
             )}
@@ -126,18 +125,18 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
         </SheetHeader>
 
         <div className="space-y-6 overflow-y-auto pb-24 pr-2">
-          <FilterSection icon={Building2} label="🏙️ Stadt" options={cityOptions} filterKey="city" />
-          <FilterSection icon={Music} label="🎵 Musik" options={musicOptions} filterKey="music" />
+          <FilterSection icon={Buildings} label="🏙️ Stadt" options={cityOptions} filterKey="city" />
+          <FilterSection icon={MusicNote} label="🎵 Musik" options={musicOptions} filterKey="music" />
           <FilterSection icon={Users} label="👥 Vibes" options={vibesOptions} filterKey="vibes" />
           <FilterSection icon={Clock} label="⏰ Zeit" options={timeOptions} filterKey="time" />
-          <FilterSection icon={DollarSign} label="💰 Preis" options={priceOptions} filterKey="price" />
+          <FilterSection icon={CurrencyDollar} label="💰 Preis" options={priceOptions} filterKey="price" />
           <FilterSection icon={MapPin} label="📍 Radius" options={radiusOptions} filterKey="radius" />
           <FilterSection icon={Star} label="⭐ Social Cloud" options={socialCloudOptions} filterKey="socialCloud" />
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur-xl p-4 safe-area-pb">
           <Button 
-            className="w-full bg-gradient-to-r from-primary to-accent text-lg font-semibold h-12"
+            className="w-full text-lg font-semibold h-12"
             onClick={() => setOpen(false)}
           >
             {activeFiltersCount > 0 

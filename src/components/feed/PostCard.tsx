@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Heart, MessageCircle, Share2, MapPin, Clock, Music, Volume2, VolumeX, MoreVertical, Trash2, Timer } from 'lucide-react';
+import { Heart, ChatCircle, ShareNetwork, MapPin, Clock, MusicNote, SpeakerHigh, SpeakerX, DotsThreeVertical, Trash, Timer } from '@phosphor-icons/react';
 import { formatDistanceToNow, differenceInHours } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -51,7 +51,6 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
 
   const isOwnPost = currentProfile?.id === post.author_id;
   
-  // Calculate remaining time for 24h posts
   const getTimeRemaining = () => {
     if (!post.expires_at) return null;
     const expiresAt = new Date(post.expires_at);
@@ -64,7 +63,6 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
 
   const timeRemaining = getTimeRemaining();
 
-  // Auto-play music when post is in view (TikTok-style)
   useEffect(() => {
     if (!post.music_url) return;
 
@@ -119,15 +117,8 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
   return (
     <>
       <article ref={cardRef} className="animate-fade-in overflow-hidden rounded-2xl border border-border/50 bg-card">
-        {/* Hidden audio element for music */}
         {post.music_url && (
-          <audio
-            ref={audioRef}
-            src={post.music_url}
-            loop
-            muted={isMuted}
-            preload="metadata"
-          />
+          <audio ref={audioRef} src={post.music_url} loop muted={isMuted} preload="metadata" />
         )}
 
         {/* Header */}
@@ -147,41 +138,36 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
                 <BadgeDisplay points={author.social_cloud_points} size="sm" />
               )}
               {author?.is_verified && (
-                <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-                  ✓
-                </Badge>
+                <Badge variant="secondary" className="h-5 px-1.5 text-xs">✓</Badge>
               )}
               {post.is_moment_x && (
-                <Badge className="h-5 bg-gradient-to-r from-primary to-accent px-2 text-xs">
-                  Moment-X
-                </Badge>
+                <Badge className="h-5 bg-gradient-to-r from-primary to-accent px-2 text-xs">Moment-X</Badge>
               )}
               {post.expires_at && (
                 <Badge variant="outline" className="h-5 gap-1 border-accent/50 px-2 text-xs text-accent">
-                  <Timer className="h-3 w-3" />
+                  <Timer weight="thin" className="h-3 w-3" />
                   {timeRemaining}
                 </Badge>
               )}
             </div>
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Clock className="h-3 w-3" />
+              <Clock weight="thin" className="h-3 w-3" />
               <span>{timeAgo}</span>
               {post.location_name && (
                 <>
                   <span>•</span>
-                  <MapPin className="h-3 w-3" />
+                  <MapPin weight="thin" className="h-3 w-3" />
                   <span>{post.location_name}</span>
                 </>
               )}
             </div>
           </div>
           
-          {/* More options menu */}
           {isOwnPost && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="h-4 w-4" />
+                  <DotsThreeVertical weight="thin" className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
@@ -189,7 +175,7 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
                   className="text-destructive focus:text-destructive"
                   onClick={() => setShowDeleteDialog(true)}
                 >
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash weight="thin" className="mr-2 h-4 w-4" />
                   Löschen
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -200,60 +186,37 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
         {/* Media */}
         <div className="relative aspect-square bg-muted">
           {post.media_type === 'video' ? (
-            <video
-              src={post.media_url}
-              className="h-full w-full object-cover"
-              controls
-              playsInline
-            />
+            <video src={post.media_url} className="h-full w-full object-cover" controls playsInline />
           ) : (
-            <img
-              src={post.media_url}
-              alt={post.caption || 'Post image'}
-              className="h-full w-full object-cover"
-              loading="lazy"
-            />
+            <img src={post.media_url} alt={post.caption || 'Post image'} className="h-full w-full object-cover" loading="lazy" />
           )}
           
-          {/* Music overlay */}
           {post.music_url && post.music_title && (
             <div className="absolute bottom-3 right-3 flex items-center gap-2">
               <div className="flex items-center gap-2 rounded-full bg-background/80 px-3 py-1.5 backdrop-blur">
-                <Music className={cn("h-4 w-4 text-primary", isPlaying && "animate-pulse")} />
+                <MusicNote weight={isPlaying ? "fill" : "thin"} className={cn("h-4 w-4 text-primary", isPlaying && "animate-pulse")} />
                 <div className="max-w-[120px] overflow-hidden">
-                  <p className="truncate text-xs font-medium text-foreground">
-                    {post.music_title}
-                  </p>
+                  <p className="truncate text-xs font-medium text-foreground">{post.music_title}</p>
                   {post.music_artist && (
-                    <p className="truncate text-xs text-muted-foreground">
-                      {post.music_artist}
-                    </p>
+                    <p className="truncate text-xs text-muted-foreground">{post.music_artist}</p>
                   )}
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-6 w-6"
-                  onClick={toggleMute}
-                >
+                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={toggleMute}>
                   {isMuted ? (
-                    <VolumeX className="h-3 w-3" />
+                    <SpeakerX weight="thin" className="h-3 w-3" />
                   ) : (
-                    <Volume2 className="h-3 w-3" />
+                    <SpeakerHigh weight="thin" className="h-3 w-3" />
                   )}
                 </Button>
               </div>
             </div>
           )}
 
-          {/* Event badge overlay */}
           {post.event && (
             <div className="absolute bottom-3 left-3 right-3">
               <div className="flex items-center gap-2 rounded-lg bg-background/90 px-3 py-2 backdrop-blur">
                 <div className="h-2 w-2 animate-pulse rounded-full bg-accent" />
-                <span className="text-sm font-medium text-foreground">
-                  {post.event.name}
-                </span>
+                <span className="text-sm font-medium text-foreground">{post.event.name}</span>
               </div>
             </div>
           )}
@@ -269,22 +232,23 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
               onClick={() => onLike(post.id, isLiked)}
             >
               <Heart
+                weight={isLiked ? 'fill' : 'thin'}
                 className={cn(
-                  'h-5 w-5 transition-all',
-                  isLiked && 'fill-accent text-accent scale-110'
+                  'h-5 w-5 transition-all duration-200',
+                  isLiked ? 'text-red-400 scale-110' : 'text-foreground'
                 )}
               />
-              <span className={cn(isLiked && 'text-accent')}>
+              <span className={cn(isLiked && 'text-red-400')}>
                 {post.likes_count}
               </span>
             </Button>
             <Button variant="ghost" size="sm" className="gap-1.5">
-              <MessageCircle className="h-5 w-5" />
+              <ChatCircle weight="thin" className="h-5 w-5" />
               <span>{post.comments_count}</span>
             </Button>
           </div>
           <Button variant="ghost" size="icon">
-            <Share2 className="h-5 w-5" />
+            <ShareNetwork weight="thin" className="h-5 w-5" />
           </Button>
         </div>
 
@@ -299,7 +263,6 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
         )}
       </article>
 
-      {/* Delete confirmation dialog */}
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>

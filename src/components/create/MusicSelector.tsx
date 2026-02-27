@@ -1,14 +1,8 @@
 import { useState } from 'react';
-import { Music, Play, Pause, Check, Search, X } from 'lucide-react';
+import { MusicNote, Play, Pause, Check, MagnifyingGlass, X } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 export interface MusicTrack {
@@ -142,8 +136,8 @@ export function MusicSelector({ selectedTrack, onSelect }: MusicSelectorProps) {
       {selectedTrack ? (
         <div className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent">
-              <Music className="h-6 w-6 text-primary-foreground" />
+            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
+              <MusicNote weight="thin" className="h-6 w-6 text-foreground" />
             </div>
             <div>
               <p className="font-semibold text-foreground">{selectedTrack.title}</p>
@@ -157,13 +151,13 @@ export function MusicSelector({ selectedTrack, onSelect }: MusicSelectorProps) {
               onClick={() => handlePlayPreview(selectedTrack)}
             >
               {playingTrackId === selectedTrack.id ? (
-                <Pause className="h-4 w-4" />
+                <Pause weight="thin" className="h-4 w-4" />
               ) : (
-                <Play className="h-4 w-4" />
+                <Play weight="thin" className="h-4 w-4" />
               )}
             </Button>
             <Button variant="ghost" size="icon" onClick={handleRemoveTrack}>
-              <X className="h-4 w-4" />
+              <X weight="thin" className="h-4 w-4" />
             </Button>
           </div>
         </div>
@@ -172,7 +166,7 @@ export function MusicSelector({ selectedTrack, onSelect }: MusicSelectorProps) {
           <SheetTrigger asChild>
             <button className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-border/50 bg-muted/50 p-4 transition-colors hover:border-primary/50 hover:bg-muted">
               <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-muted">
-                <Music className="h-6 w-6 text-muted-foreground" />
+                <MusicNote weight="thin" className="h-6 w-6 text-muted-foreground" />
               </div>
               <div className="text-left">
                 <p className="font-medium text-foreground">Musik hinzufügen</p>
@@ -185,13 +179,13 @@ export function MusicSelector({ selectedTrack, onSelect }: MusicSelectorProps) {
           <SheetContent side="bottom" className="h-[80vh] rounded-t-3xl">
             <SheetHeader className="pb-4">
               <SheetTitle className="flex items-center gap-2">
-                <Music className="h-5 w-5 text-primary" />
+                <MusicNote weight="thin" className="h-5 w-5" />
                 Musik auswählen
               </SheetTitle>
             </SheetHeader>
 
             <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <MagnifyingGlass weight="thin" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 placeholder="Suche nach Songs, Artists oder Genre..."
                 value={searchQuery}
@@ -219,9 +213,9 @@ export function MusicSelector({ selectedTrack, onSelect }: MusicSelectorProps) {
                         onClick={() => handlePlayPreview(track)}
                       >
                         {playingTrackId === track.id ? (
-                          <Pause className="h-4 w-4 text-primary" />
+                          <Pause weight="thin" className="h-4 w-4 text-primary" />
                         ) : (
-                          <Play className="h-4 w-4 text-primary" />
+                          <Play weight="thin" className="h-4 w-4 text-primary" />
                         )}
                       </Button>
                       <div>
@@ -242,7 +236,7 @@ export function MusicSelector({ selectedTrack, onSelect }: MusicSelectorProps) {
                       }
                     >
                       {selectedTrack?.id === track.id ? (
-                        <Check className="h-4 w-4" />
+                        <Check weight="thin" className="h-4 w-4" />
                       ) : (
                         'Auswählen'
                       )}

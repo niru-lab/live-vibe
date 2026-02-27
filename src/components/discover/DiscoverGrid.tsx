@@ -7,7 +7,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Heart, MessageCircle, Users, Calendar, Play, MapPin, Music, CheckCircle2 } from 'lucide-react';
+import { Heart, ChatCircle, Users, CalendarBlank, Play, MapPin, MusicNote, CheckCircle } from '@phosphor-icons/react';
 import type { FilterState } from './DiscoverFilters';
 
 interface DiscoverGridProps {
@@ -29,15 +29,7 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
     if (!searchQuery && !filters) return true;
     
     const query = searchQuery?.toLowerCase() || '';
-    const matchesSearch = !searchQuery || (
-      post.caption?.toLowerCase().includes(query) ||
-      post.location_name?.toLowerCase().includes(query) ||
-      post.author?.username?.toLowerCase().includes(query) ||
-      post.author?.display_name?.toLowerCase().includes(query) ||
-      post.city?.toLowerCase().includes(query)
-    );
-
-    return matchesSearch;
+    return !searchQuery || (post.caption?.toLowerCase().includes(query) || post.location_name?.toLowerCase().includes(query) || post.author?.username?.toLowerCase().includes(query) || post.author?.display_name?.toLowerCase().includes(query) || post.city?.toLowerCase().includes(query));
   }) || [];
 
   // Filter events
@@ -96,8 +88,7 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
   // Priority calculation functions
   function calculatePostPriority(post: any): number {
     let priority = 0;
-    const now = new Date();
-    const postAge = (now.getTime() - new Date(post.created_at).getTime()) / (1000 * 60);
+    const postAge = (Date.now() - new Date(post.created_at).getTime()) / (1000 * 60);
     
     // 1. Live posts (last 30min) → Top priority
     if (postAge < 30) priority += 100;
@@ -127,9 +118,7 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
     if (event.is_free) priority += 10;
     
     // Upcoming events today
-    const eventDate = new Date(event.starts_at);
-    const now = new Date();
-    if (eventDate.toDateString() === now.toDateString()) priority += 60;
+    if (new Date(event.starts_at).toDateString() === new Date().toDateString()) priority += 60;
     
     return priority;
   }
@@ -148,7 +137,7 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-          <Users className="h-10 w-10 text-muted-foreground" />
+          <Users weight="thin" className="h-10 w-10 text-muted-foreground" />
         </div>
         <h2 className="mb-2 text-xl font-semibold">Kein Content gefunden</h2>
         <p className="max-w-xs text-muted-foreground">
@@ -261,7 +250,7 @@ function PostGridItem({ post, isHovered, onProfileClick }: PostGridItemProps) {
               {...(isHovered ? { autoPlay: true } : {})}
             />
             <div className="absolute right-2 top-2">
-              <Play className="h-4 w-4 fill-white text-white drop-shadow-lg" />
+              <Play weight="fill" className="h-4 w-4 text-white drop-shadow-lg" />
             </div>
           </div>
         ) : (
@@ -286,7 +275,7 @@ function PostGridItem({ post, isHovered, onProfileClick }: PostGridItemProps) {
           </div>
         ) : (post.likes_count || 0) > 0 ? (
           <div className="flex items-center gap-0.5 rounded-full bg-black/70 px-1.5 py-0.5 backdrop-blur-sm">
-            <Heart className="h-2.5 w-2.5 fill-red-500 text-red-500" />
+            <Heart weight="fill" className="h-2.5 w-2.5 text-red-500" />
             <span className="text-[9px] font-semibold text-white">{post.likes_count}</span>
           </div>
         ) : null}
@@ -296,7 +285,7 @@ function PostGridItem({ post, isHovered, onProfileClick }: PostGridItemProps) {
       {post.location_name && (
         <div className="absolute left-1 top-1">
           <div className="flex items-center gap-0.5 rounded-full bg-black/70 px-1.5 py-0.5 backdrop-blur-sm">
-            <MapPin className="h-2.5 w-2.5 text-primary" />
+            <MapPin weight="thin" className="h-2.5 w-2.5 text-primary" />
             <span className="max-w-[60px] truncate text-[9px] font-medium text-white">
               {post.location_name}
             </span>
@@ -328,7 +317,7 @@ function PostGridItem({ post, isHovered, onProfileClick }: PostGridItemProps) {
       {post.music_title && (
         <div className="absolute bottom-1 right-1">
           <div className={`flex items-center gap-1 rounded-full bg-black/70 px-1.5 py-0.5 backdrop-blur-sm ${isHovered ? 'animate-pulse' : ''}`}>
-            <Music className="h-3 w-3 text-green-400" />
+            <MusicNote weight="thin" className="h-3 w-3 text-green-400" />
             <span className="max-w-[50px] truncate text-[8px] text-white">
               {post.music_title}
             </span>
@@ -340,11 +329,11 @@ function PostGridItem({ post, isHovered, onProfileClick }: PostGridItemProps) {
       <div className={`absolute inset-0 flex flex-col items-center justify-center bg-black/60 transition-opacity duration-200 ${isHovered ? 'opacity-100' : 'opacity-0'}`}>
         <div className="flex items-center gap-4 text-white">
           <div className="flex flex-col items-center">
-            <Heart className="h-6 w-6" />
+            <Heart weight="thin" className="h-6 w-6" />
             <span className="text-xs font-semibold">{post.likes_count || 0}</span>
           </div>
           <div className="flex flex-col items-center">
-            <MessageCircle className="h-6 w-6" />
+            <ChatCircle weight="thin" className="h-6 w-6" />
             <span className="text-xs font-semibold">{post.comments_count || 0}</span>
           </div>
         </div>
@@ -381,7 +370,7 @@ function EventGridItem({ event, isHovered, onProfileClick }: EventGridItemProps)
       {/* Event Type Badge */}
       <div className="absolute left-1 top-1">
         <Badge variant="secondary" className="bg-primary/90 text-[8px] text-primary-foreground backdrop-blur-sm px-1.5 py-0.5 gap-0.5">
-          <Calendar className="h-2.5 w-2.5" />
+          <CalendarBlank weight="thin" className="h-2.5 w-2.5" />
           EVENT
         </Badge>
       </div>
@@ -389,7 +378,7 @@ function EventGridItem({ event, isHovered, onProfileClick }: EventGridItemProps)
       {/* Attendee Count with Hot Indicator */}
       <div className="absolute right-1 top-1">
         <div className={`flex items-center gap-0.5 rounded-full px-1.5 py-0.5 backdrop-blur-sm ${isHot ? 'bg-green-500' : 'bg-black/70'}`}>
-          <CheckCircle2 className="h-2.5 w-2.5 text-white" />
+          <CheckCircle weight="thin" className="h-2.5 w-2.5 text-white" />
           <span className="text-[9px] font-bold text-white">
             {attendeeCount}✓
           </span>
@@ -400,7 +389,7 @@ function EventGridItem({ event, isHovered, onProfileClick }: EventGridItemProps)
       {/* Location Overlay */}
       <div className="absolute bottom-8 left-1 right-1">
         <div className="flex items-center gap-0.5 rounded-full bg-black/70 px-1.5 py-0.5 backdrop-blur-sm w-fit max-w-full">
-          <MapPin className="h-2.5 w-2.5 flex-shrink-0 text-primary" />
+          <MapPin weight="thin" className="h-2.5 w-2.5 flex-shrink-0 text-primary" />
           <span className="truncate text-[9px] font-medium text-white">
             {event.location_name}
           </span>
@@ -447,7 +436,7 @@ function EventGridItem({ event, isHovered, onProfileClick }: EventGridItemProps)
           {event.name}
         </span>
         <div className="mt-2 flex items-center gap-2 text-xs text-white/80">
-          <Users className="h-3 w-3" />
+          <Users weight="thin" className="h-3 w-3" />
           <span>{attendeeCount} zugesagt</span>
         </div>
         <Badge className="mt-2 bg-primary text-[10px]">
