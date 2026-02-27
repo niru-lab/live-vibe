@@ -53,16 +53,16 @@ export const ProfileHeader = ({ profile, isLoading, followersCount, followingCou
               </button>
             )}
             {isLoading ? <Skeleton className="mt-4 h-6 w-40" /> : (
-              <div className="mt-4"><span className="text-lg text-muted-foreground">@{profile?.username}</span></div>
+              <div className="mt-4"><span className="text-sm text-muted-foreground">@{profile?.username}</span></div>
             )}
             {!isLoading && badgeData && (
               <button onClick={() => setAchievementsOpen(true)} className="mt-2 flex items-center gap-2">
-                <span className="text-2xl">{badgeData.emoji}</span>
-                <span className={cn('text-xl font-bold gradient-text')}>{badgeData.name}</span>
+                <span className="text-xl">{badgeData.emoji}</span>
+                <span className={cn('text-lg font-bold gradient-text')}>{badgeData.name}</span>
                 <span className="text-muted-foreground">•</span>
                 <div className="flex items-center gap-1">
                   <Cloud weight="thin" className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-semibold text-foreground">{formatNumber(profile?.social_cloud_points || 0)} SC</span>
+                  <span className="font-semibold text-sm text-foreground">{formatNumber(profile?.social_cloud_points || 0)} SC</span>
                 </div>
               </button>
             )}

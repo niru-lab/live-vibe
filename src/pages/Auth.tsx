@@ -90,8 +90,8 @@ export default function Auth() {
         <div className="mb-4 flex items-center justify-center gap-2">
           <Lightning weight="thin" className="h-12 w-12 text-foreground" />
         </div>
-        <h1 className="font-display text-4xl font-bold tracking-tight text-foreground">Feyrn</h1>
-        <p className="mt-2 text-muted-foreground">Entdecke, was gerade abgeht</p>
+        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">Feyrn</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Entdecke, was gerade abgeht</p>
       </div>
 
       <Card className="relative z-10 w-full max-w-md border-border/50 bg-card/80 backdrop-blur-xl">

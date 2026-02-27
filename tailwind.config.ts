@@ -17,6 +17,14 @@ export default {
         sans: ["Outfit", "sans-serif"],
         display: ["Space Grotesk", "sans-serif"],
       },
+      fontSize: {
+        "xs": ["var(--text-xs)", { lineHeight: "var(--leading-normal)", letterSpacing: "var(--tracking-wide)" }],
+        "sm": ["var(--text-sm)", { lineHeight: "var(--leading-normal)", letterSpacing: "var(--tracking-normal)" }],
+        "base": ["var(--text-base)", { lineHeight: "var(--leading-normal)", letterSpacing: "var(--tracking-normal)" }],
+        "lg": ["var(--text-lg)", { lineHeight: "var(--leading-tight)", letterSpacing: "var(--tracking-tight)" }],
+        "xl": ["var(--text-xl)", { lineHeight: "var(--leading-tight)", letterSpacing: "var(--tracking-tight)" }],
+        "2xl": ["var(--text-2xl)", { lineHeight: "var(--leading-tight)", letterSpacing: "var(--tracking-tight)" }],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
