@@ -6,7 +6,7 @@ import { useFollowStats, usePostsCount } from '@/hooks/useFollowStats';
 import { Button } from '@/components/ui/button';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfilePostsGrid } from '@/components/profile/ProfilePostsGrid';
-import { Users } from 'lucide-react';
+import { Users } from '@phosphor-icons/react';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -19,21 +19,12 @@ export default function Profile() {
     return (
       <AppLayout>
         <div className="min-h-screen flex flex-col items-center justify-center px-4 py-20 text-center bg-gradient-hero">
-          <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full glass neon-glow">
-            <Users className="h-12 w-12 text-primary" />
+          <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full glass">
+            <Users weight="thin" className="h-12 w-12 text-muted-foreground" />
           </div>
-          <h2 className="mb-3 text-2xl font-bold gradient-text">
-            Nicht angemeldet
-          </h2>
-          <p className="mb-8 max-w-xs text-muted-foreground">
-            Melde dich an, um dein Profil zu sehen und Events zu erstellen.
-          </p>
-          <Button
-            onClick={() => navigate('/auth')}
-            className="bg-gradient-neon hover:opacity-90 text-white font-semibold px-8 py-6 rounded-2xl neon-glow"
-          >
-            Anmelden
-          </Button>
+          <h2 className="mb-3 text-2xl font-bold">Nicht angemeldet</h2>
+          <p className="mb-8 max-w-xs text-muted-foreground">Melde dich an, um dein Profil zu sehen und Events zu erstellen.</p>
+          <Button onClick={() => navigate('/auth')} variant="outline" className="px-8 py-6 rounded-2xl">Anmelden</Button>
         </div>
       </AppLayout>
     );
@@ -43,26 +34,11 @@ export default function Profile() {
 
   return (
     <AppLayout>
-      {/* Gradient Background */}
       <div className="fixed inset-0 bg-gradient-hero -z-10" />
-      
       <div className="min-h-screen">
-        {/* Minimal Header */}
-        <header className="flex items-center justify-center py-4">
-          <span className="text-2xl">👤</span>
-        </header>
-
+        <header className="flex items-center justify-center py-4"><span className="text-2xl">👤</span></header>
         <div className="px-4 pb-24">
-          {/* Profile Header with Stats */}
-          <ProfileHeader
-            profile={profile || null}
-            isLoading={isLoading}
-            followersCount={followStats?.followers || 0}
-            followingCount={followStats?.following || 0}
-            postsCount={postsCount || 0}
-          />
-
-          {/* Posts Grid */}
+          <ProfileHeader profile={profile || null} isLoading={isLoading} followersCount={followStats?.followers || 0} followingCount={followStats?.following || 0} postsCount={postsCount || 0} />
           <ProfilePostsGrid profileId={profile?.id} />
         </div>
       </div>

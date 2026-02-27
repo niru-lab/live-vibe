@@ -8,7 +8,7 @@ import { PostCard } from '@/components/feed/PostCard';
 import { FeedHeader } from '@/components/feed/FeedHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Zap, PartyPopper } from 'lucide-react';
+import { Lightning, Confetti } from '@phosphor-icons/react';
 
 export default function Feed() {
   const { user, loading: authLoading } = useAuth();
@@ -33,9 +33,7 @@ export default function Feed() {
   if (authLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-background">
-        <div className="animate-pulse-glow">
-          <Zap className="h-12 w-12 text-primary" />
-        </div>
+        <Lightning weight="thin" className="h-12 w-12 text-foreground animate-pulse" />
       </div>
     );
   }
@@ -72,18 +70,13 @@ export default function Feed() {
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
-              <PartyPopper className="h-10 w-10 text-muted-foreground" />
+              <Confetti weight="thin" className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h2 className="mb-2 text-xl font-semibold text-foreground">
-              Noch keine Posts
-            </h2>
+            <h2 className="mb-2 text-xl font-semibold text-foreground">Noch keine Posts</h2>
             <p className="mb-6 max-w-xs text-muted-foreground">
               Sei der Erste, der einen Moment teilt und zeige, wo es gerade abgeht!
             </p>
-            <Button 
-              onClick={() => navigate('/create')}
-              className="bg-gradient-to-r from-primary to-accent"
-            >
+            <Button onClick={() => navigate('/create')} variant="outline">
               Ersten Post erstellen
             </Button>
           </div>
