@@ -858,6 +858,8 @@ export type Database = {
           id: string
           is_verified: boolean
           profile_type: Database["public"]["Enums"]["profile_type"]
+          show_badge_in_bio: boolean
+          show_sc_in_bio: boolean
           social_cloud_points: number
           updated_at: string
           user_id: string
@@ -872,6 +874,8 @@ export type Database = {
           id?: string
           is_verified?: boolean
           profile_type?: Database["public"]["Enums"]["profile_type"]
+          show_badge_in_bio?: boolean
+          show_sc_in_bio?: boolean
           social_cloud_points?: number
           updated_at?: string
           user_id: string
@@ -886,6 +890,8 @@ export type Database = {
           id?: string
           is_verified?: boolean
           profile_type?: Database["public"]["Enums"]["profile_type"]
+          show_badge_in_bio?: boolean
+          show_sc_in_bio?: boolean
           social_cloud_points?: number
           updated_at?: string
           user_id?: string

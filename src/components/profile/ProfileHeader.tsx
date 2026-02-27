@@ -55,15 +55,23 @@ export const ProfileHeader = ({ profile, isLoading, followersCount, followingCou
             {isLoading ? <Skeleton className="mt-4 h-6 w-40" /> : (
               <div className="mt-4"><span className="text-sm text-muted-foreground">@{profile?.username}</span></div>
             )}
-            {!isLoading && badgeData && (
-              <button onClick={() => setAchievementsOpen(true)} className="mt-2 flex items-center gap-2">
-                <span className="text-xl">{badgeData.emoji}</span>
-                <span className={cn('text-lg font-bold gradient-text')}>{badgeData.name}</span>
-                <span className="text-muted-foreground">•</span>
-                <div className="flex items-center gap-1">
-                  <Cloud weight="thin" className="h-4 w-4 text-muted-foreground" />
-                  <span className="font-semibold text-sm text-foreground">{formatNumber(profile?.social_cloud_points || 0)} SC</span>
-                </div>
+            {!isLoading && badgeData && ((profile as any)?.show_badge_in_bio || (profile as any)?.show_sc_in_bio) && (
+              <button onClick={() => setAchievementsOpen(true)} className="mt-2 flex items-center gap-1.5">
+                {(profile as any)?.show_badge_in_bio && (
+                  <>
+                    <span className="text-sm">{badgeData.emoji}</span>
+                    <span className={cn('text-xs font-semibold gradient-text')}>{badgeData.name}</span>
+                  </>
+                )}
+                {(profile as any)?.show_badge_in_bio && (profile as any)?.show_sc_in_bio && (
+                  <span className="text-muted-foreground text-xs">•</span>
+                )}
+                {(profile as any)?.show_sc_in_bio && (
+                  <div className="flex items-center gap-0.5">
+                    <Cloud weight="thin" className="h-3 w-3 text-muted-foreground" />
+                    <span className="font-medium text-xs text-foreground">{formatNumber(profile?.social_cloud_points || 0)} SC</span>
+                  </div>
+                )}
               </button>
             )}
             {!isLoading && profile?.bio && <p className="mt-3 text-sm gradient-text font-medium max-w-xs">{profile.bio}</p>}
