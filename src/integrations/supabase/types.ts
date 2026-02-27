@@ -1205,8 +1205,13 @@ export type Database = {
         Returns: boolean
       }
       delete_expired_posts: { Args: never; Returns: undefined }
+      get_user_room_ids: { Args: { _profile_id: string }; Returns: string[] }
       is_blocked: {
         Args: { checker_id: string; target_id: string }
+        Returns: boolean
+      }
+      is_room_member: {
+        Args: { _room_id: string; _user_id: string }
         Returns: boolean
       }
     }
