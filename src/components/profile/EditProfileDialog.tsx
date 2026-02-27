@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Camera, Check, X, SpinnerGap } from '@phosphor-icons/react';
 import { useUpdateProfile } from '@/hooks/useProfile';
@@ -25,12 +26,16 @@ export const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDi
   const [isUploading, setIsUploading] = useState(false);
   const [usernameAvailable, setUsernameAvailable] = useState<boolean | null>(null);
   const [checkingUsername, setCheckingUsername] = useState(false);
+  const [showBadgeInBio, setShowBadgeInBio] = useState((profile as any)?.show_badge_in_bio ?? false);
+  const [showScInBio, setShowScInBio] = useState((profile as any)?.show_sc_in_bio ?? false);
 
   const handleOpenChange = (isOpen: boolean) => {
     if (isOpen && profile) {
       setUsername(profile.username || ''); setDisplayName(profile.display_name || '');
       setBio(profile.bio || ''); setCity(profile.city || '');
       setAvatarUrl(profile.avatar_url || ''); setAvatarFile(null); setUsernameAvailable(null);
+      setShowBadgeInBio((profile as any)?.show_badge_in_bio ?? false);
+      setShowScInBio((profile as any)?.show_sc_in_bio ?? false);
     }
     onOpenChange(isOpen);
   };
@@ -68,7 +73,8 @@ export const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDi
       await updateProfile.mutateAsync({
         username: username !== profile?.username ? username : undefined,
         display_name: displayName, bio: bio || null, city: city || null, avatar_url: finalAvatarUrl,
-      });
+        show_badge_in_bio: showBadgeInBio, show_sc_in_bio: showScInBio,
+      } as any);
       toast.success('Profil aktualisiert!'); onOpenChange(false);
     } catch (error: any) { toast.error(error.message || 'Fehler beim Speichern'); }
     finally { setIsUploading(false); }
@@ -113,6 +119,17 @@ export const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDi
             <Textarea id="bio" value={bio} onChange={(e) => setBio(e.target.value.slice(0, 150))} placeholder="Erzähl etwas über dich..." rows={3} maxLength={150} />
           </div>
           <div className="space-y-2"><Label htmlFor="city">Stadt</Label><Input id="city" value={city} onChange={(e) => setCity(e.target.value)} placeholder="z.B. Stuttgart" maxLength={50} /></div>
+          <div className="space-y-3 rounded-xl bg-muted/50 p-4">
+            <p className="text-sm font-medium">Bio-Anzeige</p>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="show-badge" className="text-sm text-muted-foreground">Rang in Bio anzeigen</Label>
+              <Switch id="show-badge" checked={showBadgeInBio} onCheckedChange={setShowBadgeInBio} />
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="show-sc" className="text-sm text-muted-foreground">SC-Punkte in Bio anzeigen</Label>
+              <Switch id="show-sc" checked={showScInBio} onCheckedChange={setShowScInBio} />
+            </div>
+          </div>
         </div>
         <DialogFooter className="gap-2 sm:gap-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
