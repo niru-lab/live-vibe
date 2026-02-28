@@ -281,14 +281,22 @@
   }
 
   .mapboxgl-popup-close-button {
-    color: hsl(0 0% 60%) !important;
-    font-size: 18px !important;
-    right: 4px !important;
-    top: 4px !important;
+    color: hsl(0 0% 80%) !important;
+    font-size: 22px !important;
+    font-weight: bold !important;
+    right: 6px !important;
+    top: 2px !important;
+    width: 24px !important;
+    height: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
   }
 
   .mapboxgl-popup-close-button:hover {
     color: white !important;
-    background: transparent !important;
+    background: hsl(0 0% 20%) !important;
+    border-radius: 50% !important;
   }
 }

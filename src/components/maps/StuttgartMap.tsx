@@ -328,7 +328,8 @@ export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
             latitude={popupInfo.type === 'venue' ? popupInfo.data.latitude : popupInfo.data.coords[0]}
             longitude={popupInfo.type === 'venue' ? popupInfo.data.longitude : popupInfo.data.coords[1]}
             onClose={() => setPopupInfo(null)}
-            closeOnClick={false}
+            closeOnClick={true}
+            closeButton={true}
             maxWidth="280px"
             className="feyrn-popup"
           >
@@ -349,8 +350,8 @@ export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
                       </span>
                     )}
                   </div>
-                  <h3 className="font-bold mb-1 text-sm">{popupInfo.data.name}</h3>
-                  <p className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                  <h3 className="font-bold mb-1 text-sm text-white">{popupInfo.data.name}</h3>
+                  <p className="text-xs text-neutral-400 mb-2 flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     {popupInfo.data.address}
                   </p>
@@ -386,17 +387,17 @@ export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
                   >
                     🎉 Event
                   </span>
-                  <h3 className="font-bold mb-1 text-sm">{popupInfo.data.name}</h3>
-                  <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                  <h3 className="font-bold mb-1 text-sm text-white">{popupInfo.data.name}</h3>
+                  <p className="text-xs text-neutral-400 mb-1 flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     {popupInfo.data.address}, {popupInfo.data.city}
                   </p>
-                  <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                  <p className="text-xs text-neutral-400 mb-1 flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     {format(new Date(popupInfo.data.starts_at), 'dd. MMM, HH:mm', { locale: de })} Uhr
                   </p>
                   {popupInfo.data.expected_attendees && (
-                    <p className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                    <p className="text-xs text-neutral-400 mb-2 flex items-center gap-1">
                       <Users className="h-3 w-3" />
                       ~{popupInfo.data.expected_attendees} erwartet
                     </p>
