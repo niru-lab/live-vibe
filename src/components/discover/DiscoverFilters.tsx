@@ -124,7 +124,7 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
           </p>
         </SheetHeader>
 
-        <div className="space-y-6 overflow-y-auto pb-24 pr-2">
+        <div className="space-y-6 overflow-y-auto pb-24 pr-2 max-h-[calc(80vh-180px)] touch-pan-y overscroll-contain">
           <FilterSection icon={Buildings} label="🏙️ Stadt" options={cityOptions} filterKey="city" />
           <FilterSection icon={MusicNote} label="🎵 Musik" options={musicOptions} filterKey="music" />
           <FilterSection icon={Users} label="👥 Vibes" options={vibesOptions} filterKey="vibes" />
