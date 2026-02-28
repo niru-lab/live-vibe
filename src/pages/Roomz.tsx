@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Plus, MagnifyingGlass, Users, MapPin, Lightning } from '@phosphor-icons/react';
+import { Plus, MagnifyingGlass, Users, MapPin, Lightning, GearSix } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -93,10 +93,15 @@ const Roomz = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-foreground">Roomz</h1>
-          <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => navigate('/roomz/create')}>
-            <Plus weight="bold" className="h-4 w-4" />
-            Erstellen
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button variant="ghost" size="icon" className="h-8 w-8">
+              <GearSix weight="thin" className="h-5 w-5 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+            </Button>
+            <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => navigate('/roomz/create')}>
+              <Plus weight="bold" className="h-4 w-4" />
+              Erstellen
+            </Button>
+          </div>
         </div>
 
         {/* Search */}

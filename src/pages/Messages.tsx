@@ -3,6 +3,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from '@/components/ui/button';
 import { Envelope, MapPin, CalendarBlank, CaretRight, ChatCircle, ArrowUp, ArrowDown } from '@phosphor-icons/react';
 import { useEventMessages, useMarkMessageRead } from '@/hooks/useEventMessages';
 import { useProfile } from '@/hooks/useProfile';
@@ -65,6 +66,9 @@ export default function Messages() {
             <span className="text-2xl">💬</span>
             {unreadCount > 0 && <Badge className="bg-red-500 text-white">{unreadCount} neu</Badge>}
           </div>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Envelope weight="thin" className="h-5 w-5 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+          </Button>
         </div>
       </header>
 
