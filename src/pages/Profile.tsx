@@ -6,7 +6,7 @@ import { useFollowStats, usePostsCount } from '@/hooks/useFollowStats';
 import { Button } from '@/components/ui/button';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfilePostsGrid } from '@/components/profile/ProfilePostsGrid';
-import { Users } from '@phosphor-icons/react';
+import { Users, GearSix } from '@phosphor-icons/react';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -36,7 +36,12 @@ export default function Profile() {
     <AppLayout>
       <div className="fixed inset-0 bg-gradient-hero -z-10" />
       <div className="min-h-screen">
-        <header className="flex items-center justify-center py-4"><span className="text-2xl">👤</span></header>
+        <header className="flex items-center justify-between px-4 py-4">
+          <span className="text-2xl">👤</span>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <GearSix weight="thin" className="h-5 w-5 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+          </Button>
+        </header>
         <div className="px-4 pb-24">
           <ProfileHeader profile={profile || null} isLoading={isLoading} followersCount={followStats?.followers || 0} followingCount={followStats?.following || 0} postsCount={postsCount || 0} />
           <ProfilePostsGrid profileId={profile?.id} />

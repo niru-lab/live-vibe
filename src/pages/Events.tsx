@@ -39,7 +39,9 @@ export default function Events() {
       <header className="sticky top-0 z-40 glass">
         <div className="flex items-center justify-between p-4">
           <span className="text-2xl">🎉</span>
-          <div />
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <ChartBar weight="thin" className="h-5 w-5 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+          </Button>
         </div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="px-4 pb-2">
           <TabsList className="w-full glass rounded-2xl p-1">

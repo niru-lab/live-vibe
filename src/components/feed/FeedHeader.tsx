@@ -42,8 +42,8 @@ export const FeedHeader = ({ selectedCity, onCityChange }: FeedHeaderProps) => {
           </Select>
 
           <Button variant="ghost" size="icon" className="relative">
-            <Bell weight="thin" className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-accent" />
+            <Bell weight="thin" className="h-5 w-5 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+            <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-accent shadow-[0_0_6px_hsl(var(--accent))]" />
           </Button>
         </div>
       </div>

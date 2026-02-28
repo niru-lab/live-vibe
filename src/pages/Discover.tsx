@@ -29,7 +29,7 @@ export default function Discover() {
           <div className="flex items-center justify-between">
             <Sparkle weight="thin" className="h-5 w-5 text-foreground" />
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleRefresh} disabled={isRefreshing}>
-              <ArrowsClockwise weight="thin" className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <ArrowsClockwise weight="thin" className={`h-4 w-4 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))] ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
           </div>
           <div className="flex gap-2">
