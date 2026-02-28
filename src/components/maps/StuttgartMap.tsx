@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import Map, { Marker, Popup, Source, Layer, NavigationControl } from 'react-map-gl/mapbox';
+import type { MapRef } from 'react-map-gl/mapbox';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEvents, useVenues } from '@/hooks/useEvents';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,20 +11,10 @@ import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 
-interface Location {
-  id?: string;
-  name: string;
-  address: string;
-  category: 'bar' | 'club' | 'cafe' | 'event' | 'restaurant' | 'other';
-  coordinates: [number, number];
-  areaKey?: string;
-  postCount?: number;
-  eventData?: {
-    id: string;
-    starts_at: string;
-    expected_attendees?: number;
-  };
-}
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiZmV5cm4iLCJhIjoiY21tNjZrYm5xMGRwMTJwcnp5bmhwbGU2aSJ9.qvMwkRPWhHDXQYrsYpN2Yw';
+
+// feyrn dark map style
+const MAP_STYLE = 'mapbox://styles/mapbox/dark-v11';
 
 // Stuttgart area coordinates for events without exact lat/lng
 const stuttgartAreas: Record<string, [number, number]> = {
@@ -42,17 +32,11 @@ const stuttgartAreas: Record<string, [number, number]> = {
   'bad cannstatt': [48.8060, 9.2150],
   'cannstatt': [48.8060, 9.2150],
   'vaihingen': [48.7300, 9.1050],
-  'stuttgart vaihingen': [48.7300, 9.1050],
   'degerloch': [48.7450, 9.1700],
-  'stuttgart degerloch': [48.7450, 9.1700],
   'feuerbach': [48.8100, 9.1550],
-  'stuttgart feuerbach': [48.8100, 9.1550],
   'zuffenhausen': [48.8350, 9.1700],
-  'stuttgart zuffenhausen': [48.8350, 9.1700],
   'untertürkheim': [48.7750, 9.2450],
-  'stuttgart untertürkheim': [48.7750, 9.2450],
   'heslach': [48.7580, 9.1650],
-  'stuttgart heslach': [48.7580, 9.1650],
   'killesberg': [48.8000, 9.1680],
   'botnang': [48.7850, 9.1380],
   'weilimdorf': [48.8150, 9.1100],
@@ -65,14 +49,8 @@ const stuttgartAreas: Record<string, [number, number]> = {
   'hedelfingen': [48.7650, 9.2500],
   'obertürkheim': [48.7600, 9.2550],
   'rotenberg': [48.7850, 9.2450],
-  // Aalen (BW)
   'aalen': [48.8375, 10.0933],
-  'aalen (bw)': [48.8375, 10.0933],
   'wasseralfingen': [48.8580, 10.0760],
-  'unterkochen': [48.8050, 10.0750],
-  'dewangen': [48.8700, 10.0550],
-  'ebnat': [48.8200, 10.1200],
-  // Frankfurt am Main
   'frankfurt': [50.1109, 8.6821],
   'frankfurt am main': [50.1109, 8.6821],
   'sachsenhausen': [50.1000, 8.6850],
@@ -82,46 +60,20 @@ const stuttgartAreas: Record<string, [number, number]> = {
   'westend': [50.1200, 8.6600],
   'bahnhofsviertel': [50.1070, 8.6650],
   'altstadt': [50.1109, 8.6821],
-  // Other cities
   'berlin': [52.5200, 13.4050],
-  'berlin mitte': [52.5200, 13.4050],
   'hamburg': [53.5511, 9.9937],
   'münchen': [48.1351, 11.5820],
   'köln': [50.9375, 6.9603],
-  'düsseldorf': [51.2277, 6.7735],
-  'leipzig': [51.3397, 12.3731],
-  'dortmund': [51.5136, 7.4653],
-  'essen': [51.4556, 7.0116],
-  'bremen': [53.0793, 8.8017],
-  'dresden': [51.0504, 13.7373],
 };
 
-// Get coordinates for an event based on city and area
 const getEventCoordinates = (city: string, area: string): [number, number] | null => {
   const areaLower = area?.toLowerCase().trim() || '';
   const cityLower = city?.toLowerCase().trim() || '';
-  
-  // First try exact area match
-  if (stuttgartAreas[areaLower]) {
-    return stuttgartAreas[areaLower];
-  }
-  
-  // Try with city prefix
+  if (stuttgartAreas[areaLower]) return stuttgartAreas[areaLower];
   const withCity = `${cityLower} ${areaLower}`;
-  if (stuttgartAreas[withCity]) {
-    return stuttgartAreas[withCity];
-  }
-  
-  // Try city alone
-  if (stuttgartAreas[cityLower]) {
-    return stuttgartAreas[cityLower];
-  }
-  
-  // Default to Stuttgart center if it's a Stuttgart event
-  if (cityLower.includes('stuttgart')) {
-    return stuttgartAreas['stuttgart'];
-  }
-  
+  if (stuttgartAreas[withCity]) return stuttgartAreas[withCity];
+  if (stuttgartAreas[cityLower]) return stuttgartAreas[cityLower];
+  if (cityLower.includes('stuttgart')) return stuttgartAreas['stuttgart'];
   return null;
 };
 
@@ -130,6 +82,8 @@ const categoryColors: Record<string, string> = {
   club: '#a855f7',
   cafe: '#22c55e',
   event: '#ef4444',
+  restaurant: '#3b82f6',
+  other: '#6b7280',
 };
 
 const categoryLabels: Record<string, string> = {
@@ -139,80 +93,34 @@ const categoryLabels: Record<string, string> = {
   event: '🎉 Events',
 };
 
-// Fix default marker icon issue
-delete (L.Icon.Default.prototype as any)._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
-});
-
-// Create custom marker icons for each category with dynamic size
-const createCustomIcon = (color: string, isHot = false, count = 1) => {
-  // Scale size based on count (min 24px, max 56px for hot venues/events)
-  const baseSize = isHot ? 28 : 24;
-  const maxSize = 56;
-  const size = isHot ? Math.min(baseSize + (count - 1) * 8, maxSize) : baseSize;
-  const halfSize = size / 2;
-  
-  return L.divIcon({
-    className: 'custom-marker',
-    html: `<div style="
-      width: ${size}px;
-      height: ${size}px;
-      border-radius: 50%;
-      background-color: ${color};
-      border: ${isHot ? '3px' : '2px'} solid white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.3), ${isHot && count > 0 ? `0 0 ${Math.max(count * 5, 10)}px ${color}` : 'none'};
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
-      font-size: ${Math.max(10, size / 3)}px;
-      ${isHot ? 'animation: pulse 2s ease-in-out infinite;' : ''}
-    ">${count > 0 ? count : ''}</div>
-    ${isHot ? `<style>
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 ${color}80; }
-        50% { transform: scale(1.05); box-shadow: 0 0 ${10 + count * 3}px ${count * 2}px ${color}40; }
-      }
-    </style>` : ''}`,
-    iconSize: [size, size],
-    iconAnchor: [halfSize, halfSize],
-    popupAnchor: [0, -halfSize],
-  });
-};
-
-const categoryIcons: Record<string, L.DivIcon> = {
-  bar: createCustomIcon(categoryColors.bar),
-  club: createCustomIcon(categoryColors.club),
-  cafe: createCustomIcon(categoryColors.cafe),
-  event: createCustomIcon(categoryColors.event, true),
-};
-
-// City center coordinates for filter
 const cityCenters: Record<string, { center: [number, number]; zoom: number }> = {
-  'Stuttgart': { center: [48.7758, 9.1829], zoom: 14 },
-  'Aalen (BW)': { center: [48.8375, 10.0933], zoom: 14 },
-  'Frankfurt am Main': { center: [50.1109, 8.6821], zoom: 13 },
+  'Stuttgart': { center: [48.7758, 9.1829], zoom: 13 },
+  'Aalen (BW)': { center: [48.8375, 10.0933], zoom: 13 },
+  'Frankfurt am Main': { center: [50.1109, 8.6821], zoom: 12.5 },
 };
 
-// Helper component to update map center dynamically
-function MapCenterUpdater({ city }: { city: string | null }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (city && cityCenters[city]) {
-      map.flyTo(cityCenters[city].center, cityCenters[city].zoom, { duration: 1.5 });
-    } else {
-      // Default to Stuttgart
-      map.flyTo([48.7758, 9.1829], 14, { duration: 1.5 });
-    }
-  }, [city, map]);
-  
-  return null;
-}
+// Heatmap layer style
+const heatmapLayer: any = {
+  id: 'events-heat',
+  type: 'heatmap',
+  source: 'events-heatmap',
+  paint: {
+    'heatmap-weight': ['interpolate', ['linear'], ['get', 'intensity'], 0, 0, 10, 1],
+    'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 15, 3],
+    'heatmap-color': [
+      'interpolate', ['linear'], ['heatmap-density'],
+      0, 'rgba(0,0,0,0)',
+      0.1, 'rgba(103,0,255,0.15)',
+      0.3, 'rgba(147,51,234,0.3)',
+      0.5, 'rgba(168,85,247,0.45)',
+      0.7, 'rgba(236,72,153,0.6)',
+      0.9, 'rgba(239,68,68,0.75)',
+      1, 'rgba(255,255,255,0.9)',
+    ],
+    'heatmap-radius': ['interpolate', ['linear'], ['zoom'], 0, 15, 15, 30],
+    'heatmap-opacity': 0.8,
+  },
+};
 
 interface StuttgartMapProps {
   selectedCity?: string | null;
@@ -220,37 +128,26 @@ interface StuttgartMapProps {
 
 export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [popupInfo, setPopupInfo] = useState<any>(null);
   const { data: events } = useEvents();
   const { data: venues } = useVenues();
   const navigate = useNavigate();
+  const mapRef = useRef<MapRef>(null);
 
-  // Fetch posts per venue with media info
+  // Fetch posts per venue
   const { data: venuePosts } = useQuery({
     queryKey: ['venue-posts-map'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('posts')
-        .select(`
-          id,
-          venue_id,
-          media_url,
-          media_type,
-          caption,
-          created_at,
-          author:profiles!posts_author_id_fkey(username, avatar_url)
-        `)
+        .select(`id, venue_id, media_url, media_type, caption, created_at, author:profiles!posts_author_id_fkey(username, avatar_url)`)
         .not('venue_id', 'is', null)
         .order('created_at', { ascending: false });
-      
       if (error) throw error;
-      
-      // Group posts by venue
       const postsByVenue: Record<string, typeof data> = {};
       data?.forEach(post => {
         if (post.venue_id) {
-          if (!postsByVenue[post.venue_id]) {
-            postsByVenue[post.venue_id] = [];
-          }
+          if (!postsByVenue[post.venue_id]) postsByVenue[post.venue_id] = [];
           postsByVenue[post.venue_id].push(post);
         }
       });
@@ -258,295 +155,290 @@ export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
     },
   });
 
-  // Get post count per venue
-  const venuePostCounts = Object.fromEntries(
-    Object.entries(venuePosts || {}).map(([venueId, posts]) => [venueId, posts?.length || 0])
-  );
+  // Fly to city when filter changes
+  useEffect(() => {
+    if (!mapRef.current) return;
+    const target = selectedCity && cityCenters[selectedCity]
+      ? cityCenters[selectedCity]
+      : { center: [48.7758, 9.1829] as [number, number], zoom: 13 };
+    mapRef.current.flyTo({
+      center: [target.center[1], target.center[0]],
+      zoom: target.zoom,
+      duration: 1500,
+    });
+  }, [selectedCity]);
 
-  // Convert venues from database to Location format with post counts
-  const venueLocations: Location[] = (venues || []).map(venue => ({
-    id: venue.id,
-    name: venue.name,
-    address: venue.address,
-    category: venue.category as Location['category'],
-    coordinates: [venue.latitude, venue.longitude] as [number, number],
-    postCount: venuePostCounts?.[venue.id] || 0,
-  }));
+  // Build heatmap GeoJSON from events
+  const heatmapData = useMemo(() => {
+    const features = (events || [])
+      .map(event => {
+        let coords: [number, number] | null = null;
+        if (event.latitude && event.longitude) {
+          coords = [event.latitude, event.longitude];
+        } else {
+          coords = getEventCoordinates(event.city, event.address);
+        }
+        if (!coords) return null;
 
-  // Group events by area for heatmap effect
-  const eventsByArea = (events || []).reduce((acc, event) => {
-    const areaKey = `${event.address?.toLowerCase().trim()}-${event.city?.toLowerCase().trim()}`;
-    if (!acc[areaKey]) {
-      acc[areaKey] = [];
-    }
-    acc[areaKey].push(event);
-    return acc;
-  }, {} as Record<string, typeof events>);
+        // Filter by city
+        if (selectedCity && selectedCity !== 'Alle' && event.city?.toLowerCase() !== selectedCity.toLowerCase()) return null;
 
-  // Create grouped event locations with count
-  interface GroupedLocation extends Location {
-    eventCount: number;
-    allEvents: Array<{
-      id: string;
-      name: string;
-      starts_at: string;
-      expected_attendees?: number;
-    }>;
-  }
-
-  const groupedEventLocations: GroupedLocation[] = Object.entries(eventsByArea)
-    .map(([areaKey, areaEvents]) => {
-      if (!areaEvents || areaEvents.length === 0) return null;
-      
-      const firstEvent = areaEvents[0];
-      let coords: [number, number] | null = null;
-      
-      // First try exact coordinates from first event
-      if (firstEvent.latitude && firstEvent.longitude) {
-        coords = [firstEvent.latitude, firstEvent.longitude];
-      } else {
-        // Try to get coordinates from area/city
-        coords = getEventCoordinates(firstEvent.city, firstEvent.address);
-      }
-      
-      if (!coords) return null;
-      
-      return {
-        id: firstEvent.id,
-        name: areaEvents.length > 1 
-          ? `${areaEvents.length} Events in ${firstEvent.address}` 
-          : firstEvent.name,
-        address: `${firstEvent.address}, ${firstEvent.city}`,
-        category: 'event' as const,
-        coordinates: coords,
-        areaKey,
-        eventCount: areaEvents.length,
-        allEvents: areaEvents.map(e => ({
-          id: e.id,
-          name: e.name,
-          starts_at: e.starts_at,
-          expected_attendees: e.expected_attendees || undefined,
-        })),
-        eventData: {
-          id: firstEvent.id,
-          starts_at: firstEvent.starts_at,
-          expected_attendees: firstEvent.expected_attendees || undefined,
-        },
-      };
-    })
-    .filter((loc): loc is NonNullable<typeof loc> => loc !== null);
-
-  // Combine venue locations from DB with grouped events
-  const allLocations = [...venueLocations, ...groupedEventLocations];
-
-  const filteredLocations = selectedCategory
-    ? allLocations.filter(l => l.category === selectedCategory)
-    : allLocations;
-
-  // Filter venues and events by selected city
-  const cityFilteredVenues = selectedCity && selectedCity !== 'Alle'
-    ? venueLocations.filter(v => {
-        // Match venue city to selected city
-        const venueCity = (venues || []).find(dbv => dbv.id === v.id)?.city?.toLowerCase() || '';
-        return venueCity === selectedCity.toLowerCase();
+        return {
+          type: 'Feature' as const,
+          properties: {
+            intensity: (event.expected_attendees || 50) / 50,
+            name: event.name,
+            id: event.id,
+          },
+          geometry: {
+            type: 'Point' as const,
+            coordinates: [coords[1], coords[0]], // [lng, lat]
+          },
+        };
       })
-    : venueLocations;
+      .filter(Boolean);
 
-  const cityFilteredEvents = selectedCity && selectedCity !== 'Alle'
-    ? (events || []).filter(e => e.city?.toLowerCase() === selectedCity.toLowerCase())
-    : (events || []);
+    return { type: 'FeatureCollection' as const, features };
+  }, [events, selectedCity]);
 
-  const getCategoryCount = (category: string) => {
-    if (category === 'event') {
-      return cityFilteredEvents.length;
-    }
-    return cityFilteredVenues.filter(l => l.category === category).length;
-  };
+  // Build venue markers
+  const venueMarkers = useMemo(() => {
+    const filtered = (venues || []).filter(v => {
+      if (selectedCity && selectedCity !== 'Alle' && v.city?.toLowerCase() !== selectedCity.toLowerCase()) return false;
+      if (selectedCategory && selectedCategory !== 'event' && v.category !== selectedCategory) return false;
+      if (selectedCategory === 'event') return false;
+      return true;
+    });
+    return filtered;
+  }, [venues, selectedCity, selectedCategory]);
 
-  const legendTitle = selectedCity && selectedCity !== 'Alle' ? `${selectedCity} Locations` : 'Alle Locations';
+  // Build event markers (for popup interaction)
+  const eventMarkers = useMemo(() => {
+    if (selectedCategory && selectedCategory !== 'event') return [];
+    return (events || [])
+      .map(event => {
+        let coords: [number, number] | null = null;
+        if (event.latitude && event.longitude) coords = [event.latitude, event.longitude];
+        else coords = getEventCoordinates(event.city, event.address);
+        if (!coords) return null;
+        if (selectedCity && selectedCity !== 'Alle' && event.city?.toLowerCase() !== selectedCity.toLowerCase()) return null;
+        return { ...event, coords };
+      })
+      .filter(Boolean) as (typeof events extends (infer T)[] | undefined ? T & { coords: [number, number] } : never)[];
+  }, [events, selectedCity, selectedCategory]);
 
-  // Get dynamic icon for location based on activity (posts or events)
-  const getLocationIcon = (location: Location | GroupedLocation) => {
-    const color = categoryColors[location.category] || categoryColors.bar;
-    
-    if (location.category === 'event') {
-      const count = 'eventCount' in location ? location.eventCount : 1;
-      return createCustomIcon(color, true, count);
-    }
-    
-    // For venues, show post count
-    const postCount = location.postCount || 0;
-    if (postCount > 0) {
-      return createCustomIcon(color, true, postCount);
-    }
-    
-    return createCustomIcon(color, false, 0);
-  };
+  const getCategoryCount = useCallback((category: string) => {
+    const cityFilter = (city?: string | null) =>
+      !selectedCity || selectedCity === 'Alle' || city?.toLowerCase() === selectedCity?.toLowerCase();
+    if (category === 'event') return (events || []).filter(e => cityFilter(e.city)).length;
+    return (venues || []).filter(v => v.category === category && cityFilter(v.city)).length;
+  }, [events, venues, selectedCity]);
+
+  const postCount = (venueId: string) => venuePosts?.[venueId]?.length || 0;
 
   return (
     <div className="relative w-full h-[500px] rounded-xl overflow-hidden border border-border/50">
-      <MapContainer
-        center={[48.7758, 9.1829]}
-        zoom={14}
-        style={{ height: '100%', width: '100%' }}
-        className="z-0"
+      <Map
+        ref={mapRef}
+        initialViewState={{
+          latitude: 48.7758,
+          longitude: 9.1829,
+          zoom: 13,
+          pitch: 45,
+        }}
+        style={{ width: '100%', height: '100%' }}
+        mapStyle={MAP_STYLE}
+        mapboxAccessToken={MAPBOX_TOKEN}
+        attributionControl={false}
       >
-        <MapCenterUpdater city={selectedCity || null} />
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        {filteredLocations.map((location, index) => {
-          const isGrouped = 'allEvents' in location;
-          const eventCount = isGrouped ? (location as any).eventCount : 1;
-          const allEvents = isGrouped ? (location as any).allEvents : location.eventData ? [location.eventData] : [];
-          const postCount = location.postCount || 0;
-          
+        <NavigationControl position="top-right" showCompass={false} />
+
+        {/* Heatmap Layer */}
+        {(!selectedCategory || selectedCategory === 'event') && (
+          <Source id="events-heatmap" type="geojson" data={heatmapData}>
+            <Layer {...heatmapLayer} />
+          </Source>
+        )}
+
+        {/* Venue Markers */}
+        {venueMarkers.map(venue => {
+          const count = postCount(venue.id);
+          const color = categoryColors[venue.category] || categoryColors.other;
+          const size = count > 0 ? Math.min(16 + count * 3, 32) : 14;
           return (
             <Marker
-              key={`${location.name}-${index}`}
-              position={location.coordinates}
-              icon={getLocationIcon(location)}
+              key={venue.id}
+              latitude={venue.latitude}
+              longitude={venue.longitude}
+              anchor="center"
+              onClick={e => {
+                e.originalEvent.stopPropagation();
+                setPopupInfo({ type: 'venue', data: venue });
+              }}
             >
-              <Popup>
-                <div className="p-1 min-w-[240px] max-h-[350px] overflow-y-auto">
-                  {/* Header */}
-                  <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <span 
-                      className="text-white px-2 py-0.5 rounded-full text-xs inline-block"
-                      style={{ backgroundColor: categoryColors[location.category] }}
-                    >
-                      {categoryLabels[location.category]}
-                    </span>
-                    {location.category === 'event' && eventCount > 1 && (
-                      <span className="text-xs font-bold text-red-500">
-                        🔥 {eventCount} Events
-                      </span>
-                    )}
-                    {location.category !== 'event' && postCount > 0 && (
-                      <span className="text-xs font-bold text-purple-500 flex items-center gap-1">
-                        <Image className="h-3 w-3" />
-                        {postCount} {postCount === 1 ? 'Post' : 'Posts'}
-                      </span>
-                    )}
-                  </div>
-                  
-                  <h3 className="font-bold mb-1 text-gray-900 text-sm">{location.name}</h3>
-                  <p className="text-xs text-gray-600 mb-2 flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    {location.address}
-                  </p>
-                  
-                  {/* Posts Preview for Venues */}
-                  {location.category !== 'event' && location.id && venuePosts?.[location.id] && venuePosts[location.id].length > 0 && (
-                    <div className="mb-3">
-                      <p className="text-xs font-semibold text-gray-700 mb-2">📸 Neueste Posts</p>
-                      <div className="grid grid-cols-3 gap-1">
-                        {venuePosts[location.id].slice(0, 6).map((post: any) => (
-                          <div 
-                            key={post.id} 
-                            className="relative aspect-square rounded-md overflow-hidden cursor-pointer group"
-                            onClick={() => navigate(`/feed`)}
-                          >
-                            {post.media_type === 'video' ? (
-                              <video 
-                                src={post.media_url} 
-                                className="w-full h-full object-cover"
-                                muted
-                              />
-                            ) : (
-                              <img 
-                                src={post.media_url} 
-                                alt={post.caption || 'Post'} 
-                                className="w-full h-full object-cover"
-                              />
-                            )}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center">
-                              <span className="text-white opacity-0 group-hover:opacity-100 text-xs">
-                                👁️
-                              </span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                      {venuePosts[location.id].length > 6 && (
-                        <p className="text-xs text-gray-500 text-center mt-2">
-                          +{venuePosts[location.id].length - 6} weitere
-                        </p>
-                      )}
-                    </div>
-                  )}
-                  
-                  {/* Events */}
-                  {location.category === 'event' && allEvents.length > 0 && (
-                    <div className="space-y-3 mb-2">
-                      {allEvents.slice(0, 5).map((evt: any, i: number) => (
-                        <div key={evt.id} className={`${i > 0 ? 'pt-2 border-t border-gray-200' : ''}`}>
-                          {eventCount > 1 && (
-                            <p className="text-xs font-semibold text-gray-800 mb-1">{evt.name}</p>
-                          )}
-                          <p className="text-xs text-gray-600 flex items-center gap-1">
-                            <Calendar className="h-3 w-3" />
-                            {format(new Date(evt.starts_at), 'dd. MMM, HH:mm', { locale: de })} Uhr
-                          </p>
-                          {evt.expected_attendees && (
-                            <p className="text-xs text-gray-600 flex items-center gap-1">
-                              <Users className="h-3 w-3" />
-                              ~{evt.expected_attendees} erwartet
-                            </p>
-                          )}
-                          <Button
-                            size="sm"
-                            className="w-full mt-2 bg-gradient-neon text-white text-xs"
-                            onClick={() => navigate(`/events/${evt.id}`)}
-                          >
-                            {eventCount > 1 ? 'Ansehen' : 'Event ansehen'}
-                          </Button>
-                        </div>
-                      ))}
-                      {allEvents.length > 5 && (
-                        <p className="text-xs text-gray-500 text-center">
-                          +{allEvents.length - 5} weitere Events
-                        </p>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </Popup>
+              <div
+                className="rounded-full border-2 border-white/80 cursor-pointer transition-transform hover:scale-125 flex items-center justify-center"
+                style={{
+                  width: size,
+                  height: size,
+                  backgroundColor: color,
+                  boxShadow: count > 0 ? `0 0 ${count * 4}px ${color}` : '0 2px 6px rgba(0,0,0,0.4)',
+                }}
+              >
+                {count > 0 && (
+                  <span className="text-white font-bold" style={{ fontSize: Math.max(8, size / 3) }}>
+                    {count}
+                  </span>
+                )}
+              </div>
             </Marker>
           );
         })}
-      </MapContainer>
-      
+
+        {/* Event Markers */}
+        {eventMarkers.map(event => {
+          const size = Math.min(14 + (event.expected_attendees || 0) / 20, 30);
+          return (
+            <Marker
+              key={event.id}
+              latitude={event.coords[0]}
+              longitude={event.coords[1]}
+              anchor="center"
+              onClick={e => {
+                e.originalEvent.stopPropagation();
+                setPopupInfo({ type: 'event', data: event });
+              }}
+            >
+              <div
+                className="rounded-full border-2 border-white/80 cursor-pointer animate-pulse"
+                style={{
+                  width: size,
+                  height: size,
+                  backgroundColor: categoryColors.event,
+                  boxShadow: `0 0 12px ${categoryColors.event}`,
+                }}
+              />
+            </Marker>
+          );
+        })}
+
+        {/* Popup */}
+        {popupInfo && (
+          <Popup
+            latitude={popupInfo.type === 'venue' ? popupInfo.data.latitude : popupInfo.data.coords[0]}
+            longitude={popupInfo.type === 'venue' ? popupInfo.data.longitude : popupInfo.data.coords[1]}
+            onClose={() => setPopupInfo(null)}
+            closeOnClick={false}
+            maxWidth="280px"
+            className="feyrn-popup"
+          >
+            <div className="p-1 min-w-[240px]">
+              {popupInfo.type === 'venue' && (
+                <>
+                  <div className="flex items-center gap-2 mb-2 flex-wrap">
+                    <span
+                      className="text-white px-2 py-0.5 rounded-full text-xs"
+                      style={{ backgroundColor: categoryColors[popupInfo.data.category] }}
+                    >
+                      {categoryLabels[popupInfo.data.category] || popupInfo.data.category}
+                    </span>
+                    {postCount(popupInfo.data.id) > 0 && (
+                      <span className="text-xs font-bold text-purple-400 flex items-center gap-1">
+                        <Image className="h-3 w-3" />
+                        {postCount(popupInfo.data.id)} Posts
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="font-bold mb-1 text-sm">{popupInfo.data.name}</h3>
+                  <p className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {popupInfo.data.address}
+                  </p>
+                  {/* Post previews */}
+                  {venuePosts?.[popupInfo.data.id] && venuePosts[popupInfo.data.id].length > 0 && (
+                    <div className="mb-2">
+                      <p className="text-xs font-semibold mb-1">📸 Neueste Posts</p>
+                      <div className="grid grid-cols-3 gap-1">
+                        {venuePosts[popupInfo.data.id].slice(0, 6).map((post: any) => (
+                          <div
+                            key={post.id}
+                            className="relative aspect-square rounded-md overflow-hidden cursor-pointer group"
+                            onClick={() => navigate('/feed')}
+                          >
+                            {post.media_type === 'video' ? (
+                              <video src={post.media_url} className="w-full h-full object-cover" muted />
+                            ) : (
+                              <img src={post.media_url} alt={post.caption || 'Post'} className="w-full h-full object-cover" />
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {popupInfo.type === 'event' && (
+                <>
+                  <span
+                    className="text-white px-2 py-0.5 rounded-full text-xs inline-block mb-2"
+                    style={{ backgroundColor: categoryColors.event }}
+                  >
+                    🎉 Event
+                  </span>
+                  <h3 className="font-bold mb-1 text-sm">{popupInfo.data.name}</h3>
+                  <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                    <MapPin className="h-3 w-3" />
+                    {popupInfo.data.address}, {popupInfo.data.city}
+                  </p>
+                  <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                    <Calendar className="h-3 w-3" />
+                    {format(new Date(popupInfo.data.starts_at), 'dd. MMM, HH:mm', { locale: de })} Uhr
+                  </p>
+                  {popupInfo.data.expected_attendees && (
+                    <p className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                      <Users className="h-3 w-3" />
+                      ~{popupInfo.data.expected_attendees} erwartet
+                    </p>
+                  )}
+                  <Button
+                    size="sm"
+                    className="w-full mt-1 bg-gradient-neon text-white text-xs"
+                    onClick={() => navigate(`/events/${popupInfo.data.id}`)}
+                  >
+                    Event ansehen
+                  </Button>
+                </>
+              )}
+            </div>
+          </Popup>
+        )}
+      </Map>
+
       {/* Legend */}
-      <div className="absolute bottom-4 left-4 glass rounded-xl p-3 z-[10]">
-        <div className="text-xs font-semibold mb-2 text-foreground">{legendTitle}</div>
+      <div className="absolute bottom-4 left-4 glass rounded-xl p-3 z-10">
+        <div className="text-xs font-semibold mb-2 text-foreground">
+          {selectedCity && selectedCity !== 'Alle' ? `${selectedCity}` : 'Alle Locations'}
+        </div>
         <div className="flex flex-col gap-1.5">
           {Object.entries(categoryLabels).map(([key, label]) => (
             <button
               key={key}
               onClick={() => setSelectedCategory(selectedCategory === key ? null : key)}
               className={`flex items-center gap-2 text-xs px-2 py-1.5 rounded-lg transition-all ${
-                selectedCategory === key 
-                  ? 'bg-primary/20 neon-glow-sm' 
-                  : 'hover:bg-muted'
+                selectedCategory === key ? 'bg-primary/20 neon-glow-sm' : 'hover:bg-muted'
               }`}
             >
-              <div 
+              <div
                 className={`w-3 h-3 rounded-full ${key === 'event' ? 'animate-pulse' : ''}`}
                 style={{ backgroundColor: categoryColors[key] }}
               />
               <span className="text-foreground">{label}</span>
-              <span className="text-muted-foreground ml-auto">
-                {getCategoryCount(key)}
-              </span>
+              <span className="text-muted-foreground ml-auto">{getCategoryCount(key)}</span>
             </button>
           ))}
         </div>
       </div>
-
-      {/* Gradient overlay */}
-      <div className="absolute inset-0 pointer-events-none bg-gradient-to-t from-background/20 to-transparent z-[999]" />
     </div>
   );
 }
