@@ -356,26 +356,37 @@ export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
                     {popupInfo.data.address}
                   </p>
                   {/* Post previews */}
-                  {venuePosts?.[popupInfo.data.id] && venuePosts[popupInfo.data.id].length > 0 && (
-                    <div className="mb-2">
-                      <p className="text-xs font-semibold mb-1">📸 Neueste Posts</p>
-                      <div className="grid grid-cols-3 gap-1">
-                        {venuePosts[popupInfo.data.id].slice(0, 6).map((post: any) => (
-                          <div
-                            key={post.id}
-                            className="relative aspect-square rounded-md overflow-hidden cursor-pointer group"
-                            onClick={() => navigate('/feed')}
-                          >
-                            {post.media_type === 'video' ? (
-                              <video src={post.media_url} className="w-full h-full object-cover" muted />
-                            ) : (
-                              <img src={post.media_url} alt={post.caption || 'Post'} className="w-full h-full object-cover" />
-                            )}
-                          </div>
-                        ))}
+                  {venuePosts?.[popupInfo.data.id] && venuePosts[popupInfo.data.id].length > 0 && (() => {
+                    const posts = venuePosts[popupInfo.data.id];
+                    const totalCount = posts.length;
+                    const showPosts = posts.slice(0, 3);
+                    const remaining = totalCount - 3;
+                    return (
+                      <div className="mb-2">
+                        <p className="text-xs font-semibold mb-1">📸 Neueste Posts</p>
+                        <div className="grid grid-cols-3 gap-1">
+                          {showPosts.map((post: any, idx: number) => (
+                            <div
+                              key={post.id}
+                              className="relative aspect-square rounded-lg overflow-hidden cursor-pointer"
+                              onClick={() => navigate('/feed')}
+                            >
+                              {post.media_type === 'video' ? (
+                                <video src={post.media_url} className="w-full h-full object-cover" muted />
+                              ) : (
+                                <img src={post.media_url} alt={post.caption || 'Post'} className="w-full h-full object-cover" />
+                              )}
+                              {idx === 2 && remaining > 0 && (
+                                <div className="absolute top-1 right-1 bg-black/70 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                                  +{remaining}
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </>
               )}
 
