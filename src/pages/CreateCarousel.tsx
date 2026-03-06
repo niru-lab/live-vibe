@@ -83,7 +83,7 @@ export default function CreateCarousel() {
   return (
     <AppLayout hideNav>
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border/50 bg-background/80 p-4 backdrop-blur-xl">
-        <div className="flex items-center gap-4"><Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ArrowLeft weight="thin" className="h-5 w-5" /></Button><div><h1 className="font-display text-xl font-bold">Carousel</h1><p className="text-xs text-muted-foreground">{mediaItems.length}/10 Medien</p></div></div>
+        <div className="flex items-center gap-4"><Button variant="ghost" size="icon" onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/')}><ArrowLeft weight="thin" className="h-5 w-5" /></Button><div><h1 className="font-display text-xl font-bold">Carousel</h1><p className="text-xs text-muted-foreground">{mediaItems.length}/10 Medien</p></div></div>
         <Button onClick={handleSubmit} className="bg-gradient-to-r from-primary to-accent" disabled={mediaItems.length === 0 || isUploading}>{isUploading ? (<><SpinnerGap weight="thin" className="mr-2 h-4 w-4 animate-spin" />Lädt...</>) : 'Teilen'}</Button>
       </header>
       <div className="p-4 space-y-6">
