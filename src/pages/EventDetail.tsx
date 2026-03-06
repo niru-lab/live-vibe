@@ -75,7 +75,7 @@ export default function EventDetail() {
   return (
     <AppLayout hideNav>
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border/50 bg-background/80 p-4 backdrop-blur-xl">
-        <Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ArrowLeft weight="thin" className="h-5 w-5" /></Button>
+        <Button variant="ghost" size="icon" onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/events')}><ArrowLeft weight="thin" className="h-5 w-5" /></Button>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={handleShare}><ShareNetwork weight="thin" className="h-5 w-5" /></Button>
           {isCreator && (
