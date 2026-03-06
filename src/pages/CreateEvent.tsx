@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
-import { ArrowLeft, MapPin, CurrencyEur, TShirt, Camera, X, Plus, MusicNote, Play } from '@phosphor-icons/react';
+import { ArrowLeft, MapPin, CurrencyEur, TShirt, Camera, X, Plus, MusicNote, Play, CalendarBlank, Notepad } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 interface MediaItem { id: string; file: File; previewUrl: string; type: 'image' | 'video'; }
@@ -122,79 +122,92 @@ export default function CreateEvent() {
 
   return (
     <AppLayout hideNav>
-      <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border/50 bg-background/80 p-4 backdrop-blur-xl">
-        <div className="flex items-center gap-4"><Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ArrowLeft weight="thin" className="h-5 w-5" /></Button><div><h1 className="font-display text-xl font-bold">Neues Event</h1><p className="text-xs text-muted-foreground">Party erstellen</p></div></div>
-        <Button onClick={form.handleSubmit(onSubmit)} className="bg-gradient-to-r from-pink-500 to-orange-500" disabled={createEvent.isPending || isUploading}>{isUploading ? 'Lädt...' : 'Erstellen 🎉'}</Button>
-      </header>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-4 pb-8">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between"><Label className="text-base font-semibold">Event-Medien</Label><span className="text-xs text-muted-foreground">{mediaItems.length}/10</span></div>
-            {mediaItems.length > 0 ? (
-              <>
-                <div className="relative aspect-video overflow-hidden rounded-2xl bg-muted">
-                  {mediaItems[currentSlide]?.type === 'video' ? <video src={mediaItems[currentSlide].previewUrl} className="h-full w-full object-cover" controls /> : <img src={mediaItems[currentSlide]?.previewUrl} alt="Event cover" className="h-full w-full object-cover" />}
-                  {mediaItems.length > 1 && (<div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">{mediaItems.map((_, index) => (<button key={index} type="button" onClick={() => setCurrentSlide(index)} className={cn('h-2 w-2 rounded-full transition-all', index === currentSlide ? 'bg-white w-4' : 'bg-white/50')} />))}</div>)}
-                </div>
-                <div className="grid grid-cols-5 gap-2">
-                  {mediaItems.map((item, index) => (
-                    <div key={item.id} onClick={() => setCurrentSlide(index)} className={cn('group relative aspect-square cursor-pointer overflow-hidden rounded-lg', currentSlide === index && 'ring-2 ring-primary')}>
-                      {item.type === 'video' ? (<div className="relative h-full w-full"><video src={item.previewUrl} className="h-full w-full object-cover" /><Play weight="fill" className="absolute inset-0 m-auto h-4 w-4 text-white" /></div>) : <img src={item.previewUrl} alt="" className="h-full w-full object-cover" />}
-                      <button type="button" onClick={(e) => { e.stopPropagation(); removeMediaItem(item.id); }} className="absolute right-0.5 top-0.5 rounded-full bg-black/70 p-0.5 opacity-0 transition group-hover:opacity-100"><X weight="thin" className="h-3 w-3 text-white" /></button>
-                    </div>
-                  ))}
-                  {mediaItems.length < 10 && (<label className="flex aspect-square cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-border/50 bg-muted/50 transition hover:border-primary/50"><input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFilesSelect} /><Plus weight="thin" className="h-5 w-5 text-muted-foreground" /></label>)}
-                </div>
-              </>
-            ) : (
-              <label className="flex aspect-video cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-border/50 bg-muted/50 transition-colors hover:border-primary/50 hover:bg-muted">
-                <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFilesSelect} />
-                <Camera weight="thin" className="mb-2 h-10 w-10 text-muted-foreground" /><p className="font-medium text-foreground">Event-Foto/Video</p>
-              </label>
-            )}
-          </div>
-          <div className="space-y-2 rounded-2xl border border-border/50 bg-card p-4">
-            <div className="flex items-center gap-2 mb-3"><MusicNote weight="thin" className="h-5 w-5 text-primary" /><h2 className="font-semibold text-foreground">Event-Soundtrack</h2></div>
-            <MusicSelector selectedTrack={selectedMusic} onSelect={setSelectedMusic} />
-          </div>
-          <div className="space-y-4 rounded-2xl border border-border/50 bg-card p-4">
-            <h2 className="font-semibold text-foreground">📝 Event-Details</h2>
-            <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Event-Name *</FormLabel><FormControl><Input placeholder='z.B. "Techno Mondays @ Proton"' {...field} /></FormControl><FormMessage /></FormItem>)} />
-            <FormField control={form.control} name="category" render={({ field }) => (
-              <FormItem><FormLabel>Kategorie *</FormLabel><div className="grid grid-cols-3 gap-2">{categories.map((cat) => (<button key={cat.value} type="button" onClick={() => field.onChange(cat.value)} className={cn('flex flex-col items-center gap-1 rounded-xl border-2 p-3 transition-all', field.value === cat.value ? 'border-primary bg-primary/10' : 'border-border/50 hover:border-primary/50')}><span className="text-2xl">{cat.emoji}</span><span className="text-xs font-medium">{cat.label.split(' ')[1]}</span></button>))}</div><FormMessage /></FormItem>
-            )} />
-            <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>Beschreibung</FormLabel><FormControl><Textarea placeholder="Erzähle mehr über dein Event..." className="min-h-[80px]" {...field} /></FormControl><FormMessage /></FormItem>)} />
-          </div>
-          <div className="space-y-4 rounded-2xl border border-border/50 bg-card p-4">
-            <div className="flex items-center gap-2"><MapPin weight="thin" className="h-5 w-5 text-primary" /><h2 className="font-semibold text-foreground">📍 Location</h2></div>
-            <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabel>Stadt *</FormLabel><FormControl><Input placeholder="z.B. Stuttgart" {...field} /></FormControl><FormMessage /></FormItem>)} />
-            <FormField control={form.control} name="location_name" render={({ field }) => (<FormItem><FormLabel>Location Name *</FormLabel><FormControl><Input placeholder="z.B. Proton The Club" {...field} /></FormControl><FormMessage /></FormItem>)} />
-            <FormField control={form.control} name="area" render={({ field }) => (<FormItem><FormLabel>Adresse / Gebiet *</FormLabel><FormControl><Input placeholder="z.B. Königstraße 12" {...field} /></FormControl><FormMessage /></FormItem>)} />
-          </div>
-          <div className="space-y-4 rounded-2xl border border-border/50 bg-card p-4">
-            <div className="flex items-center gap-2"><h2 className="font-semibold text-foreground">📅 Datum & Uhrzeit</h2></div>
-            <FormField control={form.control} name="starts_at" render={({ field }) => (
-              <FormItem><FormLabel>Datum *</FormLabel><FormControl>
-                <Input type="date" value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} onChange={(e) => { const d = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined; field.onChange(d); }} />
-              </FormControl><FormMessage /></FormItem>
-            )} />
-            <div className="grid grid-cols-2 gap-3">
-              <FormField control={form.control} name="starts_at_time" render={({ field }) => (
-                <FormItem><FormLabel>Start *</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
-              <FormField control={form.control} name="ends_at_time" render={({ field }) => (
-                <FormItem><FormLabel>Ende</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
-              )} />
+      <div className="flex h-screen flex-col">
+        <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border/50 bg-background/80 p-3 backdrop-blur-xl">
+          <div className="flex items-center gap-3"><Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ArrowLeft weight="thin" className="h-5 w-5" /></Button><h1 className="font-display text-lg font-bold">Neues Event</h1></div>
+          <Button onClick={form.handleSubmit(onSubmit)} className="bg-gradient-to-r from-primary to-accent" disabled={createEvent.isPending || isUploading}>{isUploading ? 'Lädt...' : 'Erstellen'}</Button>
+        </header>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-y-auto space-y-3 p-4 pb-8">
+            {/* Media upload - compact */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between"><Label className="text-sm font-semibold">Medien</Label><span className="text-xs text-muted-foreground">{mediaItems.length}/10</span></div>
+              {mediaItems.length > 0 ? (
+                <>
+                  <div className="relative h-[180px] overflow-hidden rounded-xl bg-muted">
+                    {mediaItems[currentSlide]?.type === 'video' ? <video src={mediaItems[currentSlide].previewUrl} className="h-full w-full object-cover" controls /> : <img src={mediaItems[currentSlide]?.previewUrl} alt="Event cover" className="h-full w-full object-cover" />}
+                    {mediaItems.length > 1 && (<div className="absolute bottom-2 left-1/2 flex -translate-x-1/2 gap-1.5">{mediaItems.map((_, index) => (<button key={index} type="button" onClick={() => setCurrentSlide(index)} className={cn('h-1.5 w-1.5 rounded-full transition-all', index === currentSlide ? 'bg-white w-3' : 'bg-white/50')} />))}</div>)}
+                  </div>
+                  <div className="grid grid-cols-6 gap-1.5">
+                    {mediaItems.map((item, index) => (
+                      <div key={item.id} onClick={() => setCurrentSlide(index)} className={cn('group relative aspect-square cursor-pointer overflow-hidden rounded-md', currentSlide === index && 'ring-2 ring-primary')}>
+                        {item.type === 'video' ? (<div className="relative h-full w-full"><video src={item.previewUrl} className="h-full w-full object-cover" /><Play weight="fill" className="absolute inset-0 m-auto h-3 w-3 text-white" /></div>) : <img src={item.previewUrl} alt="" className="h-full w-full object-cover" />}
+                        <button type="button" onClick={(e) => { e.stopPropagation(); removeMediaItem(item.id); }} className="absolute right-0.5 top-0.5 rounded-full bg-black/70 p-0.5 opacity-0 transition group-hover:opacity-100"><X weight="thin" className="h-3 w-3 text-white" /></button>
+                      </div>
+                    ))}
+                    {mediaItems.length < 10 && (<label className="flex aspect-square cursor-pointer items-center justify-center rounded-md border border-dashed border-border/50 bg-muted/50"><input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFilesSelect} /><Plus weight="thin" className="h-4 w-4 text-muted-foreground" /></label>)}
+                  </div>
+                </>
+              ) : (
+                <label className="flex h-[140px] cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-border/50 bg-muted/50 transition-colors hover:border-primary/50">
+                  <input type="file" accept="image/*,video/*" multiple className="hidden" onChange={handleFilesSelect} />
+                  <Camera weight="thin" className="mb-1 h-7 w-7 text-muted-foreground" /><p className="text-sm text-muted-foreground">Foto / Video</p>
+                </label>
+              )}
             </div>
-          </div>
-          <div className="space-y-4 rounded-2xl border border-border/50 bg-card p-4">
-            <div className="flex items-center gap-2"><CurrencyEur weight="thin" className="h-5 w-5 text-primary" /><h2 className="font-semibold text-foreground">Eintritt & Infos</h2></div>
-            <FormField control={form.control} name="is_free" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3"><div className="space-y-0.5"><FormLabel>Kostenlos</FormLabel></div><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
-            {!form.watch('is_free') && (<FormField control={form.control} name="entry_price" render={({ field }) => (<FormItem><FormLabel>Preis (€)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl><FormMessage /></FormItem>)} />)}
-            <FormField control={form.control} name="dresscode" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><TShirt weight="thin" className="h-4 w-4" /> Dresscode</FormLabel><FormControl><Input placeholder="z.B. All Black, Casual..." {...field} /></FormControl><FormMessage /></FormItem>)} />
-          </div>
-        </form>
-      </Form>
+
+            {/* Soundtrack - compact */}
+            <div className="rounded-xl border border-border/50 bg-card p-3">
+              <div className="flex items-center gap-2 mb-2"><MusicNote weight="thin" className="h-4 w-4 text-primary" /><h2 className="text-sm font-semibold text-foreground">Soundtrack</h2></div>
+              <MusicSelector selectedTrack={selectedMusic} onSelect={setSelectedMusic} />
+            </div>
+
+            {/* Event Details */}
+            <div className="space-y-3 rounded-xl border border-border/50 bg-card p-3">
+              <div className="flex items-center gap-2"><Notepad weight="thin" className="h-4 w-4 text-primary" /><h2 className="text-sm font-semibold text-foreground">Event-Details</h2></div>
+              <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Event-Name *</FormLabel><FormControl><Input placeholder='z.B. "Techno Mondays @ Proton"' {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="category" render={({ field }) => (
+                <FormItem><FormLabel>Kategorie *</FormLabel><div className="grid grid-cols-4 gap-1.5">{categories.map((cat) => (<button key={cat.value} type="button" onClick={() => field.onChange(cat.value)} className={cn('flex flex-col items-center gap-0.5 rounded-lg border p-2 transition-all text-center', field.value === cat.value ? 'border-primary bg-primary/10' : 'border-border/50 hover:border-primary/50')}><span className="text-lg">{cat.emoji}</span><span className="text-[10px] font-medium leading-tight">{cat.label.split(' ')[1]}</span></button>))}</div><FormMessage /></FormItem>
+              )} />
+              <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>Beschreibung</FormLabel><FormControl><Textarea placeholder="Erzähle mehr über dein Event..." className="min-h-[60px]" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            </div>
+
+            {/* Location */}
+            <div className="space-y-3 rounded-xl border border-border/50 bg-card p-3">
+              <div className="flex items-center gap-2"><MapPin weight="thin" className="h-4 w-4 text-primary" /><h2 className="text-sm font-semibold text-foreground">Location</h2></div>
+              <FormField control={form.control} name="city" render={({ field }) => (<FormItem><FormLabel>Stadt *</FormLabel><FormControl><Input placeholder="z.B. Stuttgart" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="location_name" render={({ field }) => (<FormItem><FormLabel>Location Name *</FormLabel><FormControl><Input placeholder="z.B. Proton The Club" {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="area" render={({ field }) => (<FormItem><FormLabel>Adresse / Gebiet *</FormLabel><FormControl><Input placeholder="z.B. Königstraße 12" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            </div>
+
+            {/* Date & Time */}
+            <div className="space-y-3 rounded-xl border border-border/50 bg-card p-3">
+              <div className="flex items-center gap-2"><CalendarBlank weight="thin" className="h-4 w-4 text-primary" /><h2 className="text-sm font-semibold text-foreground">Datum & Uhrzeit</h2></div>
+              <FormField control={form.control} name="starts_at" render={({ field }) => (
+                <FormItem><FormLabel>Datum *</FormLabel><FormControl>
+                  <Input type="date" value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} onChange={(e) => { const d = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined; field.onChange(d); }} />
+                </FormControl><FormMessage /></FormItem>
+              )} />
+              <div className="grid grid-cols-2 gap-3">
+                <FormField control={form.control} name="starts_at_time" render={({ field }) => (
+                  <FormItem><FormLabel>Start *</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+                <FormField control={form.control} name="ends_at_time" render={({ field }) => (
+                  <FormItem><FormLabel>Ende</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
+                )} />
+              </div>
+            </div>
+
+            {/* Entry & Info */}
+            <div className="space-y-3 rounded-xl border border-border/50 bg-card p-3">
+              <div className="flex items-center gap-2"><CurrencyEur weight="thin" className="h-4 w-4 text-primary" /><h2 className="text-sm font-semibold text-foreground">Eintritt & Infos</h2></div>
+              <FormField control={form.control} name="is_free" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-2.5"><div className="space-y-0.5"><FormLabel className="text-sm">Kostenlos</FormLabel></div><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
+              {!form.watch('is_free') && (<FormField control={form.control} name="entry_price" render={({ field }) => (<FormItem><FormLabel>Preis (€)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl><FormMessage /></FormItem>)} />)}
+              <FormField control={form.control} name="dresscode" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><TShirt weight="thin" className="h-4 w-4" /> Dresscode</FormLabel><FormControl><Input placeholder="z.B. All Black, Casual..." {...field} /></FormControl><FormMessage /></FormItem>)} />
+            </div>
+          </form>
+        </Form>
+      </div>
     </AppLayout>
   );
 }
