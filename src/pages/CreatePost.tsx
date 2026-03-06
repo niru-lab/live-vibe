@@ -66,7 +66,7 @@ export default function CreatePost() {
   return (
     <AppLayout hideNav>
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border/50 bg-background/80 p-4 backdrop-blur-xl">
-        <div className="flex items-center gap-4"><Button variant="ghost" size="icon" onClick={() => navigate(-1)}><ArrowLeft weight="thin" className="h-5 w-5" /></Button><h1 className="font-display text-xl font-bold">Neuer Post</h1></div>
+        <div className="flex items-center gap-4"><Button variant="ghost" size="icon" onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/')}><ArrowLeft weight="thin" className="h-5 w-5" /></Button><h1 className="font-display text-xl font-bold">Neuer Post</h1></div>
         <Button onClick={handleSubmit} className="bg-gradient-to-r from-primary to-accent" disabled={!selectedFile || isUploading}>
           {isUploading ? (<><SpinnerGap weight="thin" className="mr-2 h-4 w-4 animate-spin" />Lädt...</>) : 'Teilen'}
         </Button>

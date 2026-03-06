@@ -57,7 +57,7 @@ const CreateRoom = () => {
       <div className="px-4 pt-14 pb-32 space-y-6">
         {/* Header */}
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-1">
+          <button onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/roomz')} className="p-1">
             <ArrowLeft weight="bold" className="h-5 w-5 text-foreground" />
           </button>
           <h1 className="text-lg font-bold text-foreground">Room erstellen</h1>

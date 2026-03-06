@@ -36,8 +36,7 @@ export default function Profile() {
     <AppLayout>
       <div className="fixed inset-0 bg-gradient-hero -z-10" />
       <div className="min-h-screen">
-        <header className="flex items-center justify-between px-4 py-4">
-          <span className="text-2xl">👤</span>
+        <header className="flex items-center justify-end px-4 py-4">
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <GearSix weight="thin" className="h-5 w-5 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
           </Button>
