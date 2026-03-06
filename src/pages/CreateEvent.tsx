@@ -172,6 +172,22 @@ export default function CreateEvent() {
             <FormField control={form.control} name="area" render={({ field }) => (<FormItem><FormLabel>Adresse / Gebiet *</FormLabel><FormControl><Input placeholder="z.B. Königstraße 12" {...field} /></FormControl><FormMessage /></FormItem>)} />
           </div>
           <div className="space-y-4 rounded-2xl border border-border/50 bg-card p-4">
+            <div className="flex items-center gap-2"><h2 className="font-semibold text-foreground">📅 Datum & Uhrzeit</h2></div>
+            <FormField control={form.control} name="starts_at" render={({ field }) => (
+              <FormItem><FormLabel>Datum *</FormLabel><FormControl>
+                <Input type="date" value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} onChange={(e) => { const d = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined; field.onChange(d); }} />
+              </FormControl><FormMessage /></FormItem>
+            )} />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField control={form.control} name="starts_at_time" render={({ field }) => (
+                <FormItem><FormLabel>Start *</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+              <FormField control={form.control} name="ends_at_time" render={({ field }) => (
+                <FormItem><FormLabel>Ende</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
+              )} />
+            </div>
+          </div>
+          <div className="space-y-4 rounded-2xl border border-border/50 bg-card p-4">
             <div className="flex items-center gap-2"><CurrencyEur weight="thin" className="h-5 w-5 text-primary" /><h2 className="font-semibold text-foreground">Eintritt & Infos</h2></div>
             <FormField control={form.control} name="is_free" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3"><div className="space-y-0.5"><FormLabel>Kostenlos</FormLabel></div><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
             {!form.watch('is_free') && (<FormField control={form.control} name="entry_price" render={({ field }) => (<FormItem><FormLabel>Preis (€)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl><FormMessage /></FormItem>)} />)}
