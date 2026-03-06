@@ -15,7 +15,7 @@ import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
-import { ArrowLeft, MapPin, CurrencyEur, TShirt, Camera, X, Plus, MusicNote, Play } from '@phosphor-icons/react';
+import { ArrowLeft, MapPin, CurrencyEur, TShirt, Camera, X, Plus, MusicNote, Play, CalendarBlank, Notepad } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 interface MediaItem { id: string; file: File; previewUrl: string; type: 'image' | 'video'; }
