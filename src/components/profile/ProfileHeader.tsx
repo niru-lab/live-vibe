@@ -89,12 +89,3 @@ export const ProfileHeader = ({ profile, isLoading, followersCount, followingCou
     </>
   );
 };
-
-interface StatChipProps { label: string; value: number; icon?: string; isLoading: boolean; onClick?: () => void; }
-
-const StatChip = ({ label, value, icon, isLoading, onClick }: StatChipProps) => {
-  const formatNumber = (num: number) => { if (num >= 1000) return (num / 1000).toFixed(1).replace('.0', '') + 'k'; return num.toString(); };
-  const ChipContent = (<>{icon && <span>{icon}</span>}<span className="font-bold text-foreground">{formatNumber(value)}</span>{label && <span className="text-muted-foreground">{label}</span>}</>);
-  if (onClick) return (<button onClick={onClick} className="stat-chip neon-glow-sm hover:bg-white/20 transition-colors cursor-pointer">{isLoading ? <Skeleton className="h-4 w-12" /> : ChipContent}</button>);
-  return (<div className="stat-chip neon-glow-sm">{isLoading ? <Skeleton className="h-4 w-12" /> : ChipContent}</div>);
-};
