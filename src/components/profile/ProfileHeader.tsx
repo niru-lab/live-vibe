@@ -41,46 +41,46 @@ export const ProfileHeader = ({ profile, isLoading, followersCount, followingCou
               <DotsThree weight="thin" className="h-5 w-5" />
             </Button>
           </div>
-          <div className="flex flex-col items-center text-center pt-4">
-            {isLoading ? <Skeleton className="h-[140px] w-[140px] rounded-full" /> : (
-              <button onClick={() => setAchievementsOpen(true)} className="relative group">
-                <div className="absolute inset-0 rounded-full bg-gradient-neon opacity-60 blur-xl group-hover:opacity-80 transition-opacity" />
-                <Avatar className="relative h-[140px] w-[140px] ring-4 ring-white/20 neon-glow pulse-neon">
-                  <AvatarImage src={profile?.avatar_url || ''} className="object-cover" />
-                  <AvatarFallback className="bg-gradient-neon text-4xl text-white font-bold">{profile?.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
-                </Avatar>
-                {badgeData && <div className="absolute -bottom-1 -right-1 text-3xl badge-pulse drop-shadow-lg">{badgeData.emoji}</div>}
-              </button>
-            )}
-            {isLoading ? <Skeleton className="mt-4 h-6 w-40" /> : (
-              <div className="mt-4"><span className="text-sm text-muted-foreground">@{profile?.username}</span></div>
-            )}
-            {!isLoading && badgeData && ((profile as any)?.show_badge_in_bio || (profile as any)?.show_sc_in_bio) && (
-              <button onClick={() => setAchievementsOpen(true)} className="mt-2 flex items-center gap-1.5">
-                {(profile as any)?.show_badge_in_bio && (
-                  <>
-                    <span className="text-sm">{badgeData.emoji}</span>
-                    <span className={cn('text-xs font-semibold gradient-text')}>{badgeData.name}</span>
-                  </>
-                )}
-                {(profile as any)?.show_badge_in_bio && (profile as any)?.show_sc_in_bio && (
-                  <span className="text-muted-foreground text-xs">•</span>
-                )}
-                {(profile as any)?.show_sc_in_bio && (
-                  <div className="flex items-center gap-0.5">
-                    <Cloud weight="thin" className="h-3 w-3 text-muted-foreground" />
-                    <span className="font-medium text-xs text-foreground">{formatNumber(profile?.social_cloud_points || 0)} SC</span>
-                  </div>
-                )}
-              </button>
-            )}
-            {!isLoading && profile?.bio && <p className="mt-3 text-sm gradient-text font-medium max-w-xs">{profile.bio}</p>}
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-              <StatChip label="Posts" value={postsCount} isLoading={isLoading} />
-              <StatChip label="Events" value={0} icon="🎉" isLoading={isLoading} />
-              <StatChip label="" value={followersCount} icon="👥" isLoading={isLoading} onClick={() => { setFollowListTab('followers'); setFollowListOpen(true); }} />
+            <div className="flex flex-col items-center text-center pt-2">
+              {isLoading ? <Skeleton className="h-[84px] w-[84px] rounded-full" /> : (
+                <button onClick={() => setAchievementsOpen(true)} className="relative group">
+                  <Avatar className="relative h-[84px] w-[84px] ring-2 ring-[hsl(var(--neon-purple))] ring-offset-2 ring-offset-background">
+                    <AvatarImage src={profile?.avatar_url || ''} className="object-cover" />
+                    <AvatarFallback className="bg-muted text-xl text-foreground font-semibold">{profile?.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+                  </Avatar>
+                  {badgeData && <div className="absolute -bottom-1 -right-1 text-lg drop-shadow-lg">{badgeData.emoji}</div>}
+                </button>
+              )}
+              {isLoading ? <Skeleton className="mt-3 h-5 w-32" /> : (
+                <div className="mt-3"><span className="text-sm text-muted-foreground">@{profile?.username}</span></div>
+              )}
+              {!isLoading && badgeData && ((profile as any)?.show_badge_in_bio || (profile as any)?.show_sc_in_bio) && (
+                <button onClick={() => setAchievementsOpen(true)} className="mt-1.5 flex items-center gap-1.5">
+                  {(profile as any)?.show_badge_in_bio && (
+                    <span className="text-xs font-medium text-muted-foreground">{badgeData.name}</span>
+                  )}
+                  {(profile as any)?.show_badge_in_bio && (profile as any)?.show_sc_in_bio && (
+                    <span className="text-muted-foreground text-xs">·</span>
+                  )}
+                  {(profile as any)?.show_sc_in_bio && (
+                    <div className="flex items-center gap-0.5">
+                      <Cloud weight="thin" className="h-3 w-3 text-muted-foreground" />
+                      <span className="font-medium text-xs text-foreground">{formatNumber(profile?.social_cloud_points || 0)} SC</span>
+                    </div>
+                  )}
+                </button>
+              )}
+              {!isLoading && profile?.bio && <p className="mt-2 text-xs text-muted-foreground max-w-xs">{profile.bio}</p>}
+              <div className="mt-4 flex items-center justify-center gap-3 text-sm">
+                <span className="text-foreground font-semibold">{postsCount}</span><span className="text-muted-foreground">Posts</span>
+                <span className="text-muted-foreground">·</span>
+                <span className="text-foreground font-semibold">{formatNumber(0)}</span><span className="text-muted-foreground">Events</span>
+                <span className="text-muted-foreground">·</span>
+                <button onClick={() => { setFollowListTab('followers'); setFollowListOpen(true); }} className="flex items-center gap-1">
+                  <span className="text-foreground font-semibold">{formatNumber(followersCount)}</span><span className="text-muted-foreground">Follower</span>
+                </button>
+              </div>
             </div>
-          </div>
         </div>
       </div>
       <ProfileSettings open={settingsOpen} onOpenChange={setSettingsOpen} profile={profile} />
