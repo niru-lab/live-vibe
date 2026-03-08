@@ -378,7 +378,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                             <div
                               key={post.id}
                               className="relative aspect-square rounded-lg overflow-hidden cursor-pointer"
-                              onClick={() => navigate('/feed')}
+                              onClick={() => navigate(`/?venue=${popupInfo.data.id}`)}
                             >
                               {post.media_type === 'video' ? (
                                 <video src={post.media_url} className="w-full h-full object-cover" muted />
