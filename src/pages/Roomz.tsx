@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Plus, MagnifyingGlass, Users, MapPin, Lightning, GearSix } from '@phosphor-icons/react';
+import { Plus, MagnifyingGlass, Users, MapPin, Lightning, GearSix, ChatsCircle } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
@@ -92,7 +92,10 @@ const Roomz = () => {
       <div className="px-4 pt-14 pb-32 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h1 className="text-xl font-bold text-foreground">Roomz</h1>
+          <div className="flex items-center gap-2">
+            <ChatsCircle weight="thin" className="h-5 w-5 text-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+            <h1 className="text-xl font-bold text-foreground">Roomz</h1>
+          </div>
           <div className="flex items-center gap-1">
             <Button variant="ghost" size="icon" className="h-8 w-8">
               <GearSix weight="thin" className="h-5 w-5 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
