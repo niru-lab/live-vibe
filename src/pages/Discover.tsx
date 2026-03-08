@@ -14,6 +14,7 @@ const StuttgartMap = lazy(() => import('@/components/maps/StuttgartMap').then(m 
 export default function Discover() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();
 
