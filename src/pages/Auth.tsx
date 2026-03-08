@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Sparkle, Confetti, Lightning } from '@phosphor-icons/react';
+import { Sparkle, Confetti } from '@phosphor-icons/react';
+import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Bitte gib eine gültige E-Mail-Adresse ein');
@@ -88,9 +89,8 @@ export default function Auth() {
 
       <div className="relative z-10 mb-8 text-center">
         <div className="mb-4 flex items-center justify-center gap-2">
-          <Lightning weight="thin" className="h-12 w-12 text-foreground" />
+          <FeyrnLogo size="lg" />
         </div>
-        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">Feyrn</h1>
         <p className="mt-2 text-sm text-muted-foreground">Entdecke, was gerade abgeht</p>
       </div>
 

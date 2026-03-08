@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Confetti, UserCheck, ChartBar, Eye, ShareNetwork, Envelope, Check, X } from '@phosphor-icons/react';
+import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -38,7 +39,7 @@ export default function Events() {
       
       <header className="sticky top-0 z-40 glass">
         <div className="flex items-center justify-between p-4">
-          <span className="text-2xl">🎉</span>
+           <FeyrnLogo size="sm" />
           <Button variant="ghost" size="icon" className="h-8 w-8">
             <ChartBar weight="thin" className="h-5 w-5 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
           </Button>

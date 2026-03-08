@@ -125,7 +125,6 @@ export default function CreateEvent() {
       <div className="flex h-screen flex-col">
         <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border/50 bg-background/80 p-3 backdrop-blur-xl">
           <div className="flex items-center gap-3"><Button variant="ghost" size="icon" onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/events')}><ArrowLeft weight="thin" className="h-5 w-5" /></Button><h1 className="font-display text-lg font-bold">Neues Event</h1></div>
-          <Button onClick={form.handleSubmit(onSubmit)} className="bg-gradient-to-r from-primary to-accent" disabled={createEvent.isPending || isUploading}>{isUploading ? 'Lädt...' : 'Erstellen'}</Button>
         </header>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-y-auto space-y-3 p-4 pb-8">
@@ -207,6 +206,16 @@ export default function CreateEvent() {
             </div>
           </form>
         </Form>
+        {/* Sticky bottom submit button */}
+        <div className="sticky bottom-0 z-40 border-t border-border/50 bg-background/95 backdrop-blur-xl p-3">
+          <Button
+            onClick={form.handleSubmit(onSubmit)}
+            className="w-full rounded-2xl bg-[hsl(var(--neon-purple))] hover:bg-[hsl(var(--neon-purple))]/90 text-white py-6 text-base font-semibold"
+            disabled={createEvent.isPending || isUploading}
+          >
+            {isUploading ? 'Lädt...' : 'Event erstellen'}
+          </Button>
+        </div>
       </div>
     </AppLayout>
   );

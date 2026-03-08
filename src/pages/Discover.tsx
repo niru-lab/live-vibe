@@ -4,7 +4,8 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MagnifyingGlass, Microphone, Camera, Sparkle, ArrowsClockwise } from '@phosphor-icons/react';
+import { MagnifyingGlass, Microphone, Camera, ArrowsClockwise } from '@phosphor-icons/react';
+import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { DiscoverFilters } from '@/components/discover/DiscoverFilters';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -27,7 +28,7 @@ export default function Discover() {
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 backdrop-blur-xl">
         <div className="space-y-3 p-4">
           <div className="flex items-center justify-between">
-            <Sparkle weight="thin" className="h-5 w-5 text-foreground" />
+            <FeyrnLogo size="sm" />
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleRefresh} disabled={isRefreshing}>
               <ArrowsClockwise weight="thin" className={`h-4 w-4 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))] ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>

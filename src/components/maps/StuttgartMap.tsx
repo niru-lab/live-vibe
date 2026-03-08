@@ -87,10 +87,10 @@ const categoryColors: Record<string, string> = {
 };
 
 const categoryLabels: Record<string, string> = {
-  bar: '🍸 Bar',
-  club: '🎧 Club',
-  cafe: '☕ Café',
-  event: '🎉 Events',
+  bar: 'Bar',
+  club: 'Club',
+  cafe: 'Café',
+  event: 'Events',
 };
 
 const cityCenters: Record<string, { center: [number, number]; zoom: number }> = {
@@ -128,6 +128,7 @@ interface StuttgartMapProps {
 
 export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [legendCollapsed, setLegendCollapsed] = useState(true);
   const [popupInfo, setPopupInfo] = useState<any>(null);
   const { data: events } = useEvents();
   const { data: venues } = useVenues();
@@ -427,29 +428,63 @@ export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
         )}
       </Map>
 
-      {/* Legend */}
-      <div className="absolute bottom-4 left-4 glass rounded-xl p-3 z-10">
-        <div className="text-xs font-semibold mb-2 text-foreground">
-          {selectedCity && selectedCity !== 'Alle' ? `${selectedCity}` : 'Alle Locations'}
-        </div>
-        <div className="flex flex-col gap-1.5">
-          {Object.entries(categoryLabels).map(([key, label]) => (
-            <button
-              key={key}
-              onClick={() => setSelectedCategory(selectedCategory === key ? null : key)}
-              className={`flex items-center gap-2 text-xs px-2 py-1.5 rounded-lg transition-all ${
-                selectedCategory === key ? 'bg-primary/20 neon-glow-sm' : 'hover:bg-muted'
-              }`}
-            >
-              <div
-                className={`w-3 h-3 rounded-full ${key === 'event' ? 'animate-pulse' : ''}`}
-                style={{ backgroundColor: categoryColors[key] }}
-              />
-              <span className="text-foreground">{label}</span>
-              <span className="text-muted-foreground ml-auto">{getCategoryCount(key)}</span>
-            </button>
-          ))}
-        </div>
+      {/* Legend - bottom left, compact, collapsible, glassmorphism */}
+      <div className="absolute bottom-4 left-4 z-10 max-w-[160px]">
+        {legendCollapsed ? (
+          <button
+            onClick={() => setLegendCollapsed(false)}
+            className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium text-foreground backdrop-blur-xl"
+            style={{ background: 'rgba(0,0,0,0.6)' }}
+          >
+            <div className="flex gap-1">
+              {Object.entries(categoryColors).filter(([k]) => k in categoryLabels).map(([key, color]) => (
+                <div
+                  key={key}
+                  className="h-2 w-2 rounded-full"
+                  style={{ backgroundColor: color, boxShadow: selectedCategory === key ? `0 0 6px ${color}` : 'none' }}
+                />
+              ))}
+            </div>
+            <span className="text-muted-foreground">Legende</span>
+          </button>
+        ) : (
+          <div
+            className="rounded-xl px-3 py-2.5 backdrop-blur-xl"
+            style={{ background: 'rgba(0,0,0,0.6)' }}
+          >
+            <div className="flex items-center justify-between mb-1.5">
+              <span className="text-[11px] font-semibold text-foreground">
+                {selectedCity && selectedCity !== 'Alle' ? selectedCity : 'Locations'}
+              </span>
+              <button
+                onClick={() => setLegendCollapsed(true)}
+                className="text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-x-3 gap-y-1">
+              {Object.entries(categoryLabels).map(([key, label]) => (
+                <button
+                  key={key}
+                  onClick={() => setSelectedCategory(selectedCategory === key ? null : key)}
+                  className="flex items-center gap-1.5 text-[11px] py-0.5 transition-all"
+                >
+                  <div
+                    className={`h-2.5 w-2.5 rounded-full shrink-0 ${key === 'event' ? 'animate-pulse' : ''}`}
+                    style={{
+                      backgroundColor: categoryColors[key],
+                      boxShadow: selectedCategory === key ? `0 0 8px ${categoryColors[key]}` : 'none',
+                    }}
+                  />
+                  <span className={selectedCategory === key ? 'text-foreground font-medium' : 'text-muted-foreground'}>
+                    {label}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

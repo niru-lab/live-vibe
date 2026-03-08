@@ -1,4 +1,5 @@
-import { MapPin, Bell, Lightning } from '@phosphor-icons/react';
+import { MapPin, Bell } from '@phosphor-icons/react';
+import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -24,7 +25,7 @@ export const FeedHeader = ({ selectedCity, onCityChange }: FeedHeaderProps) => {
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
-          <Lightning weight="thin" className="h-6 w-6 text-foreground" />
+          <FeyrnLogo size="md" />
         </div>
 
         <div className="flex items-center gap-2">
