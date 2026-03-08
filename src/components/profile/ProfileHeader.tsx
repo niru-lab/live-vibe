@@ -54,18 +54,18 @@ export const ProfileHeader = ({ profile, isLoading, followersCount, followingCou
               {isLoading ? <Skeleton className="mt-3 h-5 w-32" /> : (
                 <div className="mt-3"><span className="text-sm text-muted-foreground">@{profile?.username}</span></div>
               )}
-              {!isLoading && badgeData && ((profile as any)?.show_badge_in_bio || (profile as any)?.show_sc_in_bio) && (
-                <button onClick={() => setAchievementsOpen(true)} className="mt-1.5 flex items-center gap-1.5">
-                  {(profile as any)?.show_badge_in_bio && (
-                    <span className="text-xs font-medium text-muted-foreground">{badgeData.name}</span>
+              {!isLoading && badgeData && (profile?.show_badge_in_bio || profile?.show_sc_in_bio) && (
+                <button onClick={() => setAchievementsOpen(true)} className="mt-1.5 flex items-center gap-1.5 rounded-full border border-[hsl(var(--neon-purple)/0.3)] bg-muted/50 px-3 py-1">
+                  {profile?.show_badge_in_bio && (
+                    <span className="text-[11px] font-medium text-muted-foreground">{badgeData.name}</span>
                   )}
-                  {(profile as any)?.show_badge_in_bio && (profile as any)?.show_sc_in_bio && (
-                    <span className="text-muted-foreground text-xs">·</span>
+                  {profile?.show_badge_in_bio && profile?.show_sc_in_bio && (
+                    <span className="text-muted-foreground text-[10px]">·</span>
                   )}
-                  {(profile as any)?.show_sc_in_bio && (
+                  {profile?.show_sc_in_bio && (
                     <div className="flex items-center gap-0.5">
                       <Cloud weight="thin" className="h-3 w-3 text-muted-foreground" />
-                      <span className="font-medium text-xs text-foreground">{formatNumber(profile?.social_cloud_points || 0)} SC</span>
+                      <span className="font-medium text-[11px] text-foreground">{formatNumber(profile?.social_cloud_points || 0)} SC</span>
                     </div>
                   )}
                 </button>

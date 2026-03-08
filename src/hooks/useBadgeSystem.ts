@@ -12,16 +12,16 @@ export interface BadgeLevel {
 }
 
 export const BADGE_LEVELS: BadgeLevel[] = [
-  { level: 0, name: 'NEULING', emoji: '🆕', minPoints: 0, color: 'text-muted-foreground' },
-  { level: 1, name: 'PARTY STARTER', emoji: '🎉', minPoints: 100, color: 'text-green-500' },
-  { level: 2, name: 'NACHTFALKE', emoji: '🌃', minPoints: 500, color: 'text-blue-400' },
-  { level: 3, name: 'PARTY FUCHS', emoji: '🦊', minPoints: 1500, color: 'text-orange-500' },
-  { level: 4, name: 'PARTY HASE', emoji: '🐰', minPoints: 5000, color: 'text-pink-400' },
-  { level: 5, name: 'PARTY LÖWE', emoji: '🦁', minPoints: 15000, color: 'text-yellow-500' },
-  { level: 6, name: 'NACHTKÖNIG', emoji: '👑', minPoints: 50000, color: 'text-purple-500' },
-  { level: 7, name: 'PARTY LEGENDE', emoji: '⚔️', minPoints: 150000, color: 'text-red-500' },
-  { level: 8, name: 'PARTY CHAMPION', emoji: '🏆', minPoints: 500000, color: 'text-amber-400' },
-  { level: 9, name: 'PARTY GOTT', emoji: '🌟', minPoints: 1000000, color: 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500' },
+  { level: 0, name: 'Neuling', emoji: '', minPoints: 0, color: 'text-muted-foreground' },
+  { level: 1, name: 'Party Starter', emoji: '', minPoints: 100, color: 'text-green-500' },
+  { level: 2, name: 'Nachtfalke', emoji: '', minPoints: 500, color: 'text-blue-400' },
+  { level: 3, name: 'Party Fuchs', emoji: '', minPoints: 1500, color: 'text-orange-500' },
+  { level: 4, name: 'Party Hase', emoji: '', minPoints: 5000, color: 'text-pink-400' },
+  { level: 5, name: 'Party Löwe', emoji: '', minPoints: 15000, color: 'text-yellow-500' },
+  { level: 6, name: 'Nachtkönig', emoji: '', minPoints: 50000, color: 'text-purple-500' },
+  { level: 7, name: 'Party Legende', emoji: '', minPoints: 150000, color: 'text-red-500' },
+  { level: 8, name: 'Party Champion', emoji: '', minPoints: 500000, color: 'text-amber-400' },
+  { level: 9, name: 'Party Gott', emoji: '', minPoints: 1000000, color: 'text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500' },
 ];
 
 // 50 Faktoren grouped into 5 categories
