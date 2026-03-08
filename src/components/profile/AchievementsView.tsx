@@ -67,7 +67,7 @@ export const AchievementsView = ({ open, onOpenChange, badgeData, city }: Achiev
           {badgeData.nextLevel && (
             <div className="rounded-lg border border-primary/30 bg-primary/5 p-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 text-2xl">{badgeData.nextLevel.emoji}</div>
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/20 text-sm font-bold text-muted-foreground">Lv.{badgeData.nextLevel.level}</div>
                 <div><p className="font-semibold text-foreground">Level-Up zu {badgeData.nextLevel.name}</p><p className="text-sm text-muted-foreground">Noch {badgeData.pointsToNext.toLocaleString()} Punkte</p></div>
                 <CaretRight weight="thin" className="ml-auto h-5 w-5 text-muted-foreground" />
               </div>
