@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Envelope, MapPin, CalendarBlank, CaretRight, ChatCircle, ArrowUp, ArrowDown } from '@phosphor-icons/react';
+import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { useEventMessages, useMarkMessageRead } from '@/hooks/useEventMessages';
 import { useProfile } from '@/hooks/useProfile';
 import { supabase } from '@/integrations/supabase/client';
