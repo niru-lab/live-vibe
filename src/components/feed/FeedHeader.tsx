@@ -1,4 +1,4 @@
-import { MapPin, Bell } from '@phosphor-icons/react';
+import { MapPin, Bell, Lightning } from '@phosphor-icons/react';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { Button } from '@/components/ui/button';
 import {
