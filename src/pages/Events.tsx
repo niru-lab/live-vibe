@@ -10,6 +10,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Confetti, UserCheck, ChartBar, Eye, ShareNetwork, Envelope, Check, X } from '@phosphor-icons/react';
+import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { toast } from 'sonner';
