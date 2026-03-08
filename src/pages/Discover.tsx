@@ -28,7 +28,10 @@ export default function Discover() {
       <header className="sticky top-0 z-40 border-b border-border/50 bg-background/95 backdrop-blur-xl">
         <div className="space-y-3 p-4">
           <div className="flex items-center justify-between">
-            <FeyrnLogo size="sm" />
+            <div className="flex items-center gap-2">
+              <Compass weight="thin" className="h-5 w-5 text-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+              <FeyrnLogo size="sm" />
+            </div>
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleRefresh} disabled={isRefreshing}>
               <ArrowsClockwise weight="thin" className={`h-4 w-4 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))] ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
