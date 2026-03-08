@@ -64,7 +64,7 @@ export default function Messages() {
       <header className="sticky top-0 z-40 glass">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <Envelope weight="thin" className="h-5 w-5 text-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+            <Envelope weight="thin" className="h-5 w-5 text-[hsl(var(--neon-purple))] drop-shadow-[0_0_8px_hsl(var(--neon-purple))]" />
             <span className="text-lg font-display font-bold text-foreground">Nachrichten</span>
             {unreadCount > 0 && <Badge className="bg-red-500 text-white">{unreadCount} neu</Badge>}
           </div>

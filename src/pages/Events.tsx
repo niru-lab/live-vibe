@@ -40,7 +40,7 @@ export default function Events() {
       <header className="sticky top-0 z-40 glass">
         <div className="flex items-center justify-between p-4">
            <div className="flex items-center gap-2">
-             <CalendarBlank weight="thin" className="h-5 w-5 text-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+             <CalendarBlank weight="thin" className="h-5 w-5 text-[hsl(var(--neon-purple))] drop-shadow-[0_0_8px_hsl(var(--neon-purple))]" />
              <FeyrnLogo size="sm" />
            </div>
           <Button variant="ghost" size="icon" className="h-8 w-8">
