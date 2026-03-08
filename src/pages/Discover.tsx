@@ -63,7 +63,7 @@ export default function Discover() {
       </header>
       <div className="flex-1 p-4">
         <Suspense fallback={<Skeleton className="h-[500px] w-full rounded-xl" />}>
-          <StuttgartMap selectedCity={selectedCity} />
+          <StuttgartMap selectedCity={selectedCity} selectedCategory={selectedCategory} />
         </Suspense>
       </div>
     </AppLayout>
