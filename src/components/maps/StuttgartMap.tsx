@@ -87,10 +87,10 @@ const categoryColors: Record<string, string> = {
 };
 
 const categoryLabels: Record<string, string> = {
-  bar: '🍸 Bar',
-  club: '🎧 Club',
-  cafe: '☕ Café',
-  event: '🎉 Events',
+  bar: 'Bar',
+  club: 'Club',
+  cafe: 'Café',
+  event: 'Events',
 };
 
 const cityCenters: Record<string, { center: [number, number]; zoom: number }> = {
