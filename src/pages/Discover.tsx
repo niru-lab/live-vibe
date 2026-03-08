@@ -14,6 +14,7 @@ const StuttgartMap = lazy(() => import('@/components/maps/StuttgartMap').then(m 
 export default function Discover() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const queryClient = useQueryClient();
 
@@ -51,13 +52,18 @@ export default function Discover() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <DiscoverFilters onFiltersChange={(f) => setSelectedCity(f.city)} />
+            <DiscoverFilters onFiltersChange={(f) => { 
+              setSelectedCity(f.city); 
+              // Map category filter names to map keys
+              const catMap: Record<string, string> = { 'Bar': 'bar', 'Club': 'club', 'Café': 'cafe', 'Events': 'event' };
+              setSelectedCategory(f.category ? catMap[f.category] || null : null);
+            }} />
           </div>
         </div>
       </header>
       <div className="flex-1 p-4">
         <Suspense fallback={<Skeleton className="h-[500px] w-full rounded-xl" />}>
-          <StuttgartMap selectedCity={selectedCity} />
+          <StuttgartMap selectedCity={selectedCity} selectedCategory={selectedCategory} />
         </Suspense>
       </div>
     </AppLayout>
