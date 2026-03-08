@@ -10,6 +10,7 @@ interface DiscoverFiltersProps {
 
 export interface FilterState {
   city: string | null;
+  category: string | null;
   music: string | null;
   vibes: string | null;
   time: string | null;
