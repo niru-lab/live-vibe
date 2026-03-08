@@ -52,7 +52,12 @@ export default function Discover() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <DiscoverFilters onFiltersChange={(f) => setSelectedCity(f.city)} />
+            <DiscoverFilters onFiltersChange={(f) => { 
+              setSelectedCity(f.city); 
+              // Map category filter names to map keys
+              const catMap: Record<string, string> = { 'Bar': 'bar', 'Club': 'club', 'Café': 'cafe', 'Events': 'event' };
+              setSelectedCategory(f.category ? catMap[f.category] || null : null);
+            }} />
           </div>
         </div>
       </header>
