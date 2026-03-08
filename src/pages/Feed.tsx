@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePosts, useLikePost, useUserLikes } from '@/hooks/usePosts';
 import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
+import { useTaggedPosts } from '@/hooks/useEvents';
 import { PostCard } from '@/components/feed/PostCard';
 import { FeedHeader } from '@/components/feed/FeedHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Lightning, Confetti } from '@phosphor-icons/react';
+import { Lightning, Confetti, ArrowLeft } from '@phosphor-icons/react';
 
 export default function Feed() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const venueFilter = searchParams.get('venue');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   
   const { data: rawPosts, isLoading: postsLoading } = usePosts(selectedCity === 'all' ? undefined : selectedCity);
   const posts = useFeedAlgorithm(rawPosts);
+  const { data: taggedPosts, isLoading: taggedLoading } = useTaggedPosts(venueFilter || undefined);
   const { data: likedPosts = [] } = useUserLikes();
   const likeMutation = useLikePost();
 
@@ -29,6 +33,9 @@ export default function Feed() {
   const handleLike = (postId: string, isLiked: boolean) => {
     likeMutation.mutate({ postId, isLiked });
   };
+
+  const activePosts = venueFilter ? taggedPosts : posts;
+  const isLoading = venueFilter ? taggedLoading : postsLoading;
 
   if (authLoading) {
     return (
@@ -43,7 +50,18 @@ export default function Feed() {
       <FeedHeader selectedCity={selectedCity} onCityChange={setSelectedCity} />
       
       <div className="px-4 pt-4">
-        {postsLoading ? (
+        {venueFilter && (
+          <div className="mb-4 flex items-center gap-2">
+            <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setSearchParams({})}>
+              <ArrowLeft weight="bold" className="h-4 w-4" />
+              Zurück zum Feed
+            </Button>
+            <span className="text-xs text-muted-foreground">
+              Posts für Venue
+            </span>
+          </div>
+        )}
+        {isLoading ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="space-y-3">
@@ -56,9 +74,9 @@ export default function Feed() {
               </div>
             ))}
           </div>
-        ) : posts && posts.length > 0 ? (
+        ) : activePosts && activePosts.length > 0 ? (
           <div className="space-y-6">
-            {posts.map((post) => (
+            {activePosts.map((post: any) => (
               <PostCard
                 key={post.id}
                 post={post}
@@ -72,13 +90,23 @@ export default function Feed() {
             <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted">
               <Confetti weight="thin" className="h-10 w-10 text-muted-foreground" />
             </div>
-            <h2 className="mb-2 text-lg font-semibold text-foreground">Noch keine Posts</h2>
+            <h2 className="mb-2 text-lg font-semibold text-foreground">
+              {venueFilter ? 'Keine Posts für diese Location' : 'Noch keine Posts'}
+            </h2>
             <p className="mb-6 max-w-xs text-sm text-muted-foreground">
-              Sei der Erste, der einen Moment teilt und zeige, wo es gerade abgeht!
+              {venueFilter 
+                ? 'Für diese Location wurden noch keine Posts geteilt.'
+                : 'Sei der Erste, der einen Moment teilt und zeige, wo es gerade abgeht!'}
             </p>
-            <Button onClick={() => navigate('/create')} variant="outline">
-              Ersten Post erstellen
-            </Button>
+            {venueFilter ? (
+              <Button onClick={() => setSearchParams({})} variant="outline">
+                Zurück zum Feed
+              </Button>
+            ) : (
+              <Button onClick={() => navigate('/create')} variant="outline">
+                Ersten Post erstellen
+              </Button>
+            )}
           </div>
         )}
       </div>

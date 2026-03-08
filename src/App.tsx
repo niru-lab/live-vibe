@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { IconContext } from "@phosphor-icons/react";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { OfflineBanner } from "@/components/OfflineBanner";
 import Feed from "./pages/Feed";
 import Auth from "./pages/Auth";
 import Discover from "./pages/Discover";
@@ -21,7 +23,15 @@ import CreateRoom from "./pages/CreateRoom";
 import RoomDetail from "./pages/RoomDetail";
 import NotFound from "./pages/NotFound";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 2,
+      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 10000),
+      staleTime: 30_000,
+    },
+  },
+});
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -29,27 +39,30 @@ const App = () => (
       <ThemeProvider defaultTheme="dark" storageKey="feyrn-theme">
         <AuthProvider>
           <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Feed />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route path="/discover" element={<Discover />} />
-                <Route path="/events" element={<Events />} />
-                <Route path="/events/create" element={<CreateEvent />} />
-                <Route path="/events/:id" element={<EventDetail />} />
-                <Route path="/create" element={<CreatePost />} />
-                <Route path="/create/carousel" element={<CreateCarousel />} />
-                <Route path="/profile" element={<Profile />} />
-                <Route path="/messages" element={<Messages />} />
-                <Route path="/roomz" element={<Roomz />} />
-                <Route path="/roomz/create" element={<CreateRoom />} />
-                <Route path="/roomz/:id" element={<RoomDetail />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </BrowserRouter>
+            <ErrorBoundary>
+              <OfflineBanner />
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Feed />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/discover" element={<Discover />} />
+                  <Route path="/events" element={<Events />} />
+                  <Route path="/events/create" element={<CreateEvent />} />
+                  <Route path="/events/:id" element={<EventDetail />} />
+                  <Route path="/create" element={<CreatePost />} />
+                  <Route path="/create/carousel" element={<CreateCarousel />} />
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/messages" element={<Messages />} />
+                  <Route path="/roomz" element={<Roomz />} />
+                  <Route path="/roomz/create" element={<CreateRoom />} />
+                  <Route path="/roomz/:id" element={<RoomDetail />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </BrowserRouter>
+            </ErrorBoundary>
           </TooltipProvider>
         </AuthProvider>
       </ThemeProvider>

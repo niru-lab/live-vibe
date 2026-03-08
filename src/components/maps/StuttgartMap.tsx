@@ -378,7 +378,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                             <div
                               key={post.id}
                               className="relative aspect-square rounded-lg overflow-hidden cursor-pointer"
-                              onClick={() => navigate('/feed')}
+                              onClick={() => navigate(`/?venue=${popupInfo.data.id}`)}
                             >
                               {post.media_type === 'video' ? (
                                 <video src={post.media_url} className="w-full h-full object-cover" muted />
@@ -396,6 +396,16 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                       </div>
                     );
                   })()}
+                  {postCount(popupInfo.data.id) > 0 && (
+                    <Button
+                      size="sm"
+                      className="w-full mt-1 text-xs"
+                      variant="outline"
+                      onClick={() => navigate(`/?venue=${popupInfo.data.id}`)}
+                    >
+                      Alle Posts ansehen
+                    </Button>
+                  )}
                 </>
               )}
 
