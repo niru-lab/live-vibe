@@ -206,6 +206,16 @@ export default function CreateEvent() {
             </div>
           </form>
         </Form>
+        {/* Sticky bottom submit button */}
+        <div className="sticky bottom-0 z-40 border-t border-border/50 bg-background/95 backdrop-blur-xl p-3">
+          <Button
+            onClick={form.handleSubmit(onSubmit)}
+            className="w-full rounded-2xl bg-[hsl(var(--neon-purple))] hover:bg-[hsl(var(--neon-purple))]/90 text-white py-6 text-base font-semibold"
+            disabled={createEvent.isPending || isUploading}
+          >
+            {isUploading ? 'Lädt...' : 'Event erstellen'}
+          </Button>
+        </div>
       </div>
     </AppLayout>
   );
