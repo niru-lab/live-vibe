@@ -124,10 +124,13 @@ const heatmapLayer: any = {
 
 interface StuttgartMapProps {
   selectedCity?: string | null;
+  selectedCategory?: string | null;
 }
 
-export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+export function StuttgartMap({ selectedCity, selectedCategory: externalCategory }: StuttgartMapProps) {
+  const [internalCategory, setInternalCategory] = useState<string | null>(null);
+  const selectedCategory = externalCategory ?? internalCategory;
+  const setSelectedCategory = (cat: string | null) => setInternalCategory(cat);
   const [legendCollapsed, setLegendCollapsed] = useState(true);
   const [popupInfo, setPopupInfo] = useState<any>(null);
   const { data: events } = useEvents();
