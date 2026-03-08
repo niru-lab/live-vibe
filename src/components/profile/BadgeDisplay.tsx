@@ -88,7 +88,7 @@ export const BadgeCard = ({
     <div className="rounded-xl border border-border/50 bg-gradient-to-br from-card to-muted/30 p-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-3xl">{emoji}</span>
+          <div className="flex h-10 w-10 items-center justify-center rounded-full border border-[hsl(var(--neon-purple)/0.5)] bg-muted text-sm font-bold text-muted-foreground">{level}</div>
           <div>
             <p className={cn('font-bold text-lg', color)}>{name}</p>
             <p className="text-sm text-muted-foreground">Level {level}/9</p>
@@ -102,7 +102,7 @@ export const BadgeCard = ({
       {nextLevel && (
         <div className="mt-4">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-            <span>Fortschritt zu {nextLevel.emoji} {nextLevel.name}</span>
+            <span>Fortschritt zu Lv.{nextLevel.level} {nextLevel.name}</span>
             <span>{Math.round(progressToNext)}%</span>
           </div>
           <div className="h-2 rounded-full bg-muted overflow-hidden">
