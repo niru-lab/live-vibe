@@ -131,12 +131,12 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
         <div className="space-y-6 overflow-y-auto pb-24 pr-2 max-h-[calc(80vh-180px)] touch-pan-y overscroll-contain">
           <FilterSection icon={Buildings} label="Stadt" options={cityOptions} filterKey="city" />
           <FilterSection icon={Funnel} label="Kategorie" options={categoryOptions} filterKey="category" />
-          <FilterSection icon={MusicNote} label="🎵 Musik" options={musicOptions} filterKey="music" />
-          <FilterSection icon={Users} label="👥 Vibes" options={vibesOptions} filterKey="vibes" />
-          <FilterSection icon={Clock} label="⏰ Zeit" options={timeOptions} filterKey="time" />
-          <FilterSection icon={CurrencyDollar} label="💰 Preis" options={priceOptions} filterKey="price" />
-          <FilterSection icon={MapPin} label="📍 Radius" options={radiusOptions} filterKey="radius" />
-          <FilterSection icon={Star} label="⭐ Social Cloud" options={socialCloudOptions} filterKey="socialCloud" />
+          <FilterSection icon={MusicNote} label="Musik" options={musicOptions} filterKey="music" />
+          <FilterSection icon={Users} label="Vibes" options={vibesOptions} filterKey="vibes" />
+          <FilterSection icon={Clock} label="Zeit" options={timeOptions} filterKey="time" />
+          <FilterSection icon={CurrencyDollar} label="Preis" options={priceOptions} filterKey="price" />
+          <FilterSection icon={MapPin} label="Radius" options={radiusOptions} filterKey="radius" />
+          <FilterSection icon={Star} label="Social Cloud" options={socialCloudOptions} filterKey="socialCloud" />
         </div>
 
         <div className="absolute bottom-0 left-0 right-0 border-t bg-background/95 backdrop-blur-xl p-4 safe-area-pb">
