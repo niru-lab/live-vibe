@@ -125,6 +125,7 @@ const heatmapLayer: any = {
 interface StuttgartMapProps {
   selectedCity?: string | null;
   selectedCategory?: string | null;
+  searchQuery?: string;
 }
 
 export function StuttgartMap({ selectedCity, selectedCategory: externalCategory }: StuttgartMapProps) {
