@@ -128,6 +128,7 @@ interface StuttgartMapProps {
 
 export function StuttgartMap({ selectedCity }: StuttgartMapProps) {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [legendCollapsed, setLegendCollapsed] = useState(true);
   const [popupInfo, setPopupInfo] = useState<any>(null);
   const { data: events } = useEvents();
   const { data: venues } = useVenues();
