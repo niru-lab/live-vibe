@@ -206,16 +206,19 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
     return { type: 'FeatureCollection' as const, features };
   }, [events, selectedCity]);
 
+  const searchLower = searchQuery.toLowerCase().trim();
+
   // Build venue markers
   const venueMarkers = useMemo(() => {
     const filtered = (venues || []).filter(v => {
       if (selectedCity && selectedCity !== 'Alle' && v.city?.toLowerCase() !== selectedCity.toLowerCase()) return false;
       if (selectedCategory && selectedCategory !== 'event' && v.category !== selectedCategory) return false;
       if (selectedCategory === 'event') return false;
+      if (searchLower && !v.name.toLowerCase().includes(searchLower) && !v.address.toLowerCase().includes(searchLower) && !v.category.toLowerCase().includes(searchLower)) return false;
       return true;
     });
     return filtered;
-  }, [venues, selectedCity, selectedCategory]);
+  }, [venues, selectedCity, selectedCategory, searchLower]);
 
   // Build event markers (for popup interaction)
   const eventMarkers = useMemo(() => {
