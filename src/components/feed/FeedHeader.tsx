@@ -25,7 +25,7 @@ export const FeedHeader = ({ selectedCity, onCityChange }: FeedHeaderProps) => {
     <header className="sticky top-0 z-40 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center gap-2">
-          <Lightning weight="thin" className="h-5 w-5 text-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+          <Lightning weight="thin" className="h-5 w-5 text-[hsl(var(--neon-purple))] drop-shadow-[0_0_8px_hsl(var(--neon-purple))]" />
           <FeyrnLogo size="sm" />
         </div>
 
