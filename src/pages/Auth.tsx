@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Sparkle, Confetti, Lightning } from '@phosphor-icons/react';
+import { Sparkle, Confetti } from '@phosphor-icons/react';
+import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Bitte gib eine gültige E-Mail-Adresse ein');
