@@ -113,10 +113,3 @@ export default function Feed() {
     </AppLayout>
   );
 }
-            </Button>
-          </div>
-        )}
-      </div>
-    </AppLayout>
-  );
-}
