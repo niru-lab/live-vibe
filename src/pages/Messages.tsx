@@ -64,7 +64,7 @@ export default function Messages() {
       <header className="sticky top-0 z-40 glass">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <span className="text-2xl">💬</span>
+            <span className="text-lg font-display font-bold text-foreground">Nachrichten</span>
             {unreadCount > 0 && <Badge className="bg-red-500 text-white">{unreadCount} neu</Badge>}
           </div>
           <Button variant="ghost" size="icon" className="h-8 w-8">
