@@ -1,22 +1,26 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePosts, useLikePost, useUserLikes } from '@/hooks/usePosts';
 import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
+import { useTaggedPosts } from '@/hooks/useEvents';
 import { PostCard } from '@/components/feed/PostCard';
 import { FeedHeader } from '@/components/feed/FeedHeader';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Lightning, Confetti } from '@phosphor-icons/react';
+import { Lightning, Confetti, ArrowLeft } from '@phosphor-icons/react';
 
 export default function Feed() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const venueFilter = searchParams.get('venue');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   
   const { data: rawPosts, isLoading: postsLoading } = usePosts(selectedCity === 'all' ? undefined : selectedCity);
   const posts = useFeedAlgorithm(rawPosts);
+  const { data: taggedPosts, isLoading: taggedLoading } = useTaggedPosts(venueFilter || undefined);
   const { data: likedPosts = [] } = useUserLikes();
   const likeMutation = useLikePost();
 
@@ -29,6 +33,9 @@ export default function Feed() {
   const handleLike = (postId: string, isLiked: boolean) => {
     likeMutation.mutate({ postId, isLiked });
   };
+
+  const activePosts = venueFilter ? taggedPosts : posts;
+  const isLoading = venueFilter ? taggedLoading : postsLoading;
 
   if (authLoading) {
     return (
