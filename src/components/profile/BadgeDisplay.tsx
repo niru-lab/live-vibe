@@ -102,7 +102,7 @@ export const BadgeCard = ({
       {nextLevel && (
         <div className="mt-4">
           <div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
-            <span>Fortschritt zu {nextLevel.emoji} {nextLevel.name}</span>
+            <span>Fortschritt zu Lv.{nextLevel.level} {nextLevel.name}</span>
             <span>{Math.round(progressToNext)}%</span>
           </div>
           <div className="h-2 rounded-full bg-muted overflow-hidden">

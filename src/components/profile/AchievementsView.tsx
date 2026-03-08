@@ -78,7 +78,7 @@ export const AchievementsView = ({ open, onOpenChange, badgeData, city }: Achiev
             <div className="space-y-2">
               {BADGE_LEVELS.map((badge) => (
                 <div key={badge.level} className={cn('flex items-center gap-3 rounded-lg p-2', badge.level <= badgeData.level ? 'bg-primary/10' : 'bg-muted/30 opacity-60')}>
-                  <span className="text-xl">{badge.emoji}</span>
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-xs font-bold text-muted-foreground">{badge.level}</div>
                   <div className="flex-1"><p className={cn('text-sm font-medium', badge.color)}>{badge.name}</p><p className="text-xs text-muted-foreground">{badge.minPoints.toLocaleString()}+ Punkte</p></div>
                   {badge.level <= badgeData.level && <Badge variant="outline" className="text-green-500 border-green-500">✓</Badge>}
                   {badge.level === badgeData.level && <Badge className="bg-primary text-primary-foreground">Aktuell</Badge>}
