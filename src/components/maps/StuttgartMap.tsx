@@ -230,10 +230,11 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         else coords = getEventCoordinates(event.city, event.address);
         if (!coords) return null;
         if (selectedCity && selectedCity !== 'Alle' && event.city?.toLowerCase() !== selectedCity.toLowerCase()) return null;
+        if (searchLower && !event.name.toLowerCase().includes(searchLower) && !event.location_name.toLowerCase().includes(searchLower) && !event.address.toLowerCase().includes(searchLower)) return null;
         return { ...event, coords };
       })
       .filter(Boolean) as (typeof events extends (infer T)[] | undefined ? T & { coords: [number, number] } : never)[];
-  }, [events, selectedCity, selectedCategory]);
+  }, [events, selectedCity, selectedCategory, searchLower]);
 
   const getCategoryCount = useCallback((category: string) => {
     const cityFilter = (city?: string | null) =>
