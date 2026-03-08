@@ -128,7 +128,7 @@ interface StuttgartMapProps {
   searchQuery?: string;
 }
 
-export function StuttgartMap({ selectedCity, selectedCategory: externalCategory }: StuttgartMapProps) {
+export function StuttgartMap({ selectedCity, selectedCategory: externalCategory, searchQuery = '' }: StuttgartMapProps) {
   const [internalCategory, setInternalCategory] = useState<string | null>(null);
   const selectedCategory = externalCategory ?? internalCategory;
   const setSelectedCategory = (cat: string | null) => setInternalCategory(cat);
