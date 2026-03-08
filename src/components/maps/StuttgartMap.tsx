@@ -125,9 +125,10 @@ const heatmapLayer: any = {
 interface StuttgartMapProps {
   selectedCity?: string | null;
   selectedCategory?: string | null;
+  searchQuery?: string;
 }
 
-export function StuttgartMap({ selectedCity, selectedCategory: externalCategory }: StuttgartMapProps) {
+export function StuttgartMap({ selectedCity, selectedCategory: externalCategory, searchQuery = '' }: StuttgartMapProps) {
   const [internalCategory, setInternalCategory] = useState<string | null>(null);
   const selectedCategory = externalCategory ?? internalCategory;
   const setSelectedCategory = (cat: string | null) => setInternalCategory(cat);
@@ -205,16 +206,19 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory 
     return { type: 'FeatureCollection' as const, features };
   }, [events, selectedCity]);
 
+  const searchLower = searchQuery.toLowerCase().trim();
+
   // Build venue markers
   const venueMarkers = useMemo(() => {
     const filtered = (venues || []).filter(v => {
       if (selectedCity && selectedCity !== 'Alle' && v.city?.toLowerCase() !== selectedCity.toLowerCase()) return false;
       if (selectedCategory && selectedCategory !== 'event' && v.category !== selectedCategory) return false;
       if (selectedCategory === 'event') return false;
+      if (searchLower && !v.name.toLowerCase().includes(searchLower) && !v.address.toLowerCase().includes(searchLower) && !v.category.toLowerCase().includes(searchLower)) return false;
       return true;
     });
     return filtered;
-  }, [venues, selectedCity, selectedCategory]);
+  }, [venues, selectedCity, selectedCategory, searchLower]);
 
   // Build event markers (for popup interaction)
   const eventMarkers = useMemo(() => {
@@ -226,10 +230,11 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory 
         else coords = getEventCoordinates(event.city, event.address);
         if (!coords) return null;
         if (selectedCity && selectedCity !== 'Alle' && event.city?.toLowerCase() !== selectedCity.toLowerCase()) return null;
+        if (searchLower && !event.name.toLowerCase().includes(searchLower) && !event.location_name.toLowerCase().includes(searchLower) && !event.address.toLowerCase().includes(searchLower)) return null;
         return { ...event, coords };
       })
       .filter(Boolean) as (typeof events extends (infer T)[] | undefined ? T & { coords: [number, number] } : never)[];
-  }, [events, selectedCity, selectedCategory]);
+  }, [events, selectedCity, selectedCategory, searchLower]);
 
   const getCategoryCount = useCallback((category: string) => {
     const cityFilter = (city?: string | null) =>
