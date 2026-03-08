@@ -89,9 +89,8 @@ export default function Auth() {
 
       <div className="relative z-10 mb-8 text-center">
         <div className="mb-4 flex items-center justify-center gap-2">
-          <Lightning weight="thin" className="h-12 w-12 text-foreground" />
+          <FeyrnLogo size="lg" />
         </div>
-        <h1 className="font-display text-2xl font-bold tracking-tight text-foreground">Feyrn</h1>
         <p className="mt-2 text-sm text-muted-foreground">Entdecke, was gerade abgeht</p>
       </div>
 
