@@ -32,6 +32,7 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
   const [open, setOpen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     city: null,
+    category: null,
     music: null,
     vibes: null,
     time: null,
