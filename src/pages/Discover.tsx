@@ -4,7 +4,7 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MagnifyingGlass, Microphone, Camera, ArrowsClockwise } from '@phosphor-icons/react';
+import { MagnifyingGlass, Microphone, Camera, Compass, ArrowsClockwise } from '@phosphor-icons/react';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { DiscoverFilters } from '@/components/discover/DiscoverFilters';
 import { useQueryClient } from '@tanstack/react-query';
