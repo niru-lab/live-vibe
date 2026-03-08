@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Plus, MagnifyingGlass, Users, MapPin, Lightning, GearSix, ChatsCircle } from '@phosphor-icons/react';
+import { Plus, MagnifyingGlass, Users, MapPin, Lightning, GearSix, DoorOpen } from '@phosphor-icons/react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 
