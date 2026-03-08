@@ -48,7 +48,7 @@ export const ProfileHeader = ({ profile, isLoading, followersCount, followingCou
                     <AvatarImage src={profile?.avatar_url || ''} className="object-cover" />
                     <AvatarFallback className="bg-muted text-xl text-foreground font-semibold">{profile?.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
                   </Avatar>
-                  {badgeData && <div className="absolute -bottom-1 -right-1 text-lg drop-shadow-lg">{badgeData.emoji}</div>}
+                  {badgeData && badgeData.level > 0 && <div className="absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border border-[hsl(var(--neon-purple)/0.5)] bg-background text-[10px] font-bold text-muted-foreground">{badgeData.level}</div>}
                 </button>
               )}
               {isLoading ? <Skeleton className="mt-3 h-5 w-32" /> : (
