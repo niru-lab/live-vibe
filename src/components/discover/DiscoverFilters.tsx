@@ -52,6 +52,7 @@ export function DiscoverFilters({ onFiltersChange }: DiscoverFiltersProps) {
   const clearFilters = () => {
     const cleared: FilterState = { 
       city: null,
+      category: null,
       music: null, 
       vibes: null, 
       time: null, 
