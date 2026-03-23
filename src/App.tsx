@@ -50,7 +50,11 @@ const App = () => (
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Feed />} />
-                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/auth" element={<Welcome />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/verify" element={<Verify />} />
+                  <Route path="/onboarding" element={<Onboarding />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="/discover" element={<Discover />} />
                   <Route path="/events" element={<Events />} />
                   <Route path="/events/create" element={<CreateEvent />} />
