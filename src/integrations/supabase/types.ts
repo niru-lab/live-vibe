@@ -857,6 +857,7 @@ export type Database = {
           display_name: string
           id: string
           is_verified: boolean
+          onboarding_complete: boolean | null
           profile_type: Database["public"]["Enums"]["profile_type"]
           show_badge_in_bio: boolean
           show_sc_in_bio: boolean
@@ -864,6 +865,7 @@ export type Database = {
           updated_at: string
           user_id: string
           username: string
+          vibes: string[] | null
         }
         Insert: {
           avatar_url?: string | null
@@ -873,6 +875,7 @@ export type Database = {
           display_name: string
           id?: string
           is_verified?: boolean
+          onboarding_complete?: boolean | null
           profile_type?: Database["public"]["Enums"]["profile_type"]
           show_badge_in_bio?: boolean
           show_sc_in_bio?: boolean
@@ -880,6 +883,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           username: string
+          vibes?: string[] | null
         }
         Update: {
           avatar_url?: string | null
@@ -889,6 +893,7 @@ export type Database = {
           display_name?: string
           id?: string
           is_verified?: boolean
+          onboarding_complete?: boolean | null
           profile_type?: Database["public"]["Enums"]["profile_type"]
           show_badge_in_bio?: boolean
           show_sc_in_bio?: boolean
@@ -896,6 +901,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           username?: string
+          vibes?: string[] | null
         }
         Relationships: []
       }

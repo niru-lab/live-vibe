@@ -9,7 +9,11 @@ import { IconContext } from "@phosphor-icons/react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import Feed from "./pages/Feed";
-import Auth from "./pages/Auth";
+import Welcome from "./pages/Welcome";
+import Register from "./pages/Register";
+import Verify from "./pages/Verify";
+import Onboarding from "./pages/Onboarding";
+import AuthCallback from "./pages/AuthCallback";
 import Discover from "./pages/Discover";
 import Events from "./pages/Events";
 import CreateEvent from "./pages/CreateEvent";
@@ -46,7 +50,11 @@ const App = () => (
               <BrowserRouter>
                 <Routes>
                   <Route path="/" element={<Feed />} />
-                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/auth" element={<Welcome />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route path="/verify" element={<Verify />} />
+                  <Route path="/onboarding" element={<Onboarding />} />
+                  <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="/discover" element={<Discover />} />
                   <Route path="/events" element={<Events />} />
                   <Route path="/events/create" element={<CreateEvent />} />
