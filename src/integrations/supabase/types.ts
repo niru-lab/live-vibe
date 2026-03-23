@@ -850,57 +850,102 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address: string | null
+          age: number | null
           avatar_url: string | null
           bio: string | null
           city: string | null
+          closes_at: string | null
           created_at: string
           display_name: string
+          favorite_drink: string | null
           id: string
           is_verified: boolean
+          music_genres: string[] | null
           onboarding_complete: boolean | null
+          opens_at: string | null
+          party_vibe_score: number | null
+          perfect_evening: string | null
+          persona_color: string | null
+          persona_text: string | null
+          price_segment: string | null
           profile_type: Database["public"]["Enums"]["profile_type"]
           show_badge_in_bio: boolean
           show_sc_in_bio: boolean
           social_cloud_points: number
+          spot_types: string[] | null
           updated_at: string
           user_id: string
           username: string
+          venue_description: string | null
+          venue_name: string | null
+          venue_type: string | null
           vibes: string[] | null
         }
         Insert: {
+          address?: string | null
+          age?: number | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          closes_at?: string | null
           created_at?: string
           display_name: string
+          favorite_drink?: string | null
           id?: string
           is_verified?: boolean
+          music_genres?: string[] | null
           onboarding_complete?: boolean | null
+          opens_at?: string | null
+          party_vibe_score?: number | null
+          perfect_evening?: string | null
+          persona_color?: string | null
+          persona_text?: string | null
+          price_segment?: string | null
           profile_type?: Database["public"]["Enums"]["profile_type"]
           show_badge_in_bio?: boolean
           show_sc_in_bio?: boolean
           social_cloud_points?: number
+          spot_types?: string[] | null
           updated_at?: string
           user_id: string
           username: string
+          venue_description?: string | null
+          venue_name?: string | null
+          venue_type?: string | null
           vibes?: string[] | null
         }
         Update: {
+          address?: string | null
+          age?: number | null
           avatar_url?: string | null
           bio?: string | null
           city?: string | null
+          closes_at?: string | null
           created_at?: string
           display_name?: string
+          favorite_drink?: string | null
           id?: string
           is_verified?: boolean
+          music_genres?: string[] | null
           onboarding_complete?: boolean | null
+          opens_at?: string | null
+          party_vibe_score?: number | null
+          perfect_evening?: string | null
+          persona_color?: string | null
+          persona_text?: string | null
+          price_segment?: string | null
           profile_type?: Database["public"]["Enums"]["profile_type"]
           show_badge_in_bio?: boolean
           show_sc_in_bio?: boolean
           social_cloud_points?: number
+          spot_types?: string[] | null
           updated_at?: string
           user_id?: string
           username?: string
+          venue_description?: string | null
+          venue_name?: string | null
+          venue_type?: string | null
           vibes?: string[] | null
         }
         Relationships: []
@@ -1243,7 +1288,7 @@ export type Database = {
         | "moment_x_trending"
       outbox_status: "pending" | "processing" | "done" | "failed"
       post_type: "normal" | "moment_x"
-      profile_type: "user" | "club" | "organizer"
+      profile_type: "user" | "club" | "organizer" | "eventer"
       visibility_level: "public" | "followers" | "private"
     }
     CompositeTypes: {
@@ -1395,7 +1440,7 @@ export const Constants = {
       ],
       outbox_status: ["pending", "processing", "done", "failed"],
       post_type: ["normal", "moment_x"],
-      profile_type: ["user", "club", "organizer"],
+      profile_type: ["user", "club", "organizer", "eventer"],
       visibility_level: ["public", "followers", "private"],
     },
   },
