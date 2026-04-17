@@ -54,7 +54,7 @@ const PostsGrid = ({ posts, isLoading, onPostClick, emptyMessage }: { posts?: Po
       {posts.map((post) => {
         const isLive = (post as any).post_type === 'moment_x' || (new Date().getTime() - new Date(post.created_at).getTime()) < 30 * 60 * 1000;
         return (
-          <button key={post.id} onClick={() => onPostClick(post)} className="group relative aspect-square overflow-hidden rounded-xl bg-muted focus:outline-none transition-all duration-300 hover:scale-[1.03] hover:z-10">
+          <button key={post.id} onClick={() => onPostClick(post)} className="group relative aspect-square overflow-hidden rounded-lg bg-[#12121A] focus:outline-none transition-all duration-300 hover:scale-[1.03] hover:z-10">
             {post.media_type === 'video' ? (
               <><video src={post.media_url} className="h-full w-full object-cover" muted /><div className="absolute right-2 top-2 glass rounded-full p-1.5"><Play weight="fill" className="h-3 w-3 text-white" /></div></>
             ) : (
