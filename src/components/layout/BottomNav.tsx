@@ -31,7 +31,7 @@ export const BottomNav = () => {
   return (
     <>
       <nav className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md">
-        <div className="glass rounded-[28px] px-1 py-3 neon-glow-sm">
+        <div className="glass-pill rounded-[28px] px-1 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_20px_rgba(124,58,237,0.15)]">
           <div className="flex items-center justify-around">
             {navItems.map(({ icon: Icon, label, path, isCenter, badgeKey }) => {
               const isActive = location.pathname === path;
@@ -44,8 +44,8 @@ export const BottomNav = () => {
                     onClick={() => setShowPostSelector(true)}
                     className="relative -mt-8 flex flex-col items-center"
                   >
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full border border-foreground/20 bg-background shadow-lg transition-all duration-300 hover:scale-110 active:scale-95">
-                      <Icon weight="thin" className="h-7 w-7 text-foreground" />
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#7C3AED] to-[#EC4899] shadow-[0_0_24px_rgba(124,58,237,0.6)] transition-all duration-300 hover:scale-110 active:scale-95">
+                      <Icon weight="bold" className="h-7 w-7 text-white" />
                     </div>
                   </button>
                 );
@@ -56,8 +56,7 @@ export const BottomNav = () => {
                   key={path}
                   to={path}
                   className={cn(
-                    'relative flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl transition-all duration-300',
-                    isActive && 'bg-white/10'
+                    'relative flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl transition-all duration-300'
                   )}
                 >
                   <div className="relative">
@@ -65,25 +64,25 @@ export const BottomNav = () => {
                       weight={isActive ? 'fill' : 'thin'}
                       className={cn(
                         'h-5 w-5 transition-all duration-300',
-                        isActive ? 'text-white' : 'text-muted-foreground'
+                        isActive ? 'text-white drop-shadow-[0_0_8px_rgba(124,58,237,0.7)]' : 'text-[#A0A0B0]'
                       )}
                     />
                     {badgeCount > 0 && (
-                      <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-0.5 text-xs font-bold text-white">
+                      <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-r from-[#7C3AED] to-[#EC4899] px-0.5 text-xs font-bold text-white shadow-[0_0_8px_rgba(236,72,153,0.6)]">
                         {badgeCount > 99 ? '99+' : badgeCount}
                       </span>
                     )}
                   </div>
                   <span
                     className={cn(
-                      'text-xs font-medium transition-colors',
-                      isActive ? 'text-white' : 'text-muted-foreground'
+                      'text-xs transition-colors',
+                      isActive ? 'text-white font-bold' : 'text-[#A0A0B0] font-medium'
                     )}
                   >
                     {label}
                   </span>
                   {isActive && (
-                    <div className="absolute -bottom-0.5 h-0.5 w-6 rounded-full bg-white" />
+                    <div className="absolute -bottom-0.5 h-0.5 w-6 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#EC4899] shadow-[0_0_6px_rgba(236,72,153,0.7)]" />
                   )}
                 </Link>
               );

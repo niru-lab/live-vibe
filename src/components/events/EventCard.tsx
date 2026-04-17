@@ -38,7 +38,7 @@ export const EventCard = ({ event, onClick, compact = false }: EventCardProps) =
   };
 
   return (
-    <article onClick={onClick} className="group animate-fade-in cursor-pointer overflow-hidden rounded-2xl border border-border/50 bg-card transition-all hover:border-primary/50 hover:shadow-glow">
+    <article onClick={onClick} className="group animate-fade-in cursor-pointer overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12121A] card-glow transition-all hover:border-[#7C3AED]/40">
       <div className="relative aspect-[16/9] bg-muted">
         {event.cover_image_url ? (
           <img src={event.cover_image_url} alt={event.name} className="h-full w-full object-cover transition-transform group-hover:scale-105" loading="lazy" />
@@ -53,7 +53,7 @@ export const EventCard = ({ event, onClick, compact = false }: EventCardProps) =
         {isGoing && <div className="absolute bottom-3 right-3"><Badge className="bg-green-500/90 backdrop-blur"><UserCheck weight="thin" className="mr-1 h-3 w-3" />Du gehst hin</Badge></div>}
       </div>
       <div className="p-4">
-        <h3 className="mb-2 font-display text-lg font-bold text-foreground line-clamp-1">{event.name}</h3>
+        <h3 className="mb-2 font-display text-lg font-bold text-white line-clamp-1">{event.name}</h3>
         <div className="mb-3">
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
@@ -89,7 +89,7 @@ export const EventCard = ({ event, onClick, compact = false }: EventCardProps) =
           </Button>
         </div>
         {event.creator && (
-          <div className="flex items-center gap-2 border-t border-border/50 pt-3 mt-3">
+          <div className="flex items-center gap-2 border-t border-white/[0.08] pt-3 mt-3">
             <Avatar className="h-6 w-6"><AvatarImage src={event.creator.avatar_url || ''} /><AvatarFallback className="text-xs">{event.creator.display_name?.charAt(0)}</AvatarFallback></Avatar>
             <span className="text-xs text-muted-foreground">von <span className="font-medium text-foreground">@{event.creator.username}</span></span>
             {event.creator.social_cloud_points !== undefined && <BadgeDisplay points={event.creator.social_cloud_points} size="sm" />}

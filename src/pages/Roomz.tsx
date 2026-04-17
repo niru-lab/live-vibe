@@ -18,32 +18,32 @@ const RoomCard = ({ room, isMember, onJoin }: { room: Room & { myRole?: string }
     <div 
       onClick={() => isMember ? navigate(`/roomz/${room.id}`) : undefined}
       className={cn(
-        "glass rounded-2xl p-4 space-y-3 transition-all",
-        isMember && "cursor-pointer hover:bg-white/5"
+        "rounded-2xl p-4 space-y-3 transition-all bg-[#12121A] border border-white/[0.08] card-glow",
+        isMember && "cursor-pointer hover:border-[#7C3AED]/40"
       )}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <h3 className="text-base font-semibold text-foreground truncate">{room.name}</h3>
+          <h3 className="text-base font-bold text-white truncate">{room.name}</h3>
           {room.description && (
-            <p className="text-sm text-muted-foreground line-clamp-2 mt-0.5">{room.description}</p>
+            <p className="text-sm text-[#A0A0B0] line-clamp-2 mt-0.5">{room.description}</p>
           )}
         </div>
-        <Badge variant="secondary" className="shrink-0 text-xs">
+        <Badge className="shrink-0 text-xs glass-pill text-white border-0">
           {room.category}
         </Badge>
       </div>
 
-      <div className="flex items-center gap-3 text-xs text-muted-foreground">
+      <div className="flex items-center gap-3 text-xs text-[#A0A0B0]">
         {room.city && (
           <span className="flex items-center gap-1">
-            <MapPin weight="fill" className="h-3 w-3" />
+            <MapPin weight="fill" className="h-3 w-3 text-[#7C3AED]" />
             {room.city}
           </span>
         )}
         {room.activity && (
           <span className="flex items-center gap-1">
-            <Lightning weight="fill" className="h-3 w-3" />
+            <Lightning weight="fill" className="h-3 w-3 text-[#EC4899]" />
             {room.activity}
           </span>
         )}
@@ -51,17 +51,17 @@ const RoomCard = ({ room, isMember, onJoin }: { room: Room & { myRole?: string }
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Avatar className="h-6 w-6">
+          <Avatar className="h-6 w-6 ring-1 ring-[#7C3AED]/40">
             <AvatarImage src={room.hoster?.avatar_url || ''} />
-            <AvatarFallback className="text-xs">{room.hoster?.display_name?.[0]}</AvatarFallback>
+            <AvatarFallback className="text-xs bg-gradient-to-br from-[#7C3AED] to-[#EC4899] text-white">{room.hoster?.display_name?.[0]}</AvatarFallback>
           </Avatar>
-          <span className="text-xs text-muted-foreground">@{room.hoster?.username}</span>
+          <span className="text-xs text-[#A0A0B0]">@{room.hoster?.username}</span>
         </div>
 
         {isMember ? (
-          <Badge variant="outline" className="text-xs">{room.myRole === 'hoster' ? 'Hoster' : 'Mitglied'}</Badge>
+          <Badge className="text-xs glass-pill text-white border-0">{room.myRole === 'hoster' ? 'Hoster' : 'Mitglied'}</Badge>
         ) : (
-          <Button size="sm" variant="secondary" className="h-7 text-xs" onClick={(e) => { e.stopPropagation(); onJoin(); }}>
+          <Button size="sm" className="h-7 text-xs bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white border-0" onClick={(e) => { e.stopPropagation(); onJoin(); }}>
             Beitreten
           </Button>
         )}
@@ -89,18 +89,21 @@ const Roomz = () => {
 
   return (
     <AppLayout>
+      <div className="min-h-screen bg-[#0A0A0F]">
       <div className="px-4 pt-14 pb-32 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <DoorOpen weight="thin" className="h-5 w-5 text-[hsl(var(--neon-purple))] drop-shadow-[0_0_8px_hsl(var(--neon-purple))]" />
-            <h1 className="text-xl font-bold text-foreground">Roomz</h1>
+            <div className="flex h-8 w-8 items-center justify-center rounded-full glass-pill">
+              <DoorOpen weight="fill" className="h-4 w-4 text-[#7C3AED]" />
+            </div>
+            <h1 className="text-xl font-bold text-white">Roomz</h1>
           </div>
-          <div className="flex items-center gap-1">
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <GearSix weight="thin" className="h-5 w-5 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full glass-pill">
+              <GearSix weight="thin" className="h-4 w-4 text-[#A0A0B0]" />
             </Button>
-            <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => navigate('/roomz/create')}>
+            <Button size="sm" className="gap-1.5 bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white border-0 shadow-[0_0_16px_rgba(124,58,237,0.4)]" onClick={() => navigate('/roomz/create')}>
               <Plus weight="bold" className="h-4 w-4" />
               Erstellen
             </Button>
@@ -109,12 +112,12 @@ const Roomz = () => {
 
         {/* Search */}
         <div className="relative">
-          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <MagnifyingGlass className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#A0A0B0]" />
           <Input
             placeholder="Roomz suchen..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-9 glass border-white/10"
+            className="pl-9 glass-pill border-0 text-white placeholder:text-[#A0A0B0]"
           />
         </div>
 
@@ -123,8 +126,8 @@ const Roomz = () => {
           <button
             onClick={() => setTab('my')}
             className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium transition-all",
-              tab === 'my' ? 'bg-foreground text-background' : 'glass text-muted-foreground'
+              "px-4 py-2 rounded-full text-sm transition-all",
+              tab === 'my' ? 'bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white font-bold shadow-[0_0_16px_rgba(124,58,237,0.4)]' : 'glass-pill text-[#A0A0B0] font-medium'
             )}
           >
             Meine Roomz
@@ -132,8 +135,8 @@ const Roomz = () => {
           <button
             onClick={() => setTab('explore')}
             className={cn(
-              "px-4 py-1.5 rounded-full text-sm font-medium transition-all",
-              tab === 'explore' ? 'bg-foreground text-background' : 'glass text-muted-foreground'
+              "px-4 py-2 rounded-full text-sm transition-all",
+              tab === 'explore' ? 'bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white font-bold shadow-[0_0_16px_rgba(124,58,237,0.4)]' : 'glass-pill text-[#A0A0B0] font-medium'
             )}
           >
             Entdecken
@@ -169,6 +172,7 @@ const Roomz = () => {
             ))}
           </div>
         )}
+      </div>
       </div>
     </AppLayout>
   );
