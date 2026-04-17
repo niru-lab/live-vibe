@@ -255,6 +255,58 @@
     gap: 2px;
   }
 
+  /* Animated gradient ring (purple → pink → purple) */
+  .avatar-gradient-ring {
+    position: relative;
+    padding: 3px;
+    border-radius: 9999px;
+    background: conic-gradient(from 0deg, #7C3AED, #EC4899, #7C3AED, #EC4899, #7C3AED);
+    animation: gradient-ring-spin 6s linear infinite;
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.4);
+  }
+
+  @keyframes gradient-ring-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Glass pill (premium glassmorphism) */
+  .glass-pill {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  /* Premium card glow */
+  .card-glow {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.15);
+  }
+
+  /* Gradient text purple→pink */
+  .text-gradient-brand {
+    background: linear-gradient(135deg, #7C3AED, #EC4899);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+
+  /* Tab active gradient underline */
+  .tab-underline-active {
+    position: relative;
+  }
+  .tab-underline-active::after {
+    content: '';
+    position: absolute;
+    left: 12%;
+    right: 12%;
+    bottom: -2px;
+    height: 2px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, #7C3AED, #EC4899);
+    box-shadow: 0 0 8px rgba(236, 72, 153, 0.5);
+  }
+
   /* Music Dots */
   .music-dots {
     display: flex;
