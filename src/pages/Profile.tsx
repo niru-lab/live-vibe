@@ -34,11 +34,11 @@ export default function Profile() {
 
   return (
     <AppLayout>
-      <div className="fixed inset-0 bg-gradient-hero -z-10" />
+      <div className="fixed inset-0 -z-10" style={{ background: '#0A0A0F' }} />
       <div className="min-h-screen">
         <header className="flex items-center justify-end px-4 py-4">
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <GearSix weight="thin" className="h-5 w-5 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full glass-pill">
+            <GearSix weight="bold" className="h-4 w-4 text-white" />
           </Button>
         </header>
         <div className="px-4 pb-24">
