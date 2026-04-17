@@ -60,16 +60,18 @@ export default function Messages() {
 
   return (
     <AppLayout>
-      <div className="fixed inset-0 bg-gradient-hero -z-10" />
-      <header className="sticky top-0 z-40 glass">
+      <div className="fixed inset-0 bg-[#0A0A0F] -z-10" />
+      <header className="sticky top-0 z-40 bg-[#0A0A0F]/80 backdrop-blur-xl border-b border-white/[0.08]">
         <div className="flex items-center justify-between p-4">
           <div className="flex items-center gap-2">
-            <Envelope weight="thin" className="h-5 w-5 text-[hsl(var(--neon-purple))] drop-shadow-[0_0_8px_hsl(var(--neon-purple))]" />
-            <span className="text-lg font-display font-bold text-foreground">Nachrichten</span>
-            {unreadCount > 0 && <Badge className="bg-red-500 text-white">{unreadCount} neu</Badge>}
+            <div className="flex h-8 w-8 items-center justify-center rounded-full glass-pill">
+              <Envelope weight="fill" className="h-4 w-4 text-[#7C3AED]" />
+            </div>
+            <span className="text-lg font-display font-bold text-white">Nachrichten</span>
+            {unreadCount > 0 && <Badge className="bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white border-0">{unreadCount} neu</Badge>}
           </div>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
-            <Envelope weight="thin" className="h-5 w-5 text-muted-foreground drop-shadow-[0_0_6px_hsl(var(--neon-purple))]" />
+          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full glass-pill">
+            <Envelope weight="thin" className="h-4 w-4 text-[#A0A0B0]" />
           </Button>
         </div>
       </header>
@@ -88,14 +90,14 @@ export default function Messages() {
 function MessageCard({ message, isSent, onClick }: { message: any; isSent: boolean; onClick: () => void }) {
   const person = isSent ? message.recipient : message.sender;
   return (
-    <button onClick={onClick} className={`w-full text-left glass rounded-2xl p-4 transition-all hover:scale-[1.02] ${!isSent && !message.is_read ? 'ring-2 ring-primary/50 bg-primary/5' : ''}`}>
+    <button onClick={onClick} className={`w-full text-left rounded-2xl p-4 transition-all hover:scale-[1.02] bg-[#12121A] border border-white/[0.08] card-glow ${!isSent && !message.is_read ? 'ring-2 ring-[#7C3AED]/50' : ''}`}>
       <div className="flex items-start gap-3">
         <div className="relative">
-          <Avatar className="h-12 w-12 ring-2 ring-primary/30">
+          <Avatar className="h-12 w-12 ring-2 ring-[#7C3AED]/40 shadow-[0_0_12px_rgba(124,58,237,0.3)]">
             <AvatarImage src={person?.avatar_url || ''} />
-            <AvatarFallback className="bg-gradient-neon text-white">{person?.display_name?.charAt(0) || '?'}</AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-[#7C3AED] to-[#EC4899] text-white">{person?.display_name?.charAt(0) || '?'}</AvatarFallback>
           </Avatar>
-          <div className={`absolute -bottom-1 -right-1 rounded-full p-1 ${isSent ? 'bg-blue-500' : 'bg-green-500'}`}>
+          <div className={`absolute -bottom-1 -right-1 rounded-full p-1 ${isSent ? 'bg-[#7C3AED]' : 'bg-[#EC4899]'}`}>
             {isSent ? <ArrowUp weight="bold" className="h-2.5 w-2.5 text-white" /> : <ArrowDown weight="bold" className="h-2.5 w-2.5 text-white" />}
           </div>
         </div>

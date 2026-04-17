@@ -116,16 +116,16 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
 
   return (
     <>
-      <article ref={cardRef} className="animate-fade-in overflow-hidden rounded-2xl border border-border/50 bg-card">
+      <article ref={cardRef} className="animate-fade-in overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12121A] card-glow">
         {post.music_url && (
           <audio ref={audioRef} src={post.music_url} loop muted={isMuted} preload="metadata" />
         )}
 
         {/* Header */}
         <div className="flex items-center gap-3 p-4">
-          <Avatar className="h-10 w-10 ring-2 ring-primary/20">
+          <Avatar className="h-10 w-10 ring-2 ring-[#7C3AED]/40 shadow-[0_0_12px_rgba(124,58,237,0.3)]">
             <AvatarImage src={author?.avatar_url || ''} alt={author?.display_name || ''} />
-            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground">
+            <AvatarFallback className="bg-gradient-to-br from-[#7C3AED] to-[#EC4899] text-white">
               {author?.display_name?.charAt(0).toUpperCase() || '?'}
             </AvatarFallback>
           </Avatar>
@@ -141,10 +141,10 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
                  <Badge variant="secondary" className="h-5 px-1.5 text-xs">✓</Badge>
               )}
               {post.is_moment_x && (
-                <Badge className="h-5 bg-gradient-to-r from-primary to-accent px-2 text-xs">Moment-X</Badge>
+                <Badge className="h-5 bg-gradient-to-r from-[#7C3AED] to-[#EC4899] px-2 text-xs text-white border-0">Moment-X</Badge>
               )}
               {post.expires_at && (
-                <Badge variant="outline" className="h-5 gap-1 border-accent/50 px-2 text-xs text-accent">
+                <Badge variant="outline" className="h-5 gap-1 glass-pill px-2 text-xs text-[#EC4899]">
                   <Timer weight="thin" className="h-3 w-3" />
                   {timeRemaining}
                 </Badge>
@@ -223,7 +223,7 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
         </div>
 
         {/* Actions */}
-        <div className="flex items-center justify-between border-t border-border/50 p-3">
+        <div className="flex items-center justify-between border-t border-white/[0.08] p-3">
           <div className="flex items-center gap-1">
             <Button
               variant="ghost"
@@ -281,8 +281,8 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
 
         {/* Caption */}
         {post.caption && (
-          <div className="border-t border-border/50 px-4 py-3">
-            <p className="text-sm text-foreground">
+          <div className="border-t border-white/[0.08] px-4 py-3">
+            <p className="text-sm text-white">
               <span className="font-semibold">{author?.username} </span>
               {post.caption}
             </p>
