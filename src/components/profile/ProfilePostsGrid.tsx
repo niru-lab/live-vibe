@@ -21,12 +21,12 @@ export const ProfilePostsGrid = ({ profileId }: ProfilePostsGridProps) => {
   return (
     <div className="mt-6">
       <Tabs defaultValue="posts" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 glass rounded-2xl p-1">
-          <TabsTrigger value="posts" className="gap-2 rounded-xl data-[state=active]:bg-gradient-neon data-[state=active]:text-white">
-            <SquaresFour weight="thin" className="h-4 w-4" /><span>Beiträge</span>
+        <TabsList className="grid w-full grid-cols-2 bg-transparent border-b border-white/[0.08] rounded-none p-0 h-auto">
+          <TabsTrigger value="posts" className="gap-2 rounded-none bg-transparent py-3 text-[#A0A0B0] data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
+            <SquaresFour weight="bold" className="h-4 w-4" /><span>Beiträge</span>
           </TabsTrigger>
-          <TabsTrigger value="tagged" className="gap-2 rounded-xl data-[state=active]:bg-gradient-neon data-[state=active]:text-white">
-            <BookmarkSimple weight="thin" className="h-4 w-4" /><span>Markiert</span>
+          <TabsTrigger value="tagged" className="gap-2 rounded-none bg-transparent py-3 text-[#A0A0B0] data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
+            <BookmarkSimple weight="bold" className="h-4 w-4" /><span>Markiert</span>
           </TabsTrigger>
         </TabsList>
         <TabsContent value="posts" className="mt-4"><PostsGrid posts={userPosts} isLoading={postsLoading} onPostClick={setSelectedPost} emptyMessage="Noch keine Beiträge" /></TabsContent>
