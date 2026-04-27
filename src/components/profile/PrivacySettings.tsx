@@ -6,8 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Eye, ChatCircle, MapPin, MagnifyingGlass, Users, PauseCircle, Trash, Warning } from '@phosphor-icons/react';
-import { useState } from 'react';
+import { Eye, ChatCircle, MapPin, MagnifyingGlass, Users, PauseCircle, Trash, Warning, CaretLeft } from '@phosphor-icons/react';
+import { useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -42,6 +42,7 @@ export const PrivacySettings = ({ open, onOpenChange }: PrivacySettingsProps) =>
   const [deleteReason, setDeleteReason] = useState('');
   const [deletePassword, setDeletePassword] = useState('');
   const [deleting, setDeleting] = useState(false);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   const handleDeactivate = async () => {
     setDeactivating(true);
@@ -67,9 +68,35 @@ export const PrivacySettings = ({ open, onOpenChange }: PrivacySettingsProps) =>
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-          <SheetHeader><SheetTitle className="text-left">🔒 Privacy</SheetTitle></SheetHeader>
-          <div className="mt-6 space-y-6">
+        <SheetContent
+          side="right"
+          className="w-full touch-pan-y sm:max-w-md overflow-y-auto p-0"
+          onTouchStart={(e) => {
+            swipeStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          }}
+          onTouchEnd={(e) => {
+            if (!swipeStart.current) return;
+            const deltaX = e.changedTouches[0].clientX - swipeStart.current.x;
+            const deltaY = e.changedTouches[0].clientY - swipeStart.current.y;
+            if (deltaX > 56 && Math.abs(deltaX) > Math.abs(deltaY) * 1.25) onOpenChange(false);
+            swipeStart.current = null;
+          }}
+        >
+          <SheetHeader className="sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-border/60 px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-full -ml-1"
+                onClick={() => onOpenChange(false)}
+                aria-label="Zurück"
+              >
+                <CaretLeft weight="bold" className="h-5 w-5" />
+              </Button>
+              <SheetTitle className="text-left flex-1">Privacy</SheetTitle>
+            </div>
+          </SheetHeader>
+          <div className="mt-2 space-y-6 px-4 pb-8">
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><Eye weight="thin" className="h-4 w-4" />Profil-Sichtbarkeit</div>
               <Select value={profileVisibility} onValueChange={setProfileVisibility}>
