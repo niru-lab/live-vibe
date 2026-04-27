@@ -163,18 +163,26 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
     },
   });
 
-  // Fly to city when filter changes
+  // Resolve city from search query (e.g. "berlin" → "Berlin")
+  const searchCity = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return null;
+    return Object.keys(cityCenters).find(c => c.toLowerCase().includes(q) || q.includes(c.toLowerCase())) || null;
+  }, [searchQuery]);
+
+  // Fly to city when filter or search changes
   useEffect(() => {
     if (!mapRef.current) return;
-    const target = selectedCity && cityCenters[selectedCity]
-      ? cityCenters[selectedCity]
+    const cityKey = (selectedCity && selectedCity !== 'Alle' ? selectedCity : null) || searchCity;
+    const target = cityKey && cityCenters[cityKey]
+      ? cityCenters[cityKey]
       : { center: [48.7758, 9.1829] as [number, number], zoom: 13 };
     mapRef.current.flyTo({
       center: [target.center[1], target.center[0]],
       zoom: target.zoom,
       duration: 1500,
     });
-  }, [selectedCity]);
+  }, [selectedCity, searchCity]);
 
   // Build heatmap GeoJSON from events
   const heatmapData = useMemo(() => {
@@ -217,7 +225,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       if (selectedCity && selectedCity !== 'Alle' && v.city?.toLowerCase() !== selectedCity.toLowerCase()) return false;
       if (selectedCategory && selectedCategory !== 'event' && v.category !== selectedCategory) return false;
       if (selectedCategory === 'event') return false;
-      if (searchLower && !v.name.toLowerCase().includes(searchLower) && !v.address.toLowerCase().includes(searchLower) && !v.category.toLowerCase().includes(searchLower)) return false;
+      if (searchLower && !v.name.toLowerCase().includes(searchLower) && !v.address.toLowerCase().includes(searchLower) && !v.category.toLowerCase().includes(searchLower) && !v.city?.toLowerCase().includes(searchLower)) return false;
       return true;
     });
     return filtered;
@@ -233,7 +241,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         else coords = getEventCoordinates(event.city, event.address);
         if (!coords) return null;
         if (selectedCity && selectedCity !== 'Alle' && event.city?.toLowerCase() !== selectedCity.toLowerCase()) return null;
-        if (searchLower && !event.name.toLowerCase().includes(searchLower) && !event.location_name.toLowerCase().includes(searchLower) && !event.address.toLowerCase().includes(searchLower)) return null;
+        if (searchLower && !event.name.toLowerCase().includes(searchLower) && !event.location_name.toLowerCase().includes(searchLower) && !event.address.toLowerCase().includes(searchLower) && !event.city?.toLowerCase().includes(searchLower)) return null;
         return { ...event, coords };
       })
       .filter(Boolean) as (typeof events extends (infer T)[] | undefined ? T & { coords: [number, number] } : never)[];
