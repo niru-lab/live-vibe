@@ -95,8 +95,11 @@ const categoryLabels: Record<string, string> = {
 
 const cityCenters: Record<string, { center: [number, number]; zoom: number }> = {
   'Stuttgart': { center: [48.7758, 9.1829], zoom: 13 },
-  'Aalen (BW)': { center: [48.8375, 10.0933], zoom: 13 },
+  'Aalen': { center: [48.8375, 10.0933], zoom: 13 },
+  'Ulm': { center: [48.4011, 9.9876], zoom: 13 },
   'Frankfurt am Main': { center: [50.1109, 8.6821], zoom: 12.5 },
+  'München': { center: [48.1351, 11.5820], zoom: 12.5 },
+  'Berlin': { center: [52.5200, 13.4050], zoom: 12 },
 };
 
 // Heatmap layer style
