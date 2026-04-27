@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
   const { signOut } = useAuth();
   const [editOpen, setEditOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
+  const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   const handleSignOut = async () => { await signOut(); onOpenChange(false); navigate('/auth'); };
 
@@ -41,7 +42,20 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto p-0">
+        <SheetContent
+          side="right"
+          className="w-full touch-pan-y sm:max-w-md overflow-y-auto p-0"
+          onTouchStart={(e) => {
+            swipeStart.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          }}
+          onTouchEnd={(e) => {
+            if (!swipeStart.current) return;
+            const deltaX = e.changedTouches[0].clientX - swipeStart.current.x;
+            const deltaY = e.changedTouches[0].clientY - swipeStart.current.y;
+            if (deltaX > 64 && Math.abs(deltaX) > Math.abs(deltaY) * 1.4) onOpenChange(false);
+            swipeStart.current = null;
+          }}
+        >
           <SheetHeader className="sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-white/[0.06] px-4 py-3">
             <div className="flex items-center gap-3">
               <Button
@@ -56,14 +70,7 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
               <SheetTitle className="text-left flex-1">Einstellungen</SheetTitle>
             </div>
           </SheetHeader>
-          <div
-            className="mt-2 space-y-6 px-4 pb-8"
-            onTouchStart={(e) => { (e.currentTarget as any)._tx = e.touches[0].clientX; }}
-            onTouchEnd={(e) => {
-              const start = (e.currentTarget as any)._tx;
-              if (start != null && e.changedTouches[0].clientX - start > 80) onOpenChange(false);
-            }}
-          >
+          <div className="mt-2 space-y-6 px-4 pb-8">
             {menuItems.map((section) => (
               <div key={section.section}>
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
