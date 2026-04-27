@@ -20,7 +20,7 @@ export interface FilterState {
 }
 
 const categoryOptions = ['Alle', 'Bar', 'Club', 'Café', 'Events'];
-const cityOptions = ['Alle', 'Stuttgart', 'Aalen (BW)', 'Frankfurt am Main'];
+const cityOptions = ['Alle', 'Stuttgart', 'Aalen', 'Ulm', 'Frankfurt am Main', 'München', 'Berlin'];
 const musicOptions = ['Alle', 'Techno', 'House', 'Hip-Hop', 'Latin', 'Pop', 'Mixed'];
 const vibesOptions = ['Alle', 'Wild', 'Casual', 'Exklusiv', 'Chill', 'Underground'];
 const timeOptions = ['Alle', 'Jetzt', 'Heute', 'Morgen', 'Wochenende'];
