@@ -1,10 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import { Heart, ChatCircle, ShareNetwork, MapPin, Clock, MusicNote, SpeakerHigh, SpeakerX, DotsThreeVertical, Trash, Timer, InstagramLogo } from '@phosphor-icons/react';
-import { formatDistanceToNow, differenceInHours } from 'date-fns';
+import { useState } from 'react';
+import { Heart, ChatCircle, DotsThreeVertical, Trash } from '@phosphor-icons/react';
+import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,7 +23,6 @@ import {
 import { cn } from '@/lib/utils';
 import { useProfile } from '@/hooks/useProfile';
 import { useDeletePost } from '@/hooks/usePosts';
-import { BadgeDisplay } from '@/components/profile/BadgeDisplay';
 import type { PostWithAuthor } from '@/hooks/usePosts';
 
 interface PostCardProps {
@@ -39,70 +37,18 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
   const { data: currentProfile } = useProfile();
   const deletePost = useDeletePost();
   const timeAgo = formatDistanceToNow(new Date(post.created_at), {
-    addSuffix: true,
+    addSuffix: false,
     locale: de,
   });
 
-  const [isMuted, setIsMuted] = useState(true);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
-
   const isOwnPost = currentProfile?.id === post.author_id;
-  
-  const getTimeRemaining = () => {
-    if (!post.expires_at) return null;
-    const expiresAt = new Date(post.expires_at);
-    const now = new Date();
-    const hoursLeft = differenceInHours(expiresAt, now);
-    if (hoursLeft <= 0) return 'Läuft bald ab';
-    if (hoursLeft === 1) return '1 Stunde';
-    return `${hoursLeft} Stunden`;
-  };
 
-  const timeRemaining = getTimeRemaining();
-
-  useEffect(() => {
-    if (!post.music_url) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            if (audioRef.current) {
-              audioRef.current.play().catch(() => {});
-              setIsPlaying(true);
-            }
-          } else {
-            if (audioRef.current) {
-              audioRef.current.pause();
-              setIsPlaying(false);
-            }
-          }
-        });
-      },
-      { threshold: 0.5 }
-    );
-
-    if (cardRef.current) {
-      observer.observe(cardRef.current);
-    }
-
-    return () => {
-      observer.disconnect();
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
-  }, [post.music_url]);
-
-  const toggleMute = () => {
-    if (audioRef.current) {
-      audioRef.current.muted = !isMuted;
-      setIsMuted(!isMuted);
-    }
-  };
+  // Derive title (first line of caption) + description (rest) from existing caption field
+  const captionText = post.caption || '';
+  const splitIdx = captionText.indexOf('\n');
+  const titleText = splitIdx > -1 ? captionText.slice(0, splitIdx) : captionText;
+  const descriptionText = splitIdx > -1 ? captionText.slice(splitIdx + 1).trim() : '';
 
   const handleDelete = async () => {
     try {
@@ -116,176 +62,213 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
 
   return (
     <>
-      <article ref={cardRef} className="animate-fade-in overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12121A] card-glow">
-        {post.music_url && (
-          <audio ref={audioRef} src={post.music_url} loop muted={isMuted} preload="metadata" />
-        )}
-
-        {/* Header */}
-        <div className="flex items-center gap-3 p-4">
-          <Avatar className="h-10 w-10 ring-2 ring-[#7C3AED]/40 shadow-[0_0_12px_rgba(124,58,237,0.3)]">
-            <AvatarImage src={author?.avatar_url || ''} alt={author?.display_name || ''} />
-            <AvatarFallback className="bg-gradient-to-br from-[#7C3AED] to-[#EC4899] text-white">
-              {author?.display_name?.charAt(0).toUpperCase() || '?'}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-base text-foreground">
-                {author?.display_name || 'Unbekannt'}
-              </span>
-              {author?.social_cloud_points !== undefined && (
-                <BadgeDisplay points={author.social_cloud_points} size="sm" />
-              )}
-              {author?.is_verified && (
-                 <Badge variant="secondary" className="h-5 px-1.5 text-xs">✓</Badge>
-              )}
-              {post.is_moment_x && (
-                <Badge className="h-5 bg-gradient-to-r from-[#7C3AED] to-[#EC4899] px-2 text-xs text-white border-0">Moment-X</Badge>
-              )}
-              {post.expires_at && (
-                <Badge variant="outline" className="h-5 gap-1 glass-pill px-2 text-xs text-[#EC4899]">
-                  <Timer weight="thin" className="h-3 w-3" />
-                  {timeRemaining}
-                </Badge>
-              )}
-            </div>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-              <Clock weight="thin" className="h-3 w-3" />
-              <span>{timeAgo}</span>
-              {post.location_name && (
-                <>
-                  <span>•</span>
-                  <MapPin weight="thin" className="h-3 w-3" />
-                  <span>{post.location_name}</span>
-                </>
-              )}
-            </div>
-          </div>
-          
-          {isOwnPost && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <DotsThreeVertical weight="thin" className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem
-                  className="text-destructive focus:text-destructive"
-                  onClick={() => setShowDeleteDialog(true)}
-                >
-                  <Trash weight="thin" className="mr-2 h-4 w-4" />
-                  Löschen
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-        </div>
-
-        {/* Media */}
-        <div className="relative aspect-square bg-muted">
-          {post.media_type === 'video' ? (
-            <video src={post.media_url} className="h-full w-full object-cover" controls playsInline />
-          ) : (
-            <img src={post.media_url} alt={post.caption || 'Post image'} className="h-full w-full object-cover" loading="lazy" />
-          )}
-          
-          {post.music_url && post.music_title && (
-            <div className="absolute bottom-3 right-3 flex items-center gap-2">
-              <div className="flex items-center gap-2 rounded-full bg-background/80 px-3 py-1.5 backdrop-blur">
-                <MusicNote weight={isPlaying ? "fill" : "thin"} className={cn("h-4 w-4 text-primary", isPlaying && "animate-pulse")} />
-                <div className="max-w-[120px] overflow-hidden">
-                   <p className="truncate text-xs font-medium text-foreground">{post.music_title}</p>
-                  {post.music_artist && (
-                    <p className="truncate text-xs text-muted-foreground">{post.music_artist}</p>
-                  )}
-                </div>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={toggleMute}>
-                  {isMuted ? (
-                    <SpeakerX weight="thin" className="h-3 w-3" />
-                  ) : (
-                    <SpeakerHigh weight="thin" className="h-3 w-3" />
-                  )}
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {post.event && (
-            <div className="absolute bottom-3 left-3 right-3">
-              <div className="flex items-center gap-2 rounded-lg bg-background/90 px-3 py-2 backdrop-blur">
-                <div className="h-2 w-2 animate-pulse rounded-full bg-accent" />
-                <span className="text-sm font-medium text-foreground">{post.event.name}</span>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Actions */}
-        <div className="flex items-center justify-between border-t border-white/[0.08] p-3">
-          <div className="flex items-center gap-1">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="gap-1.5"
-              onClick={() => onLike(post.id, isLiked)}
-            >
-              <Heart
-                weight={isLiked ? 'fill' : 'thin'}
-                className={cn(
-                  'h-5 w-5 transition-all duration-200',
-                  isLiked ? 'text-red-400 scale-110' : 'text-foreground'
-                )}
+      <article
+        className="animate-fade-in overflow-hidden w-full"
+        style={{
+          background: '#12121A',
+          borderRadius: '18px',
+          border: '0.5px solid #1e1e2e',
+          fontFamily: 'system-ui, sans-serif',
+        }}
+      >
+        {/* Top row: image + content */}
+        <div className="flex" style={{ minHeight: '165px' }}>
+          {/* Left image */}
+          <div
+            style={{ width: '160px', height: '165px', flexShrink: 0 }}
+            className="relative bg-[#0A0A0F] overflow-hidden"
+          >
+            {post.media_type === 'video' ? (
+              <video
+                src={post.media_url}
+                className="h-full w-full object-cover"
+                muted
+                playsInline
               />
-              <span className={cn(isLiked && 'text-red-400')}>
-                {post.likes_count}
-              </span>
-            </Button>
-            <Button variant="ghost" size="sm" className="gap-1.5">
-              <ChatCircle weight="thin" className="h-5 w-5" />
-              <span>{post.comments_count}</span>
-            </Button>
+            ) : (
+              <img
+                src={post.media_url}
+                alt={titleText || 'Post'}
+                className="h-full w-full object-cover"
+                loading="lazy"
+              />
+            )}
           </div>
-          <div className="flex items-center gap-1">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <ShareNetwork weight="thin" className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem className="gap-2" onClick={() => {
-                  if (navigator.share) {
-                    navigator.share({ title: post.caption || 'feyrn Post', url: window.location.origin });
-                  }
-                }}>
-                  <ShareNetwork weight="thin" className="h-4 w-4" />
-                  Teilen
-                </DropdownMenuItem>
-                <DropdownMenuItem className="gap-2" onClick={() => {
-                  // Instagram Story sharing - placeholder for Graph API integration
-                  const toast = document.createElement('div');
-                  toast.className = 'fixed bottom-20 left-1/2 -translate-x-1/2 z-[100] rounded-full bg-pink-500/90 px-4 py-2 text-sm text-white backdrop-blur animate-in fade-in slide-in-from-bottom-4';
-                  toast.textContent = '📸 Instagram-Integration wird eingerichtet...';
-                  document.body.appendChild(toast);
-                  setTimeout(() => toast.remove(), 3000);
-                }}>
-                  <InstagramLogo weight="fill" className="h-4 w-4 text-pink-400" />
-                  In Instagram Story teilen
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+
+          {/* Right content */}
+          <div
+            className="flex flex-col justify-between"
+            style={{
+              flex: 1,
+              minWidth: 0,
+              overflow: 'hidden',
+              padding: '12px 11px 10px',
+            }}
+          >
+            {/* Header */}
+            <div className="flex items-center gap-1.5" style={{ minWidth: 0 }}>
+              <Avatar style={{ width: '20px', height: '20px' }} className="shrink-0">
+                <AvatarImage src={author?.avatar_url || ''} alt={author?.display_name || ''} />
+                <AvatarFallback className="text-[9px] bg-[#1e1e2e] text-[#9b9bb0]">
+                  {author?.display_name?.charAt(0).toUpperCase() || '?'}
+                </AvatarFallback>
+              </Avatar>
+              <span
+                className="truncate"
+                style={{
+                  fontSize: '11px',
+                  fontWeight: 500,
+                  color: '#9b9bb0',
+                  minWidth: 0,
+                }}
+              >
+                {author?.username || author?.display_name || 'unbekannt'}
+              </span>
+              <span style={{ color: '#3a3a50', fontSize: '10px' }}>·</span>
+              <span style={{ color: '#3a3a50', fontSize: '10px' }} className="shrink-0">
+                {timeAgo}
+              </span>
+
+              {isOwnPost && (
+                <div className="ml-auto shrink-0">
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="p-1 -m-1 text-[#4a4a5e] hover:text-[#9b9bb0]">
+                        <DotsThreeVertical weight="bold" className="h-3.5 w-3.5" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        className="text-destructive focus:text-destructive"
+                        onClick={() => setShowDeleteDialog(true)}
+                      >
+                        <Trash weight="thin" className="mr-2 h-4 w-4" />
+                        Löschen
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              )}
+            </div>
+
+            {/* Title */}
+            {titleText && (
+              <h3
+                style={{
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: '#e8e4f0',
+                  letterSpacing: '-0.01em',
+                  lineHeight: 1.3,
+                  marginTop: '6px',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
+              >
+                {titleText}
+              </h3>
+            )}
+
+            {/* Description */}
+            {descriptionText && (
+              <p
+                style={{
+                  fontSize: '11px',
+                  color: '#5a5a72',
+                  lineHeight: 1.4,
+                  marginTop: '4px',
+                  display: '-webkit-box',
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                }}
+              >
+                {descriptionText}
+              </p>
+            )}
+
+            {/* Footer */}
+            <div className="flex items-center gap-3" style={{ marginTop: '8px' }}>
+              <button
+                onClick={() => onLike(post.id, isLiked)}
+                className="flex items-center gap-1"
+                style={{
+                  color: isLiked ? '#EC4899' : '#4a4a5e',
+                  fontSize: '11px',
+                }}
+              >
+                <Heart
+                  weight={isLiked ? 'fill' : 'regular'}
+                  style={{ width: '13px', height: '13px' }}
+                  className={cn('transition-all', isLiked && 'scale-110')}
+                />
+                <span>{post.likes_count}</span>
+              </button>
+              <div
+                className="flex items-center gap-1"
+                style={{ color: '#4a4a5e', fontSize: '11px' }}
+              >
+                <ChatCircle weight="regular" style={{ width: '13px', height: '13px' }} />
+                <span>{post.comments_count}</span>
+              </div>
+
+              {(post.event?.name || post.location_name) && (
+                <span
+                  className="truncate"
+                  style={{
+                    marginLeft: 'auto',
+                    background: '#1a1025',
+                    border: '0.5px solid #3d2a6e',
+                    borderRadius: '20px',
+                    padding: '3px 7px',
+                    fontSize: '10px',
+                    color: '#7C3AED',
+                    maxWidth: '75px',
+                  }}
+                >
+                  {post.event?.name || post.location_name}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Caption */}
-        {post.caption && (
-          <div className="border-t border-white/[0.08] px-4 py-3">
-            <p className="text-sm text-white">
-              <span className="font-semibold">{author?.username} </span>
-              {post.caption}
-            </p>
+        {/* Comment preview (placeholder — uses existing comments_count only; render mock previews when available) */}
+        {post.comments_count > 0 && (
+          <div
+            style={{
+              borderTop: '0.5px solid #1e1e2e',
+              padding: '8px 12px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '5px',
+            }}
+          >
+            <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  width: '18px',
+                  height: '18px',
+                  borderRadius: '50%',
+                  background: '#1e1e2e',
+                  flexShrink: 0,
+                }}
+              />
+              <span
+                style={{ fontSize: '11px', fontWeight: 500, color: '#9b9bb0' }}
+                className="shrink-0"
+              >
+                {post.comments_count} {post.comments_count === 1 ? 'Kommentar' : 'Kommentare'}
+              </span>
+              <span
+                style={{ fontSize: '11px', color: '#5a5a72' }}
+                className="truncate"
+              >
+                · alle ansehen
+              </span>
+            </div>
           </div>
         )}
       </article>
