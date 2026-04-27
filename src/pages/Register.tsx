@@ -28,11 +28,21 @@ export default function Register() {
     setLoading(true);
     const { error: authError } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        shouldCreateUser: true,
+      },
     });
     setLoading(false);
     if (authError) {
-      setError(authError.message);
+      const msg = authError.message?.toLowerCase() || '';
+      if (msg.includes('rate') || msg.includes('limit')) {
+        setError('Zu viele Versuche. Warte kurz und probier es erneut.');
+      } else if (msg.includes('signup') || msg.includes('not allowed')) {
+        setError('Anmeldung mit dieser E-Mail aktuell nicht möglich.');
+      } else {
+        setError(authError.message);
+      }
     } else {
       navigate('/verify', { state: { method: 'email', contact: email } });
     }
@@ -48,10 +58,18 @@ export default function Register() {
       return;
     }
     setLoading(true);
-    const { error: authError } = await supabase.auth.signInWithOtp({ phone: fullPhone });
+    const { error: authError } = await supabase.auth.signInWithOtp({
+      phone: fullPhone,
+      options: { shouldCreateUser: true },
+    });
     setLoading(false);
     if (authError) {
-      setError(authError.message);
+      const msg = authError.message?.toLowerCase() || '';
+      if (msg.includes('sms') || msg.includes('phone')) {
+        setError('SMS-Anmeldung aktuell nicht verfügbar. Nutze stattdessen E-Mail.');
+      } else {
+        setError(authError.message);
+      }
     } else {
       navigate('/verify', { state: { method: 'phone', contact: fullPhone } });
     }
