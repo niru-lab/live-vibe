@@ -225,7 +225,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       if (selectedCity && selectedCity !== 'Alle' && v.city?.toLowerCase() !== selectedCity.toLowerCase()) return false;
       if (selectedCategory && selectedCategory !== 'event' && v.category !== selectedCategory) return false;
       if (selectedCategory === 'event') return false;
-      if (searchLower && !v.name.toLowerCase().includes(searchLower) && !v.address.toLowerCase().includes(searchLower) && !v.category.toLowerCase().includes(searchLower)) return false;
+      if (searchLower && !v.name.toLowerCase().includes(searchLower) && !v.address.toLowerCase().includes(searchLower) && !v.category.toLowerCase().includes(searchLower) && !v.city?.toLowerCase().includes(searchLower)) return false;
       return true;
     });
     return filtered;
