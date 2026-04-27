@@ -30,7 +30,10 @@ export const BottomNav = () => {
 
   return (
     <>
-      <nav className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md">
+      <nav
+        className="fixed left-4 right-4 z-50 mx-auto max-w-md"
+        style={{ bottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}
+      >
         <div className="glass-pill rounded-[28px] px-1 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_20px_rgba(124,58,237,0.15)]">
           <div className="flex items-center justify-around">
             {navItems.map(({ icon: Icon, label, path, isCenter, badgeKey }) => {

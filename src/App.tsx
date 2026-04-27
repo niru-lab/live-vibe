@@ -8,6 +8,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { IconContext } from "@phosphor-icons/react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
+import { SwipeBackProvider } from "@/components/layout/SwipeBackProvider";
 import Feed from "./pages/Feed";
 import Welcome from "./pages/Welcome";
 import Register from "./pages/Register";
@@ -48,6 +49,7 @@ const App = () => (
               <Toaster />
               <Sonner />
               <BrowserRouter>
+                <SwipeBackProvider />
                 <Routes>
                   <Route path="/" element={<Feed />} />
                   <Route path="/auth" element={<Welcome />} />
