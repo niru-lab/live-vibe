@@ -75,7 +75,7 @@ export default function Feed() {
             ))}
           </div>
         ) : activePosts && activePosts.length > 0 ? (
-          <div className="space-y-6">
+          <div className="flex flex-col" style={{ gap: '10px' }}>
             {activePosts.map((post: any) => (
               <PostCard
                 key={post.id}
