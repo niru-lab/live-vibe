@@ -163,18 +163,26 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
     },
   });
 
-  // Fly to city when filter changes
+  // Resolve city from search query (e.g. "berlin" → "Berlin")
+  const searchCity = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return null;
+    return Object.keys(cityCenters).find(c => c.toLowerCase().includes(q) || q.includes(c.toLowerCase())) || null;
+  }, [searchQuery]);
+
+  // Fly to city when filter or search changes
   useEffect(() => {
     if (!mapRef.current) return;
-    const target = selectedCity && cityCenters[selectedCity]
-      ? cityCenters[selectedCity]
+    const cityKey = (selectedCity && selectedCity !== 'Alle' ? selectedCity : null) || searchCity;
+    const target = cityKey && cityCenters[cityKey]
+      ? cityCenters[cityKey]
       : { center: [48.7758, 9.1829] as [number, number], zoom: 13 };
     mapRef.current.flyTo({
       center: [target.center[1], target.center[0]],
       zoom: target.zoom,
       duration: 1500,
     });
-  }, [selectedCity]);
+  }, [selectedCity, searchCity]);
 
   // Build heatmap GeoJSON from events
   const heatmapData = useMemo(() => {
