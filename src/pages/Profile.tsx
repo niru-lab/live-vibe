@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,6 +7,7 @@ import { useFollowStats, usePostsCount } from '@/hooks/useFollowStats';
 import { Button } from '@/components/ui/button';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfilePostsGrid } from '@/components/profile/ProfilePostsGrid';
+import { ProfileSettings } from '@/components/profile/ProfileSettings';
 import { Users, GearSix } from '@phosphor-icons/react';
 
 export default function Profile() {
@@ -14,6 +16,7 @@ export default function Profile() {
   const { data: profile, isLoading: profileLoading } = useProfile();
   const { data: followStats } = useFollowStats(profile?.id);
   const { data: postsCount } = usePostsCount(profile?.id);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   if (!authLoading && !user) {
     return (
@@ -37,7 +40,13 @@ export default function Profile() {
       <div className="fixed inset-0 -z-10" style={{ background: '#0A0A0F' }} />
       <div className="min-h-screen">
         <header className="flex items-center justify-end px-4 py-4">
-          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full glass-pill">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 rounded-full glass-pill"
+            onClick={() => setSettingsOpen(true)}
+            aria-label="Einstellungen öffnen"
+          >
             <GearSix weight="bold" className="h-4 w-4 text-white" />
           </Button>
         </header>
@@ -46,6 +55,7 @@ export default function Profile() {
           <ProfilePostsGrid profileId={profile?.id} />
         </div>
       </div>
+      <ProfileSettings open={settingsOpen} onOpenChange={setSettingsOpen} profile={profile || null} />
     </AppLayout>
   );
 }

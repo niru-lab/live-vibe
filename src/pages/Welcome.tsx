@@ -39,7 +39,7 @@ export default function Welcome() {
       >
         {/* Logo */}
         <div className="mb-3 flex items-center gap-2">
-          <span className="text-2xl">⚡</span>
+          <img src="/icon-192.png" alt="Feyrn" className="h-8 w-8 rounded-lg" />
           <FeyrnLogo size="lg" />
         </div>
         <p className="mb-6 text-sm" style={{ color: '#888888' }}>

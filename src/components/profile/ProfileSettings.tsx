@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Lock, Bell, MapPin, MusicNote, Users, Gear, SignOut, PencilSimple, Star, Shield } from '@phosphor-icons/react';
+import { Lock, Bell, MapPin, MusicNote, Users, Gear, SignOut, PencilSimple, Star, Shield, CaretLeft } from '@phosphor-icons/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { EditProfileDialog } from './EditProfileDialog';
 import { PrivacySettings } from './PrivacySettings';
@@ -41,9 +41,29 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent className="w-full sm:max-w-md overflow-y-auto">
-          <SheetHeader><SheetTitle className="text-left">Einstellungen</SheetTitle></SheetHeader>
-          <div className="mt-6 space-y-6">
+        <SheetContent side="right" className="w-full sm:max-w-md overflow-y-auto p-0">
+          <SheetHeader className="sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-white/[0.06] px-4 py-3">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-full -ml-1"
+                onClick={() => onOpenChange(false)}
+                aria-label="Zurück"
+              >
+                <CaretLeft weight="bold" className="h-5 w-5" />
+              </Button>
+              <SheetTitle className="text-left flex-1">Einstellungen</SheetTitle>
+            </div>
+          </SheetHeader>
+          <div
+            className="mt-2 space-y-6 px-4 pb-8"
+            onTouchStart={(e) => { (e.currentTarget as any)._tx = e.touches[0].clientX; }}
+            onTouchEnd={(e) => {
+              const start = (e.currentTarget as any)._tx;
+              if (start != null && e.changedTouches[0].clientX - start > 80) onOpenChange(false);
+            }}
+          >
             {menuItems.map((section) => (
               <div key={section.section}>
                 <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
