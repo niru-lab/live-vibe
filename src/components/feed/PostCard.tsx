@@ -155,12 +155,12 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             {titleText && (
               <h3
                 style={{
-                  fontSize: '13px',
+                  fontSize: '15px',
                   fontWeight: 600,
                   color: '#e8e4f0',
                   letterSpacing: '-0.01em',
                   lineHeight: 1.3,
-                  marginTop: '6px',
+                  marginTop: '8px',
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
