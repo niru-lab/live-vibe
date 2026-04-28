@@ -8,7 +8,8 @@ import { Button } from '@/components/ui/button';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfilePostsGrid } from '@/components/profile/ProfilePostsGrid';
 import { ProfileSettings } from '@/components/profile/ProfileSettings';
-import { Users, GearSix } from '@phosphor-icons/react';
+import { Users, GearSix, ChatCircleDots } from '@phosphor-icons/react';
+import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ export default function Profile() {
   const { data: followStats } = useFollowStats(profile?.id);
   const { data: postsCount } = usePostsCount(profile?.id);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { messagesBadge } = useNotificationBadges();
 
   if (!authLoading && !user) {
     return (
@@ -39,7 +41,24 @@ export default function Profile() {
     <AppLayout>
       <div className="fixed inset-0 -z-10" style={{ background: '#0A0A0F' }} />
       <div className="min-h-screen">
-        <header className="flex items-center justify-end px-4 py-4">
+        <header className="flex items-center justify-between px-4 py-4">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative h-9 w-9 rounded-full glass-pill"
+            onClick={() => navigate('/messages')}
+            aria-label="Nachrichten öffnen"
+          >
+            <ChatCircleDots weight="bold" className="h-4 w-4 text-white" />
+            {messagesBadge > 0 && (
+              <span
+                className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold text-white"
+                style={{ background: '#EC4899' }}
+              >
+                {messagesBadge > 9 ? '9+' : messagesBadge}
+              </span>
+            )}
+          </Button>
           <Button
             variant="ghost"
             size="icon"
