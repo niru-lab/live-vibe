@@ -13,6 +13,8 @@ import { useProfile } from '@/hooks/useProfile';
 import { useFollowStats, usePostsCount, useIsFollowing, useToggleFollow } from '@/hooks/useFollowStats';
 import { useUserPosts } from '@/hooks/useUserPosts';
 import { useBlockUser } from '@/hooks/useDirectMessages';
+import { useUserLikes, useLikePost, type PostWithAuthor } from '@/hooks/usePosts';
+import { PostDetailDialog } from '@/components/feed/PostDetailDialog';
 import { SendMessageDialog } from '@/components/messaging/SendMessageDialog';
 import { toast } from '@/hooks/use-toast';
 
@@ -23,6 +25,9 @@ export default function UserProfile() {
   const queryClient = useQueryClient();
   const [messageOpen, setMessageOpen] = useState(false);
   const [blockConfirmOpen, setBlockConfirmOpen] = useState(false);
+  const [selectedPost, setSelectedPost] = useState<PostWithAuthor | null>(null);
+  const { data: likedPosts = [] } = useUserLikes();
+  const likeMutation = useLikePost();
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile-by-username', username],
@@ -177,7 +182,7 @@ export default function UserProfile() {
                 {posts.map((p) => (
                   <button
                     key={p.id}
-                    onClick={() => navigate(`/?post=${p.id}`)}
+                    onClick={() => setSelectedPost(p as unknown as PostWithAuthor)}
                     className="aspect-square overflow-hidden rounded-md bg-[#12121A] hover:opacity-80 transition-opacity"
                   >
                     {p.media_type === 'video' ? (
