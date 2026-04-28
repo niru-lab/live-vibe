@@ -91,11 +91,18 @@ export const UserSearchBar = () => {
     );
   };
 
+  const inputRef = useRef<HTMLInputElement>(null);
+
   return (
-    <div ref={wrapRef} className="relative flex-1 max-w-md">
-      <div className="flex items-center gap-2 h-9 px-3 rounded-full glass-pill">
+    <div ref={wrapRef} className="relative flex-1 min-w-0">
+      <label
+        className="flex items-center gap-2 h-9 px-3 rounded-full glass-pill cursor-text"
+        onClick={() => inputRef.current?.focus()}
+        style={{ touchAction: 'manipulation' }}
+      >
         <MagnifyingGlass weight="thin" className="h-4 w-4 text-[#A0A0B0] shrink-0" />
         <input
+          ref={inputRef}
           type="text"
           value={query}
           onChange={(e) => {
@@ -103,8 +110,9 @@ export const UserSearchBar = () => {
             setOpen(true);
           }}
           onFocus={() => setOpen(true)}
+          onTouchStart={(e) => e.stopPropagation()}
           placeholder="Accounts suchen…"
-          className="flex-1 bg-transparent text-sm text-white placeholder:text-[#A0A0B0] outline-none min-w-0"
+          className="flex-1 bg-transparent text-sm text-white placeholder:text-[#A0A0B0] outline-none min-w-0 w-full"
           style={{ fontSize: '16px' }}
         />
         {query && (
