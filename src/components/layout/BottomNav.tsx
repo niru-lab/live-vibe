@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { House, MagnifyingGlass, PlusCircle, CalendarBlank, User, ChatCircle, UsersThree } from '@phosphor-icons/react';
+import { House, MagnifyingGlass, PlusCircle, CalendarBlank, User, UsersThree } from '@phosphor-icons/react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { PostTypeSelector } from '@/components/create/PostTypeSelector';
@@ -11,7 +11,6 @@ const navItems = [
   { icon: UsersThree, label: 'Roomz', path: '/roomz', badgeKey: null },
   { icon: PlusCircle, label: 'Post', path: '/create', isCenter: true, badgeKey: null },
   { icon: CalendarBlank, label: 'Events', path: '/events', badgeKey: 'events' as const },
-  { icon: ChatCircle, label: 'Messages', path: '/messages', badgeKey: 'messages' as const },
   { icon: User, label: 'Profil', path: '/profile', badgeKey: 'profile' as const },
 ];
 
