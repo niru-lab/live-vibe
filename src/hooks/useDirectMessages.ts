@@ -26,24 +26,27 @@ export const useDirectMessages = () => {
     queryKey: ['direct-messages', profile?.id],
     queryFn: async (): Promise<DirectMessage[]> => {
       if (!profile?.id) return [];
-      const { data, error } = await supabase
+      const { data: msgs, error } = await supabase
         .from('direct_messages')
-        .select(`*,
-          sender:profiles!direct_messages_sender_id_fkey(id, username, display_name, avatar_url),
-          recipient:profiles!direct_messages_recipient_id_fkey(id, username, display_name, avatar_url)
-        `)
+        .select('*')
         .or(`sender_id.eq.${profile.id},recipient_id.eq.${profile.id}`)
         .order('created_at', { ascending: false });
-      if (error) {
-        // fallback without joins (in case foreign-key embed name differs)
-        const { data: plain } = await supabase
-          .from('direct_messages')
-          .select('*')
-          .or(`sender_id.eq.${profile.id},recipient_id.eq.${profile.id}`)
-          .order('created_at', { ascending: false });
-        return (plain || []) as any;
-      }
-      return (data || []) as any;
+      if (error || !msgs) return [];
+
+      const ids = Array.from(new Set(msgs.flatMap((m) => [m.sender_id, m.recipient_id])));
+      if (ids.length === 0) return msgs as any;
+
+      const { data: profs } = await supabase
+        .from('profiles')
+        .select('id, username, display_name, avatar_url')
+        .in('id', ids);
+
+      const profMap = new Map((profs || []).map((p) => [p.id, p]));
+      return msgs.map((m) => ({
+        ...m,
+        sender: profMap.get(m.sender_id),
+        recipient: profMap.get(m.recipient_id),
+      })) as any;
     },
     enabled: !!profile?.id,
   });
