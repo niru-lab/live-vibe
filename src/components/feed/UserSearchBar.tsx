@@ -120,7 +120,7 @@ export const UserSearchBar = () => {
             <X weight="bold" className="h-3.5 w-3.5 text-[#A0A0B0]" />
           </button>
         )}
-      </div>
+      </label>
 
       {open && debounced.length >= 1 && (
         <div
