@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { SquaresFour, BookmarkSimple, Play, Heart, ChatCircle, MusicNote } from '@phosphor-icons/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { PostCard } from '@/components/feed/PostCard';
+import { PostDetailDialog } from '@/components/feed/PostDetailDialog';
 import { useUserPosts, useTaggedPosts } from '@/hooks/useUserPosts';
 import { useUserLikes, useLikePost } from '@/hooks/usePosts';
 import type { PostWithAuthor } from '@/hooks/usePosts';
@@ -32,11 +31,12 @@ export const ProfilePostsGrid = ({ profileId }: ProfilePostsGridProps) => {
         <TabsContent value="posts" className="mt-4"><PostsGrid posts={userPosts} isLoading={postsLoading} onPostClick={setSelectedPost} emptyMessage="Noch keine Beiträge" /></TabsContent>
         <TabsContent value="tagged" className="mt-4"><PostsGrid posts={taggedPosts} isLoading={taggedLoading} onPostClick={setSelectedPost} emptyMessage="Noch keine Markierungen" /></TabsContent>
       </Tabs>
-      <Dialog open={!!selectedPost} onOpenChange={() => setSelectedPost(null)}>
-        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto p-0 rounded-3xl border-white/10">
-          {selectedPost && <PostCard post={selectedPost} isLiked={likedPosts.includes(selectedPost.id)} onLike={handleLike} onDeleted={() => setSelectedPost(null)} />}
-        </DialogContent>
-      </Dialog>
+      <PostDetailDialog
+        post={selectedPost}
+        isLiked={selectedPost ? likedPosts.includes(selectedPost.id) : false}
+        onLike={handleLike}
+        onClose={() => setSelectedPost(null)}
+      />
     </div>
   );
 };
