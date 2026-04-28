@@ -79,12 +79,18 @@ export default function Feed() {
         ) : activePosts && activePosts.length > 0 ? (
           <div className="flex flex-col" style={{ gap: '10px' }}>
             {activePosts.map((post: any) => (
-              <PostCard
+              <button
                 key={post.id}
-                post={post}
-                isLiked={likedPosts.includes(post.id)}
-                onLike={handleLike}
-              />
+                type="button"
+                onClick={() => setOpenPost(post)}
+                className="text-left w-full focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-[18px]"
+              >
+                <PostCard
+                  post={post}
+                  isLiked={likedPosts.includes(post.id)}
+                  onLike={(id, liked) => handleLike(id, liked)}
+                />
+              </button>
             ))}
           </div>
         ) : (
