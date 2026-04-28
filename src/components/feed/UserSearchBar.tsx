@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { MagnifyingGlass, X, Lock, GlobeHemisphereWest, Check, Plus } from '@phosphor-icons/react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +25,7 @@ export const UserSearchBar = () => {
   const { data: myProfile } = useProfile();
   const toggleFollow = useToggleFollow();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(query.trim()), 250);
@@ -135,8 +137,13 @@ export const UserSearchBar = () => {
             <ul className="py-1">
               {results.map((r) => {
                 const isPrivate = r.profile_visibility === 'private' || r.profile_visibility === 'followers';
+                const goProfile = () => {
+                  setOpen(false);
+                  setQuery('');
+                  navigate(`/u/${r.username}`);
+                };
                 return (
-                  <li key={r.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.03]">
+                  <li key={r.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.03] cursor-pointer" onClick={goProfile}>
                     <Avatar className="h-9 w-9 shrink-0">
                       <AvatarImage src={r.avatar_url || ''} className="object-cover" />
                       <AvatarFallback className="bg-[#1A1A24] text-xs text-white">
