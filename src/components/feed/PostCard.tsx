@@ -175,12 +175,12 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             {descriptionText && (
               <p
                 style={{
-                  fontSize: '11px',
+                  fontSize: '12px',
                   color: '#5a5a72',
-                  lineHeight: 1.4,
-                  marginTop: '4px',
+                  lineHeight: 1.45,
+                  marginTop: '6px',
                   display: '-webkit-box',
-                  WebkitLineClamp: 2,
+                  WebkitLineClamp: 3,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
                 }}
