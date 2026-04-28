@@ -19,7 +19,7 @@ export default function Feed() {
   const [searchParams, setSearchParams] = useSearchParams();
   const venueFilter = searchParams.get('venue');
   const [selectedCity, setSelectedCity] = useState<string>('all');
-  
+  const [openPost, setOpenPost] = useState<PostWithAuthor | null>(null);
   const { data: rawPosts, isLoading: postsLoading } = usePosts(selectedCity === 'all' ? undefined : selectedCity);
   const posts = useFeedAlgorithm(rawPosts);
   const { data: taggedPosts, isLoading: taggedLoading } = useTaggedPosts(venueFilter || undefined);
