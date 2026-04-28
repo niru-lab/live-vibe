@@ -23,8 +23,8 @@ export const FollowListDialog = ({ open, onOpenChange, profileId, defaultTab = '
             <TabsTrigger value="followers" className="data-[state=active]:bg-primary/20">Follower ({followersCount})</TabsTrigger>
             <TabsTrigger value="following" className="data-[state=active]:bg-primary/20">Folge ich ({followingCount})</TabsTrigger>
           </TabsList>
-          <TabsContent value="followers" className="mt-4 max-h-[45vh] overflow-y-auto"><ProfileList profiles={followers || []} isLoading={loadingFollowers} emptyMessage="Noch keine Follower" /></TabsContent>
-          <TabsContent value="following" className="mt-4 max-h-[45vh] overflow-y-auto"><ProfileList profiles={following || []} isLoading={loadingFollowing} emptyMessage="Folgt noch niemandem" /></TabsContent>
+          <TabsContent value="followers" className="mt-4 max-h-[45vh] overflow-y-auto"><ProfileList profiles={followers || []} isLoading={loadingFollowers} emptyMessage="Noch keine Follower" onClose={() => onOpenChange(false)} /></TabsContent>
+          <TabsContent value="following" className="mt-4 max-h-[45vh] overflow-y-auto"><ProfileList profiles={following || []} isLoading={loadingFollowing} emptyMessage="Folgt noch niemandem" onClose={() => onOpenChange(false)} /></TabsContent>
         </Tabs>
       </DialogContent>
     </Dialog>
