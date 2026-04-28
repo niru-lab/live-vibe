@@ -102,7 +102,7 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
               flex: 1,
               minWidth: 0,
               overflow: 'hidden',
-              padding: '12px 11px 10px',
+              padding: '16px 14px 14px',
             }}
           >
             {/* Header */}
