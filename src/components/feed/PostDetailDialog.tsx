@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Heart, ChatCircle, PaperPlaneTilt, Trash } from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
@@ -32,11 +32,12 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="max-w-lg p-0 rounded-3xl border-white/10 bg-[#0A0A0F] overflow-hidden max-h-[90vh] flex flex-col">
+      <DialogContent className="w-[calc(100vw-24px)] max-w-lg h-[calc(100dvh-24px)] max-h-[640px] p-0 rounded-3xl border-white/10 bg-[#0A0A0F] overflow-hidden flex flex-col gap-0">
         {post && (
           <>
+            <DialogTitle className="sr-only">Beitrag von {post.author?.display_name || post.author?.username || 'Nutzer'}</DialogTitle>
             {/* Header */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06] shrink-0">
+            <div className="flex items-center gap-2 px-4 py-3 pr-12 border-b border-white/[0.06] shrink-0">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={post.author?.avatar_url || ''} />
                 <AvatarFallback className="bg-[#1e1e2e] text-xs text-white">
@@ -50,11 +51,11 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
             </div>
 
             {/* Media */}
-            <div className="relative bg-black w-full shrink-0 flex items-center justify-center" style={{ maxHeight: '40vh' }}>
+            <div className="relative bg-black w-full shrink-0 flex items-center justify-center max-h-[30dvh]">
               {post.media_type === 'video' ? (
-                <video src={post.media_url} className="w-full max-h-[40vh] object-contain" controls playsInline />
+                <video src={post.media_url} className="w-full max-h-[30dvh] object-contain" controls playsInline />
               ) : (
-                <img src={post.media_url} alt={post.caption || ''} className="w-full max-h-[40vh] object-contain" />
+                <img src={post.media_url} alt={post.caption || ''} className="w-full max-h-[30dvh] object-contain" />
               )}
             </div>
 
@@ -80,7 +81,7 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
             </div>
 
             {/* Comments */}
-            <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3 min-h-[120px]">
+            <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3">
               {isLoading ? (
                 <p className="text-xs text-[#9b9bb0] text-center py-4">Lade Kommentare…</p>
               ) : comments.length === 0 ? (
