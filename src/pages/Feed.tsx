@@ -6,7 +6,9 @@ import { usePosts, useLikePost, useUserLikes } from '@/hooks/usePosts';
 import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
 import { useTaggedPosts } from '@/hooks/useEvents';
 import { PostCard } from '@/components/feed/PostCard';
+import { PostDetailDialog } from '@/components/feed/PostDetailDialog';
 import { FeedHeader } from '@/components/feed/FeedHeader';
+import type { PostWithAuthor } from '@/hooks/usePosts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Lightning, Confetti, ArrowLeft } from '@phosphor-icons/react';
@@ -17,7 +19,7 @@ export default function Feed() {
   const [searchParams, setSearchParams] = useSearchParams();
   const venueFilter = searchParams.get('venue');
   const [selectedCity, setSelectedCity] = useState<string>('all');
-  
+  const [openPost, setOpenPost] = useState<PostWithAuthor | null>(null);
   const { data: rawPosts, isLoading: postsLoading } = usePosts(selectedCity === 'all' ? undefined : selectedCity);
   const posts = useFeedAlgorithm(rawPosts);
   const { data: taggedPosts, isLoading: taggedLoading } = useTaggedPosts(venueFilter || undefined);
@@ -77,12 +79,18 @@ export default function Feed() {
         ) : activePosts && activePosts.length > 0 ? (
           <div className="flex flex-col" style={{ gap: '10px' }}>
             {activePosts.map((post: any) => (
-              <PostCard
+              <button
                 key={post.id}
-                post={post}
-                isLiked={likedPosts.includes(post.id)}
-                onLike={handleLike}
-              />
+                type="button"
+                onClick={() => setOpenPost(post)}
+                className="text-left w-full focus:outline-none focus:ring-2 focus:ring-primary/40 rounded-[18px]"
+              >
+                <PostCard
+                  post={post}
+                  isLiked={likedPosts.includes(post.id)}
+                  onLike={(id, liked) => handleLike(id, liked)}
+                />
+              </button>
             ))}
           </div>
         ) : (
@@ -110,6 +118,13 @@ export default function Feed() {
           </div>
         )}
       </div>
+
+      <PostDetailDialog
+        post={openPost}
+        isLiked={openPost ? likedPosts.includes(openPost.id) : false}
+        onLike={handleLike}
+        onClose={() => setOpenPost(null)}
+      />
     </AppLayout>
   );
 }
