@@ -72,10 +72,10 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
         }}
       >
         {/* Top row: image + content */}
-        <div className="flex" style={{ minHeight: '165px' }}>
+        <div className="flex" style={{ minHeight: '230px' }}>
           {/* Left image */}
           <div
-            style={{ width: '160px', height: '165px', flexShrink: 0 }}
+            style={{ width: '180px', height: '230px', flexShrink: 0 }}
             className="relative bg-[#0A0A0F] overflow-hidden"
           >
             {post.media_type === 'video' ? (
@@ -102,7 +102,7 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
               flex: 1,
               minWidth: 0,
               overflow: 'hidden',
-              padding: '12px 11px 10px',
+              padding: '16px 14px 14px',
             }}
           >
             {/* Header */}
@@ -155,12 +155,12 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             {titleText && (
               <h3
                 style={{
-                  fontSize: '13px',
+                  fontSize: '15px',
                   fontWeight: 600,
                   color: '#e8e4f0',
                   letterSpacing: '-0.01em',
                   lineHeight: 1.3,
-                  marginTop: '6px',
+                  marginTop: '8px',
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
@@ -175,12 +175,12 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             {descriptionText && (
               <p
                 style={{
-                  fontSize: '11px',
+                  fontSize: '12px',
                   color: '#5a5a72',
-                  lineHeight: 1.4,
-                  marginTop: '4px',
+                  lineHeight: 1.45,
+                  marginTop: '6px',
                   display: '-webkit-box',
-                  WebkitLineClamp: 2,
+                  WebkitLineClamp: 3,
                   WebkitBoxOrient: 'vertical',
                   overflow: 'hidden',
                 }}
