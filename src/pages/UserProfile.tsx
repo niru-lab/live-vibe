@@ -220,6 +220,13 @@ export default function UserProfile() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <PostDetailDialog
+        post={selectedPost}
+        isLiked={selectedPost ? likedPosts.includes(selectedPost.id) : false}
+        onLike={(postId, isLiked) => likeMutation.mutate({ postId, isLiked })}
+        onClose={() => setSelectedPost(null)}
+      />
     </AppLayout>
   );
 }
