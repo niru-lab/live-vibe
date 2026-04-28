@@ -49,6 +49,15 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
               </div>
             </div>
 
+            {/* Media */}
+            <div className="relative bg-black w-full shrink-0 flex items-center justify-center" style={{ maxHeight: '40vh' }}>
+              {post.media_type === 'video' ? (
+                <video src={post.media_url} className="w-full max-h-[40vh] object-contain" controls playsInline />
+              ) : (
+                <img src={post.media_url} alt={post.caption || ''} className="w-full max-h-[40vh] object-contain" />
+              )}
+            </div>
+
             {/* Caption + actions */}
             <div className="px-4 py-3 border-b border-white/[0.06] shrink-0">
               {post.caption && (
