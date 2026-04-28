@@ -35,17 +35,8 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
       <DialogContent className="max-w-lg p-0 rounded-3xl border-white/10 bg-[#0A0A0F] overflow-hidden max-h-[90vh] flex flex-col">
         {post && (
           <>
-            {/* Media */}
-            <div className="relative bg-black w-full aspect-square shrink-0">
-              {post.media_type === 'video' ? (
-                <video src={post.media_url} className="w-full h-full object-contain" controls playsInline />
-              ) : (
-                <img src={post.media_url} alt={post.caption || ''} className="w-full h-full object-contain" />
-              )}
-            </div>
-
             {/* Header */}
-            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06]">
+            <div className="flex items-center gap-2 px-4 py-3 border-b border-white/[0.06] shrink-0">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={post.author?.avatar_url || ''} />
                 <AvatarFallback className="bg-[#1e1e2e] text-xs text-white">
