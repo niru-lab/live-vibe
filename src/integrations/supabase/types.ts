@@ -122,6 +122,39 @@ export type Database = {
           },
         ]
       }
+      direct_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean
+          recipient_id: string
+          responded_at: string | null
+          sender_id: string
+          status: Database["public"]["Enums"]["dm_status"]
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id: string
+          responded_at?: string | null
+          sender_id: string
+          status?: Database["public"]["Enums"]["dm_status"]
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id?: string
+          responded_at?: string | null
+          sender_id?: string
+          status?: Database["public"]["Enums"]["dm_status"]
+        }
+        Relationships: []
+      }
       email_send_log: {
         Row: {
           created_at: string
@@ -1404,6 +1437,7 @@ export type Database = {
     }
     Enums: {
       dm_policy: "everyone" | "followers" | "nobody"
+      dm_status: "pending" | "accepted" | "declined"
       event_category:
         | "club"
         | "house_party"
@@ -1554,6 +1588,7 @@ export const Constants = {
   public: {
     Enums: {
       dm_policy: ["everyone", "followers", "nobody"],
+      dm_status: ["pending", "accepted", "declined"],
       event_category: [
         "club",
         "house_party",
