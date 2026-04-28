@@ -7,6 +7,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { MagnifyingGlass, Microphone, Camera, Compass, ArrowsClockwise } from '@phosphor-icons/react';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { DiscoverFilters } from '@/components/discover/DiscoverFilters';
+import { RoomzSheet } from '@/components/discover/RoomzSheet';
 import { useQueryClient } from '@tanstack/react-query';
 
 const StuttgartMap = lazy(() => import('@/components/maps/StuttgartMap').then(m => ({ default: m.StuttgartMap })));
@@ -54,12 +55,13 @@ export default function Discover() {
                 </div>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2">
               <DiscoverFilters onFiltersChange={(f) => {
                 setSelectedCity(f.city);
                 const catMap: Record<string, string> = { 'Bar': 'bar', 'Club': 'club', 'Café': 'cafe', 'Events': 'event' };
                 setSelectedCategory(f.category ? catMap[f.category] || null : null);
               }} />
+              <RoomzSheet />
             </div>
           </div>
         </header>
