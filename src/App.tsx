@@ -21,6 +21,7 @@ import CreateEvent from "./pages/CreateEvent";
 import CreatePost from "./pages/CreatePost";
 import CreateCarousel from "./pages/CreateCarousel";
 import Profile from "./pages/Profile";
+import UserProfile from "./pages/UserProfile";
 import EventDetail from "./pages/EventDetail";
 import Messages from "./pages/Messages";
 import Roomz from "./pages/Roomz";
@@ -64,6 +65,7 @@ const App = () => (
                   <Route path="/create" element={<CreatePost />} />
                   <Route path="/create/carousel" element={<CreateCarousel />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/u/:username" element={<UserProfile />} />
                   <Route path="/messages" element={<Messages />} />
                   <Route path="/roomz" element={<Roomz />} />
                   <Route path="/roomz/create" element={<CreateRoom />} />
