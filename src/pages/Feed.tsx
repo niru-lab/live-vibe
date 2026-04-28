@@ -118,6 +118,13 @@ export default function Feed() {
           </div>
         )}
       </div>
+
+      <PostDetailDialog
+        post={openPost}
+        isLiked={openPost ? likedPosts.includes(openPost.id) : false}
+        onLike={handleLike}
+        onClose={() => setOpenPost(null)}
+      />
     </AppLayout>
   );
 }
