@@ -45,17 +45,24 @@ export const useNotificationBadges = () => {
     refetchInterval: 30000,
   });
 
-  // Unread messages
+  // Unread messages (event messages + direct messages incl. pending requests)
   const { data: messagesBadge = 0 } = useQuery({
     queryKey: ['badge-messages', profileId],
     queryFn: async () => {
       if (!profileId) return 0;
-      const { count } = await supabase
-        .from('event_messages')
-        .select('id', { count: 'exact', head: true })
-        .eq('recipient_id', profileId)
-        .eq('is_read', false);
-      return count || 0;
+      const [eventMsg, dmMsg] = await Promise.all([
+        supabase
+          .from('event_messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('recipient_id', profileId)
+          .eq('is_read', false),
+        supabase
+          .from('direct_messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('recipient_id', profileId)
+          .eq('is_read', false),
+      ]);
+      return (eventMsg.count || 0) + (dmMsg.count || 0);
     },
     enabled: !!profileId,
     refetchInterval: 30000,
