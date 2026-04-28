@@ -72,10 +72,10 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
         }}
       >
         {/* Top row: image + content */}
-        <div className="flex" style={{ minHeight: '230px' }}>
+        <div className="flex" style={{ minHeight: '260px' }}>
           {/* Left image */}
           <div
-            style={{ width: '180px', height: '230px', flexShrink: 0 }}
+            style={{ width: '220px', height: '260px', flexShrink: 0 }}
             className="relative bg-[#0A0A0F] overflow-hidden"
           >
             {post.media_type === 'video' ? (
