@@ -102,6 +102,24 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
               </div>
             ))}
             <Separator />
+            <div>
+              <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
+                {isDark ? <Moon weight="thin" className="h-4 w-4" /> : <Sun weight="thin" className="h-4 w-4" />}
+                Darstellung
+              </div>
+              <div className="flex items-center justify-between gap-3 h-11 px-3 rounded-md hover:bg-accent/50 transition-colors">
+                <div className="flex items-center gap-3">
+                  {isDark ? (
+                    <Moon weight="thin" className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <Sun weight="thin" className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <span className="text-sm">Dark Mode</span>
+                </div>
+                <Switch checked={isDark} onCheckedChange={setIsDark} aria-label="Dark Mode umschalten" />
+              </div>
+            </div>
+            <Separator />
             <div className="space-y-1">
               {otherItems.map((item) => (
                 <Button key={item.label} variant="ghost" className="w-full justify-start gap-3 h-11" onClick={item.onClick}>
