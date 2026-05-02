@@ -115,7 +115,7 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
                   )}
                   <span className="text-sm">Dark Mode</span>
                 </div>
-                <Switch checked={isDark} onCheckedChange={setIsDark} aria-label="Dark Mode umschalten" />
+                <Switch checked={isDark} onCheckedChange={handleThemeToggle} aria-label="Dark Mode umschalten" />
               </div>
             </div>
             <Separator />
