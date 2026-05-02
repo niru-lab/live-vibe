@@ -107,23 +107,22 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             <div className="flex items-center gap-1.5" style={{ minWidth: 0 }}>
               <Avatar style={{ width: '20px', height: '20px' }} className="shrink-0">
                 <AvatarImage src={author?.avatar_url || ''} alt={author?.display_name || ''} />
-                <AvatarFallback className="text-[9px] bg-[#1e1e2e] text-[#9b9bb0]">
+                <AvatarFallback className="text-[9px] bg-muted text-muted-foreground">
                   {author?.display_name?.charAt(0).toUpperCase() || '?'}
                 </AvatarFallback>
               </Avatar>
               <span
-                className="truncate"
+                className="truncate text-muted-foreground"
                 style={{
                   fontSize: '11px',
                   fontWeight: 500,
-                  color: '#9b9bb0',
                   minWidth: 0,
                 }}
               >
                 {author?.username || author?.display_name || 'unbekannt'}
               </span>
-              <span style={{ color: '#3a3a50', fontSize: '10px' }}>·</span>
-              <span style={{ color: '#3a3a50', fontSize: '10px' }} className="shrink-0">
+              <span className="text-muted-foreground/60" style={{ fontSize: '10px' }}>·</span>
+              <span className="text-muted-foreground/60 shrink-0" style={{ fontSize: '10px' }}>
                 {timeAgo}
               </span>
 
@@ -131,7 +130,7 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
                 <div className="ml-auto shrink-0">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="p-1 -m-1 text-[#4a4a5e] hover:text-[#9b9bb0]">
+                      <button className="p-1 -m-1 text-muted-foreground/60 hover:text-muted-foreground">
                         <DotsThreeVertical weight="bold" className="h-3.5 w-3.5" />
                       </button>
                     </DropdownMenuTrigger>
