@@ -172,6 +172,136 @@
     --sidebar-border: 256 23% 18%;
     --sidebar-ring: 262 83% 58%;
   }
+
+  /* ============================================================
+     LIGHT MODE OVERRIDES
+     The app has many hardcoded dark hex colors in components.
+     Instead of editing each file, we override them globally
+     ONLY when the app is in light mode (html:not(.dark)).
+     Dark mode keeps its original look untouched.
+     ============================================================ */
+  html:not(.dark) {
+    color-scheme: light;
+  }
+
+  /* Backgrounds: dark hex → light cream */
+  html:not(.dark) [class*="bg-[#0A0A0F]"],
+  html:not(.dark) [class*="bg-[#08080F]"],
+  html:not(.dark) [class*="bg-[#08080f]"],
+  html:not(.dark) [class*="bg-[#0a0a0f]"] {
+    background-color: hsl(var(--background)) !important;
+  }
+  html:not(.dark) [class*="bg-[#12121A]"],
+  html:not(.dark) [class*="bg-[#12121a]"],
+  html:not(.dark) [class*="bg-[#1A1A24]"],
+  html:not(.dark) [class*="bg-[#1a1a24]"],
+  html:not(.dark) [class*="bg-[#1C1C28]"],
+  html:not(.dark) [class*="bg-[#1c1c28]"],
+  html:not(.dark) [class*="bg-[#111120]"] {
+    background-color: hsl(var(--card)) !important;
+  }
+
+  /* Inline style backgrounds (Feed.tsx, Profile.tsx, UserSearchBar) */
+  html:not(.dark) [style*="#0A0A0F"],
+  html:not(.dark) [style*="#0a0a0f"],
+  html:not(.dark) [style*="#08080F"],
+  html:not(.dark) [style*="#08080f"] {
+    background: hsl(var(--background)) !important;
+  }
+  html:not(.dark) [style*="#12121A"],
+  html:not(.dark) [style*="#12121a"],
+  html:not(.dark) [style*="#1C1C28"],
+  html:not(.dark) [style*="#1c1c28"] {
+    background: hsl(var(--card)) !important;
+  }
+
+  /* Text colors */
+  html:not(.dark) .text-white {
+    color: hsl(var(--foreground)) !important;
+  }
+  html:not(.dark) [class*="text-[#A0A0B0]"],
+  html:not(.dark) [class*="text-[#a0a0b0]"] {
+    color: hsl(var(--muted-foreground)) !important;
+  }
+
+  /* Borders: white/* → border token */
+  html:not(.dark) [class*="border-white/"] {
+    border-color: hsl(var(--border)) !important;
+  }
+  html:not(.dark) [class*="bg-white/"] {
+    background-color: hsl(var(--muted)) !important;
+  }
+
+  /* Brand violet→pink gradient → orange in light */
+  html:not(.dark) [class*="from-[#7C3AED]"],
+  html:not(.dark) [class*="from-[#7c3aed]"] {
+    --tw-gradient-from: #FF5C00 var(--tw-gradient-from-position) !important;
+    --tw-gradient-to: rgb(255 92 0 / 0) var(--tw-gradient-to-position) !important;
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+  }
+  html:not(.dark) [class*="to-[#EC4899]"],
+  html:not(.dark) [class*="to-[#ec4899]"],
+  html:not(.dark) [class*="to-[#9D5CF6]"],
+  html:not(.dark) [class*="to-[#9d5cf6]"] {
+    --tw-gradient-to: #FF9F5C var(--tw-gradient-to-position) !important;
+  }
+  html:not(.dark) [class*="bg-[#7C3AED]"],
+  html:not(.dark) [class*="bg-[#7c3aed]"],
+  html:not(.dark) [class*="bg-[#6D28D9]"],
+  html:not(.dark) [class*="bg-[#6d28d9]"] {
+    background-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+  }
+
+  /* Brand text gradient (violet→pink) → orange in light */
+  html:not(.dark) .text-gradient-brand {
+    background: linear-gradient(135deg, #FF5C00, #FF9F5C) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    color: transparent !important;
+  }
+
+  /* Avatar gradient ring (orange in light) */
+  html:not(.dark) .avatar-gradient-ring {
+    background: conic-gradient(from 0deg, #FF5C00, #FF9F5C, #FF5C00, #FF9F5C, #FF5C00) !important;
+    box-shadow: 0 0 30px rgba(255, 92, 0, 0.35) !important;
+  }
+
+  /* Tab underline (orange in light) */
+  html:not(.dark) .tab-underline-active::after {
+    background: linear-gradient(90deg, #FF5C00, #FF9F5C) !important;
+    box-shadow: 0 0 8px rgba(255, 92, 0, 0.5) !important;
+  }
+
+  /* Glass pill on light bg */
+  html:not(.dark) .glass-pill {
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+  html:not(.dark) .glass,
+  html:not(.dark) .glass-strong {
+    background: hsl(var(--card) / 0.6) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+
+  /* Mapbox popup → light variant */
+  html:not(.dark) .feyrn-popup .mapboxgl-popup-content,
+  html:not(.dark) .mapboxgl-popup .mapboxgl-popup-content {
+    background: hsl(var(--card)) !important;
+    color: hsl(var(--card-foreground)) !important;
+    border-color: hsl(var(--border)) !important;
+  }
+  html:not(.dark) .feyrn-popup .mapboxgl-popup-tip,
+  html:not(.dark) .mapboxgl-popup .mapboxgl-popup-tip {
+    border-top-color: hsl(var(--card)) !important;
+    border-bottom-color: hsl(var(--card)) !important;
+  }
+  html:not(.dark) .feyrn-popup .mapboxgl-popup-close-button,
+  html:not(.dark) .mapboxgl-popup .mapboxgl-popup-close-button {
+    color: hsl(var(--foreground)) !important;
+    background: rgba(0, 0, 0, 0.06) !important;
+  }
 }
 
 @layer base {
