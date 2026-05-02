@@ -32,7 +32,7 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent className="w-[calc(100vw-24px)] max-w-lg h-[calc(100dvh-24px)] max-h-[640px] p-0 rounded-3xl border-white/10 bg-[#0A0A0F] overflow-hidden flex flex-col gap-0">
+      <DialogContent className="w-[calc(100vw-24px)] max-w-lg h-[calc(100dvh-24px)] max-h-[640px] p-0 rounded-3xl border-border bg-card overflow-hidden flex flex-col gap-0">
         {post && (
           <>
             <DialogTitle className="sr-only">Beitrag von {post.author?.display_name || post.author?.username || 'Nutzer'}</DialogTitle>
