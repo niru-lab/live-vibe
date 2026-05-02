@@ -38,9 +38,16 @@
       // Apply saved theme before first paint to prevent flash
       (function () {
         try {
-          var t = localStorage.getItem('feyrn_theme');
-          if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
-          else document.documentElement.removeAttribute('data-theme');
+          var t = localStorage.getItem('feyrn-theme') || localStorage.getItem('feyrn_theme') || 'light';
+          var root = document.documentElement;
+          root.classList.remove('light', 'dark');
+          if (t === 'dark') {
+            root.classList.add('dark');
+            root.setAttribute('data-theme', 'dark');
+          } else {
+            root.classList.add('light');
+            root.removeAttribute('data-theme');
+          }
         } catch (e) {}
       })();
     </script>
