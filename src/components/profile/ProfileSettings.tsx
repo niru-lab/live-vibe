@@ -33,7 +33,6 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
       localStorage.setItem('feyrn_theme', 'light');
     }
   }, [isDark]);
-  const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   const handleSignOut = async () => { await signOut(); onOpenChange(false); navigate('/auth'); };
 
