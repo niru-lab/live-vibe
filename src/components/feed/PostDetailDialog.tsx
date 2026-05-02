@@ -60,20 +60,20 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
             </div>
 
             {/* Caption + actions */}
-            <div className="px-4 py-3 border-b border-white/[0.06] shrink-0">
+            <div className="px-4 py-3 border-b border-border shrink-0">
               {post.caption && (
-                <p className="text-sm text-white/90 whitespace-pre-wrap mb-3">{post.caption}</p>
+                <p className="text-sm text-foreground/90 whitespace-pre-wrap mb-3">{post.caption}</p>
               )}
               <div className="flex items-center gap-4">
                 <button
                   onClick={() => onLike(post.id, isLiked)}
                   className="flex items-center gap-1.5"
-                  style={{ color: isLiked ? '#EC4899' : '#9b9bb0' }}
+                  style={{ color: isLiked ? '#EC4899' : 'hsl(var(--muted-foreground))' }}
                 >
                   <Heart weight={isLiked ? 'fill' : 'regular'} className={cn('h-5 w-5 transition-all', isLiked && 'scale-110')} />
                   <span className="text-sm font-medium">{post.likes_count}</span>
                 </button>
-                <div className="flex items-center gap-1.5 text-[#9b9bb0]">
+                <div className="flex items-center gap-1.5 text-muted-foreground">
                   <ChatCircle weight="regular" className="h-5 w-5" />
                   <span className="text-sm font-medium">{comments.length || post.comments_count}</span>
                 </div>
