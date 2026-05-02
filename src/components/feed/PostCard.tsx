@@ -63,11 +63,9 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
   return (
     <>
       <article
-        className="animate-fade-in overflow-hidden w-full"
+        className="animate-fade-in overflow-hidden w-full bg-card border border-border"
         style={{
-          background: '#12121A',
           borderRadius: '18px',
-          border: '0.5px solid #1e1e2e',
           fontFamily: 'system-ui, sans-serif',
         }}
       >
@@ -76,7 +74,7 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
           {/* Left image */}
           <div
             style={{ width: '220px', height: '260px', flexShrink: 0 }}
-            className="relative bg-[#0A0A0F] overflow-hidden"
+            className="relative bg-muted overflow-hidden"
           >
             {post.media_type === 'video' ? (
               <video
