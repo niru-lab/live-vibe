@@ -151,10 +151,10 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             {/* Title */}
             {titleText && (
               <h3
+                className="text-foreground"
                 style={{
                   fontSize: '15px',
                   fontWeight: 600,
-                  color: '#e8e4f0',
                   letterSpacing: '-0.01em',
                   lineHeight: 1.3,
                   marginTop: '8px',
@@ -171,9 +171,9 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             {/* Description */}
             {descriptionText && (
               <p
+                className="text-muted-foreground"
                 style={{
                   fontSize: '12px',
-                  color: '#5a5a72',
                   lineHeight: 1.45,
                   marginTop: '6px',
                   display: '-webkit-box',
