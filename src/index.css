@@ -24,6 +24,43 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap');
 
+/* ============================================================
+   Feyrn Dual-Theme color tokens (additive, parallel to HSL system)
+   Light = :root (default), Dark = [data-theme="dark"]
+   Use via: var(--color-bg-base), var(--color-accent), ...
+   ============================================================ */
+:root {
+  --color-bg-base:        #FFFBF8;
+  --color-bg-surface:     #FFFFFF;
+  --color-bg-elevated:    #FFF5EE;
+  --color-accent:         #FF5C00;
+  --color-accent-hover:   #FF7A2B;
+  --color-accent-pale:    #FFF0E8;
+  --color-accent-mid:     #FFD4B8;
+  --color-text-primary:   #1A1208;
+  --color-text-secondary: #6B5B4E;
+  --color-text-muted:     #A89080;
+  --color-border:         #F0E6DC;
+  --color-border-strong:  #E0CFC0;
+  --color-accent-gradient: linear-gradient(135deg, #FF5C00, #FF9F5C);
+}
+
+[data-theme="dark"] {
+  --color-bg-base:        #0A0A0F;
+  --color-bg-surface:     #12121A;
+  --color-bg-elevated:    #1C1C28;
+  --color-accent:         #7C3AED;
+  --color-accent-hover:   #9D5CF6;
+  --color-accent-pale:    #1E1530;
+  --color-accent-mid:     #3D2870;
+  --color-text-primary:   #F0EEFF;
+  --color-text-secondary: #A89EC0;
+  --color-text-muted:     #6B6080;
+  --color-border:         #2A2438;
+  --color-border-strong:  #3D3560;
+  --color-accent-gradient: linear-gradient(135deg, #7C3AED, #EC4899);
+}
+
 /* Moment-X Party Discovery App - Minimal B&W Design System 2026 */
 
 @layer base {
