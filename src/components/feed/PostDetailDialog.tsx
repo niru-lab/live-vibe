@@ -19,11 +19,18 @@ interface PostDetailDialogProps {
 
 export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailDialogProps) => {
   const open = !!post;
+  const navigate = useNavigate();
   const { data: comments = [], isLoading } = useComments(post?.id);
   const { data: myProfile } = useProfile();
   const addComment = useAddComment();
   const deleteComment = useDeleteComment();
   const [text, setText] = useState('');
+
+  const goToProfile = () => {
+    if (!post?.author?.username) return;
+    onClose();
+    navigate(`/u/${post.author.username}`);
+  };
 
   const handleSend = async () => {
     if (!post || !text.trim()) return;
