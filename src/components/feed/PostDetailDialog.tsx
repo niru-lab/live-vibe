@@ -51,7 +51,7 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
             </div>
 
             {/* Media */}
-            <div className="relative bg-black w-full shrink-0 flex items-center justify-center max-h-[30dvh]">
+            <div className="relative bg-muted w-full shrink-0 flex items-center justify-center max-h-[30dvh]">
               {post.media_type === 'video' ? (
                 <video src={post.media_url} className="w-full max-h-[30dvh] object-contain" controls playsInline />
               ) : (
