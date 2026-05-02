@@ -37,16 +37,16 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
           <>
             <DialogTitle className="sr-only">Beitrag von {post.author?.display_name || post.author?.username || 'Nutzer'}</DialogTitle>
             {/* Header */}
-            <div className="flex items-center gap-2 px-4 py-3 pr-12 border-b border-white/[0.06] shrink-0">
+            <div className="flex items-center gap-2 px-4 py-3 pr-12 border-b border-border shrink-0">
               <Avatar className="h-8 w-8">
                 <AvatarImage src={post.author?.avatar_url || ''} />
-                <AvatarFallback className="bg-[#1e1e2e] text-xs text-white">
+                <AvatarFallback className="bg-muted text-xs text-foreground">
                   {post.author?.display_name?.charAt(0).toUpperCase() || '?'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-white truncate">{post.author?.display_name}</p>
-                <p className="text-xs text-[#9b9bb0] truncate">@{post.author?.username}</p>
+                <p className="text-sm font-semibold text-foreground truncate">{post.author?.display_name}</p>
+                <p className="text-xs text-muted-foreground truncate">@{post.author?.username}</p>
               </div>
             </div>
 
