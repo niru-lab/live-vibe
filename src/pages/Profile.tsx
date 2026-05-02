@@ -39,7 +39,7 @@ export default function Profile() {
 
   return (
     <AppLayout>
-      <div className="fixed inset-0 -z-10" style={{ background: '#0A0A0F' }} />
+      <div className="fixed inset-0 -z-10 bg-background" />
       <div className="min-h-screen">
         <header className="flex items-center justify-between px-4 py-4">
           <Button
@@ -49,12 +49,9 @@ export default function Profile() {
             onClick={() => navigate('/messages')}
             aria-label="Nachrichten öffnen"
           >
-            <ChatCircleDots weight="bold" className="h-4 w-4 text-white" />
+            <ChatCircleDots weight="bold" className="h-4 w-4 text-foreground" />
             {messagesBadge > 0 && (
-              <span
-                className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold text-white"
-                style={{ background: '#EC4899' }}
-              >
+              <span className="absolute -top-0.5 -right-0.5 flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9px] font-bold text-primary-foreground bg-primary">
                 {messagesBadge > 9 ? '9+' : messagesBadge}
               </span>
             )}
@@ -66,7 +63,7 @@ export default function Profile() {
             onClick={() => setSettingsOpen(true)}
             aria-label="Einstellungen öffnen"
           >
-            <GearSix weight="bold" className="h-4 w-4 text-white" />
+            <GearSix weight="bold" className="h-4 w-4 text-foreground" />
           </Button>
         </header>
         <div className="px-4 pb-24">

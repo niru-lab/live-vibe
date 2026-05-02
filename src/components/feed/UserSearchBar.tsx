@@ -102,7 +102,7 @@ export const UserSearchBar = () => {
         onClick={() => inputRef.current?.focus()}
         style={{ touchAction: 'manipulation' }}
       >
-        <MagnifyingGlass weight="thin" className="h-4 w-4 text-[#A0A0B0] shrink-0" />
+        <MagnifyingGlass weight="thin" className="h-4 w-4 text-muted-foreground shrink-0" />
         <input
           ref={inputRef}
           type="text"
@@ -114,25 +114,22 @@ export const UserSearchBar = () => {
           onFocus={() => setOpen(true)}
           onTouchStart={(e) => e.stopPropagation()}
           placeholder="Accounts suchen…"
-          className="flex-1 bg-transparent text-sm text-white placeholder:text-[#A0A0B0] outline-none min-w-0 w-full"
+          className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none min-w-0 w-full"
           style={{ fontSize: '16px' }}
         />
         {query && (
           <button onClick={() => { setQuery(''); setDebounced(''); }} className="shrink-0">
-            <X weight="bold" className="h-3.5 w-3.5 text-[#A0A0B0]" />
+            <X weight="bold" className="h-3.5 w-3.5 text-muted-foreground" />
           </button>
         )}
       </label>
 
       {open && debounced.length >= 1 && (
-        <div
-          className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 max-h-[60vh] overflow-y-auto rounded-2xl border border-white/[0.08] shadow-2xl"
-          style={{ background: '#12121A' }}
-        >
+        <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 max-h-[60vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl">
           {isLoading ? (
-            <div className="p-4 text-center text-xs text-[#A0A0B0]">Suche…</div>
+            <div className="p-4 text-center text-xs text-muted-foreground">Suche…</div>
           ) : results.length === 0 ? (
-            <div className="p-4 text-center text-xs text-[#A0A0B0]">Keine Accounts gefunden</div>
+            <div className="p-4 text-center text-xs text-muted-foreground">Keine Accounts gefunden</div>
           ) : (
             <ul className="py-1">
               {results.map((r) => {
@@ -143,31 +140,31 @@ export const UserSearchBar = () => {
                   navigate(`/u/${r.username}`);
                 };
                 return (
-                  <li key={r.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-white/[0.03] cursor-pointer" onClick={goProfile}>
+                  <li key={r.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-accent/50 cursor-pointer" onClick={goProfile}>
                     <Avatar className="h-9 w-9 shrink-0">
                       <AvatarImage src={r.avatar_url || ''} className="object-cover" />
-                      <AvatarFallback className="bg-[#1A1A24] text-xs text-white">
+                      <AvatarFallback className="bg-muted text-xs text-foreground">
                         {r.display_name?.charAt(0).toUpperCase() || '?'}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-sm font-medium text-white truncate">{r.display_name}</span>
+                        <span className="text-sm font-medium text-foreground truncate">{r.display_name}</span>
                         {isPrivate ? (
-                          <Lock weight="fill" className="h-3 w-3 text-[#A0A0B0] shrink-0" />
+                          <Lock weight="fill" className="h-3 w-3 text-muted-foreground shrink-0" />
                         ) : (
-                          <GlobeHemisphereWest weight="fill" className="h-3 w-3 text-[#7C3AED] shrink-0" />
+                          <GlobeHemisphereWest weight="fill" className="h-3 w-3 text-primary shrink-0" />
                         )}
                       </div>
-                      <div className="text-[11px] text-[#A0A0B0] truncate">@{r.username}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">@{r.username}</div>
                     </div>
                     <button
                       onClick={(e) => handleFollow(e, r)}
                       disabled={toggleFollow.isPending}
                       className={`flex items-center gap-1 h-7 px-3 rounded-full text-[11px] font-semibold shrink-0 transition-colors ${
                         r.is_following
-                          ? 'bg-white/[0.06] text-white border border-white/[0.08]'
-                          : 'bg-[#7C3AED] text-white hover:bg-[#6D28D9]'
+                          ? 'bg-muted text-foreground border border-border'
+                          : 'bg-primary text-primary-foreground hover:bg-primary/90'
                       }`}
                     >
                       {r.is_following ? (

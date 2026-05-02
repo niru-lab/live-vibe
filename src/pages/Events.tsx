@@ -35,30 +35,30 @@ export default function Events() {
 
   return (
     <AppLayout>
-      <div className="fixed inset-0 bg-[#0A0A0F] -z-10" />
+      <div className="fixed inset-0 bg-background -z-10" />
       
-      <header className="sticky top-0 z-40 bg-[#0A0A0F]/80 backdrop-blur-xl border-b border-white/[0.08]">
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="flex items-center justify-between p-4">
            <div className="flex items-center gap-2">
              <div className="flex h-8 w-8 items-center justify-center rounded-full glass-pill">
-               <CalendarBlank weight="fill" className="h-4 w-4 text-[#7C3AED]" />
+               <CalendarBlank weight="fill" className="h-4 w-4 text-primary" />
              </div>
              <FeyrnLogo size="sm" />
            </div>
           <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full glass-pill">
-            <ChartBar weight="thin" className="h-4 w-4 text-[#A0A0B0]" />
+            <ChartBar weight="thin" className="h-4 w-4 text-muted-foreground" />
           </Button>
         </div>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="px-4 pb-2">
-          <TabsList className="w-full bg-transparent border-b border-white/[0.08] rounded-none p-0 h-auto">
-            <TabsTrigger value="upcoming" className="flex-1 rounded-none bg-transparent py-3 text-[#A0A0B0] data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
+          <TabsList className="w-full bg-transparent border-b border-border rounded-none p-0 h-auto">
+            <TabsTrigger value="upcoming" className="flex-1 rounded-none bg-transparent py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
               Anstehend
               {invitations.length > 0 && (
-                <Badge className="ml-1.5 h-5 w-5 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#EC4899] p-0 text-xs text-white border-0">{invitations.length}</Badge>
+                <Badge className="ml-1.5 h-5 w-5 rounded-full bg-primary p-0 text-xs text-primary-foreground border-0">{invitations.length}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="my-rsvps" className="flex-1 rounded-none bg-transparent py-3 text-[#A0A0B0] data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">Zusagen</TabsTrigger>
-            <TabsTrigger value="my-events" className="flex-1 rounded-none bg-transparent py-3 text-[#A0A0B0] data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">Meine</TabsTrigger>
+            <TabsTrigger value="my-rsvps" className="flex-1 rounded-none bg-transparent py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">Zusagen</TabsTrigger>
+            <TabsTrigger value="my-events" className="flex-1 rounded-none bg-transparent py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">Meine</TabsTrigger>
           </TabsList>
         </Tabs>
       </header>

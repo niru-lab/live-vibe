@@ -63,11 +63,9 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
   return (
     <>
       <article
-        className="animate-fade-in overflow-hidden w-full"
+        className="animate-fade-in overflow-hidden w-full bg-card border border-border"
         style={{
-          background: '#12121A',
           borderRadius: '18px',
-          border: '0.5px solid #1e1e2e',
           fontFamily: 'system-ui, sans-serif',
         }}
       >
@@ -76,7 +74,7 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
           {/* Left image */}
           <div
             style={{ width: '220px', height: '260px', flexShrink: 0 }}
-            className="relative bg-[#0A0A0F] overflow-hidden"
+            className="relative bg-muted overflow-hidden"
           >
             {post.media_type === 'video' ? (
               <video
@@ -109,23 +107,22 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             <div className="flex items-center gap-1.5" style={{ minWidth: 0 }}>
               <Avatar style={{ width: '20px', height: '20px' }} className="shrink-0">
                 <AvatarImage src={author?.avatar_url || ''} alt={author?.display_name || ''} />
-                <AvatarFallback className="text-[9px] bg-[#1e1e2e] text-[#9b9bb0]">
+                <AvatarFallback className="text-[9px] bg-muted text-muted-foreground">
                   {author?.display_name?.charAt(0).toUpperCase() || '?'}
                 </AvatarFallback>
               </Avatar>
               <span
-                className="truncate"
+                className="truncate text-muted-foreground"
                 style={{
                   fontSize: '11px',
                   fontWeight: 500,
-                  color: '#9b9bb0',
                   minWidth: 0,
                 }}
               >
                 {author?.username || author?.display_name || 'unbekannt'}
               </span>
-              <span style={{ color: '#3a3a50', fontSize: '10px' }}>·</span>
-              <span style={{ color: '#3a3a50', fontSize: '10px' }} className="shrink-0">
+              <span className="text-muted-foreground/60" style={{ fontSize: '10px' }}>·</span>
+              <span className="text-muted-foreground/60 shrink-0" style={{ fontSize: '10px' }}>
                 {timeAgo}
               </span>
 
@@ -133,7 +130,7 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
                 <div className="ml-auto shrink-0">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="p-1 -m-1 text-[#4a4a5e] hover:text-[#9b9bb0]">
+                      <button className="p-1 -m-1 text-muted-foreground/60 hover:text-muted-foreground">
                         <DotsThreeVertical weight="bold" className="h-3.5 w-3.5" />
                       </button>
                     </DropdownMenuTrigger>
@@ -154,10 +151,10 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             {/* Title */}
             {titleText && (
               <h3
+                className="text-foreground"
                 style={{
                   fontSize: '15px',
                   fontWeight: 600,
-                  color: '#e8e4f0',
                   letterSpacing: '-0.01em',
                   lineHeight: 1.3,
                   marginTop: '8px',
@@ -174,9 +171,9 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             {/* Description */}
             {descriptionText && (
               <p
+                className="text-muted-foreground"
                 style={{
                   fontSize: '12px',
-                  color: '#5a5a72',
                   lineHeight: 1.45,
                   marginTop: '6px',
                   display: '-webkit-box',
@@ -193,11 +190,8 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             <div className="flex items-center gap-3" style={{ marginTop: '8px' }}>
               <button
                 onClick={() => onLike(post.id, isLiked)}
-                className="flex items-center gap-1"
-                style={{
-                  color: isLiked ? '#EC4899' : '#4a4a5e',
-                  fontSize: '11px',
-                }}
+                className={cn('flex items-center gap-1', isLiked ? 'text-pink-500' : 'text-muted-foreground/60')}
+                style={{ fontSize: '11px' }}
               >
                 <Heart
                   weight={isLiked ? 'fill' : 'regular'}
@@ -207,8 +201,8 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
                 <span>{post.likes_count}</span>
               </button>
               <div
-                className="flex items-center gap-1"
-                style={{ color: '#4a4a5e', fontSize: '11px' }}
+                className="flex items-center gap-1 text-muted-foreground/60"
+                style={{ fontSize: '11px' }}
               >
                 <ChatCircle weight="regular" style={{ width: '13px', height: '13px' }} />
                 <span>{post.comments_count}</span>
@@ -216,15 +210,12 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
 
               {(post.event?.name || post.location_name) && (
                 <span
-                  className="truncate"
+                  className="truncate bg-primary/10 border border-primary/30 text-primary"
                   style={{
                     marginLeft: 'auto',
-                    background: '#1a1025',
-                    border: '0.5px solid #3d2a6e',
                     borderRadius: '20px',
                     padding: '3px 7px',
                     fontSize: '10px',
-                    color: '#7C3AED',
                     maxWidth: '75px',
                   }}
                 >
@@ -235,11 +226,11 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
           </div>
         </div>
 
-        {/* Comment preview (placeholder — uses existing comments_count only; render mock previews when available) */}
+        {/* Comment preview */}
         {post.comments_count > 0 && (
           <div
+            className="border-t border-border"
             style={{
-              borderTop: '0.5px solid #1e1e2e',
               padding: '8px 12px',
               display: 'flex',
               flexDirection: 'column',
@@ -248,23 +239,23 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
           >
             <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
               <div
+                className="bg-muted"
                 style={{
                   width: '18px',
                   height: '18px',
                   borderRadius: '50%',
-                  background: '#1e1e2e',
                   flexShrink: 0,
                 }}
               />
               <span
-                style={{ fontSize: '11px', fontWeight: 500, color: '#9b9bb0' }}
-                className="shrink-0"
+                className="shrink-0 text-muted-foreground"
+                style={{ fontSize: '11px', fontWeight: 500 }}
               >
                 {post.comments_count} {post.comments_count === 1 ? 'Kommentar' : 'Kommentare'}
               </span>
               <span
-                style={{ fontSize: '11px', color: '#5a5a72' }}
-                className="truncate"
+                className="truncate text-muted-foreground/60"
+                style={{ fontSize: '11px' }}
               >
                 · alle ansehen
               </span>
