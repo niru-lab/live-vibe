@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { Lock, Bell, MapPin, MusicNote, Users, Gear, SignOut, PencilSimple, Star, Shield, CaretLeft } from '@phosphor-icons/react';
+import { Switch } from '@/components/ui/switch';
+import { Lock, Bell, MapPin, MusicNote, Users, Gear, SignOut, PencilSimple, Star, Shield, CaretLeft, Moon, Sun } from '@phosphor-icons/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { EditProfileDialog } from './EditProfileDialog';
 import { PrivacySettings } from './PrivacySettings';
