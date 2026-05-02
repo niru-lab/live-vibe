@@ -32,7 +32,7 @@ export const BottomNav = () => {
         className="fixed left-4 right-4 z-50 mx-auto max-w-md"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}
       >
-        <div className="glass-pill rounded-[28px] px-1 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.5),0_0_20px_rgba(124,58,237,0.15)]">
+        <div className="glass-pill rounded-[28px] px-1 py-3 shadow-[0_8px_32px_rgba(0,0,0,0.18)]">
           <div className="flex items-center justify-around">
             {navItems.map(({ icon: Icon, label, path, isCenter, badgeKey }) => {
               const isActive = location.pathname === path;
@@ -45,8 +45,8 @@ export const BottomNav = () => {
                     onClick={() => setShowPostSelector(true)}
                     className="relative -mt-8 flex flex-col items-center"
                   >
-                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#7C3AED] to-[#EC4899] shadow-[0_0_24px_rgba(124,58,237,0.6)] transition-all duration-300 hover:scale-110 active:scale-95">
-                      <Icon weight="bold" className="h-7 w-7 text-white" />
+                    <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-300 hover:scale-110 active:scale-95">
+                      <Icon weight="bold" className="h-7 w-7" />
                     </div>
                   </button>
                 );
@@ -65,11 +65,11 @@ export const BottomNav = () => {
                       weight={isActive ? 'fill' : 'thin'}
                       className={cn(
                         'h-5 w-5 transition-all duration-300',
-                        isActive ? 'text-white drop-shadow-[0_0_8px_rgba(124,58,237,0.7)]' : 'text-[#A0A0B0]'
+                        isActive ? 'text-primary' : 'text-muted-foreground'
                       )}
                     />
                     {badgeCount > 0 && (
-                      <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-r from-[#7C3AED] to-[#EC4899] px-0.5 text-xs font-bold text-white shadow-[0_0_8px_rgba(236,72,153,0.6)]">
+                      <span className="absolute -right-2 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-0.5 text-xs font-bold text-primary-foreground">
                         {badgeCount > 99 ? '99+' : badgeCount}
                       </span>
                     )}
@@ -77,13 +77,13 @@ export const BottomNav = () => {
                   <span
                     className={cn(
                       'text-xs transition-colors',
-                      isActive ? 'text-white font-bold' : 'text-[#A0A0B0] font-medium'
+                      isActive ? 'text-foreground font-bold' : 'text-muted-foreground font-medium'
                     )}
                   >
                     {label}
                   </span>
                   {isActive && (
-                    <div className="absolute -bottom-0.5 h-0.5 w-6 rounded-full bg-gradient-to-r from-[#7C3AED] to-[#EC4899] shadow-[0_0_6px_rgba(236,72,153,0.7)]" />
+                    <div className="absolute -bottom-0.5 h-0.5 w-6 rounded-full bg-primary" />
                   )}
                 </Link>
               );
