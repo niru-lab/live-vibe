@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Lock, Bell, MapPin, MusicNote, Users, Gear, SignOut, PencilSimple, Star, Shield, CaretLeft, Moon, Sun } from '@phosphor-icons/react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/components/ThemeProvider';
 import { EditProfileDialog } from './EditProfileDialog';
 import { PrivacySettings } from './PrivacySettings';
 import type { Profile } from '@/hooks/useProfile';
@@ -17,22 +18,20 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
   const { signOut } = useAuth();
   const [editOpen, setEditOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('feyrn_theme') === 'dark';
-  });
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark';
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (isDark) {
-      root.setAttribute('data-theme', 'dark');
-      localStorage.setItem('feyrn_theme', 'dark');
-    } else {
-      root.removeAttribute('data-theme');
-      localStorage.setItem('feyrn_theme', 'light');
-    }
-  }, [isDark]);
+  const handleThemeToggle = (checked: boolean) => {
+    const next = checked ? 'dark' : 'light';
+    setTheme(next);
+    try {
+      localStorage.setItem('feyrn_theme', next);
+      const root = document.documentElement;
+      if (next === 'dark') root.setAttribute('data-theme', 'dark');
+      else root.removeAttribute('data-theme');
+    } catch {}
+  };
 
   const handleSignOut = async () => { await signOut(); onOpenChange(false); navigate('/auth'); };
 
@@ -116,7 +115,7 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
                   )}
                   <span className="text-sm">Dark Mode</span>
                 </div>
-                <Switch checked={isDark} onCheckedChange={setIsDark} aria-label="Dark Mode umschalten" />
+                <Switch checked={isDark} onCheckedChange={handleThemeToggle} aria-label="Dark Mode umschalten" />
               </div>
             </div>
             <Separator />

@@ -42,7 +42,7 @@ const queryClient = new QueryClient({
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <IconContext.Provider value={{ weight: "thin", size: 24 }}>
-      <ThemeProvider defaultTheme="dark" storageKey="feyrn-theme">
+      <ThemeProvider defaultTheme="light" storageKey="feyrn-theme">
         <AuthProvider>
           <TooltipProvider>
             <ErrorBoundary>
