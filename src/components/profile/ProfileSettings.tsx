@@ -18,22 +18,20 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
   const { signOut } = useAuth();
   const [editOpen, setEditOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof window === 'undefined') return false;
-    return localStorage.getItem('feyrn_theme') === 'dark';
-  });
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === 'dark';
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (isDark) {
-      root.setAttribute('data-theme', 'dark');
-      localStorage.setItem('feyrn_theme', 'dark');
-    } else {
-      root.removeAttribute('data-theme');
-      localStorage.setItem('feyrn_theme', 'light');
-    }
-  }, [isDark]);
+  const handleThemeToggle = (checked: boolean) => {
+    const next = checked ? 'dark' : 'light';
+    setTheme(next);
+    try {
+      localStorage.setItem('feyrn_theme', next);
+      const root = document.documentElement;
+      if (next === 'dark') root.setAttribute('data-theme', 'dark');
+      else root.removeAttribute('data-theme');
+    } catch {}
+  };
 
   const handleSignOut = async () => { await signOut(); onOpenChange(false); navigate('/auth'); };
 
