@@ -83,9 +83,9 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
             {/* Comments */}
             <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-3">
               {isLoading ? (
-                <p className="text-xs text-[#9b9bb0] text-center py-4">Lade Kommentare…</p>
+                <p className="text-xs text-muted-foreground text-center py-4">Lade Kommentare…</p>
               ) : comments.length === 0 ? (
-                <p className="text-xs text-[#9b9bb0] text-center py-4">Noch keine Kommentare. Sei der oder die Erste!</p>
+                <p className="text-xs text-muted-foreground text-center py-4">Noch keine Kommentare. Sei der oder die Erste!</p>
               ) : (
                 comments.map((c) => {
                   const isOwn = c.user_id === myProfile?.id;
@@ -93,23 +93,23 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
                     <div key={c.id} className="flex items-start gap-2 group">
                       <Avatar className="h-7 w-7 shrink-0">
                         <AvatarImage src={c.author?.avatar_url || ''} />
-                        <AvatarFallback className="bg-[#1e1e2e] text-[10px] text-white">
+                        <AvatarFallback className="bg-muted text-[10px] text-foreground">
                           {c.author?.display_name?.charAt(0).toUpperCase() || '?'}
                         </AvatarFallback>
                       </Avatar>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs">
-                          <span className="font-semibold text-white">{c.author?.username || c.author?.display_name || 'Nutzer'}</span>
-                          <span className="text-white/90 ml-1.5 break-words">{c.content}</span>
+                          <span className="font-semibold text-foreground">{c.author?.username || c.author?.display_name || 'Nutzer'}</span>
+                          <span className="text-foreground/90 ml-1.5 break-words">{c.content}</span>
                         </p>
-                        <p className="text-[10px] text-[#5a5a72] mt-0.5">
+                        <p className="text-[10px] text-muted-foreground/70 mt-0.5">
                           {formatDistanceToNow(new Date(c.created_at), { addSuffix: true, locale: de })}
                         </p>
                       </div>
                       {isOwn && (
                         <button
                           onClick={() => deleteComment.mutate({ commentId: c.id, postId: post.id })}
-                          className="opacity-0 group-hover:opacity-100 text-[#5a5a72] hover:text-destructive transition-opacity p-1"
+                          className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity p-1"
                           aria-label="Kommentar löschen"
                         >
                           <Trash weight="thin" className="h-3.5 w-3.5" />
@@ -122,14 +122,14 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
             </div>
 
             {/* Input */}
-            <div className="border-t border-white/[0.06] p-3 flex items-center gap-2 shrink-0">
+            <div className="border-t border-border p-3 flex items-center gap-2 shrink-0">
               <input
                 type="text"
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
                 placeholder="Kommentar hinzufügen…"
-                className="flex-1 bg-[#12121A] border border-white/[0.08] rounded-full px-4 py-2 text-sm text-white placeholder:text-[#5a5a72] focus:outline-none focus:border-primary/50"
+                className="flex-1 bg-muted border border-border rounded-full px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary/50"
                 disabled={addComment.isPending}
               />
               <button
