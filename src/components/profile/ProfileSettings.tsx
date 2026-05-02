@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Lock, Bell, MapPin, MusicNote, Users, Gear, SignOut, PencilSimple, Star, Shield, CaretLeft, Moon, Sun } from '@phosphor-icons/react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTheme } from '@/components/ThemeProvider';
 import { EditProfileDialog } from './EditProfileDialog';
 import { PrivacySettings } from './PrivacySettings';
 import type { Profile } from '@/hooks/useProfile';
