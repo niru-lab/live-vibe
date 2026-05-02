@@ -190,11 +190,8 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
             <div className="flex items-center gap-3" style={{ marginTop: '8px' }}>
               <button
                 onClick={() => onLike(post.id, isLiked)}
-                className="flex items-center gap-1"
-                style={{
-                  color: isLiked ? '#EC4899' : '#4a4a5e',
-                  fontSize: '11px',
-                }}
+                className={cn('flex items-center gap-1', isLiked ? 'text-pink-500' : 'text-muted-foreground/60')}
+                style={{ fontSize: '11px' }}
               >
                 <Heart
                   weight={isLiked ? 'fill' : 'regular'}
@@ -204,8 +201,8 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
                 <span>{post.likes_count}</span>
               </button>
               <div
-                className="flex items-center gap-1"
-                style={{ color: '#4a4a5e', fontSize: '11px' }}
+                className="flex items-center gap-1 text-muted-foreground/60"
+                style={{ fontSize: '11px' }}
               >
                 <ChatCircle weight="regular" style={{ width: '13px', height: '13px' }} />
                 <span>{post.comments_count}</span>
@@ -213,15 +210,12 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
 
               {(post.event?.name || post.location_name) && (
                 <span
-                  className="truncate"
+                  className="truncate bg-primary/10 border border-primary/30 text-primary"
                   style={{
                     marginLeft: 'auto',
-                    background: '#1a1025',
-                    border: '0.5px solid #3d2a6e',
                     borderRadius: '20px',
                     padding: '3px 7px',
                     fontSize: '10px',
-                    color: '#7C3AED',
                     maxWidth: '75px',
                   }}
                 >
@@ -232,11 +226,11 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
           </div>
         </div>
 
-        {/* Comment preview (placeholder — uses existing comments_count only; render mock previews when available) */}
+        {/* Comment preview */}
         {post.comments_count > 0 && (
           <div
+            className="border-t border-border"
             style={{
-              borderTop: '0.5px solid #1e1e2e',
               padding: '8px 12px',
               display: 'flex',
               flexDirection: 'column',
@@ -245,23 +239,23 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
           >
             <div className="flex items-center gap-2" style={{ minWidth: 0 }}>
               <div
+                className="bg-muted"
                 style={{
                   width: '18px',
                   height: '18px',
                   borderRadius: '50%',
-                  background: '#1e1e2e',
                   flexShrink: 0,
                 }}
               />
               <span
-                style={{ fontSize: '11px', fontWeight: 500, color: '#9b9bb0' }}
-                className="shrink-0"
+                className="shrink-0 text-muted-foreground"
+                style={{ fontSize: '11px', fontWeight: 500 }}
               >
                 {post.comments_count} {post.comments_count === 1 ? 'Kommentar' : 'Kommentare'}
               </span>
               <span
-                style={{ fontSize: '11px', color: '#5a5a72' }}
-                className="truncate"
+                className="truncate text-muted-foreground/60"
+                style={{ fontSize: '11px' }}
               >
                 · alle ansehen
               </span>
