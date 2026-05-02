@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Heart, ChatCircle, PaperPlaneTilt, Trash } from '@phosphor-icons/react';
@@ -18,11 +19,18 @@ interface PostDetailDialogProps {
 
 export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailDialogProps) => {
   const open = !!post;
+  const navigate = useNavigate();
   const { data: comments = [], isLoading } = useComments(post?.id);
   const { data: myProfile } = useProfile();
   const addComment = useAddComment();
   const deleteComment = useDeleteComment();
   const [text, setText] = useState('');
+
+  const goToProfile = () => {
+    if (!post?.author?.username) return;
+    onClose();
+    navigate(`/u/${post.author.username}`);
+  };
 
   const handleSend = async () => {
     if (!post || !text.trim()) return;
@@ -38,16 +46,18 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
             <DialogTitle className="sr-only">Beitrag von {post.author?.display_name || post.author?.username || 'Nutzer'}</DialogTitle>
             {/* Header */}
             <div className="flex items-center gap-2 px-4 py-3 pr-12 border-b border-border shrink-0">
-              <Avatar className="h-8 w-8">
-                <AvatarImage src={post.author?.avatar_url || ''} />
-                <AvatarFallback className="bg-muted text-xs text-foreground">
-                  {post.author?.display_name?.charAt(0).toUpperCase() || '?'}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-foreground truncate">{post.author?.display_name}</p>
-                <p className="text-xs text-muted-foreground truncate">@{post.author?.username}</p>
-              </div>
+              <button onClick={goToProfile} className="flex items-center gap-2 flex-1 min-w-0 text-left hover:opacity-80 transition-opacity">
+                <Avatar className="h-8 w-8">
+                  <AvatarImage src={post.author?.avatar_url || ''} />
+                  <AvatarFallback className="bg-muted text-xs text-foreground">
+                    {post.author?.display_name?.charAt(0).toUpperCase() || '?'}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground truncate">{post.author?.display_name}</p>
+                  <p className="text-xs text-muted-foreground truncate">@{post.author?.username}</p>
+                </div>
+              </button>
             </div>
 
             {/* Media */}
