@@ -32,62 +32,62 @@ export const ProfileHeader = ({ profile, isLoading, followersCount, followingCou
 
   return (
     <>
-      <div className="relative overflow-hidden rounded-[28px] border border-white/[0.08] card-glow" style={{ background: '#12121A' }}>
-        <div className="absolute inset-0 opacity-60" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(124,58,237,0.18), transparent 60%)' }} />
+      <div className="relative overflow-hidden rounded-[28px] border border-border bg-card card-glow">
+        <div className="absolute inset-0 opacity-60" style={{ background: 'radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.18), transparent 60%)' }} />
         <div className="relative p-6">
           <div className="absolute right-4 top-4">
-            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full glass-pill hover:bg-white/10" onClick={() => setSettingsOpen(true)}>
-              <DotsThree weight="bold" className="h-5 w-5 text-white" />
+            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full glass-pill" onClick={() => setSettingsOpen(true)}>
+              <DotsThree weight="bold" className="h-5 w-5 text-foreground" />
             </Button>
           </div>
             <div className="flex flex-col items-center text-center pt-2">
               {isLoading ? <Skeleton className="h-[90px] w-[90px] rounded-full" /> : (
                 <button onClick={() => setAchievementsOpen(true)} className="relative group">
                   <div className="avatar-gradient-ring">
-                    <Avatar className="relative h-[84px] w-[84px] border-2" style={{ borderColor: '#0A0A0F' }}>
+                    <Avatar className="relative h-[84px] w-[84px] border-2 border-card">
                       <AvatarImage src={profile?.avatar_url || ''} className="object-cover" />
-                      <AvatarFallback className="bg-[#1A1A24] text-xl text-white font-bold">{profile?.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+                      <AvatarFallback className="bg-muted text-xl text-foreground font-bold">{profile?.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
                     </Avatar>
                   </div>
                   {badgeData && badgeData.level > 0 && (
-                    <div className="absolute -bottom-1 -right-1 flex h-6 min-w-[24px] items-center justify-center rounded-full glass-pill px-1.5 text-[10px] font-bold text-white shadow-lg">
+                    <div className="absolute -bottom-1 -right-1 flex h-6 min-w-[24px] items-center justify-center rounded-full glass-pill px-1.5 text-[10px] font-bold text-foreground shadow-lg">
                       {badgeData.level}
                     </div>
                   )}
                 </button>
               )}
               {isLoading ? <Skeleton className="mt-3 h-5 w-32" /> : (
-                <div className="mt-3"><span className="text-sm font-medium" style={{ color: '#A0A0B0' }}>@{profile?.username}</span></div>
+                <div className="mt-3"><span className="text-sm font-medium text-muted-foreground">@{profile?.username}</span></div>
               )}
               {!isLoading && badgeData && (profile?.show_badge_in_bio || profile?.show_sc_in_bio) && (
                 <button onClick={() => setAchievementsOpen(true)} className="mt-2 flex items-center gap-2 rounded-full glass-pill px-3 py-1.5">
                   {profile?.show_badge_in_bio && (
-                    <span className="text-[11px] font-semibold text-white tracking-wide">{badgeData.name}</span>
+                    <span className="text-[11px] font-semibold text-foreground tracking-wide">{badgeData.name}</span>
                   )}
                   {profile?.show_badge_in_bio && profile?.show_sc_in_bio && (
-                    <span className="text-white/30 text-[10px]">·</span>
+                    <span className="text-muted-foreground/60 text-[10px]">·</span>
                   )}
                   {profile?.show_sc_in_bio && (
                     <div className="flex items-center gap-1">
-                      <Cloud weight="fill" className="h-3 w-3" style={{ color: '#EC4899' }} />
-                      <span className="font-semibold text-[11px] text-white">{formatNumber(profile?.social_cloud_points || 0)} SC</span>
+                      <Cloud weight="fill" className="h-3 w-3 text-primary" />
+                      <span className="font-semibold text-[11px] text-foreground">{formatNumber(profile?.social_cloud_points || 0)} SC</span>
                     </div>
                   )}
                 </button>
               )}
-              {!isLoading && profile?.bio && <p className="mt-3 text-xs max-w-xs leading-relaxed" style={{ color: '#A0A0B0' }}>{profile.bio}</p>}
+              {!isLoading && profile?.bio && <p className="mt-3 text-xs max-w-xs leading-relaxed text-muted-foreground">{profile.bio}</p>}
               <div className="mt-5 grid grid-cols-3 w-full max-w-[280px]">
                 <div className="flex flex-col items-center px-2">
-                  <span className="text-white font-bold text-[24px] leading-tight">{postsCount}</span>
-                  <span className="text-[12px] mt-0.5" style={{ color: '#A0A0B0' }}>Posts</span>
+                  <span className="text-foreground font-bold text-[24px] leading-tight">{postsCount}</span>
+                  <span className="text-[12px] mt-0.5 text-muted-foreground">Posts</span>
                 </div>
-                <div className="flex flex-col items-center px-2 border-x border-white/[0.08]">
-                  <span className="text-white font-bold text-[24px] leading-tight">{formatNumber(0)}</span>
-                  <span className="text-[12px] mt-0.5" style={{ color: '#A0A0B0' }}>Events</span>
+                <div className="flex flex-col items-center px-2 border-x border-border">
+                  <span className="text-foreground font-bold text-[24px] leading-tight">{formatNumber(0)}</span>
+                  <span className="text-[12px] mt-0.5 text-muted-foreground">Events</span>
                 </div>
                 <button onClick={() => { setFollowListTab('followers'); setFollowListOpen(true); }} className="flex flex-col items-center px-2 transition-opacity hover:opacity-80">
-                  <span className="text-white font-bold text-[24px] leading-tight">{formatNumber(followersCount)}</span>
-                  <span className="text-[12px] mt-0.5" style={{ color: '#A0A0B0' }}>Followers</span>
+                  <span className="text-foreground font-bold text-[24px] leading-tight">{formatNumber(followersCount)}</span>
+                  <span className="text-[12px] mt-0.5 text-muted-foreground">Followers</span>
                 </button>
               </div>
             </div>

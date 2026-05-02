@@ -20,11 +20,11 @@ export const ProfilePostsGrid = ({ profileId }: ProfilePostsGridProps) => {
   return (
     <div className="mt-6">
       <Tabs defaultValue="posts" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-transparent border-b border-white/[0.08] rounded-none p-0 h-auto">
-          <TabsTrigger value="posts" className="gap-2 rounded-none bg-transparent py-3 text-[#A0A0B0] data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
+        <TabsList className="grid w-full grid-cols-2 bg-transparent border-b border-border rounded-none p-0 h-auto">
+          <TabsTrigger value="posts" className="gap-2 rounded-none bg-transparent py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
             <SquaresFour weight="bold" className="h-4 w-4" /><span>Beiträge</span>
           </TabsTrigger>
-          <TabsTrigger value="tagged" className="gap-2 rounded-none bg-transparent py-3 text-[#A0A0B0] data-[state=active]:bg-transparent data-[state=active]:text-white data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
+          <TabsTrigger value="tagged" className="gap-2 rounded-none bg-transparent py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
             <BookmarkSimple weight="bold" className="h-4 w-4" /><span>Markiert</span>
           </TabsTrigger>
         </TabsList>
@@ -54,7 +54,7 @@ const PostsGrid = ({ posts, isLoading, onPostClick, emptyMessage }: { posts?: Po
       {posts.map((post) => {
         const isLive = (post as any).post_type === 'moment_x' || (new Date().getTime() - new Date(post.created_at).getTime()) < 30 * 60 * 1000;
         return (
-          <button key={post.id} onClick={() => onPostClick(post)} className="group relative aspect-square overflow-hidden rounded-lg bg-[#12121A] focus:outline-none transition-all duration-300 hover:scale-[1.03] hover:z-10">
+          <button key={post.id} onClick={() => onPostClick(post)} className="group relative aspect-square overflow-hidden rounded-lg bg-muted focus:outline-none transition-all duration-300 hover:scale-[1.03] hover:z-10">
             {post.media_type === 'video' ? (
               <><video src={post.media_url} className="h-full w-full object-cover" muted /><div className="absolute right-2 top-2 glass rounded-full p-1.5"><Play weight="fill" className="h-3 w-3 text-white" /></div></>
             ) : (

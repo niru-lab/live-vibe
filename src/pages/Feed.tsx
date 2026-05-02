@@ -51,7 +51,7 @@ export default function Feed() {
     <AppLayout>
       <FeedHeader selectedCity={selectedCity} onCityChange={setSelectedCity} />
       
-      <div style={{ background: '#0A0A0F', padding: '8px 14px', minHeight: '100%' }}>
+      <div className="bg-background" style={{ padding: '8px 14px', minHeight: '100%' }}>
         {venueFilter && (
           <div className="mb-4 flex items-center gap-2">
             <Button variant="ghost" size="sm" className="gap-1.5 text-muted-foreground" onClick={() => setSearchParams({})}>
