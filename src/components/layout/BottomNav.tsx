@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { House, MagnifyingGlass, PlusCircle, CalendarBlank, User } from '@phosphor-icons/react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { PostTypeSelector } from '@/components/create/PostTypeSelector';
 import { useNotificationBadges } from '@/hooks/useNotificationBadges';
