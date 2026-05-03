@@ -15,6 +15,7 @@ const navItems = [
 
 export const BottomNav = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [showPostSelector, setShowPostSelector] = useState(false);
   const { eventBadge, messagesBadge, profileBadge } = useNotificationBadges();
 
