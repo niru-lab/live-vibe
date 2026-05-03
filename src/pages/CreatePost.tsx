@@ -13,6 +13,7 @@ import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
 import { VenueEventSelector, type SelectedTag } from '@/components/create/VenueEventSelector';
+import { LocationPicker, type PickedLocation } from '@/components/create/LocationPicker';
 import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo } from '@phosphor-icons/react';
 
 export default function CreatePost() {
