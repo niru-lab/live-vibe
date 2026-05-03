@@ -40,16 +40,11 @@ export const BottomNav = () => {
               const badgeCount = getBadgeCount(badgeKey);
 
               if (isCenter) {
-                let pressTimer: ReturnType<typeof setTimeout> | null = null;
                 return (
                   <button
                     key={path}
                     data-testid="create-post-btn"
-                    onClick={() => navigate('/create')}
-                    onPointerDown={() => { pressTimer = setTimeout(() => setShowPostSelector(true), 450); }}
-                    onPointerUp={() => { if (pressTimer) clearTimeout(pressTimer); }}
-                    onPointerLeave={() => { if (pressTimer) clearTimeout(pressTimer); }}
-                    onContextMenu={(e) => { e.preventDefault(); setShowPostSelector(true); }}
+                    onClick={() => setShowPostSelector(true)}
                     className="relative -mt-8 flex flex-col items-center"
                   >
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-300 hover:scale-110 active:scale-95">
