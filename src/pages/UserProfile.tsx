@@ -102,7 +102,7 @@ export default function UserProfile() {
   return (
     <AppLayout>
       <div className="fixed inset-0 -z-10 bg-[#0A0A0F]" />
-      <div className="min-h-screen">
+      <div className="min-h-screen" data-testid="profile-container">
         <header className="flex items-center justify-between px-4 py-4">
           <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full glass-pill" onClick={() => navigate(-1)}>
             <ArrowLeft weight="bold" className="h-4 w-4 text-white" />
@@ -136,7 +136,7 @@ export default function UserProfile() {
                 <AvatarFallback className="bg-[#1A1A24] text-xl text-white font-bold">{profile.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
               </Avatar>
               <p className="mt-3 text-base font-bold text-white">{profile.display_name}</p>
-              <p className="text-sm text-[#A0A0B0]">@{profile.username}</p>
+              <p data-testid="profile-username" className="text-sm text-[#A0A0B0]">@{profile.username}</p>
               {profile.bio && <p className="mt-3 text-xs max-w-xs leading-relaxed text-[#A0A0B0]">{profile.bio}</p>}
 
               <div className="mt-5 grid grid-cols-3 w-full max-w-[280px]">
@@ -145,7 +145,7 @@ export default function UserProfile() {
                   <span className="text-[12px] mt-0.5 text-[#A0A0B0]">Posts</span>
                 </div>
                 <div className="flex flex-col items-center px-2 border-x border-white/[0.08]">
-                  <span className="text-white font-bold text-[24px] leading-tight">{followStats?.followers || 0}</span>
+                  <span data-testid="follower-count" className="text-white font-bold text-[24px] leading-tight">{followStats?.followers || 0}</span>
                   <span className="text-[12px] mt-0.5 text-[#A0A0B0]">Followers</span>
                 </div>
                 <div className="flex flex-col items-center px-2">
@@ -156,17 +156,19 @@ export default function UserProfile() {
 
               <div className="mt-5 flex gap-2 w-full max-w-[280px]">
                 <Button
+                  data-testid="follow-btn"
                   onClick={handleFollow}
                   disabled={toggleFollow.isPending}
                   className={`flex-1 gap-1.5 ${isFollowing ? 'bg-white/[0.06] text-white border border-white/[0.08] hover:bg-white/[0.1]' : 'bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white border-0'}`}
                 >
-                  {isFollowing ? <><Check weight="bold" className="h-4 w-4" /> Folgst du</> : <><Plus weight="bold" className="h-4 w-4" /> Folgen</>}
+                  {isFollowing ? <><Check weight="bold" className="h-4 w-4" /> Following</> : <><Plus weight="bold" className="h-4 w-4" /> Folgen</>}
                 </Button>
-                <Button onClick={() => setMessageOpen(true)} variant="outline" size="icon" className="bg-white/[0.04] border-white/[0.08] text-white hover:bg-white/[0.1]">
+                <Button data-testid="message-btn" onClick={() => setMessageOpen(true)} variant="outline" size="icon" className="bg-white/[0.04] border-white/[0.08] text-white hover:bg-white/[0.1]">
                   <ChatCircleDots weight="bold" className="h-4 w-4" />
                 </Button>
               </div>
             </div>
+          </div>
           </div>
 
           {/* Posts grid */}
