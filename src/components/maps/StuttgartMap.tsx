@@ -387,8 +387,12 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
             latitude={post.latitude!}
             longitude={post.longitude!}
             anchor="center"
+            onClick={e => {
+              e.originalEvent.stopPropagation();
+              setPopupInfo({ type: 'moment-x', data: post });
+            }}
           >
-            <div data-testid="map-moment-x-marker" className="relative h-5 w-5">
+            <div data-testid="map-moment-x-marker" className="relative h-5 w-5 cursor-pointer">
               <span
                 className="absolute inset-0 rounded-full animate-ping"
                 style={{ backgroundColor: '#7F77DD', opacity: 0.55 }}
@@ -407,8 +411,8 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         {/* Popup */}
         {popupInfo && (
           <Popup
-            latitude={popupInfo.type === 'venue' ? popupInfo.data.latitude : popupInfo.data.coords[0]}
-            longitude={popupInfo.type === 'venue' ? popupInfo.data.longitude : popupInfo.data.coords[1]}
+            latitude={popupInfo.type === 'venue' ? popupInfo.data.latitude : popupInfo.type === 'moment-x' ? popupInfo.data.latitude : popupInfo.data.coords[0]}
+            longitude={popupInfo.type === 'venue' ? popupInfo.data.longitude : popupInfo.type === 'moment-x' ? popupInfo.data.longitude : popupInfo.data.coords[1]}
             onClose={() => setPopupInfo(null)}
             closeOnClick={true}
             closeButton={true}
@@ -513,6 +517,30 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                     Event ansehen
                   </Button>
                 </>
+              )}
+
+              {popupInfo.type === 'moment-x' && (
+                <div data-testid="moment-x-popup">
+                  <span
+                    className="text-white px-2 py-0.5 rounded-full text-xs inline-block mb-2"
+                    style={{ background: 'linear-gradient(135deg,#B5AEFF,#7F77DD)' }}
+                  >
+                    ⚡ Moment X
+                  </span>
+                  {popupInfo.data.media_url && (
+                    <img src={popupInfo.data.media_url} alt="" className="w-full h-32 object-cover rounded-lg mb-2" />
+                  )}
+                  <p data-testid="post-content" className="text-xs text-white mb-2">
+                    {popupInfo.data.caption || 'Live Moment'}
+                  </p>
+                  <Button
+                    size="sm"
+                    className="w-full mt-1 bg-gradient-neon text-white text-xs"
+                    onClick={() => navigate(`/?post=${popupInfo.data.id}`)}
+                  >
+                    Post ansehen
+                  </Button>
+                </div>
               )}
             </div>
           </Popup>

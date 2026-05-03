@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { House, MagnifyingGlass, PlusCircle, CalendarBlank, User } from '@phosphor-icons/react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { PostTypeSelector } from '@/components/create/PostTypeSelector';
 import { useNotificationBadges } from '@/hooks/useNotificationBadges';
@@ -15,6 +15,7 @@ const navItems = [
 
 export const BottomNav = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [showPostSelector, setShowPostSelector] = useState(false);
   const { eventBadge, messagesBadge, profileBadge } = useNotificationBadges();
 
@@ -42,7 +43,9 @@ export const BottomNav = () => {
                 return (
                   <button
                     key={path}
-                    onClick={() => setShowPostSelector(true)}
+                    data-testid="create-post-btn"
+                    onClick={() => navigate('/create')}
+                    onContextMenu={(e) => { e.preventDefault(); setShowPostSelector(true); }}
                     className="relative -mt-8 flex flex-col items-center"
                   >
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-300 hover:scale-110 active:scale-95">
@@ -56,6 +59,7 @@ export const BottomNav = () => {
                 <Link
                   key={path}
                   to={path}
+                  data-testid={path === '/discover' ? 'nav-map' : path === '/' ? 'nav-feed' : path === '/events' ? 'nav-events' : path === '/profile' ? 'nav-profile' : undefined}
                   className={cn(
                     'relative flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl transition-all duration-300'
                   )}
