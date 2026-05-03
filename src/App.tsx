@@ -53,6 +53,8 @@ const App = () => (
                 <SwipeBackProvider />
                 <Routes>
                   <Route path="/" element={<Feed />} />
+                  <Route path="/feed" element={<Feed />} />
+                  <Route path="/profile/:username" element={<UserProfile />} />
                   <Route path="/auth" element={<Welcome />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/verify" element={<Verify />} />
