@@ -183,6 +183,23 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
     },
   });
 
+  // Fetch active Moment X posts (24h fresh, with coordinates)
+  const { data: momentXPosts } = useQuery({
+    queryKey: ['moment-x-posts-map'],
+    queryFn: async () => {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { data, error } = await supabase
+        .from('posts')
+        .select('id, latitude, longitude, caption, media_url, created_at')
+        .eq('is_moment_x', true)
+        .gte('created_at', since)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
+      if (error) throw error;
+      return data || [];
+    },
+    refetchInterval: 60_000,
+  });
   // Resolve city from search query (e.g. "berlin" → "Berlin")
   const searchCity = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -317,6 +334,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
               }}
             >
               <div
+                data-testid="map-venue-marker"
                 className="rounded-full border-2 border-white/80 cursor-pointer transition-transform hover:scale-125 flex items-center justify-center"
                 style={{
                   width: size,
@@ -361,6 +379,30 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
             </Marker>
           );
         })}
+
+        {/* Moment X Markers — pulsing neon-purple pins */}
+        {(momentXPosts || []).map(post => (
+          <Marker
+            key={`mx-${post.id}`}
+            latitude={post.latitude!}
+            longitude={post.longitude!}
+            anchor="center"
+          >
+            <div data-testid="map-moment-x-marker" className="relative h-5 w-5">
+              <span
+                className="absolute inset-0 rounded-full animate-ping"
+                style={{ backgroundColor: '#7F77DD', opacity: 0.55 }}
+              />
+              <span
+                className="absolute inset-0 rounded-full border-2 border-white/90"
+                style={{
+                  background: 'radial-gradient(circle, #B5AEFF 0%, #7F77DD 70%)',
+                  boxShadow: '0 0 14px #7F77DD, 0 0 28px rgba(127,119,221,0.6)',
+                }}
+              />
+            </div>
+          </Marker>
+        ))}
 
         {/* Popup */}
         {popupInfo && (
