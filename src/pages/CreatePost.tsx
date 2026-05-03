@@ -43,22 +43,48 @@ export default function CreatePost() {
 
   const handleSubmit = async () => {
     if (!user || !profile) { navigate('/auth'); return; }
-    if (!selectedFile) { toast({ variant: 'destructive', title: 'Kein Bild/Video', description: 'Bitte wähle ein Foto oder Video aus.' }); return; }
+
+    // Moment X requires a location
+    if (isMomentX && !pickedLocation) {
+      setLocationError(true);
+      toast({ variant: 'destructive', title: 'Location fehlt', description: 'Für Moment X musst du eine Location wählen.' });
+      return;
+    }
+    setLocationError(false);
+
+    if (!selectedFile && !caption.trim()) {
+      toast({ variant: 'destructive', title: 'Leerer Post', description: 'Bitte füge ein Foto/Video hinzu oder schreibe etwas.' });
+      return;
+    }
     setIsUploading(true);
     try {
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage.from('post-media').upload(fileName, selectedFile);
-      if (uploadError) throw uploadError;
-      const { data: { publicUrl } } = supabase.storage.from('post-media').getPublicUrl(fileName);
-      const mediaType = selectedFile.type.startsWith('video') ? 'video' : 'image';
-      const shouldExpire = is24hPost || selectedTag !== null;
+      let publicUrl = '';
+      let mediaType: 'image' | 'video' = 'image';
+      if (selectedFile) {
+        const fileExt = selectedFile.name.split('.').pop();
+        const fileName = `${user.id}/${Date.now()}.${fileExt}`;
+        const { error: uploadError } = await supabase.storage.from('post-media').upload(fileName, selectedFile);
+        if (uploadError) throw uploadError;
+        publicUrl = supabase.storage.from('post-media').getPublicUrl(fileName).data.publicUrl;
+        mediaType = selectedFile.type.startsWith('video') ? 'video' : 'image';
+      }
+      const shouldExpire = is24hPost || selectedTag !== null || isMomentX;
       const expiresAt = shouldExpire ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null;
 
       await createPost.mutateAsync({
-        media_url: publicUrl, media_type: mediaType, caption: caption || null, location_name: location || null, is_moment_x: isMomentX,
-        music_url: selectedMusic?.url || null, music_title: selectedMusic?.title || null, music_artist: selectedMusic?.artist || null,
-        expires_at: expiresAt, venue_id: selectedTag?.type === 'venue' ? selectedTag.id : null, event_id: selectedTag?.type === 'event' ? selectedTag.id : null,
+        media_url: publicUrl,
+        media_type: mediaType,
+        caption: caption || null,
+        location_name: pickedLocation?.name || location || null,
+        latitude: pickedLocation?.latitude ?? null,
+        longitude: pickedLocation?.longitude ?? null,
+        is_moment_x: isMomentX,
+        music_url: selectedMusic?.url || null,
+        music_title: selectedMusic?.title || null,
+        music_artist: selectedMusic?.artist || null,
+        expires_at: expiresAt,
+        venue_id: pickedLocation?.venue_id || (selectedTag?.type === 'venue' ? selectedTag.id : null),
+        event_id: selectedTag?.type === 'event' ? selectedTag.id : null,
       });
       toast({ title: 'Gepostet! 🎉', description: 'Dein Beitrag wurde erfolgreich geteilt.' });
       navigate('/');
