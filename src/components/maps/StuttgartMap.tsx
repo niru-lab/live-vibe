@@ -380,6 +380,30 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
           );
         })}
 
+        {/* Moment X Markers — pulsing neon-purple pins */}
+        {(momentXPosts || []).map(post => (
+          <Marker
+            key={`mx-${post.id}`}
+            latitude={post.latitude!}
+            longitude={post.longitude!}
+            anchor="center"
+          >
+            <div data-testid="map-moment-x-marker" className="relative h-5 w-5">
+              <span
+                className="absolute inset-0 rounded-full animate-ping"
+                style={{ backgroundColor: '#7F77DD', opacity: 0.55 }}
+              />
+              <span
+                className="absolute inset-0 rounded-full border-2 border-white/90"
+                style={{
+                  background: 'radial-gradient(circle, #B5AEFF 0%, #7F77DD 70%)',
+                  boxShadow: '0 0 14px #7F77DD, 0 0 28px rgba(127,119,221,0.6)',
+                }}
+              />
+            </div>
+          </Marker>
+        ))}
+
         {/* Popup */}
         {popupInfo && (
           <Popup
