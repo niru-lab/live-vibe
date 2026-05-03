@@ -15,27 +15,34 @@ import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
-import { ArrowLeft, MapPin, CurrencyEur, TShirt, Camera, X, Plus, MusicNote, Play, CalendarBlank, Notepad } from '@phosphor-icons/react';
+import { FollowerInviteSelector } from '@/components/create/FollowerInviteSelector';
+import { ArrowLeft, MapPin, CurrencyEur, TShirt, Camera, X, Plus, MusicNote, Play, CalendarBlank, Notepad, Lock, Globe, Users } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 interface MediaItem { id: string; file: File; previewUrl: string; type: 'image' | 'video'; }
 
 const eventSchema = z.object({
-  name: z.string().min(3, 'Name muss mindestens 3 Zeichen haben'),
-  description: z.string().optional(),
-  location_name: z.string().min(2, 'Location ist erforderlich'),
-  area: z.string().min(2, 'Gebiet ist erforderlich (z.B. Stuttgart West)'),
-  city: z.string().min(2, 'Stadt ist erforderlich'),
+  name: z.string().trim().min(3, 'Name muss mindestens 3 Zeichen haben').max(120),
+  description: z.string().max(2000).optional(),
+  location_name: z.string().trim().min(2, 'Location ist erforderlich').max(120),
+  area: z.string().trim().min(2, 'Gebiet ist erforderlich (z.B. Stuttgart West)').max(200),
+  city: z.string().trim().min(2, 'Stadt ist erforderlich').max(80),
   starts_at: z.date({ required_error: 'Datum ist erforderlich' }),
   starts_at_time: z.string().min(1, 'Startzeit ist erforderlich'),
   ends_at_time: z.string().optional(),
   expected_attendees: z.number().min(1).optional(),
   is_free: z.boolean(),
   entry_price: z.number().min(0).optional(),
-  dresscode: z.string().optional(),
-  dos_and_donts: z.string().optional(),
+  dresscode: z.string().max(80).optional(),
+  dos_and_donts: z.string().max(500).optional(),
   category: z.enum(['club', 'house_party', 'bar', 'festival', 'concert', 'sport', 'other']),
-});
+  visibility: z.enum(['public', 'private']),
+}).refine((data) => {
+  const [h, m] = data.starts_at_time.split(':').map(Number);
+  const dt = new Date(data.starts_at);
+  dt.setHours(h, m, 0, 0);
+  return dt.getTime() > Date.now();
+}, { message: 'Datum muss in der Zukunft liegen', path: ['starts_at'] });
 
 type EventFormData = z.infer<typeof eventSchema>;
 
