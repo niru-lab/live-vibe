@@ -411,8 +411,8 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         {/* Popup */}
         {popupInfo && (
           <Popup
-            latitude={popupInfo.type === 'venue' ? popupInfo.data.latitude : popupInfo.data.coords[0]}
-            longitude={popupInfo.type === 'venue' ? popupInfo.data.longitude : popupInfo.data.coords[1]}
+            latitude={popupInfo.type === 'venue' ? popupInfo.data.latitude : popupInfo.type === 'moment-x' ? popupInfo.data.latitude : popupInfo.data.coords[0]}
+            longitude={popupInfo.type === 'venue' ? popupInfo.data.longitude : popupInfo.type === 'moment-x' ? popupInfo.data.longitude : popupInfo.data.coords[1]}
             onClose={() => setPopupInfo(null)}
             closeOnClick={true}
             closeButton={true}
