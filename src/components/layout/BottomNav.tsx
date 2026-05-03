@@ -42,6 +42,7 @@ export const BottomNav = () => {
                 return (
                   <button
                     key={path}
+                    data-testid="create-post-btn"
                     onClick={() => setShowPostSelector(true)}
                     className="relative -mt-8 flex flex-col items-center"
                   >
