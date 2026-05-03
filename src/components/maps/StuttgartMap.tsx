@@ -334,6 +334,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
               }}
             >
               <div
+                data-testid="map-venue-marker"
                 className="rounded-full border-2 border-white/80 cursor-pointer transition-transform hover:scale-125 flex items-center justify-center"
                 style={{
                   width: size,
