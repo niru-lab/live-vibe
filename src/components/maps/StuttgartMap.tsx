@@ -387,8 +387,12 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
             latitude={post.latitude!}
             longitude={post.longitude!}
             anchor="center"
+            onClick={e => {
+              e.originalEvent.stopPropagation();
+              setPopupInfo({ type: 'moment-x', data: post });
+            }}
           >
-            <div data-testid="map-moment-x-marker" className="relative h-5 w-5">
+            <div data-testid="map-moment-x-marker" className="relative h-5 w-5 cursor-pointer">
               <span
                 className="absolute inset-0 rounded-full animate-ping"
                 style={{ backgroundColor: '#7F77DD', opacity: 0.55 }}
