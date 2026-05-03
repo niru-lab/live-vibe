@@ -131,7 +131,7 @@ export const UserSearchBar = () => {
           {isLoading ? (
             <div className="p-4 text-center text-xs text-muted-foreground">Suche…</div>
           ) : results.length === 0 ? (
-            <div className="p-4 text-center text-xs text-muted-foreground">Keine Accounts gefunden</div>
+            <div data-testid="no-results-msg" className="p-4 text-center text-xs text-muted-foreground">Keine Accounts gefunden</div>
           ) : (
             <ul className="py-1">
               {results.map((r) => {
@@ -142,7 +142,7 @@ export const UserSearchBar = () => {
                   navigate(`/u/${r.username}`);
                 };
                 return (
-                  <li key={r.id} className="flex items-center gap-3 px-3 py-2.5 hover:bg-accent/50 cursor-pointer" onClick={goProfile}>
+                  <li key={r.id} data-testid="search-result-user" className="flex items-center gap-3 px-3 py-2.5 hover:bg-accent/50 cursor-pointer" onClick={goProfile}>
                     <Avatar className="h-9 w-9 shrink-0">
                       <AvatarImage src={r.avatar_url || ''} className="object-cover" />
                       <AvatarFallback className="bg-muted text-xs text-foreground">
