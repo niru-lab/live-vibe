@@ -28,9 +28,9 @@ const SEED_SECRET = process.env.TEST_SEED_SECRET;
 const PROJECT_REF = new URL(SUPABASE_URL).host.split('.')[0];
 const STORAGE_KEY = `sb-${PROJECT_REF}-auth-token`;
 
-const TEST_USERS = [
-  {
-    role: 'user' as const,
+export const TEST_USERS = {
+  sender: {
+    role: 'sender' as const,
     file: 'playwright/.auth/user.json',
     email: process.env.FEYRN_TEST_USER_EMAIL ?? 'testuser@feyrn-test.de',
     password: process.env.FEYRN_TEST_USER_PASSWORD ?? 'TestFeyrn2026!',
@@ -39,7 +39,7 @@ const TEST_USERS = [
     age: 25,
     profileType: 'user' as const,
   },
-  {
+  receiver: {
     role: 'receiver' as const,
     file: 'playwright/.auth/receiver.json',
     email: process.env.FEYRN_TEST_RECEIVER_EMAIL ?? 'receiver@feyrn-test.de',
@@ -49,7 +49,9 @@ const TEST_USERS = [
     age: 26,
     profileType: 'user' as const,
   },
-];
+} as const;
+
+const TEST_USERS_LIST = [TEST_USERS.sender, TEST_USERS.receiver];
 
 const EMPTY_STATE = JSON.stringify({ cookies: [], origins: [] });
 
