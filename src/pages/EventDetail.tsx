@@ -94,7 +94,7 @@ export default function EventDetail() {
         </div>
       </header>
       {isCreator && <AttendeeManager open={showAttendeeManager} onOpenChange={setShowAttendeeManager} eventId={event?.id || ''} eventName={event?.name || ''} eventAddress={`${event?.address}, ${event?.city}`} />}
-      <div className="pb-24">
+      <div className="pb-24" data-testid="event-detail">
         <div className="relative aspect-video bg-muted">
           {event.cover_image_url ? <img src={event.cover_image_url} alt={event.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20"><span className="text-7xl">{categoryEmojis[event.category] || '🎉'}</span></div>}
           <div className="absolute left-3 top-3 flex gap-2">
@@ -105,7 +105,7 @@ export default function EventDetail() {
         </div>
         <div className="p-4 space-y-6">
           <div>
-            <h1 className="font-display text-2xl font-bold text-foreground mb-2">{event.name}</h1>
+            <h1 data-testid="event-detail-title" className="font-display text-2xl font-bold text-foreground mb-2">{event.name}</h1>
             {event.creator && (
               <div className="flex items-center gap-2"><Avatar className="h-8 w-8"><AvatarImage src={event.creator.avatar_url || ''} /><AvatarFallback>{event.creator.display_name?.charAt(0)}</AvatarFallback></Avatar><div><span className="text-sm text-muted-foreground">von </span><span className="text-sm font-medium text-foreground">@{event.creator.username}</span>{event.creator.is_verified && <CheckCircle weight="fill" className="ml-1 inline h-4 w-4 text-primary" />}</div></div>
             )}

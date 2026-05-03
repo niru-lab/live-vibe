@@ -15,27 +15,34 @@ import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
-import { ArrowLeft, MapPin, CurrencyEur, TShirt, Camera, X, Plus, MusicNote, Play, CalendarBlank, Notepad } from '@phosphor-icons/react';
+import { FollowerInviteSelector } from '@/components/create/FollowerInviteSelector';
+import { ArrowLeft, MapPin, CurrencyEur, TShirt, Camera, X, Plus, MusicNote, Play, CalendarBlank, Notepad, Lock, Globe, Users } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 interface MediaItem { id: string; file: File; previewUrl: string; type: 'image' | 'video'; }
 
 const eventSchema = z.object({
-  name: z.string().min(3, 'Name muss mindestens 3 Zeichen haben'),
-  description: z.string().optional(),
-  location_name: z.string().min(2, 'Location ist erforderlich'),
-  area: z.string().min(2, 'Gebiet ist erforderlich (z.B. Stuttgart West)'),
-  city: z.string().min(2, 'Stadt ist erforderlich'),
+  name: z.string().trim().min(3, 'Name muss mindestens 3 Zeichen haben').max(120),
+  description: z.string().max(2000).optional(),
+  location_name: z.string().trim().min(2, 'Location ist erforderlich').max(120),
+  area: z.string().trim().min(2, 'Gebiet ist erforderlich (z.B. Stuttgart West)').max(200),
+  city: z.string().trim().min(2, 'Stadt ist erforderlich').max(80),
   starts_at: z.date({ required_error: 'Datum ist erforderlich' }),
   starts_at_time: z.string().min(1, 'Startzeit ist erforderlich'),
   ends_at_time: z.string().optional(),
   expected_attendees: z.number().min(1).optional(),
   is_free: z.boolean(),
   entry_price: z.number().min(0).optional(),
-  dresscode: z.string().optional(),
-  dos_and_donts: z.string().optional(),
+  dresscode: z.string().max(80).optional(),
+  dos_and_donts: z.string().max(500).optional(),
   category: z.enum(['club', 'house_party', 'bar', 'festival', 'concert', 'sport', 'other']),
-});
+  visibility: z.enum(['public', 'private']),
+}).refine((data) => {
+  const [h, m] = data.starts_at_time.split(':').map(Number);
+  const dt = new Date(data.starts_at);
+  dt.setHours(h, m, 0, 0);
+  return dt.getTime() > Date.now();
+}, { message: 'Datum muss in der Zukunft liegen', path: ['starts_at'] });
 
 type EventFormData = z.infer<typeof eventSchema>;
 
@@ -62,7 +69,7 @@ export default function CreateEvent() {
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
-    defaultValues: { name: '', description: '', location_name: '', area: '', city: '', is_free: true, entry_price: 0, category: 'other', starts_at_time: '22:00', ends_at_time: '04:00' },
+    defaultValues: { name: '', description: '', location_name: '', area: '', city: '', is_free: true, entry_price: 0, category: 'other', starts_at_time: '22:00', ends_at_time: '04:00', visibility: 'public' },
   });
 
   const handleFilesSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -109,6 +116,7 @@ export default function CreateEvent() {
         starts_at: startsAt.toISOString(), ends_at: endsAt?.toISOString() || null, expected_attendees: data.expected_attendees || null,
         is_free: data.is_free, entry_price: data.is_free ? 0 : (data.entry_price || 0), dresscode: data.dresscode || null,
         dos_and_donts: data.dos_and_donts || null, category: data.category, cover_image_url: coverImageUrl,
+        visibility: data.visibility,
       });
       if (invitedFollowers.length > 0 && newEvent?.id) {
         const invitations = invitedFollowers.map((userId) => ({ event_id: newEvent.id, user_id: userId, status: 'invited' as const }));
@@ -127,7 +135,7 @@ export default function CreateEvent() {
           <div className="flex items-center gap-3"><Button variant="ghost" size="icon" onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/events')}><ArrowLeft weight="thin" className="h-5 w-5" /></Button><h1 className="font-display text-lg font-bold">Neues Event</h1></div>
         </header>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-y-auto space-y-3 p-4 pb-8">
+          <form data-testid="event-form" onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-y-auto space-y-3 p-4 pb-8">
             {/* Media upload - compact */}
             <div className="space-y-2">
               <div className="flex items-center justify-between"><Label className="text-sm font-semibold">Medien</Label><span className="text-xs text-muted-foreground">{mediaItems.length}/10</span></div>
@@ -164,7 +172,7 @@ export default function CreateEvent() {
             {/* Event Details */}
             <div className="space-y-3 rounded-xl border border-border/50 bg-card p-3">
               <div className="flex items-center gap-2"><Notepad weight="thin" className="h-4 w-4 text-primary" /><h2 className="text-sm font-semibold text-foreground">Event-Details</h2></div>
-              <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Event-Name *</FormLabel><FormControl><Input placeholder='z.B. "Techno Mondays @ Proton"' {...field} /></FormControl><FormMessage /></FormItem>)} />
+              <FormField control={form.control} name="name" render={({ field }) => (<FormItem><FormLabel>Event-Name *</FormLabel><FormControl><Input data-testid="event-title-input" placeholder='z.B. "Techno Mondays @ Proton"' {...field} /></FormControl><FormMessage data-testid="event-title-error" /></FormItem>)} />
               <FormField control={form.control} name="category" render={({ field }) => (
                 <FormItem><FormLabel>Kategorie *</FormLabel><div className="grid grid-cols-4 gap-1.5">{categories.map((cat) => (<button key={cat.value} type="button" onClick={() => field.onChange(cat.value)} className={cn('flex flex-col items-center gap-0.5 rounded-lg border p-2 transition-all text-center', field.value === cat.value ? 'border-primary bg-primary/10' : 'border-border/50 hover:border-primary/50')}><span className="text-lg">{cat.emoji}</span><span className="text-[10px] font-medium leading-tight">{cat.label.split(' ')[1]}</span></button>))}</div><FormMessage /></FormItem>
               )} />
@@ -182,10 +190,24 @@ export default function CreateEvent() {
             {/* Date & Time */}
             <div className="space-y-3 rounded-xl border border-border/50 bg-card p-3">
               <div className="flex items-center gap-2"><CalendarBlank weight="thin" className="h-4 w-4 text-primary" /><h2 className="text-sm font-semibold text-foreground">Datum & Uhrzeit</h2></div>
+              {/* Combined datetime-local for tests + a11y; syncs to date + starts_at_time */}
+              <Input
+                type="datetime-local"
+                data-testid="event-datetime-input"
+                aria-label="Datum und Uhrzeit"
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (!v) return;
+                  const [datePart, timePart] = v.split('T');
+                  if (datePart) form.setValue('starts_at', new Date(datePart + 'T00:00:00'), { shouldValidate: true });
+                  if (timePart) form.setValue('starts_at_time', timePart.slice(0, 5), { shouldValidate: true });
+                }}
+                className="hidden"
+              />
               <FormField control={form.control} name="starts_at" render={({ field }) => (
                 <FormItem><FormLabel>Datum *</FormLabel><FormControl>
                   <Input type="date" value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} onChange={(e) => { const d = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined; field.onChange(d); }} />
-                </FormControl><FormMessage /></FormItem>
+                </FormControl><FormMessage data-testid="event-date-error" /></FormItem>
               )} />
               <div className="grid grid-cols-2 gap-3">
                 <FormField control={form.control} name="starts_at_time" render={({ field }) => (
@@ -195,6 +217,32 @@ export default function CreateEvent() {
                   <FormItem><FormLabel>Ende</FormLabel><FormControl><Input type="time" {...field} /></FormControl><FormMessage /></FormItem>
                 )} />
               </div>
+            </div>
+
+            {/* Visibility */}
+            <div className="space-y-3 rounded-xl border border-border/50 bg-card p-3">
+              <div className="flex items-center gap-2"><Globe weight="thin" className="h-4 w-4 text-primary" /><h2 className="text-sm font-semibold text-foreground">Sichtbarkeit</h2></div>
+              <FormField control={form.control} name="visibility" render={({ field }) => (
+                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-2.5">
+                  <div className="space-y-0.5">
+                    <FormLabel className="text-sm flex items-center gap-2">
+                      {field.value === 'public' ? <><Globe weight="thin" className="h-4 w-4" /> Öffentlich</> : <><Lock weight="thin" className="h-4 w-4" /> Privat (nur Eingeladene)</>}
+                    </FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch
+                      data-testid="event-visibility-toggle"
+                      checked={field.value === 'public'}
+                      onCheckedChange={(checked) => field.onChange(checked ? 'public' : 'private')}
+                    />
+                  </FormControl>
+                </FormItem>
+              )} />
+            </div>
+
+            {/* Gästeliste */}
+            <div className="space-y-3 rounded-xl border border-border/50 bg-card p-3">
+              <FollowerInviteSelector selectedIds={invitedFollowers} onSelectionChange={setInvitedFollowers} />
             </div>
 
             {/* Entry & Info */}
@@ -209,6 +257,7 @@ export default function CreateEvent() {
         {/* Sticky bottom submit button */}
         <div className="sticky bottom-0 z-40 border-t border-border/50 bg-background/95 backdrop-blur-xl p-3">
           <Button
+            data-testid="event-submit-btn"
             onClick={form.handleSubmit(onSubmit)}
             className="w-full rounded-2xl bg-[hsl(var(--neon-purple))] hover:bg-[hsl(var(--neon-purple))]/90 text-white py-6 text-base font-semibold"
             disabled={createEvent.isPending || isUploading}
