@@ -44,7 +44,7 @@ export default function Discover() {
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <MagnifyingGlass weight="thin" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input placeholder="Stuttgart | Techno | Heute..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 pr-20 glass-pill border-0 h-11 text-foreground placeholder:text-muted-foreground" />
+                <Input data-testid="map-search-input" placeholder="Stuttgart | Techno | Heute..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-10 pr-20 glass-pill border-0 h-11 text-foreground placeholder:text-muted-foreground" />
                 <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
                   <Button variant="ghost" size="icon" className="h-7 w-7">
                     <Microphone weight="thin" className="h-4 w-4 text-muted-foreground" />
