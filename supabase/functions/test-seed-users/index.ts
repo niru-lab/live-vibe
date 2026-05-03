@@ -184,12 +184,18 @@ Deno.serve(async (req) => {
     const follower = results[0];
     for (let i = 1; i < results.length; i++) {
       const following = results[i];
-      await admin
+      const { data: existing } = await admin
         .from('follows')
-        .upsert(
-          { follower_id: follower.profileId, following_id: following.profileId },
-          { onConflict: 'follower_id,following_id', ignoreDuplicates: true },
-        );
+        .select('id')
+        .eq('follower_id', follower.profileId)
+        .eq('following_id', following.profileId)
+        .maybeSingle();
+      if (!existing) {
+        await admin.from('follows').insert({
+          follower_id: follower.profileId,
+          following_id: following.profileId,
+        });
+      }
     }
   }
 
