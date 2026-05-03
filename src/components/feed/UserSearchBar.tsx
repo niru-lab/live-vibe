@@ -98,6 +98,7 @@ export const UserSearchBar = () => {
   return (
     <div ref={wrapRef} className="relative flex-1 min-w-0">
       <label
+        data-testid="search-btn"
         className="flex items-center gap-2 h-9 px-3 rounded-full glass-pill cursor-text"
         onClick={() => inputRef.current?.focus()}
         style={{ touchAction: 'manipulation' }}
@@ -105,6 +106,7 @@ export const UserSearchBar = () => {
         <MagnifyingGlass weight="thin" className="h-4 w-4 text-muted-foreground shrink-0" />
         <input
           ref={inputRef}
+          data-testid="search-input"
           type="text"
           value={query}
           onChange={(e) => {
