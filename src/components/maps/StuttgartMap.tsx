@@ -183,6 +183,23 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
     },
   });
 
+  // Fetch active Moment X posts (24h fresh, with coordinates)
+  const { data: momentXPosts } = useQuery({
+    queryKey: ['moment-x-posts-map'],
+    queryFn: async () => {
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { data, error } = await supabase
+        .from('posts')
+        .select('id, latitude, longitude, caption, media_url, created_at')
+        .eq('is_moment_x', true)
+        .gte('created_at', since)
+        .not('latitude', 'is', null)
+        .not('longitude', 'is', null);
+      if (error) throw error;
+      return data || [];
+    },
+    refetchInterval: 60_000,
+  });
   // Resolve city from search query (e.g. "berlin" → "Berlin")
   const searchCity = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
