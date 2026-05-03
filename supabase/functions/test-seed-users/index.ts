@@ -179,6 +179,20 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Auto-follow: ensure first user follows all others (test invite flow needs followers)
+  if (results.length >= 2) {
+    const follower = results[0];
+    for (let i = 1; i < results.length; i++) {
+      const following = results[i];
+      await admin
+        .from('follows')
+        .upsert(
+          { follower_id: follower.profileId, following_id: following.profileId },
+          { onConflict: 'follower_id,following_id', ignoreDuplicates: true },
+        );
+    }
+  }
+
   return new Response(JSON.stringify({ users: results }), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
     status: 200,
