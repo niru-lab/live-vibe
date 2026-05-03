@@ -277,7 +277,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   const postCount = (venueId: string) => venuePosts?.[venueId]?.length || 0;
 
   return (
-    <div className="relative w-full h-[500px] rounded-xl overflow-hidden border border-border/50">
+    <div data-testid="map-container" className="relative w-full h-[500px] rounded-xl overflow-hidden border border-border/50">
       <Map
         ref={mapRef}
         initialViewState={{
