@@ -96,17 +96,17 @@ export default function CreatePost() {
     <AppLayout hideNav>
       <header className="sticky top-0 z-40 flex items-center justify-between border-b border-border/50 bg-background/80 p-4 backdrop-blur-xl">
         <div className="flex items-center gap-4"><Button variant="ghost" size="icon" onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/')}><ArrowLeft weight="thin" className="h-5 w-5" /></Button><h1 className="font-display text-xl font-bold">Neuer Post</h1></div>
-        <Button onClick={handleSubmit} className="bg-gradient-to-r from-primary to-accent" disabled={!selectedFile || isUploading}>
+        <Button data-testid="post-submit-btn" onClick={handleSubmit} className="bg-gradient-to-r from-primary to-accent" disabled={isUploading}>
           {isUploading ? (<><SpinnerGap weight="thin" className="mr-2 h-4 w-4 animate-spin" />Lädt...</>) : 'Teilen'}
         </Button>
       </header>
-      <div className="p-4 space-y-6">
+      <div data-testid={isMomentX ? 'moment-x-composer' : 'post-composer'} className="p-4 space-y-6">
         <div className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent"><Lightning weight="fill" className="h-5 w-5 text-primary-foreground" /></div>
             <div><h3 className="font-semibold text-foreground">Moment-X</h3><p className="text-sm text-muted-foreground">Der beste Moment des Abends</p></div>
           </div>
-          <Switch checked={isMomentX} onCheckedChange={setIsMomentX} />
+          <Switch data-testid="moment-x-toggle" checked={isMomentX} onCheckedChange={(v) => { setIsMomentX(v); if (!v) setLocationError(false); }} />
         </div>
         <div className="flex items-center justify-between rounded-2xl border border-accent/30 bg-accent/5 p-4">
           <div className="flex items-center gap-3">
@@ -162,8 +162,23 @@ export default function CreatePost() {
           <VenueEventSelector selectedTag={selectedTag} onSelect={setSelectedTag} />
           {selectedTag && <p className="text-xs text-muted-foreground">⏱️ Post erscheint 24h im Feed von {selectedTag.name}</p>}
         </div>
-        <div className="space-y-2"><Label htmlFor="caption">Beschreibung</Label><Textarea id="caption" placeholder="Was geht gerade ab? 🎉" value={caption} onChange={(e) => setCaption(e.target.value)} className="min-h-[100px]" /></div>
-        <div className="space-y-2"><Label htmlFor="location">Location</Label><div className="relative"><MapPin weight="thin" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" /><Input id="location" placeholder="Wo bist du gerade?" value={location} onChange={(e) => setLocation(e.target.value)} className="pl-10" /></div></div>
+        <div className="space-y-2">
+          <Label htmlFor="caption">Beschreibung</Label>
+          <Textarea data-testid="post-text-input" id="caption" placeholder="Was geht gerade ab? 🎉" value={caption} onChange={(e) => setCaption(e.target.value)} className="min-h-[100px]" />
+        </div>
+        <div className="space-y-2">
+          <Label>Location {isMomentX && <span className="text-primary">*</span>}</Label>
+          <LocationPicker selected={pickedLocation} onSelect={(l) => { setPickedLocation(l); if (l) setLocationError(false); }} />
+          {locationError && (
+            <p data-testid="location-error" className="text-xs text-destructive">
+              Für Moment X ist eine Location erforderlich.
+            </p>
+          )}
+          <div className="relative">
+            <MapPin weight="thin" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input id="location" placeholder="Oder freier Text…" value={location} onChange={(e) => setLocation(e.target.value)} className="pl-10" />
+          </div>
+        </div>
         <div className="rounded-xl bg-muted/50 p-4">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground"><Sparkle weight="thin" className="h-4 w-4 text-primary" />Tipps für mehr Reichweite</div>
           <ul className="mt-2 space-y-1 text-sm text-muted-foreground"><li>• Poste im besten Moment der Party</li><li>• Nutze Moment-X für maximale Sichtbarkeit</li><li>• Tagge die Location für Club-Integration</li></ul>
