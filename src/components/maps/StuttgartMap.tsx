@@ -518,6 +518,30 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                   </Button>
                 </>
               )}
+
+              {popupInfo.type === 'moment-x' && (
+                <div data-testid="moment-x-popup">
+                  <span
+                    className="text-white px-2 py-0.5 rounded-full text-xs inline-block mb-2"
+                    style={{ background: 'linear-gradient(135deg,#B5AEFF,#7F77DD)' }}
+                  >
+                    ⚡ Moment X
+                  </span>
+                  {popupInfo.data.media_url && (
+                    <img src={popupInfo.data.media_url} alt="" className="w-full h-32 object-cover rounded-lg mb-2" />
+                  )}
+                  <p data-testid="post-content" className="text-xs text-white mb-2">
+                    {popupInfo.data.caption || 'Live Moment'}
+                  </p>
+                  <Button
+                    size="sm"
+                    className="w-full mt-1 bg-gradient-neon text-white text-xs"
+                    onClick={() => navigate(`/?post=${popupInfo.data.id}`)}
+                  >
+                    Post ansehen
+                  </Button>
+                </div>
+              )}
             </div>
           </Popup>
         )}
