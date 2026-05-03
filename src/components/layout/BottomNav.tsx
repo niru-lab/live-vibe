@@ -44,8 +44,8 @@ export const BottomNav = () => {
                   <button
                     key={path}
                     data-testid="create-post-btn"
-                    onClick={() => setShowPostSelector(true)}
-                    onDoubleClick={() => navigate('/create')}
+                    onClick={() => navigate('/create')}
+                    onContextMenu={(e) => { e.preventDefault(); setShowPostSelector(true); }}
                     className="relative -mt-8 flex flex-col items-center"
                   >
                     <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-all duration-300 hover:scale-110 active:scale-95">
