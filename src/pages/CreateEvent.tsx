@@ -69,7 +69,7 @@ export default function CreateEvent() {
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
-    defaultValues: { name: '', description: '', location_name: '', area: '', city: '', is_free: true, entry_price: 0, category: 'other', starts_at_time: '22:00', ends_at_time: '04:00' },
+    defaultValues: { name: '', description: '', location_name: '', area: '', city: '', is_free: true, entry_price: 0, category: 'other', starts_at_time: '22:00', ends_at_time: '04:00', visibility: 'public' },
   });
 
   const handleFilesSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -116,6 +116,7 @@ export default function CreateEvent() {
         starts_at: startsAt.toISOString(), ends_at: endsAt?.toISOString() || null, expected_attendees: data.expected_attendees || null,
         is_free: data.is_free, entry_price: data.is_free ? 0 : (data.entry_price || 0), dresscode: data.dresscode || null,
         dos_and_donts: data.dos_and_donts || null, category: data.category, cover_image_url: coverImageUrl,
+        visibility: data.visibility,
       });
       if (invitedFollowers.length > 0 && newEvent?.id) {
         const invitations = invitedFollowers.map((userId) => ({ event_id: newEvent.id, user_id: userId, status: 'invited' as const }));
