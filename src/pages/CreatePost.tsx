@@ -25,6 +25,7 @@ export default function CreatePost() {
 
   const [caption, setCaption] = useState('');
   const [location, setLocation] = useState('');
+  const [pickedLocation, setPickedLocation] = useState<PickedLocation | null>(null);
   const [isMomentX, setIsMomentX] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -33,6 +34,7 @@ export default function CreatePost() {
   const [is24hPost, setIs24hPost] = useState(false);
   const [selectedTag, setSelectedTag] = useState<SelectedTag | null>(null);
   const [shareToInstagram, setShareToInstagram] = useState(false);
+  const [locationError, setLocationError] = useState(false);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
