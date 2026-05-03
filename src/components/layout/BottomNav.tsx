@@ -59,6 +59,7 @@ export const BottomNav = () => {
                 <Link
                   key={path}
                   to={path}
+                  data-testid={path === '/discover' ? 'nav-map' : path === '/' ? 'nav-feed' : path === '/events' ? 'nav-events' : path === '/profile' ? 'nav-profile' : undefined}
                   className={cn(
                     'relative flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl transition-all duration-300'
                   )}
