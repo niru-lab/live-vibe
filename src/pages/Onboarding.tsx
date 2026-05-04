@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import { Check } from '@phosphor-icons/react';
-import UserFlow from '@/components/onboarding/UserFlow';
+import OnboardingFlow from '@/components/onboarding/OnboardingFlow';
 import EventerFlow from '@/components/onboarding/EventerFlow';
 
 export default function Onboarding() {
@@ -80,7 +80,7 @@ export default function Onboarding() {
   }
 
   return (
-    <UserFlow
+    <OnboardingFlow
       profileId={profileId!}
       userId={user!.id}
       initialUsername={username}
