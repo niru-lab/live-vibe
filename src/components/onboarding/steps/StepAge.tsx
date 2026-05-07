@@ -1,25 +1,9 @@
-import { useMemo } from 'react';
-
 interface Props {
-  birthdate: string; // YYYY-MM-DD
+  birthdate: string; // we store age as string here for compatibility (e.g. "24")
   onChange: (v: string) => void;
 }
 
-function calcAge(iso: string): number | null {
-  if (!iso) return null;
-  const d = new Date(iso);
-  if (isNaN(d.getTime())) return null;
-  const now = new Date();
-  let age = now.getFullYear() - d.getFullYear();
-  const m = now.getMonth() - d.getMonth();
-  if (m < 0 || (m === 0 && now.getDate() < d.getDate())) age--;
-  return age;
-}
-
 export default function StepAge({ birthdate, onChange }: Props) {
-  const age = useMemo(() => calcAge(birthdate), [birthdate]);
-  const max = new Date().toISOString().slice(0, 10);
-
   const inputStyle: React.CSSProperties = {
     width: '100%',
     background: 'rgba(255,255,255,0.05)',
@@ -32,28 +16,32 @@ export default function StepAge({ birthdate, onChange }: Props) {
     outline: 'none',
     fontFamily: 'inherit',
     backdropFilter: 'blur(12px)',
+    textAlign: 'center',
+    letterSpacing: '0.02em',
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const v = e.target.value.replace(/\D/g, '').slice(0, 2);
+    onChange(v);
   };
 
   return (
     <div className="space-y-3">
       <input
-        type="date"
+        type="text"
+        inputMode="numeric"
+        pattern="[0-9]*"
         value={birthdate}
-        max={max}
-        onChange={e => onChange(e.target.value)}
+        onChange={handleChange}
+        placeholder="Dein Alter"
         style={inputStyle}
         autoFocus
       />
-      {age !== null && (
-        <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
-          Du bist {age} Jahre alt.
-        </p>
-      )}
     </div>
   );
 }
 
 export function isAgeValid(birthdate: string) {
-  const a = calcAge(birthdate);
-  return a !== null && a >= 0;
+  const n = parseInt(birthdate, 10);
+  return !isNaN(n) && n >= 1 && n <= 99;
 }

@@ -77,22 +77,13 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
   const goBack = () => { setDirection(-1); setStep(s => Math.max(1, s - 1)); };
   const skip = () => { setDirection(1); setStep(s => s + 1); };
 
-  const calcAge = (iso: string) => {
-    const d = new Date(iso); const now = new Date();
-    let a = now.getFullYear() - d.getFullYear();
-    const m = now.getMonth() - d.getMonth();
-    if (m < 0 || (m === 0 && now.getDate() < d.getDate())) a--;
-    return a;
-  };
-
   const handleFinish = async () => {
     setSaving(true);
-    // TODO: API integration — bei Bedarf race-safe Username-Reservierung serverseitig.
     console.log('Onboarding complete:', data);
+    const ageNum = parseInt(data.birthdate, 10);
     await supabase.from('profiles').update({
       username: data.username,
-      birthdate: data.birthdate,
-      age: calcAge(data.birthdate),
+      age: isNaN(ageNum) ? null : ageNum,
       music_genres: data.genres,
       vibes: data.genres.slice(0, 3),
       favorite_artist: data.artist || null,
