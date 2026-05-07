@@ -12,12 +12,15 @@ import {
   Link,
   Preview,
   Text,
-  Section,
-  Hr,
 } from 'npm:@react-email/components@0.0.22'
 
 interface EmailChangeEmailProps {
   siteName: string
+  // oldEmail is the user's current address (HookData.OldEmail). For the
+  // NEW-recipient half of a secure email_change fanout, `email` equals the
+  // recipient (NEW), so the "from" line must render oldEmail to read
+  // "from OLD to NEW" instead of "from NEW to NEW".
+  oldEmail: string
   email: string
   newEmail: string
   confirmationUrl: string
@@ -25,36 +28,37 @@ interface EmailChangeEmailProps {
 
 export const EmailChangeEmail = ({
   siteName,
-  email,
+  oldEmail,
   newEmail,
   confirmationUrl,
 }: EmailChangeEmailProps) => (
-  <Html lang="de" dir="ltr">
+  <Html lang="en" dir="ltr">
     <Head />
-    <Preview>E-Mail-Adresse ändern — Feyrn ⚡</Preview>
+    <Preview>Confirm your email change for {siteName}</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Section style={logoSection}>
-          <Text style={logoText}>⚡ Feyrn</Text>
-        </Section>
-        <Heading style={h1}>E-Mail-Adresse ändern ✉️</Heading>
+        <Heading style={h1}>Confirm your email change</Heading>
         <Text style={text}>
-          Du möchtest deine E-Mail bei Feyrn von{' '}
-          <Link href={`mailto:${email}`} style={link}>{email}</Link>{' '}
-          zu{' '}
-          <Link href={`mailto:${newEmail}`} style={link}>{newEmail}</Link>{' '}
-          ändern.
+          You requested to change your email address for {siteName} from{' '}
+          <Link href={`mailto:${oldEmail}`} style={link}>
+            {oldEmail}
+          </Link>{' '}
+          to{' '}
+          <Link href={`mailto:${newEmail}`} style={link}>
+            {newEmail}
+          </Link>
+          .
         </Text>
-        <Section style={buttonSection}>
-          <Button style={button} href={confirmationUrl}>
-            Änderung bestätigen →
-          </Button>
-        </Section>
-        <Hr style={divider} />
+        <Text style={text}>
+          Click the button below to confirm this change:
+        </Text>
+        <Button style={button} href={confirmationUrl}>
+          Confirm Email Change
+        </Button>
         <Text style={footer}>
-          Falls du diese Änderung nicht angefordert hast, sichere bitte sofort dein Konto.
+          If you didn't request this change, please secure your account
+          immediately.
         </Text>
-        <Text style={footerBrand}>Feyrn — Wo die Party beginnt.</Text>
       </Container>
     </Body>
   </Html>
@@ -62,15 +66,27 @@ export const EmailChangeEmail = ({
 
 export default EmailChangeEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: "'Space Grotesk', Arial, sans-serif" }
-const container = { padding: '40px 25px', maxWidth: '480px', margin: '0 auto' }
-const logoSection = { textAlign: 'center' as const, marginBottom: '32px' }
-const logoText = { fontSize: '28px', fontWeight: 'bold' as const, color: '#7F77DD', margin: '0' }
-const h1 = { fontSize: '24px', fontWeight: 'bold' as const, color: '#08080f', margin: '0 0 20px', textAlign: 'center' as const }
-const text = { fontSize: '14px', color: '#333333', lineHeight: '1.6', margin: '0 0 16px' }
-const link = { color: '#7F77DD', textDecoration: 'underline' }
-const buttonSection = { textAlign: 'center' as const, margin: '28px 0' }
-const button = { backgroundColor: '#7F77DD', color: '#ffffff', fontSize: '16px', fontWeight: 'bold' as const, borderRadius: '12px', padding: '14px 32px', textDecoration: 'none' }
-const divider = { borderColor: '#e5e5e5', margin: '24px 0' }
-const footer = { fontSize: '12px', color: '#999999', margin: '0 0 8px' }
-const footerBrand = { fontSize: '12px', color: '#7F77DD', fontWeight: 'bold' as const, margin: '0' }
+const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
+const container = { padding: '20px 25px' }
+const h1 = {
+  fontSize: '22px',
+  fontWeight: 'bold' as const,
+  color: '#000000',
+  margin: '0 0 20px',
+}
+const text = {
+  fontSize: '14px',
+  color: '#55575d',
+  lineHeight: '1.5',
+  margin: '0 0 25px',
+}
+const link = { color: 'inherit', textDecoration: 'underline' }
+const button = {
+  backgroundColor: '#000000',
+  color: '#ffffff',
+  fontSize: '14px',
+  borderRadius: '8px',
+  padding: '12px 20px',
+  textDecoration: 'none',
+}
+const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
