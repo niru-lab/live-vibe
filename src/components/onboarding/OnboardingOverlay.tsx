@@ -1,7 +1,9 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Step {
   selector: string;
+  path: string;
   icon: string;
   headline: string;
   body: string;
@@ -10,24 +12,28 @@ interface Step {
 const STEPS: Step[] = [
   {
     selector: '[data-testid="nav-feed"]',
+    path: '/',
     icon: '⚡',
     headline: 'Dein Abend. In Echtzeit.',
     body: 'Sieh live was gerade passiert — Posts, Hotspots und Events direkt aus deiner Stadt.',
   },
   {
     selector: '[data-testid="nav-map"]',
+    path: '/discover',
     icon: '🗺️',
     headline: 'Finde wo was los ist.',
     body: 'Die Stadtkarte zeigt dir live welche Venues brennen — und welche schlafen.',
   },
   {
     selector: '[data-testid="create-post-btn"]',
+    path: '/create',
     icon: '🎉',
     headline: 'Zeig wo du feierst.',
     body: 'Poste deinen Moment. Deine Freunde sehen live wo der Abend startet.',
   },
   {
     selector: '[data-testid="nav-profile"]',
+    path: '/profile',
     icon: '✨',
     headline: 'Dein Nightlife-Profil.',
     body: 'Badges, Punkte und deine Abende — alles an einem Ort.',
