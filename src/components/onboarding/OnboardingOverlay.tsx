@@ -1,7 +1,9 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface Step {
   selector: string;
+  path: string;
   icon: string;
   headline: string;
   body: string;
@@ -10,24 +12,28 @@ interface Step {
 const STEPS: Step[] = [
   {
     selector: '[data-testid="nav-feed"]',
+    path: '/',
     icon: '⚡',
     headline: 'Dein Abend. In Echtzeit.',
     body: 'Sieh live was gerade passiert — Posts, Hotspots und Events direkt aus deiner Stadt.',
   },
   {
     selector: '[data-testid="nav-map"]',
+    path: '/discover',
     icon: '🗺️',
     headline: 'Finde wo was los ist.',
     body: 'Die Stadtkarte zeigt dir live welche Venues brennen — und welche schlafen.',
   },
   {
     selector: '[data-testid="create-post-btn"]',
+    path: '',
     icon: '🎉',
     headline: 'Zeig wo du feierst.',
     body: 'Poste deinen Moment. Deine Freunde sehen live wo der Abend startet.',
   },
   {
     selector: '[data-testid="nav-profile"]',
+    path: '/profile',
     icon: '✨',
     headline: 'Dein Nightlife-Profil.',
     body: 'Badges, Punkte und deine Abende — alles an einem Ort.',
@@ -37,6 +43,7 @@ const STEPS: Step[] = [
 const STORAGE_KEY = 'feyrn_onboarding_complete';
 
 export default function OnboardingOverlay() {
+  const navigate = useNavigate();
   const [active, setActive] = useState(false);
   const [step, setStep] = useState(0);
   const [rect, setRect] = useState<DOMRect | null>(null);
@@ -44,42 +51,34 @@ export default function OnboardingOverlay() {
   useEffect(() => {
     if (typeof window === 'undefined') return;
     if (localStorage.getItem(STORAGE_KEY) === 'true') return;
-    // wait briefly so target nav renders
     const t = setTimeout(() => setActive(true), 400);
     return () => clearTimeout(t);
   }, []);
 
-  // Find current step's element; auto-skip missing steps
+  // Find current step's element; retry until DOM mounts after route change
   useLayoutEffect(() => {
     if (!active) return;
     let cancelled = false;
     let attempts = 0;
 
     const measure = () => {
-      if (cancelled) return;
-      let i = step;
-      while (i < STEPS.length) {
-        const el = document.querySelector(STEPS[i].selector) as HTMLElement | null;
-        if (el) {
-          const r = el.getBoundingClientRect();
-          if (r.width > 0 && r.height > 0) {
-            if (i !== step) setStep(i);
-            else setRect(r);
-            return;
-          }
+      if (cancelled) return false;
+      const el = document.querySelector(STEPS[step].selector) as HTMLElement | null;
+      if (el) {
+        const r = el.getBoundingClientRect();
+        if (r.width > 0 && r.height > 0) {
+          setRect(r);
+          return true;
         }
-        i++;
       }
-      // No remaining valid step
-      if (i >= STEPS.length) finish();
+      return false;
     };
 
     measure();
     const retry = setInterval(() => {
       attempts++;
-      measure();
-      if (attempts > 20) clearInterval(retry);
-    }, 150);
+      if (measure() || attempts > 30) clearInterval(retry);
+    }, 100);
 
     const onResize = () => measure();
     window.addEventListener('resize', onResize);
@@ -91,7 +90,6 @@ export default function OnboardingOverlay() {
       window.removeEventListener('resize', onResize);
       window.removeEventListener('scroll', onResize, true);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, step]);
 
   const finish = () => {
@@ -101,8 +99,11 @@ export default function OnboardingOverlay() {
 
   const next = () => {
     if (step >= STEPS.length - 1) { finish(); return; }
+    const nextStep = step + 1;
+    const target = STEPS[nextStep];
     setRect(null);
-    setStep(s => s + 1);
+    setStep(nextStep);
+    if (target.path) navigate(target.path);
   };
 
   if (!active) return null;
