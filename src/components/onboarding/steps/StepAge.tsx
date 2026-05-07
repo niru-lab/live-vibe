@@ -18,13 +18,12 @@ function calcAge(iso: string): number | null {
 
 export default function StepAge({ birthdate, onChange }: Props) {
   const age = useMemo(() => calcAge(birthdate), [birthdate]);
-  const tooYoung = age !== null && age < 16;
   const max = new Date().toISOString().slice(0, 10);
 
   const inputStyle: React.CSSProperties = {
     width: '100%',
     background: 'rgba(255,255,255,0.05)',
-    border: `0.5px solid ${tooYoung ? '#EC4899' : 'rgba(255,255,255,0.1)'}`,
+    border: '0.5px solid rgba(255,255,255,0.1)',
     borderRadius: 14,
     color: '#fff',
     padding: '16px 18px',
@@ -45,14 +44,9 @@ export default function StepAge({ birthdate, onChange }: Props) {
         style={inputStyle}
         autoFocus
       />
-      {age !== null && !tooYoung && (
+      {age !== null && (
         <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13 }}>
           Du bist {age} Jahre alt.
-        </p>
-      )}
-      {tooYoung && (
-        <p style={{ color: '#EC4899', fontSize: 13, fontWeight: 500 }}>
-          Du musst mindestens 16 Jahre alt sein 🔞
         </p>
       )}
     </div>
@@ -61,5 +55,5 @@ export default function StepAge({ birthdate, onChange }: Props) {
 
 export function isAgeValid(birthdate: string) {
   const a = calcAge(birthdate);
-  return a !== null && a >= 16;
+  return a !== null && a >= 0;
 }
