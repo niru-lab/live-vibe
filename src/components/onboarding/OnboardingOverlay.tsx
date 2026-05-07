@@ -26,7 +26,7 @@ const STEPS: Step[] = [
   },
   {
     selector: '[data-testid="create-post-btn"]',
-    path: '/create',
+    path: '',
     icon: '🎉',
     headline: 'Zeig wo du feierst.',
     body: 'Poste deinen Moment. Deine Freunde sehen live wo der Abend startet.',
