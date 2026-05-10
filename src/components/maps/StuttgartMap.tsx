@@ -78,6 +78,23 @@ const getEventCoordinates = (city: string, area: string): [number, number] | nul
   return null;
 };
 
+// Privacy: For house parties the user is not accepted to, fuzz the exact
+// coordinates to a directional offset (~1.2km) from the city center and
+// replace the address with a cardinal direction label.
+const DIR_LABELS = ['Osten', 'Nordosten', 'Norden', 'Nordwesten', 'Westen', 'Südwesten', 'Süden', 'Südosten'];
+function fuzzHouseParty(lat: number, lng: number, city?: string | null): { coords: [number, number]; label: string } {
+  const center = (city && cityCenters[city]?.center) || [48.7758, 9.1829];
+  const dLat = lat - center[0];
+  const dLng = lng - center[1];
+  const angle = Math.atan2(dLat, dLng); // radians: 0=E, π/2=N
+  const idx = ((Math.round((angle * 180 / Math.PI) / 45) % 8) + 8) % 8;
+  const label = DIR_LABELS[idx];
+  const offsetKm = 1.2;
+  const offLat = Math.sin(angle) * (offsetKm / 111);
+  const offLng = Math.cos(angle) * (offsetKm / (111 * Math.cos(center[0] * Math.PI / 180)));
+  return { coords: [center[0] + offLat, center[1] + offLng], label };
+}
+
 const categoryColors: Record<string, string> = {
   bar: '#f97316',
   club: '#a855f7',
