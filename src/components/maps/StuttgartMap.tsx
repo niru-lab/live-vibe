@@ -3,6 +3,7 @@ import Map, { Marker, Popup, Source, Layer, NavigationControl } from 'react-map-
 import type { MapRef } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEvents, useVenues } from '@/hooks/useEvents';
+import { useProfile } from '@/hooks/useProfile';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
