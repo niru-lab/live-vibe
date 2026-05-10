@@ -181,17 +181,28 @@ export default function Register() {
               onFocus={(e) => (e.target.style.borderColor = '#7F77DD')}
               onBlur={(e) => (e.target.style.borderColor = '#2a2a3a')}
             />
+            {mode === 'login' && (
+              <input
+                type="password"
+                placeholder="Passwort"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                style={inputStyle}
+                onFocus={(e) => (e.target.style.borderColor = '#7F77DD')}
+                onBlur={(e) => (e.target.style.borderColor = '#2a2a3a')}
+              />
+            )}
             {error && <p className="text-xs" style={{ color: '#ff6b6b' }}>{error}</p>}
             <button
               type="submit"
-              disabled={loading || !email}
+              disabled={loading || !email || (mode === 'login' && !password)}
               className="w-full rounded-xl py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
               style={{ background: '#7F77DD' }}
             >
               {loading ? (
                 <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               ) : (
-                mode === 'login' ? 'Login-Link senden →' : 'Registrierungslink senden →'
+                mode === 'login' ? 'Einloggen →' : 'Registrierungslink senden →'
               )}
             </button>
           </form>
