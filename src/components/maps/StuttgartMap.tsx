@@ -3,6 +3,7 @@ import Map, { Marker, Popup, Source, Layer, NavigationControl } from 'react-map-
 import type { MapRef } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useEvents, useVenues } from '@/hooks/useEvents';
+import { useProfile } from '@/hooks/useProfile';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -76,6 +77,23 @@ const getEventCoordinates = (city: string, area: string): [number, number] | nul
   if (cityLower.includes('stuttgart')) return stuttgartAreas['stuttgart'];
   return null;
 };
+
+// Privacy: For house parties the user is not accepted to, fuzz the exact
+// coordinates to a directional offset (~1.2km) from the city center and
+// replace the address with a cardinal direction label.
+const DIR_LABELS = ['Osten', 'Nordosten', 'Norden', 'Nordwesten', 'Westen', 'Südwesten', 'Süden', 'Südosten'];
+function fuzzHouseParty(lat: number, lng: number, city?: string | null): { coords: [number, number]; label: string } {
+  const center = (city && cityCenters[city]?.center) || [48.7758, 9.1829];
+  const dLat = lat - center[0];
+  const dLng = lng - center[1];
+  const angle = Math.atan2(dLat, dLng); // radians: 0=E, π/2=N
+  const idx = ((Math.round((angle * 180 / Math.PI) / 45) % 8) + 8) % 8;
+  const label = DIR_LABELS[idx];
+  const offsetKm = 1.2;
+  const offLat = Math.sin(angle) * (offsetKm / 111);
+  const offLng = Math.cos(angle) * (offsetKm / (111 * Math.cos(center[0] * Math.PI / 180)));
+  return { coords: [center[0] + offLat, center[1] + offLng], label };
+}
 
 const categoryColors: Record<string, string> = {
   bar: '#f97316',
@@ -161,6 +179,23 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   const { data: venues } = useVenues();
   const navigate = useNavigate();
   const mapRef = useRef<MapRef>(null);
+  const { data: profile } = useProfile();
+
+  // House parties the current user has been accepted into → real address visible
+  const { data: acceptedHouseParties } = useQuery({
+    queryKey: ['accepted-house-parties', profile?.id],
+    enabled: !!profile?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('event_attendees')
+        .select('event_id')
+        .eq('user_id', profile!.id)
+        .eq('status', 'going')
+        .eq('host_accepted', true);
+      if (error) throw error;
+      return new Set((data || []).map(r => r.event_id));
+    },
+  });
 
   // Fetch posts per venue
   const { data: venuePosts } = useQuery({
@@ -236,6 +271,12 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         // Filter by city
         if (selectedCity && selectedCity !== 'Alle' && event.city?.toLowerCase() !== selectedCity.toLowerCase()) return null;
 
+        // Privacy: fuzz house parties unless user is accepted
+        if (event.category === 'house_party' && !acceptedHouseParties?.has(event.id)) {
+          const fuzzed = fuzzHouseParty(coords[0], coords[1], event.city);
+          coords = fuzzed.coords;
+        }
+
         return {
           type: 'Feature' as const,
           properties: {
@@ -252,7 +293,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       .filter(Boolean);
 
     return { type: 'FeatureCollection' as const, features };
-  }, [events, selectedCity]);
+  }, [events, selectedCity, acceptedHouseParties]);
 
   const searchLower = searchQuery.toLowerCase().trim();
 
@@ -278,11 +319,18 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         else coords = getEventCoordinates(event.city, event.address);
         if (!coords) return null;
         if (selectedCity && selectedCity !== 'Alle' && event.city?.toLowerCase() !== selectedCity.toLowerCase()) return null;
-        if (searchLower && !event.name.toLowerCase().includes(searchLower) && !event.location_name.toLowerCase().includes(searchLower) && !event.address.toLowerCase().includes(searchLower) && !event.city?.toLowerCase().includes(searchLower)) return null;
-        return { ...event, coords };
+        const isPrivateHouseParty = event.category === 'house_party' && !acceptedHouseParties?.has(event.id);
+        let directionLabel: string | null = null;
+        if (isPrivateHouseParty) {
+          const fuzzed = fuzzHouseParty(coords[0], coords[1], event.city);
+          coords = fuzzed.coords;
+          directionLabel = fuzzed.label;
+        }
+        if (searchLower && !event.name.toLowerCase().includes(searchLower) && !event.location_name.toLowerCase().includes(searchLower) && !(event.address || '').toLowerCase().includes(searchLower) && !event.city?.toLowerCase().includes(searchLower)) return null;
+        return { ...event, coords, isPrivateHouseParty, directionLabel };
       })
-      .filter(Boolean) as (typeof events extends (infer T)[] | undefined ? T & { coords: [number, number] } : never)[];
-  }, [events, selectedCity, selectedCategory, searchLower]);
+      .filter(Boolean) as any[];
+  }, [events, selectedCity, selectedCategory, searchLower, acceptedHouseParties]);
 
   const getCategoryCount = useCallback((category: string) => {
     const cityFilter = (city?: string | null) =>
@@ -497,7 +545,9 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                   <h3 className="font-bold mb-1 text-sm text-white">{popupInfo.data.name}</h3>
                   <p className="text-xs text-neutral-400 mb-1 flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
-                    {popupInfo.data.address}, {popupInfo.data.city}
+                    {popupInfo.data.isPrivateHouseParty
+                      ? `🔒 Hausparty • ${popupInfo.data.directionLabel} von ${popupInfo.data.city} (genaue Adresse nach Zusage)`
+                      : `${popupInfo.data.address}, ${popupInfo.data.city}`}
                   </p>
                   <p className="text-xs text-neutral-400 mb-1 flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
