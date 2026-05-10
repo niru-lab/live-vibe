@@ -8,7 +8,7 @@ export default function Verify() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { method, contact } = (location.state as { method: string; contact: string }) || {};
+  const { method, contact, mode } = (location.state as { method: string; contact: string; mode?: 'login' | 'register' }) || {};
 
   const [countdown, setCountdown] = useState(60);
   const [resending, setResending] = useState(false);
@@ -32,10 +32,13 @@ export default function Verify() {
     if (method === 'email') {
       await supabase.auth.signInWithOtp({
         email: contact,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          shouldCreateUser: mode === 'register',
+        },
       });
     } else {
-      await supabase.auth.signInWithOtp({ phone: contact });
+      await supabase.auth.signInWithOtp({ phone: contact, options: { shouldCreateUser: mode === 'register' } });
     }
     setResending(false);
     setCountdown(60);
@@ -74,8 +77,8 @@ export default function Verify() {
         </h1>
         <p className="mb-6 text-sm" style={{ color: '#888' }}>
           {isEmail
-            ? `Wir haben einen Link an ${contact} geschickt. Klick auf den Link — und du bist drin.`
-            : `Wir haben einen Code an ${contact} geschickt.`}
+            ? `Wir haben einen ${mode === 'register' ? 'Registrierungslink' : 'Login-Link'} an ${contact} geschickt.`
+            : `Wir haben einen ${mode === 'register' ? 'Registrierungscode' : 'Login-Code'} an ${contact} geschickt.`}
         </p>
 
         {/* Preview Card */}
