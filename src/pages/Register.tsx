@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from '@phosphor-icons/react';
@@ -10,6 +10,8 @@ const phoneSchema = z.string().min(6, 'Bitte gib eine gültige Nummer ein');
 
 export default function Register() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState<'login' | 'register'>(searchParams.get('mode') === 'register' ? 'register' : 'login');
   const [tab, setTab] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
@@ -30,7 +32,7 @@ export default function Register() {
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-        shouldCreateUser: true,
+        shouldCreateUser: mode === 'register',
       },
     });
     setLoading(false);
@@ -39,12 +41,12 @@ export default function Register() {
       if (msg.includes('rate') || msg.includes('limit')) {
         setError('Zu viele Versuche. Warte kurz und probier es erneut.');
       } else if (msg.includes('signup') || msg.includes('not allowed')) {
-        setError('Anmeldung mit dieser E-Mail aktuell nicht möglich.');
+        setError(mode === 'login' ? 'Für diese E-Mail gibt es noch keinen Account. Bitte registrieren.' : 'Registrierung mit dieser E-Mail aktuell nicht möglich.');
       } else {
         setError(authError.message);
       }
     } else {
-      navigate('/verify', { state: { method: 'email', contact: email } });
+      navigate('/verify', { state: { method: 'email', contact: email, mode } });
     }
   };
 
@@ -60,7 +62,7 @@ export default function Register() {
     setLoading(true);
     const { error: authError } = await supabase.auth.signInWithOtp({
       phone: fullPhone,
-      options: { shouldCreateUser: true },
+      options: { shouldCreateUser: mode === 'register' },
     });
     setLoading(false);
     if (authError) {
@@ -71,7 +73,7 @@ export default function Register() {
         setError(authError.message);
       }
     } else {
-      navigate('/verify', { state: { method: 'phone', contact: fullPhone } });
+      navigate('/verify', { state: { method: 'phone', contact: fullPhone, mode } });
     }
   };
 
@@ -101,10 +103,31 @@ export default function Register() {
           <ArrowLeft size={18} weight="bold" />
         </button>
 
-        <h1 className="mb-2 text-xl font-bold text-white">Anmelden oder registrieren</h1>
+        <h1 className="mb-2 text-xl font-bold text-white">{mode === 'login' ? 'Einloggen' : 'Konto erstellen'}</h1>
         <p className="mb-6 text-sm" style={{ color: '#888' }}>
-          Wir schicken dir einen Link bzw. Code — kein Passwort nötig. Funktioniert für neue & bestehende Accounts.
+          {mode === 'login'
+            ? 'Melde dich mit deiner bestehenden E-Mail oder Nummer an.'
+            : 'Registriere dich mit E-Mail oder Nummer — kein Passwort nötig.'}
         </p>
+
+        <div
+          className="mb-3 flex rounded-xl p-1"
+          style={{ background: '#111120', border: '0.5px solid #2a2a3a' }}
+        >
+          {(['login', 'register'] as const).map((m) => (
+            <button
+              key={m}
+              onClick={() => { setMode(m); setError(''); }}
+              className="flex-1 rounded-lg py-2 text-sm font-medium transition-all"
+              style={{
+                background: mode === m ? '#7F77DD' : 'transparent',
+                color: mode === m ? '#fff' : '#888',
+              }}
+            >
+              {m === 'login' ? 'Anmelden' : 'Registrieren'}
+            </button>
+          ))}
+        </div>
 
         {/* Tab Switcher */}
         <div
@@ -147,7 +170,7 @@ export default function Register() {
               {loading ? (
                 <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               ) : (
-                'Link senden →'
+                mode === 'login' ? 'Login-Link senden →' : 'Registrierungslink senden →'
               )}
             </button>
           </form>
@@ -180,7 +203,7 @@ export default function Register() {
               {loading ? (
                 <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               ) : (
-                'Code senden →'
+                mode === 'login' ? 'Login-Code senden →' : 'Registrierungscode senden →'
               )}
             </button>
           </form>
