@@ -70,7 +70,7 @@ export default function Events() {
           className="fixed bottom-28 right-4 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-105 transition"
           aria-label="Event erstellen"
         >
-          <CalendarBlank weight="bold" className="h-6 w-6" />
+          <Plus weight="bold" className="h-7 w-7" />
         </button>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsContent value="upcoming" className="mt-0 space-y-4">
