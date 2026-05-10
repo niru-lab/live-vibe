@@ -127,8 +127,8 @@ export default function Register() {
         <h1 className="mb-2 text-xl font-bold text-white">{mode === 'login' ? 'Einloggen' : 'Konto erstellen'}</h1>
         <p className="mb-6 text-sm" style={{ color: '#888' }}>
           {mode === 'login'
-            ? 'Melde dich mit deiner bestehenden E-Mail oder Nummer an.'
-            : 'Registriere dich mit E-Mail oder Nummer — kein Passwort nötig.'}
+            ? 'Melde dich mit E-Mail & Passwort oder per SMS-Code an.'
+            : 'Registriere dich mit E-Mail oder Nummer — wir schicken dir einen Magic Link.'}
         </p>
 
         <div
