@@ -50,6 +50,15 @@ Deno.serve(async (req) => {
 
     results.old_hotspots = oldHotspots?.length || 0;
 
+    // 3b. Delete events that ended more than 24h ago (or started >24h ago if no end time)
+    const eventCutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    const { data: endedEvents } = await supabase
+      .from('events')
+      .delete()
+      .or(`ends_at.lt.${eventCutoff},and(ends_at.is.null,starts_at.lt.${eventCutoff})`)
+      .select('id');
+    results.expired_events = endedEvents?.length || 0;
+
     // 4. Clean processed outbox events older than 7 days
     const outboxCutoff = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
     const { data: oldOutbox } = await supabase
