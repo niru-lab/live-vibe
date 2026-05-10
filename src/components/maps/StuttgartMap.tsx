@@ -179,6 +179,23 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   const { data: venues } = useVenues();
   const navigate = useNavigate();
   const mapRef = useRef<MapRef>(null);
+  const { data: profile } = useProfile();
+
+  // House parties the current user has been accepted into → real address visible
+  const { data: acceptedHouseParties } = useQuery({
+    queryKey: ['accepted-house-parties', profile?.id],
+    enabled: !!profile?.id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('event_attendees')
+        .select('event_id')
+        .eq('user_id', profile!.id)
+        .eq('status', 'going')
+        .eq('host_accepted', true);
+      if (error) throw error;
+      return new Set((data || []).map(r => r.event_id));
+    },
+  });
 
   // Fetch posts per venue
   const { data: venuePosts } = useQuery({
