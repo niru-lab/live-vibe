@@ -99,9 +99,9 @@ export default function Welcome() {
         <button
           onClick={() => navigate('/register')}
           className="w-full rounded-xl px-4 py-3 text-sm transition-opacity hover:opacity-80"
-          style={{ color: '#888888', border: '0.5px solid #2a2a3a' }}
+          style={{ color: '#ffffff', border: '0.5px solid #2a2a3a', background: '#111120' }}
         >
-          Mit E-Mail oder Nummer
+          Mit E-Mail oder Nummer anmelden
         </button>
 
         {/* Footer */}

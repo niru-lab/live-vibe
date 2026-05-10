@@ -101,9 +101,9 @@ export default function Register() {
           <ArrowLeft size={18} weight="bold" />
         </button>
 
-        <h1 className="mb-2 text-xl font-bold text-white">Konto erstellen</h1>
+        <h1 className="mb-2 text-xl font-bold text-white">Anmelden oder registrieren</h1>
         <p className="mb-6 text-sm" style={{ color: '#888' }}>
-          Wir schicken dir einen Link — kein Passwort nötig.
+          Wir schicken dir einen Link bzw. Code — kein Passwort nötig. Funktioniert für neue & bestehende Accounts.
         </p>
 
         {/* Tab Switcher */}
