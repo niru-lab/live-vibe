@@ -545,7 +545,9 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                   <h3 className="font-bold mb-1 text-sm text-white">{popupInfo.data.name}</h3>
                   <p className="text-xs text-neutral-400 mb-1 flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
-                    {popupInfo.data.address}, {popupInfo.data.city}
+                    {popupInfo.data.isPrivateHouseParty
+                      ? `🔒 Hausparty • ${popupInfo.data.directionLabel} von ${popupInfo.data.city} (genaue Adresse nach Zusage)`
+                      : `${popupInfo.data.address}, ${popupInfo.data.city}`}
                   </p>
                   <p className="text-xs text-neutral-400 mb-1 flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
