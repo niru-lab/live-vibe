@@ -14,6 +14,7 @@ export default function Register() {
   const [mode, setMode] = useState<'login' | 'register'>(searchParams.get('mode') === 'register' ? 'register' : 'login');
   const [tab, setTab] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [countryCode] = useState('+49');
   const [loading, setLoading] = useState(false);
@@ -27,12 +28,34 @@ export default function Register() {
       setError(result.error.errors[0].message);
       return;
     }
+
+    if (mode === 'login') {
+      if (!password || password.length < 6) {
+        setError('Bitte gib dein Passwort ein (mind. 6 Zeichen).');
+        return;
+      }
+      setLoading(true);
+      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+      setLoading(false);
+      if (authError) {
+        const msg = authError.message?.toLowerCase() || '';
+        if (msg.includes('invalid')) {
+          setError('E-Mail oder Passwort falsch.');
+        } else {
+          setError(authError.message);
+        }
+      } else {
+        navigate('/', { replace: true });
+      }
+      return;
+    }
+
     setLoading(true);
     const { error: authError } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: `${window.location.origin}/auth/callback`,
-        shouldCreateUser: mode === 'register',
+        shouldCreateUser: true,
       },
     });
     setLoading(false);
@@ -40,8 +63,6 @@ export default function Register() {
       const msg = authError.message?.toLowerCase() || '';
       if (msg.includes('rate') || msg.includes('limit')) {
         setError('Zu viele Versuche. Warte kurz und probier es erneut.');
-      } else if (msg.includes('signup') || msg.includes('not allowed')) {
-        setError(mode === 'login' ? 'Für diese E-Mail gibt es noch keinen Account. Bitte registrieren.' : 'Registrierung mit dieser E-Mail aktuell nicht möglich.');
       } else {
         setError(authError.message);
       }
