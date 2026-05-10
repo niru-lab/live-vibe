@@ -35,18 +35,30 @@ export default function Register() {
         return;
       }
       setLoading(true);
-      const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
-      setLoading(false);
+      const { data: signInData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
       if (authError) {
+        setLoading(false);
         const msg = authError.message?.toLowerCase() || '';
         if (msg.includes('invalid')) {
           setError('E-Mail oder Passwort falsch.');
         } else {
           setError(authError.message);
         }
-      } else {
-        navigate('/', { replace: true });
+        return;
       }
+      // Check onboarding status before routing
+      const uid = signInData.user?.id;
+      let onboardingDone = false;
+      if (uid) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('onboarding_complete')
+          .eq('user_id', uid)
+          .maybeSingle();
+        onboardingDone = !!profile?.onboarding_complete;
+      }
+      setLoading(false);
+      navigate(onboardingDone ? '/' : '/onboarding', { replace: true });
       return;
     }
 
