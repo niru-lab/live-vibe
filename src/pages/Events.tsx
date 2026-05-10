@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Confetti, UserCheck, ChartBar, Eye, ShareNetwork, Envelope, Check, X, CalendarBlank } from '@phosphor-icons/react';
+import { Confetti, UserCheck, ChartBar, Eye, ShareNetwork, Envelope, Check, X, CalendarBlank, Plus } from '@phosphor-icons/react';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
