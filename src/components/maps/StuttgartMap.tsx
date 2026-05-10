@@ -271,6 +271,12 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         // Filter by city
         if (selectedCity && selectedCity !== 'Alle' && event.city?.toLowerCase() !== selectedCity.toLowerCase()) return null;
 
+        // Privacy: fuzz house parties unless user is accepted
+        if (event.category === 'house_party' && !acceptedHouseParties?.has(event.id)) {
+          const fuzzed = fuzzHouseParty(coords[0], coords[1], event.city);
+          coords = fuzzed.coords;
+        }
+
         return {
           type: 'Feature' as const,
           properties: {
@@ -287,7 +293,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       .filter(Boolean);
 
     return { type: 'FeatureCollection' as const, features };
-  }, [events, selectedCity]);
+  }, [events, selectedCity, acceptedHouseParties]);
 
   const searchLower = searchQuery.toLowerCase().trim();
 
