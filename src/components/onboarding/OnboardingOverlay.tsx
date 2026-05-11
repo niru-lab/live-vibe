@@ -104,7 +104,10 @@ export default function OnboardingOverlay() {
   }, [active, step]);
 
   const finish = () => {
-    try { localStorage.setItem(STORAGE_KEY, 'true'); } catch {}
+    try {
+      localStorage.setItem(STORAGE_KEY, 'true');
+      localStorage.removeItem(STEP_KEY);
+    } catch {}
     setActive(false);
   };
 
