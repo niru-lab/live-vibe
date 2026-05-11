@@ -11,6 +11,7 @@ import {
   Html,
   Link,
   Preview,
+  Section,
   Text,
 } from 'npm:@react-email/components@0.0.22'
 
@@ -27,31 +28,48 @@ export const SignupEmail = ({
   recipient,
   confirmationUrl,
 }: SignupEmailProps) => (
-  <Html lang="en" dir="ltr">
+  <Html lang="de" dir="ltr">
     <Head />
-    <Preview>Confirm your email for {siteName}</Preview>
+    <Preview>Die Nacht wartet auf dich. Bestätige deine Mail ✦</Preview>
     <Body style={main}>
       <Container style={container}>
-        <Heading style={h1}>Confirm your email</Heading>
-        <Text style={text}>
-          Thanks for signing up for{' '}
-          <Link href={siteUrl} style={link}>
-            <strong>{siteName}</strong>
-          </Link>
-          !
-        </Text>
-        <Text style={text}>
-          Please confirm your email address (
-          <Link href={`mailto:${recipient}`} style={link}>
-            {recipient}
-          </Link>
-          ) by clicking the button below:
-        </Text>
-        <Button style={button} href={confirmationUrl}>
-          Verify Email
-        </Button>
+        <Section style={hero}>
+          <Text style={kicker}>FEYRN ✦ NIGHTLIFE</Text>
+          <Heading style={h1}>Welcome to the night.</Heading>
+          <Text style={subtitle}>
+            Schön, dass du da bist. Eine letzte Sache fehlt noch — dann
+            geht's los.
+          </Text>
+        </Section>
+
+        <Section style={card}>
+          <Text style={text}>
+            Hey 👋 willkommen bei{' '}
+            <Link href={siteUrl} style={link}>
+              <strong>Feyrn</strong>
+            </Link>
+            . Ab jetzt verpasst du keine Nacht mehr — Events, Crews und
+            Momente, alles an einem Ort.
+          </Text>
+          <Text style={text}>
+            Tipp einmal auf den Button und du bist drin:
+          </Text>
+          <Section style={{ textAlign: 'center', margin: '32px 0 8px' }}>
+            <Button style={button} href={confirmationUrl}>
+              Let's go ✦
+            </Button>
+          </Section>
+          <Text style={small}>
+            Mail-Adresse:{' '}
+            <Link href={`mailto:${recipient}`} style={muted}>
+              {recipient}
+            </Link>
+          </Text>
+        </Section>
+
         <Text style={footer}>
-          If you didn't create an account, you can safely ignore this email.
+          Du kennst Feyrn nicht und das war nicht du? Kein Stress — ignorier
+          diese Mail einfach, dann passiert nichts.
         </Text>
       </Container>
     </Body>
@@ -60,27 +78,76 @@ export const SignupEmail = ({
 
 export default SignupEmail
 
-const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif' }
-const container = { padding: '20px 25px' }
+const main = {
+  backgroundColor: '#ffffff',
+  fontFamily:
+    '-apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif',
+}
+const container = { padding: '24px 20px', maxWidth: '560px' }
+const hero = {
+  background:
+    'linear-gradient(135deg, #08080f 0%, #1a1535 60%, #7F77DD 140%)',
+  borderRadius: '20px',
+  padding: '40px 28px',
+  textAlign: 'center' as const,
+  marginBottom: '20px',
+}
+const kicker = {
+  fontSize: '11px',
+  letterSpacing: '3px',
+  color: '#7F77DD',
+  fontWeight: 600,
+  margin: '0 0 14px',
+}
 const h1 = {
-  fontSize: '22px',
-  fontWeight: 'bold' as const,
-  color: '#000000',
-  margin: '0 0 20px',
+  fontSize: '30px',
+  fontWeight: 700,
+  color: '#ffffff',
+  margin: '0 0 12px',
+  letterSpacing: '-0.5px',
+}
+const subtitle = {
+  fontSize: '15px',
+  color: 'rgba(255,255,255,0.75)',
+  lineHeight: '1.5',
+  margin: 0,
+}
+const card = {
+  backgroundColor: '#ffffff',
+  border: '1px solid #ececf5',
+  borderRadius: '16px',
+  padding: '28px 24px',
 }
 const text = {
-  fontSize: '14px',
-  color: '#55575d',
-  lineHeight: '1.5',
-  margin: '0 0 25px',
+  fontSize: '15px',
+  color: '#2a2a35',
+  lineHeight: '1.6',
+  margin: '0 0 16px',
 }
-const link = { color: 'inherit', textDecoration: 'underline' }
+const small = {
+  fontSize: '12px',
+  color: '#8a8a98',
+  textAlign: 'center' as const,
+  margin: '16px 0 0',
+}
+const link = { color: '#7F77DD', textDecoration: 'none', fontWeight: 600 }
+const muted = { color: '#8a8a98', textDecoration: 'underline' }
 const button = {
-  backgroundColor: '#000000',
+  backgroundColor: '#7F77DD',
+  backgroundImage: 'linear-gradient(135deg, #7F77DD 0%, #5a4fc7 100%)',
   color: '#ffffff',
-  fontSize: '14px',
-  borderRadius: '8px',
-  padding: '12px 20px',
+  fontSize: '15px',
+  fontWeight: 600,
+  borderRadius: '999px',
+  padding: '14px 36px',
   textDecoration: 'none',
+  display: 'inline-block',
+  letterSpacing: '0.3px',
 }
-const footer = { fontSize: '12px', color: '#999999', margin: '30px 0 0' }
+const footer = {
+  fontSize: '12px',
+  color: '#a0a0ad',
+  textAlign: 'center' as const,
+  margin: '24px 8px 0',
+  lineHeight: '1.5',
+}
