@@ -34,7 +34,7 @@ export const SignupEmail = ({
     <Body style={main}>
       <Container style={container}>
         <Section style={hero}>
-          <Text style={kicker}>FEYRN ✦ NIGHTLIFE</Text>
+          <Text style={kicker}>FEYRN</Text>
           <Heading style={h1}>Welcome to the night.</Heading>
           <Text style={subtitle}>
             Schön, dass du da bist. Eine letzte Sache fehlt noch — dann
