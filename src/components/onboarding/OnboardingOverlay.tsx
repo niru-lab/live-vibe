@@ -41,11 +41,16 @@ const STEPS: Step[] = [
 ];
 
 const STORAGE_KEY = 'feyrn_onboarding_complete';
+const STEP_KEY = 'feyrn_onboarding_step';
 
 export default function OnboardingOverlay() {
   const navigate = useNavigate();
   const [active, setActive] = useState(false);
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState(() => {
+    if (typeof window === 'undefined') return 0;
+    const s = parseInt(localStorage.getItem(STEP_KEY) || '0', 10);
+    return isNaN(s) ? 0 : Math.min(Math.max(s, 0), STEPS.length - 1);
+  });
   const [rect, setRect] = useState<DOMRect | null>(null);
 
   useEffect(() => {
@@ -54,6 +59,12 @@ export default function OnboardingOverlay() {
     const t = setTimeout(() => setActive(true), 400);
     return () => clearTimeout(t);
   }, []);
+
+  // Persist current step so unmount/remount during navigation doesn't restart the tour
+  useEffect(() => {
+    if (!active) return;
+    try { localStorage.setItem(STEP_KEY, String(step)); } catch {}
+  }, [active, step]);
 
   // Find current step's element; retry until DOM mounts after route change
   useLayoutEffect(() => {
@@ -93,7 +104,10 @@ export default function OnboardingOverlay() {
   }, [active, step]);
 
   const finish = () => {
-    try { localStorage.setItem(STORAGE_KEY, 'true'); } catch {}
+    try {
+      localStorage.setItem(STORAGE_KEY, 'true');
+      localStorage.removeItem(STEP_KEY);
+    } catch {}
     setActive(false);
   };
 
