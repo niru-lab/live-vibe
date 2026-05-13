@@ -9,6 +9,7 @@ import { IconContext } from "@phosphor-icons/react";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SwipeBackProvider } from "@/components/layout/SwipeBackProvider";
+import { OnboardingGate } from "@/components/auth/OnboardingGate";
 import Feed from "./pages/Feed";
 import Welcome from "./pages/Welcome";
 import Register from "./pages/Register";
@@ -51,6 +52,7 @@ const App = () => (
               <Sonner />
               <BrowserRouter>
                 <SwipeBackProvider />
+                <OnboardingGate />
                 <Routes>
                   <Route path="/" element={<Feed />} />
                   <Route path="/feed" element={<Feed />} />
