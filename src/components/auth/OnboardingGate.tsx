@@ -11,6 +11,8 @@ const ALLOWED_PREFIXES = [
   '/onboarding',
 ];
 
+const ALLOWED_EXACT = ['/'];
+
 export const OnboardingGate = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -19,6 +21,7 @@ export const OnboardingGate = () => {
 
   useEffect(() => {
     if (loading || !user) return;
+    if (ALLOWED_EXACT.includes(location.pathname)) return;
     if (ALLOWED_PREFIXES.some((p) => location.pathname.startsWith(p))) return;
     if (checkedFor === user.id) return;
 
