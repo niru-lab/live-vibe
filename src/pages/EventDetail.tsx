@@ -107,7 +107,10 @@ export default function EventDetail() {
           <div>
             <h1 data-testid="event-detail-title" className="font-display text-2xl font-bold text-foreground mb-2">{event.name}</h1>
             {event.creator && (
-              <div className="flex items-center gap-2"><Avatar className="h-8 w-8"><AvatarImage src={event.creator.avatar_url || ''} /><AvatarFallback>{event.creator.display_name?.charAt(0)}</AvatarFallback></Avatar><div><span className="text-sm text-muted-foreground">von </span><span className="text-sm font-medium text-foreground">@{event.creator.username}</span>{event.creator.is_verified && <CheckCircle weight="fill" className="ml-1 inline h-4 w-4 text-primary" />}</div></div>
+              <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(`/profile/${event.creator.username}`)}>
+                <Avatar className="h-8 w-8"><AvatarImage src={event.creator.avatar_url || ''} /><AvatarFallback>{event.creator.display_name?.charAt(0)}</AvatarFallback></Avatar>
+                <div><span className="text-sm text-muted-foreground">von </span><span className="text-sm font-medium text-foreground hover:underline">@{event.creator.username}</span>{event.creator.is_verified && <CheckCircle weight="fill" className="ml-1 inline h-4 w-4 text-primary" />}</div>
+              </div>
             )}
           </div>
           <Sheet open={showAttendees} onOpenChange={setShowAttendees}>

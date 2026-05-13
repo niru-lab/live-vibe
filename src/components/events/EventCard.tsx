@@ -89,9 +89,9 @@ export const EventCard = ({ event, onClick, compact = false }: EventCardProps) =
           </Button>
         </div>
         {event.creator && (
-          <div className="flex items-center gap-2 border-t border-white/[0.08] pt-3 mt-3">
+          <div className="flex items-center gap-2 border-t border-white/[0.08] pt-3 mt-3 cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate(`/profile/${event.creator.username}`); }}>
             <Avatar className="h-6 w-6"><AvatarImage src={event.creator.avatar_url || ''} /><AvatarFallback className="text-xs">{event.creator.display_name?.charAt(0)}</AvatarFallback></Avatar>
-            <span className="text-xs text-muted-foreground">von <span className="font-medium text-foreground">@{event.creator.username}</span></span>
+            <span className="text-xs text-muted-foreground">von <span className="font-medium text-foreground hover:underline">@{event.creator.username}</span></span>
             {event.creator.social_cloud_points !== undefined && <BadgeDisplay points={event.creator.social_cloud_points} size="sm" />}
           </div>
         )}
