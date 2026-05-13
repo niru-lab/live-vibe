@@ -42,6 +42,7 @@ const STEPS: Step[] = [
 
 const STORAGE_KEY = 'feyrn_onboarding_complete';
 const STEP_KEY = 'feyrn_onboarding_step';
+const ACTIVE_KEY = 'feyrn_onboarding_active';
 
 export default function OnboardingOverlay() {
   const navigate = useNavigate();
@@ -56,12 +57,19 @@ export default function OnboardingOverlay() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (location.state?.startAppTour !== true) return;
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(STEP_KEY);
+    const shouldStart = location.state?.startAppTour === true;
+    const tourIsActive = localStorage.getItem(ACTIVE_KEY) === 'true';
+    if (!shouldStart && !tourIsActive) return;
+    if (shouldStart) {
+      localStorage.setItem(ACTIVE_KEY, 'true');
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(STEP_KEY);
+      setStep(0);
+      setRect(null);
+    }
     const t = setTimeout(() => setActive(true), 400);
     return () => clearTimeout(t);
-  }, [location.state]);
+  }, [location.pathname, location.state]);
 
   // Persist current step so unmount/remount during navigation doesn't restart the tour
   useEffect(() => {
@@ -109,6 +117,7 @@ export default function OnboardingOverlay() {
   const finish = () => {
     try {
       localStorage.setItem(STORAGE_KEY, 'true');
+      localStorage.removeItem(ACTIVE_KEY);
       localStorage.removeItem(STEP_KEY);
     } catch {}
     setActive(false);
@@ -120,6 +129,7 @@ export default function OnboardingOverlay() {
     const target = STEPS[nextStep];
     setRect(null);
     setStep(nextStep);
+    try { localStorage.setItem(STEP_KEY, String(nextStep)); } catch {}
     if (target.path) navigate(target.path);
   };
 
