@@ -12,6 +12,7 @@ import { Calendar, MapPin, Users, Image } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { getEventStatus } from '@/lib/utils';
 
 const MAPBOX_TOKEN = 'pk.eyJ1IjoiZmV5cm4iLCJhIjoiY21tNjZrYm5xMGRwMTJwcnp5bmhwbGU2aSJ9.qvMwkRPWhHDXQYrsYpN2Yw';
 
@@ -537,12 +538,22 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
 
               {popupInfo.type === 'event' && (
                 <>
-                  <span
-                    className="text-white px-2 py-0.5 rounded-full text-xs inline-block mb-2"
-                    style={{ backgroundColor: categoryColors.event }}
-                  >
-                    🎉 Event
-                  </span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span
+                      className="text-white px-2 py-0.5 rounded-full text-xs inline-block"
+                      style={{ backgroundColor: categoryColors.event }}
+                    >
+                      🎉 Event
+                    </span>
+                    {(() => {
+                      const status = getEventStatus(popupInfo.data.starts_at, popupInfo.data.ends_at);
+                      return (
+                        <span className={`text-white px-2 py-0.5 rounded-full text-xs inline-block ${status.color}`}>
+                          {status.label}
+                        </span>
+                      );
+                    })()}
+                  </div>
                   <h3 className="font-bold mb-1 text-sm text-white">{popupInfo.data.name}</h3>
                   <p className="text-xs text-neutral-400 mb-1 flex items-center gap-1">
                     <MapPin className="h-3 w-3" />

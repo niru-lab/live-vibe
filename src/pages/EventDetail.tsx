@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AttendeeManager } from '@/components/events/AttendeeManager';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ArrowLeft, CalendarBlank, Clock, MapPin, Users, CurrencyEur, TShirt, CheckCircle, XCircle, ShareNetwork, Flame, UserCheck, Trash } from '@phosphor-icons/react';
-import { cn } from '@/lib/utils';
+import { cn, getEventStatus } from '@/lib/utils';
 
 const categoryEmojis: Record<string, string> = { club: '🎧', house_party: '🏠', bar: '🍸', festival: '🎪', concert: '🎤', other: '✨' };
 
@@ -98,6 +98,10 @@ export default function EventDetail() {
         <div className="relative aspect-video bg-muted">
           {event.cover_image_url ? <img src={event.cover_image_url} alt={event.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20"><span className="text-7xl">{categoryEmojis[event.category] || '🎉'}</span></div>}
           <div className="absolute left-3 top-3 flex gap-2">
+            {(() => {
+              const status = getEventStatus(event.starts_at, event.ends_at);
+              return <Badge className={`${status.color} text-white`}>{status.label}</Badge>;
+            })()}
             {isSoon && <Badge className="bg-accent/90 backdrop-blur"><span className="mr-1 inline-block h-2 w-2 animate-pulse rounded-full bg-white" />{isToday ? 'Heute' : 'Bald'}</Badge>}
             <Badge variant="outline" className="border-white/30 bg-background/60 backdrop-blur">{categoryEmojis[event.category]} {event.category.replace('_', ' ')}</Badge>
           </div>
