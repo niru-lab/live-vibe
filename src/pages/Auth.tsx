@@ -89,7 +89,7 @@ export default function Auth() {
 
       <div className="relative z-10 mb-8 text-center">
         <div className="mb-4 flex items-center justify-center gap-2">
-          <FeyrnLogo size="lg" />
+          <FeyrnLogo size="lg" asLink={false} />
         </div>
         <p className="mt-2 text-sm text-muted-foreground">Entdecke, was gerade abgeht</p>
       </div>

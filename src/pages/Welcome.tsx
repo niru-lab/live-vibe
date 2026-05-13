@@ -31,7 +31,7 @@ export default function Welcome() {
         {/* Logo */}
         <div className="mb-3 flex items-center gap-2">
           <img src="/icon-192.png" alt="Feyrn" className="h-8 w-8 rounded-lg" />
-          <FeyrnLogo size="lg" />
+          <FeyrnLogo size="lg" asLink={false} />
         </div>
         <p className="mb-6 text-sm" style={{ color: '#888888' }}>
           Wo die Party beginnt
