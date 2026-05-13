@@ -543,7 +543,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                       className="text-white px-2 py-0.5 rounded-full text-xs inline-block"
                       style={{ backgroundColor: categoryColors.event }}
                     >
-                      Event
+                      🎉 Event
                     </span>
                     {(() => {
                       const status = getEventStatus(popupInfo.data.starts_at, popupInfo.data.ends_at);
