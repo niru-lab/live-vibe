@@ -49,7 +49,15 @@ export const EventCard = ({ event, onClick, compact = false }: EventCardProps) =
           </div>
         )}
         {isSoon && <div className="absolute left-3 top-3"><Badge className="bg-accent/90 backdrop-blur"><span className="mr-1 inline-block h-2 w-2 animate-pulse rounded-full bg-white" />{isToday ? 'Heute' : 'Bald'}</Badge></div>}
-        <div className="absolute right-3 top-3"><Badge variant="secondary" className="bg-background/80 backdrop-blur">{event.is_free ? 'Kostenlos' : `${event.entry_price}€`}</Badge></div>
+        {(() => {
+          const status = getEventStatus(event.starts_at, event.ends_at);
+          return (
+            <div className="absolute right-3 top-3 flex flex-col gap-1.5 items-end">
+              <Badge variant="secondary" className="bg-background/80 backdrop-blur">{event.is_free ? 'Kostenlos' : `${event.entry_price}€`}</Badge>
+              <Badge className={`${status.color} text-white text-[10px] px-2 py-0.5`}>{status.label}</Badge>
+            </div>
+          );
+        })()}
         <div className="absolute bottom-3 left-3"><Badge variant="outline" className="border-white/30 bg-background/60 backdrop-blur">{categoryEmojis[event.category]} {event.category.replace('_', ' ')}</Badge></div>
         {isGoing && <div className="absolute bottom-3 right-3"><Badge className="bg-green-500/90 backdrop-blur"><UserCheck weight="thin" className="mr-1 h-3 w-3" />Du gehst hin</Badge></div>}
       </div>
