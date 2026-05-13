@@ -559,6 +559,22 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                       ~{popupInfo.data.expected_attendees} erwartet
                     </p>
                   )}
+                  {popupInfo.data.creator && (
+                    <div
+                      className="flex items-center gap-2 mb-2 cursor-pointer"
+                      onClick={() => navigate(`/profile/${popupInfo.data.creator.username}`)}
+                    >
+                      <img
+                        src={popupInfo.data.creator.avatar_url || ''}
+                        alt={popupInfo.data.creator.display_name}
+                        className="h-5 w-5 rounded-full object-cover border border-white/30"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        von <span className="font-medium text-foreground hover:underline">@{popupInfo.data.creator.username}</span>
+                      </span>
+                    </div>
+                  )}
                   <Button
                     size="sm"
                     className="w-full mt-1 bg-gradient-neon text-white text-xs"
