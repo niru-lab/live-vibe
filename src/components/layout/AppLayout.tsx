@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { useLocation } from 'react-router-dom';
 import { BottomNav } from './BottomNav';
 import OnboardingOverlay from '@/components/onboarding/OnboardingOverlay';
 
@@ -8,6 +9,9 @@ interface AppLayoutProps {
 }
 
 export const AppLayout = ({ children, hideNav = false }: AppLayoutProps) => {
+  const location = useLocation();
+  const showAppTour = !hideNav && location.state?.startAppTour === true;
+
   return (
     <div
       className="bg-background w-full"
@@ -19,7 +23,7 @@ export const AppLayout = ({ children, hideNav = false }: AppLayoutProps) => {
         {children}
       </main>
       {!hideNav && <BottomNav />}
-      {!hideNav && <OnboardingOverlay />}
+      {showAppTour && <OnboardingOverlay />}
     </div>
   );
 };
