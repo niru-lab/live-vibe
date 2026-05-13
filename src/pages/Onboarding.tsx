@@ -19,7 +19,7 @@ export default function Onboarding() {
 
   useEffect(() => {
     if (!authLoading && !user) {
-      navigate('/auth', { replace: true });
+      navigate('/', { replace: true });
       return;
     }
     if (!user) return;
@@ -55,7 +55,7 @@ export default function Onboarding() {
 
       if (!data) {
         // Couldn't create — bounce to auth so user can try again
-        navigate('/auth', { replace: true });
+        navigate('/', { replace: true });
         return;
       }
 
@@ -73,7 +73,7 @@ export default function Onboarding() {
 
   const handleComplete = () => {
     setShowSuccess(true);
-    setTimeout(() => navigate('/', { replace: true }), 1500);
+    setTimeout(() => navigate('/feed', { replace: true, state: { startAppTour: true } }), 1500);
   };
 
   if (authLoading || !ready) return null;

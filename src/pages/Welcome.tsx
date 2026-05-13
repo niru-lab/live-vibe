@@ -1,30 +1,21 @@
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
 import { lovable } from '@/integrations/lovable/index';
 import { motion } from 'framer-motion';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 
 export default function Welcome() {
-  const { user, loading } = useAuth();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!loading && user) {
-      navigate('/onboarding');
-    }
-  }, [user, loading, navigate]);
 
   const handleGoogle = async () => {
     const { error } = await lovable.auth.signInWithOAuth('google', {
-      redirect_uri: window.location.origin,
+      redirect_uri: `${window.location.origin}/auth/callback`,
     });
     if (error) console.error('Google auth error:', error);
   };
 
   const handleApple = async () => {
     const { error } = await lovable.auth.signInWithOAuth('apple', {
-      redirect_uri: window.location.origin,
+      redirect_uri: `${window.location.origin}/auth/callback`,
     });
     if (error) console.error('Apple auth error:', error);
   };
