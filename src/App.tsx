@@ -52,6 +52,7 @@ const App = () => (
               <Sonner />
               <BrowserRouter>
                 <SwipeBackProvider />
+                <OnboardingGate />
                 <Routes>
                   <Route path="/" element={<Feed />} />
                   <Route path="/feed" element={<Feed />} />
