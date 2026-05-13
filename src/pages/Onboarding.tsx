@@ -22,23 +22,53 @@ export default function Onboarding() {
       navigate('/auth', { replace: true });
       return;
     }
-    if (user) {
-      supabase
+    if (!user) return;
+    (async () => {
+      let { data } = await supabase
         .from('profiles')
         .select('id, username, profile_type, onboarding_complete')
         .eq('user_id', user.id)
-        .maybeSingle()
-        .then(({ data }) => {
-          if (data?.onboarding_complete) {
-            navigate('/', { replace: true });
-          } else if (data) {
-            setProfileId(data.id);
-            setProfileType(data.profile_type || 'user');
-            if (data.username) setUsername(data.username);
-            setReady(true);
-          }
-        });
-    }
+        .maybeSingle();
+
+      // Create profile on the fly if missing (e.g. trigger didn't fire for OAuth)
+      if (!data) {
+        const fallbackName =
+          (user.user_metadata as any)?.username ||
+          (user.email ? user.email.split('@')[0].replace(/\./g, '_') : 'user') +
+            '_' + user.id.slice(0, 4);
+        const display =
+          (user.user_metadata as any)?.full_name ||
+          (user.user_metadata as any)?.name ||
+          fallbackName;
+        const { data: created } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: user.id,
+            username: fallbackName.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20) || `u_${user.id.slice(0, 6)}`,
+            display_name: display,
+            onboarding_complete: false,
+          } as any)
+          .select('id, username, profile_type, onboarding_complete')
+          .maybeSingle();
+        data = created;
+      }
+
+      if (!data) {
+        // Couldn't create — bounce to auth so user can try again
+        navigate('/auth', { replace: true });
+        return;
+      }
+
+      if (data.onboarding_complete) {
+        navigate('/', { replace: true });
+        return;
+      }
+
+      setProfileId(data.id);
+      setProfileType(data.profile_type || 'user');
+      if (data.username) setUsername(data.username);
+      setReady(true);
+    })();
   }, [user, authLoading, navigate]);
 
   const handleComplete = () => {
