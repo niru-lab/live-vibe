@@ -73,7 +73,7 @@ export default function Onboarding() {
 
   const handleComplete = () => {
     setShowSuccess(true);
-    setTimeout(() => navigate('/', { replace: true }), 1500);
+    setTimeout(() => navigate('/feed', { replace: true, state: { startAppTour: true } }), 1500);
   };
 
   if (authLoading || !ready) return null;
