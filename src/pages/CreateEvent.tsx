@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { format } from 'date-fns';
+import { de } from 'date-fns/locale';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useCreateEvent } from '@/hooks/useEvents';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,10 +15,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useToast } from '@/hooks/use-toast';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
 import { FollowerInviteSelector } from '@/components/create/FollowerInviteSelector';
-import { ArrowLeft, MapPin, CurrencyEur, TShirt, Camera, X, Plus, MusicNote, Play, CalendarBlank, Notepad, Lock, Globe, Users } from '@phosphor-icons/react';
+import { ArrowLeft, MapPin, CurrencyEur, TShirt, Camera, X, Plus, MusicNote, Play, CalendarBlank, Notepad, Lock, Globe, Users, CalendarIcon } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
 
 interface MediaItem { id: string; file: File; previewUrl: string; type: 'image' | 'video'; }
@@ -205,9 +209,40 @@ export default function CreateEvent() {
                 className="hidden"
               />
               <FormField control={form.control} name="starts_at" render={({ field }) => (
-                <FormItem><FormLabel>Datum *</FormLabel><FormControl>
-                  <Input type="date" value={field.value ? new Date(field.value).toISOString().split('T')[0] : ''} onChange={(e) => { const d = e.target.value ? new Date(e.target.value + 'T00:00:00') : undefined; field.onChange(d); }} />
-                </FormControl><FormMessage data-testid="event-date-error" /></FormItem>
+                <FormItem className="flex flex-col">
+                  <FormLabel>Datum *</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon weight="thin" className="mr-2 h-4 w-4" />
+                          {field.value ? (
+                            format(field.value, "PPP", { locale: de })
+                          ) : (
+                            <span>Datum wählen</span>
+                          )}
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage data-testid="event-date-error" />
+                </FormItem>
               )} />
               <div className="grid grid-cols-2 gap-3">
                 <FormField control={form.control} name="starts_at_time" render={({ field }) => (
