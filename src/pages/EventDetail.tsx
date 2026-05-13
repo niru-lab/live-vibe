@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -106,12 +106,16 @@ export default function EventDetail() {
         <div className="p-4 space-y-6">
           <div>
             <h1 data-testid="event-detail-title" className="font-display text-2xl font-bold text-foreground mb-2">{event.name}</h1>
-            {event.creator && (
-              <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate(`/profile/${event.creator.username}`)}>
-                <Avatar className="h-8 w-8"><AvatarImage src={event.creator.avatar_url || ''} /><AvatarFallback>{event.creator.display_name?.charAt(0)}</AvatarFallback></Avatar>
-                <div><span className="text-sm text-muted-foreground">von </span><span className="text-sm font-medium text-foreground hover:underline">@{event.creator.username}</span>{event.creator.is_verified && <CheckCircle weight="fill" className="ml-1 inline h-4 w-4 text-primary" />}</div>
-              </div>
-            )}
+            {(() => {
+              const creator = Array.isArray(event.creator) ? event.creator[0] : event.creator;
+              if (!creator?.username) return null;
+              return (
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = `/profile/${creator.username}`}>
+                  <Avatar className="h-8 w-8"><AvatarImage src={creator.avatar_url || ''} /><AvatarFallback>{creator.display_name?.charAt(0)}</AvatarFallback></Avatar>
+                  <div><span className="text-sm text-muted-foreground">von </span><span className="text-sm font-medium text-foreground hover:underline">@{creator.username}</span>{creator.is_verified && <CheckCircle weight="fill" className="ml-1 inline h-4 w-4 text-primary" />}</div>
+                </div>
+              );
+            })()}
           </div>
           <Sheet open={showAttendees} onOpenChange={setShowAttendees}>
             <SheetTrigger asChild>

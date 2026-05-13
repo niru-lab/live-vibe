@@ -1,6 +1,7 @@
 import { CalendarBlank, MapPin, Users, Clock, UserCheck, Flame } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -88,13 +89,17 @@ export const EventCard = ({ event, onClick, compact = false }: EventCardProps) =
             <UserCheck weight="thin" className="h-4 w-4" />{isGoing ? 'Zugesagt ✓' : 'Zusagen'}
           </Button>
         </div>
-        {event.creator && (
-          <div className="flex items-center gap-2 border-t border-white/[0.08] pt-3 mt-3 cursor-pointer" onClick={(e) => { e.stopPropagation(); navigate(`/profile/${event.creator.username}`); }}>
-            <Avatar className="h-6 w-6"><AvatarImage src={event.creator.avatar_url || ''} /><AvatarFallback className="text-xs">{event.creator.display_name?.charAt(0)}</AvatarFallback></Avatar>
-            <span className="text-xs text-muted-foreground">von <span className="font-medium text-foreground hover:underline">@{event.creator.username}</span></span>
-            {event.creator.social_cloud_points !== undefined && <BadgeDisplay points={event.creator.social_cloud_points} size="sm" />}
-          </div>
-        )}
+        {(() => {
+          const creator = Array.isArray(event.creator) ? event.creator[0] : event.creator;
+          if (!creator?.username) return null;
+          return (
+            <Link to={`/profile/${creator.username}`} className="flex items-center gap-2 border-t border-white/[0.08] pt-3 mt-3 no-underline" onClick={(e) => e.stopPropagation()}>
+              <Avatar className="h-6 w-6"><AvatarImage src={creator.avatar_url || ''} /><AvatarFallback className="text-xs">{creator.display_name?.charAt(0)}</AvatarFallback></Avatar>
+              <span className="text-xs text-muted-foreground">von <span className="font-medium text-foreground hover:underline">@{creator.username}</span></span>
+              {creator.social_cloud_points !== undefined && <BadgeDisplay points={creator.social_cloud_points} size="sm" />}
+            </Link>
+          );
+        })()}
       </div>
     </article>
   );

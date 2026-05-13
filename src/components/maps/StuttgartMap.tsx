@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import Map, { Marker, Popup, Source, Layer, NavigationControl } from 'react-map-gl/mapbox';
 import type { MapRef } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
+import { Link } from 'react-router-dom';
 import { useEvents, useVenues } from '@/hooks/useEvents';
 import { useProfile } from '@/hooks/useProfile';
 import { useQuery } from '@tanstack/react-query';
@@ -559,22 +560,23 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                       ~{popupInfo.data.expected_attendees} erwartet
                     </p>
                   )}
-                  {popupInfo.data.creator && (
-                    <div
-                      className="flex items-center gap-2 mb-2 cursor-pointer"
-                      onClick={() => navigate(`/profile/${popupInfo.data.creator.username}`)}
-                    >
-                      <img
-                        src={popupInfo.data.creator.avatar_url || ''}
-                        alt={popupInfo.data.creator.display_name}
-                        className="h-5 w-5 rounded-full object-cover border border-white/30"
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                      />
-                      <span className="text-xs text-muted-foreground">
-                        von <span className="font-medium text-foreground hover:underline">@{popupInfo.data.creator.username}</span>
-                      </span>
-                    </div>
-                  )}
+                  {(() => {
+                    const creator = Array.isArray(popupInfo.data.creator) ? popupInfo.data.creator[0] : popupInfo.data.creator;
+                    if (!creator?.username) return null;
+                    return (
+                      <Link to={`/profile/${creator.username}`} className="flex items-center gap-2 mb-2 no-underline">
+                        <img
+                          src={creator.avatar_url || ''}
+                          alt={creator.display_name}
+                          className="h-5 w-5 rounded-full object-cover border border-white/30"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          von <span className="font-medium text-foreground hover:underline">@{creator.username}</span>
+                        </span>
+                      </Link>
+                    );
+                  })()}
                   <Button
                     size="sm"
                     className="w-full mt-1 bg-gradient-neon text-white text-xs"
