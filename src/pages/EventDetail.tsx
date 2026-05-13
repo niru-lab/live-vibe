@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import { AttendeeManager } from '@/components/events/AttendeeManager';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ArrowLeft, CalendarBlank, Clock, MapPin, Users, CurrencyEur, TShirt, CheckCircle, XCircle, ShareNetwork, Flame, UserCheck, Trash } from '@phosphor-icons/react';
-import { cn } from '@/lib/utils';
+import { cn, getEventStatus } from '@/lib/utils';
 
 const categoryEmojis: Record<string, string> = { club: '🎧', house_party: '🏠', bar: '🍸', festival: '🎪', concert: '🎤', other: '✨' };
 
