@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface Step {
   selector: string;
@@ -45,6 +45,7 @@ const STEP_KEY = 'feyrn_onboarding_step';
 
 export default function OnboardingOverlay() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [active, setActive] = useState(false);
   const [step, setStep] = useState(() => {
     if (typeof window === 'undefined') return 0;
@@ -55,10 +56,12 @@ export default function OnboardingOverlay() {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (localStorage.getItem(STORAGE_KEY) === 'true') return;
+    if (location.state?.startAppTour !== true) return;
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem(STEP_KEY);
     const t = setTimeout(() => setActive(true), 400);
     return () => clearTimeout(t);
-  }, []);
+  }, [location.state]);
 
   // Persist current step so unmount/remount during navigation doesn't restart the tour
   useEffect(() => {
