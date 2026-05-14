@@ -1,7 +1,7 @@
-import { Bell, Lightning } from '@phosphor-icons/react';
+import { Lightning } from '@phosphor-icons/react';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
-import { Button } from '@/components/ui/button';
 import { UserSearchBar } from './UserSearchBar';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 interface FeedHeaderProps {
   selectedCity: string;
@@ -21,10 +21,7 @@ export const FeedHeader = ({ selectedCity, onCityChange }: FeedHeaderProps) => {
 
         <UserSearchBar />
 
-        <Button variant="ghost" size="icon" className="relative h-9 w-9 rounded-full glass-pill shrink-0">
-          <Bell weight="thin" className="h-4 w-4 text-muted-foreground" />
-          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-primary" />
-        </Button>
+        <NotificationBell />
       </div>
     </header>
   );
