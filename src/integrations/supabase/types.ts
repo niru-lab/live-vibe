@@ -1405,6 +1405,18 @@ export type Database = {
         Args: { target_id: string; viewer_id: string }
         Returns: boolean
       }
+      create_notification: {
+        Args: {
+          _actor: string
+          _body?: string
+          _recipient: string
+          _ref_id?: string
+          _ref_type?: string
+          _title: string
+          _type: Database["public"]["Enums"]["notification_type"]
+        }
+        Returns: undefined
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1462,6 +1474,9 @@ export type Database = {
         | "mention"
         | "level_up"
         | "moment_x_trending"
+        | "message_request"
+        | "event_join_request"
+        | "event_created_by_followed_user"
       outbox_status: "pending" | "processing" | "done" | "failed"
       post_type: "normal" | "moment_x"
       profile_type: "user" | "club" | "organizer" | "eventer"
@@ -1614,6 +1629,9 @@ export const Constants = {
         "mention",
         "level_up",
         "moment_x_trending",
+        "message_request",
+        "event_join_request",
+        "event_created_by_followed_user",
       ],
       outbox_status: ["pending", "processing", "done", "failed"],
       post_type: ["normal", "moment_x"],
