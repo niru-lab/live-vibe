@@ -397,6 +397,30 @@ export type Database = {
           },
         ]
       }
+      event_participants: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           address: string
@@ -1431,6 +1455,10 @@ export type Database = {
         Args: { checker_id: string; target_id: string }
         Returns: boolean
       }
+      is_event_owner: {
+        Args: { _event_id: string; _profile_id: string }
+        Returns: boolean
+      }
       is_room_member: {
         Args: { _room_id: string; _user_id: string }
         Returns: boolean
@@ -1477,6 +1505,8 @@ export type Database = {
         | "message_request"
         | "event_join_request"
         | "event_created_by_followed_user"
+        | "event_accepted"
+        | "event_declined"
       outbox_status: "pending" | "processing" | "done" | "failed"
       post_type: "normal" | "moment_x"
       profile_type: "user" | "club" | "organizer" | "eventer"
@@ -1632,6 +1662,8 @@ export const Constants = {
         "message_request",
         "event_join_request",
         "event_created_by_followed_user",
+        "event_accepted",
+        "event_declined",
       ],
       outbox_status: ["pending", "processing", "done", "failed"],
       post_type: ["normal", "moment_x"],

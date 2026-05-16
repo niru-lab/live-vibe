@@ -16,6 +16,9 @@ import { Progress } from '@/components/ui/progress';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { useToast } from '@/hooks/use-toast';
 import { AttendeeManager } from '@/components/events/AttendeeManager';
+import { ParticipantManager } from '@/components/events/ParticipantManager';
+import { useMyParticipation, useSetParticipation } from '@/hooks/useEventParticipation';
+import { Heart, PaperPlaneTilt, Hourglass } from '@phosphor-icons/react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ArrowLeft, CalendarBlank, Clock, MapPin, Users, CurrencyEur, TShirt, CheckCircle, XCircle, ShareNetwork, Flame, UserCheck, Trash } from '@phosphor-icons/react';
 import { cn, getEventStatus } from '@/lib/utils';
@@ -36,7 +39,10 @@ export default function EventDetail() {
   const deleteEventMutation = useDeleteEvent();
   const [showAttendees, setShowAttendees] = useState(false);
   const [showAttendeeManager, setShowAttendeeManager] = useState(false);
+  const [showParticipantManager, setShowParticipantManager] = useState(false);
   const { data: pendingAttendees } = usePendingAttendees(id);
+  const { data: myParticipation } = useMyParticipation(id);
+  const setParticipation = useSetParticipation();
 
   const handleDeleteEvent = async () => {
     if (!event) return;
@@ -94,6 +100,7 @@ export default function EventDetail() {
         </div>
       </header>
       {isCreator && <AttendeeManager open={showAttendeeManager} onOpenChange={setShowAttendeeManager} eventId={event?.id || ''} eventName={event?.name || ''} eventAddress={`${event?.address}, ${event?.city}`} />}
+      {isCreator && <ParticipantManager open={showParticipantManager} onOpenChange={setShowParticipantManager} eventId={event?.id || ''} />}
       <div className="pb-24" data-testid="event-detail">
         <div className="relative aspect-video bg-muted">
           {event.cover_image_url ? <img src={event.cover_image_url} alt={event.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20"><span className="text-7xl">{categoryEmojis[event.category] || '🎉'}</span></div>}
@@ -146,10 +153,76 @@ export default function EventDetail() {
           </div>
           {event.description && <div className="rounded-2xl border border-border/50 bg-card p-4"><h3 className="font-semibold mb-2">Beschreibung</h3><p className="text-muted-foreground whitespace-pre-wrap">{event.description}</p></div>}
           {event.dos_and_donts && <div className="rounded-2xl border border-border/50 bg-card p-4"><h3 className="font-semibold mb-2">Dos & Don'ts</h3><p className="text-muted-foreground whitespace-pre-wrap">{event.dos_and_donts}</p></div>}
-          <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" className="gap-2" onClick={() => handleRSVP(isGoing ? null : 'going')} disabled={rsvpMutation.isPending}>{isGoing ? <><XCircle weight="thin" className="h-4 w-4" /> Absagen</> : <><UserCheck weight="thin" className="h-4 w-4" /> Zusagen</>}</Button>
-            <Button className="bg-gradient-to-r from-primary to-accent gap-2" onClick={handleShare}><ShareNetwork weight="thin" className="h-4 w-4" /> Teilen</Button>
-          </div>
+          {isCreator ? (
+            <div className="rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/5 to-accent/5 p-4 flex items-center justify-between gap-3">
+              <div>
+                <p className="font-semibold">Du hast dieses Event erstellt</p>
+                <p className="text-xs text-muted-foreground">Verwalte Anfragen & Teilnehmer</p>
+              </div>
+              <Button onClick={() => setShowParticipantManager(true)} className="gap-2">
+                <Users weight="thin" className="h-4 w-4" /> Teilnehmer
+              </Button>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {myParticipation?.status === 'requested' && (
+                <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Hourglass weight="thin" className="h-5 w-5 text-primary animate-pulse" />
+                    <span>Anfrage gesendet · warte auf Bestätigung</span>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setParticipation.mutate({ eventId: event.id, status: null })} disabled={setParticipation.isPending}>
+                    Zurückziehen
+                  </Button>
+                </div>
+              )}
+              {myParticipation?.status === 'accepted' && (
+                <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-4 flex items-center gap-2 text-green-500 font-semibold">
+                  <CheckCircle weight="fill" className="h-5 w-5" /> Du bist dabei
+                </div>
+              )}
+              {myParticipation?.status === 'declined' && (
+                <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 flex items-center gap-2 text-sm text-muted-foreground">
+                  <XCircle weight="thin" className="h-5 w-5" /> Deine Anfrage wurde abgelehnt
+                </div>
+              )}
+              {(!myParticipation || myParticipation.status === 'interested') && (
+                <div className="grid grid-cols-2 gap-3">
+                  <Button
+                    variant="outline"
+                    className="gap-2"
+                    onClick={() => {
+                      if (!user) { navigate('/auth'); return; }
+                      const next = myParticipation?.status === 'interested' ? null : 'interested';
+                      setParticipation.mutate({ eventId: event.id, status: next }, {
+                        onSuccess: () => toast({ title: next ? '❤️ Gemerkt' : 'Aus Merkliste entfernt' }),
+                      });
+                    }}
+                    disabled={setParticipation.isPending}
+                  >
+                    <Heart weight={myParticipation?.status === 'interested' ? 'fill' : 'thin'} className={cn('h-4 w-4', myParticipation?.status === 'interested' && 'text-red-500')} />
+                    {myParticipation?.status === 'interested' ? 'Gemerkt' : 'Gefällt mir'}
+                  </Button>
+                  <Button
+                    className="bg-gradient-to-r from-primary to-accent gap-2"
+                    onClick={() => {
+                      if (!user) { navigate('/auth'); return; }
+                      setParticipation.mutate({ eventId: event.id, status: 'requested' }, {
+                        onSuccess: () => toast({ title: '💬 Anfrage gesendet', description: 'Der Host wurde benachrichtigt.' }),
+                        onError: () => toast({ variant: 'destructive', title: 'Fehler', description: 'Anfrage konnte nicht gesendet werden.' }),
+                      });
+                    }}
+                    disabled={setParticipation.isPending}
+                  >
+                    <PaperPlaneTilt weight="thin" className="h-4 w-4" /> Anfragen
+                  </Button>
+                </div>
+              )}
+              <Button variant="ghost" className="w-full gap-2" onClick={handleShare}>
+                <ShareNetwork weight="thin" className="h-4 w-4" /> Teilen
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </AppLayout>

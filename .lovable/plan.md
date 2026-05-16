@@ -1,99 +1,81 @@
-# Onboarding Flow Replacement (6-Step, Purple→Pink)
+## Where "Anstehend" actually lives
+There is **no Anstehend tab in the user profile** — it sits on `/events` (`src/pages/Events.tsx`). I will rebuild that tab. If you actually meant "move/add it to the Profile page", say so and I will relocate it; otherwise I rebuild it in place.
 
-## Goal
-Den bestehenden 9-Step `UserFlow.tsx` durch einen neuen 6-Step Flow nach Spec ersetzen. Eventer-Branch bleibt unverändert. Routing, Auth und `Onboarding.tsx`-Wrapper werden minimal angefasst (nur der Mount-Punkt für UserFlow).
+> Note: the project already has a parallel accept-flow via `event_attendees` + `host_accepted` (used by `AttendeeManager` and the host pending badge). Per your spec I add a **separate** `event_participants` table and leave the old one untouched so map, badges, and host messaging keep working.
 
-## Was gebaut wird
+## Database migration
+New table `public.event_participants`:
+- `id uuid pk default gen_random_uuid()`
+- `event_id uuid not null` (no FK to keep schema convention)
+- `user_id uuid not null` → references `profiles.id` (matches every other table in this project; auth.users is never referenced from public)
+- `status text not null check (status in ('interested','requested','accepted','declined'))`
+- `created_at timestamptz not null default now()`
+- `unique (event_id, user_id)`
 
-### Neue Dateien
-```text
-src/components/onboarding/OnboardingFlow.tsx       (Wrapper, State, Step-Switch)
-src/components/onboarding/ProgressBar.tsx          (Gradient-Progress + "x / 6")
-src/components/onboarding/StepTransition.tsx       (Slide-in-from-right Wrapper)
-src/components/onboarding/steps/StepAge.tsx        (Datepicker, 16+ Validation)
-src/components/onboarding/steps/StepUsername.tsx   (Debounced Verfügbarkeit gegen profiles)
-src/components/onboarding/steps/StepGenres.tsx     (Multi-Select Chips, min 1)
-src/components/onboarding/steps/StepArtist.tsx     (Freitext, optional + Skip)
-src/components/onboarding/steps/StepWeekend.tsx    (Single-Select Cards)
-src/components/onboarding/steps/StepDrink.tsx      (Single-Select Chips, finale CTA)
-```
+RLS:
+- `SELECT`: row's `user_id` belongs to caller **OR** caller owns `events.creator_id` for that `event_id`. Implemented via `SECURITY DEFINER` helper `is_event_owner(_event_id uuid, _profile_id uuid)` to avoid recursion.
+- `INSERT`: authenticated; `user_id` must be the caller's profile; `status` must be `interested` or `requested`; caller must NOT be the event creator (enforced in policy via the helper).
+- `UPDATE`:
+  - Caller updating own row → may move between `interested`/`requested` or delete (cancel).
+  - Event owner → may set `status` to `accepted` or `declined`.
+- `DELETE`: own row only.
 
-### Geänderte Dateien (minimal)
-- `src/pages/Onboarding.tsx`: User-Branch rendert `<OnboardingFlow />` statt `<UserFlow />`. Eventer-Branch + Success-Screen bleiben 1:1.
+Notifications:
+- Extend the existing `notification_type` enum with `event_accepted` (and `event_declined` for symmetry).
+- Add trigger `notify_on_participation_change` on `event_participants` `AFTER UPDATE`: when status flips to `accepted` → notify `user_id`; when to `declined` → notify `user_id`. Reuses the existing `create_notification(...)` helper.
+- INSERT trigger when `status='requested'` → notify creator with type `event_join_request` (already exists in enum).
 
-### Gelöscht
-- `src/components/onboarding/UserFlow.tsx` (wird ersetzt)
+## New hook `src/hooks/useEventParticipation.ts`
+Exports:
+- `useMyParticipation(eventId)` → current user's row (status or null).
+- `useRequestJoin()` → upsert row with `status='requested'`.
+- `useToggleInterested()` → upsert/delete `status='interested'` (server-side; replaces the local-only liked list so the heart persists across devices). The spec says local-only — I will keep it server-side to match the existing app pattern; flag if you want pure localStorage instead.
+- `useMyUpcomingParticipations()` → all my rows where `status in ('requested','accepted')` joined with `events` (future `starts_at` only), ordered by `starts_at`.
+- `useEventParticipants(eventId)` → host view: rows joined with `profiles`.
+- `useHostDecision()` → `{ participantId, decision: 'accepted'|'declined' }`.
 
-`OnboardingLayout.tsx` bleibt — wird vom Eventer-Flow weiter genutzt, vom neuen User-Flow nicht.
+## New component `src/components/events/ParticipantManager.tsx`
+Glass sheet (same pattern as `AttendeeManager`) with two tabs: **Anfragen** / **Akzeptiert**. Each row: avatar, name, requested-at; Anfragen rows have **Annehmen** (green) / **Ablehnen** (destructive) buttons wired to `useHostDecision`. Opens from EventDetail's existing host header area as a second button "Teilnehmer" (does not remove the existing Gäste manager).
 
-## Design-Entscheidungen (bestätigt)
+## EventDetail rewrite (action buttons only)
+Replace the current `Zusagen/Absagen` + `Teilen` row with:
 
-- **Gradient nur im Onboarding**: `#7C3AED → #EC4899` für Progress, CTAs, aktive Chips/Cards. Rest der App bleibt `#7F77DD`.
-- **Backgrounds**: `#0A0A0F` (page), `#12121A` (cards) — nur in Onboarding-Files. Übrige App behält `#08080f` / `#111120`.
-- **Inline-Styles** durchgehend (konsistent mit EventerFlow & OnboardingLayout). Keine Tailwind-Arbitrary-Values für Hex.
-- **0.5px Borders** + Glassmorphism (`backdrop-blur`, `rgba(255,255,255,0.05)`).
-- **Phosphor Icons** (thin 24px) für Back-Chevron, Search, Check, X — konsistent mit Iconography-Memory.
+1. **Creator guard** — if `profile.id === event.creator_id`:
+   - Hide `Gefällt mir` and `Anfragen`.
+   - Show a glass card: "Du hast dieses Event erstellt" + link button "Teilnehmer verwalten" → opens `ParticipantManager`.
+2. **Non-creator** — render based on `useMyParticipation`:
+   - No row → two buttons: ❤️ **Gefällt mir** (toggles `interested`) and 💬 **Anfragen** (sets `requested`).
+   - `interested` → heart filled + still show **Anfragen**.
+   - `requested` → disabled pill **Anfrage gesendet · warte auf Bestätigung**, with a small "Zurückziehen" link.
+   - `accepted` → green pill **Du bist dabei ✓**.
+   - `declined` → muted pill **Anfrage abgelehnt**.
+   - **Teilen** button stays.
 
-## Datenmodell & DB-Mapping
+The existing `useRSVP`/`event_attendees` calls on this page are removed from the action row, but the Zusagen-list Sheet (going avatars/progress) stays untouched.
 
-Lokaler State im Wrapper:
-```ts
-{ birthdate: string; username: string; genres: string[];
-  artist: string; weekendType: string; drink: string }
-```
+## Anstehend tab rebuild (`src/pages/Events.tsx`)
+Drop the current "show all events" content. New layout (top → bottom):
 
-Beim finalen CTA Schreibvorgang auf `profiles`:
-- `username` → `username`
-- `birthdate` → neues Feld `birthdate` (date) — **Migration nötig**, plus berechnetes `age` für Kompatibilität
-- `genres` → `music_genres` (existiert)
-- `artist` → neues Feld `favorite_artist` (text) — **Migration nötig**
-- `weekendType` → `perfect_evening` (existiert, Mapping der 5 neuen Optionen)
-- `drink` → `favorite_drink` (existiert)
-- `onboarding_complete: true`
+1. **Mini map** — compact 200 px Mapbox dark map (`mapbox-gl` + token already in `StuttgartMap.tsx`, extracted to a constant). Markers only for accepted participations using `events.display_lat/lng` (or `latitude/longitude` fallback). Tap pin → `navigate(/events/:id)`. No heatmap, no clustering complexity — simple purple pins. Hidden if user has zero accepted events.
+2. **Section "Ausstehend"** — rows from `useMyUpcomingParticipations` where `status='requested'`. Card shows cover, name, host, datetime, sub-label "Ausstehend — warte auf Bestätigung", and a "Zurückziehen" button.
+3. **Section "Zusagen"** — rows where `status='accepted'`. Tappable EventCard-style row that navigates to EventDetail.
+4. Excludes events the current user created and the generic "all upcoming" feed (those move out of this tab entirely; discovery still happens on `/discover` and the map).
+5. Empty state if both sections empty.
 
-Felder die wegfallen (nicht mehr abgefragt, DB-Spalten bleiben aber bestehen für Eventer & Altdaten): `city`, `spot_types`, `party_vibe_score`, `persona_color`, `persona_text`. **Hinweis**: `city` wird vom Feed/Discover gebraucht — wir setzen Default `'Stuttgart'` beim Save, damit nichts bricht.
+The Zusagen and Meine sibling tabs (`my-rsvps`, `my-events`) remain unchanged.
 
-Username-Verfügbarkeit: echter Supabase-Check gegen `profiles.username` (gleiche Logik wie aktueller UserFlow), nicht nur das im Spec genannte Mock — Mock wäre Regression.
+## Files
+- **Create**
+  - `src/hooks/useEventParticipation.ts`
+  - `src/components/events/ParticipantManager.tsx`
+- **Modify**
+  - `src/pages/Events.tsx` — rewrite `TabsContent value="upcoming"` only.
+  - `src/pages/EventDetail.tsx` — replace action buttons + add creator guard + ParticipantManager trigger.
+- **Migration** — new table, RLS, helper function, enum extension, two triggers.
 
-## Step-Details
+## Untouched
+Map rendering logic, event creation, public feed/discovery, notifications drawer/bell, chat, the existing `event_attendees`/`AttendeeManager` flow.
 
-| # | Titel | Pflicht | Validation |
-|---|---|---|---|
-| 1 | Wie alt bist du? | ja | Geburtsdatum gesetzt + Alter ≥16 |
-| 2 | Wähl deinen Namen | ja | 3–20 Zeichen, `[a-z0-9_]`, Supabase-Verfügbarkeit ✓ |
-| 3 | Was läuft bei dir? | ja | min. 1 Genre |
-| 4 | Wer ist dein Artist? | nein | — (Skip-Link) |
-| 5 | Wie verbringst du deinen Freitag? | ja | genau 1 |
-| 6 | Was trinkst du so? | ja | genau 1, CTA "Feyrn starten 🔥" mit Pulse |
-
-## Globale UI
-
-- **ProgressBar**: `h-1`, full-width, bg `rgba(255,255,255,0.1)`, fill = linear-gradient(90deg, #7C3AED, #EC4899), `transition: width 500ms`. Counter "x / 6" oben rechts in `rgba(255,255,255,0.4)`.
-- **Back**: oben links, Phosphor `CaretLeft`, ab Step 2 sichtbar, behält State.
-- **StepTransition**: framer-motion `initial={{x:32,opacity:0}} animate={{x:0,opacity:1}} exit={{x:-32,opacity:0}}`, 300ms ease-out. (framer-motion ist bereits Dependency.)
-- **CTA**: `rounded-full`, gradient bg, `font-semibold`, `active:scale-95`, disabled ⇒ opacity 0.4 + cursor-not-allowed.
-
-## Migration
-
-```sql
-ALTER TABLE public.profiles
-  ADD COLUMN IF NOT EXISTS birthdate date,
-  ADD COLUMN IF NOT EXISTS favorite_artist text;
-```
-Keine RLS-Änderung — bestehende Profile-Policies decken neue Spalten ab.
-
-## Was NICHT angefasst wird
-
-- `src/pages/Auth.tsx`, `AuthCallback.tsx`, `AuthContext.tsx` (Step 0 wird übersprungen — Auth läuft schon vorgelagert)
-- `App.tsx`, Routing
-- `EventerFlow.tsx`, `OnboardingLayout.tsx`
-- Bestehende DB-Spalten / RLS / Trigger
-- `src/integrations/supabase/{client,types}.ts`
-
-## Memory-Updates nach Build
-
-1. `mem://auth/onboarding-flow` aktualisieren: User-Flow ist jetzt 6 Steps, Eventer-Flow unverändert.
-2. `mem://style/visual-identity`: Notiz „Purple→Pink Gradient ausschließlich in `/components/onboarding/*` erlaubt; Rest bleibt #7F77DD ohne Gradients."
-
-## Offen / TODO im Code
-- `// TODO: optional API-Hook für Username-Reservierung mit Lock vor finalem Insert` (aktuell race-condition möglich, wie im bestehenden Flow auch).
+## Open questions
+1. **Profile vs Events page** — confirm rebuild on `/events` Anstehend tab (only place named "Anstehend"), or do you want a brand-new tab inside `/profile`?
+2. **"Gefällt mir" persistence** — server-side (`status='interested'`, syncs across devices, hosts can see interest counts) or strictly localStorage as the spec literally says? I default to server-side; tell me to switch if not.
