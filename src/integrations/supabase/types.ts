@@ -1477,6 +1477,8 @@ export type Database = {
         | "message_request"
         | "event_join_request"
         | "event_created_by_followed_user"
+        | "event_accepted"
+        | "event_declined"
       outbox_status: "pending" | "processing" | "done" | "failed"
       post_type: "normal" | "moment_x"
       profile_type: "user" | "club" | "organizer" | "eventer"
@@ -1632,6 +1634,8 @@ export const Constants = {
         "message_request",
         "event_join_request",
         "event_created_by_followed_user",
+        "event_accepted",
+        "event_declined",
       ],
       outbox_status: ["pending", "processing", "done", "failed"],
       post_type: ["normal", "moment_x"],
