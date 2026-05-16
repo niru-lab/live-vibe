@@ -63,8 +63,8 @@ export default function Events() {
           <TabsList className="w-full bg-transparent border-b border-border rounded-none p-0 h-auto">
             <TabsTrigger value="upcoming" className="flex-1 rounded-none bg-transparent py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
               Anstehend
-              {invitations.length > 0 && (
-                <Badge className="ml-1.5 h-5 w-5 rounded-full bg-primary p-0 text-xs text-primary-foreground border-0">{invitations.length}</Badge>
+              {pending.length > 0 && (
+                <Badge className="ml-1.5 h-5 w-5 rounded-full bg-primary p-0 text-xs text-primary-foreground border-0">{pending.length}</Badge>
               )}
             </TabsTrigger>
             <TabsTrigger value="my-rsvps" className="flex-1 rounded-none bg-transparent py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">Zusagen</TabsTrigger>
