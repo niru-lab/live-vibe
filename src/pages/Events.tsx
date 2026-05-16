@@ -1,37 +1,47 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Map, { Marker } from 'react-map-gl/mapbox';
+import 'mapbox-gl/dist/mapbox-gl.css';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useEvents, useMyEvents } from '@/hooks/useEvents';
-import { useMyRSVPs, useMyInvitations, useRespondToInvitation } from '@/hooks/useEventAttendees';
+import { useMyRSVPs } from '@/hooks/useEventAttendees';
+import { useMyUpcomingParticipations, useSetParticipation } from '@/hooks/useEventParticipation';
 import { useAuth } from '@/contexts/AuthContext';
 import { EventCard } from '@/components/events/EventCard';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
-import { Confetti, UserCheck, ChartBar, Eye, ShareNetwork, Envelope, Check, X, CalendarBlank, Plus } from '@phosphor-icons/react';
+import { Confetti, UserCheck, ChartBar, Eye, ShareNetwork, CalendarBlank, Plus, Hourglass, CheckCircle, MapPin } from '@phosphor-icons/react';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { toast } from 'sonner';
+
+const MAPBOX_TOKEN = 'pk.eyJ1IjoiZmV5cm4iLCJhIjoiY21tNjZrYm5xMGRwMTJwcnp5bmhwbGU2aSJ9.qvMwkRPWhHDXQYrsYpN2Yw';
+const MAP_STYLE = 'mapbox://styles/mapbox/dark-v11';
 
 export default function Events() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('upcoming');
 
-  const { data: upcomingEvents, isLoading: upcomingLoading } = useEvents();
   const { data: myEvents, isLoading: myEventsLoading } = useMyEvents();
   const { data: myRSVPs, isLoading: rsvpsLoading } = useMyRSVPs();
-  const { data: invitations = [], isLoading: invitationsLoading } = useMyInvitations();
-  const respondToInvite = useRespondToInvitation();
+  const { data: participations = [], isLoading: partLoading } = useMyUpcomingParticipations();
+  const setParticipation = useSetParticipation();
 
-  const handleInviteResponse = (attendeeId: string, accept: boolean) => {
-    respondToInvite.mutate(
-      { attendeeId, accept },
-      { onSuccess: () => { toast.success(accept ? 'Einladung angenommen! 🎉' : 'Einladung abgelehnt'); } }
-    );
-  };
+  const pending = participations.filter((p: any) => p.status === 'requested');
+  const accepted = participations.filter((p: any) => p.status === 'accepted');
+
+  const mapPins = useMemo(() => accepted
+    .map((p: any) => ({ id: p.event?.id, name: p.event?.name, lat: p.event?.latitude, lng: p.event?.longitude }))
+    .filter((p: any) => p.lat && p.lng), [accepted]);
+
+  const mapCenter = mapPins.length > 0
+    ? { lat: mapPins.reduce((s: number, p: any) => s + p.lat, 0) / mapPins.length, lng: mapPins.reduce((s: number, p: any) => s + p.lng, 0) / mapPins.length }
+    : { lat: 48.7758, lng: 9.1829 };
+
 
   return (
     <AppLayout>
