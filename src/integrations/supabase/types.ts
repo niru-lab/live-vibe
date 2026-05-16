@@ -50,6 +50,33 @@ export type Database = {
           },
         ]
       }
+      chat_requests: {
+        Row: {
+          created_at: string
+          id: string
+          recipient_id: string
+          sender_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          recipient_id: string
+          sender_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          recipient_id?: string
+          sender_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cities: {
         Row: {
           country_code: string
@@ -1429,6 +1456,7 @@ export type Database = {
         Args: { target_id: string; viewer_id: string }
         Returns: boolean
       }
+      chat_request_status: { Args: { _a: string; _b: string }; Returns: string }
       create_notification: {
         Args: {
           _actor: string

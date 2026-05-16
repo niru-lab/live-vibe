@@ -1,81 +1,93 @@
-## Where "Anstehend" actually lives
-There is **no Anstehend tab in the user profile** — it sits on `/events` (`src/pages/Events.tsx`). I will rebuild that tab. If you actually meant "move/add it to the Profile page", say so and I will relocate it; otherwise I rebuild it in place.
+## Fix scope
 
-> Note: the project already has a parallel accept-flow via `event_attendees` + `host_accepted` (used by `AttendeeManager` and the host pending badge). Per your spec I add a **separate** `event_participants` table and leave the old one untouched so map, badges, and host messaging keep working.
+Chat module only: `src/pages/Messages.tsx`, `src/components/messaging/SendMessageDialog.tsx`, `src/hooks/useDirectMessages.ts`, plus one new hook `src/hooks/useChatRequest.ts`. Map, events, notifications, profile tabs are not touched.
 
-## Database migration
-New table `public.event_participants`:
-- `id uuid pk default gen_random_uuid()`
-- `event_id uuid not null` (no FK to keep schema convention)
-- `user_id uuid not null` → references `profiles.id` (matches every other table in this project; auth.users is never referenced from public)
-- `status text not null check (status in ('interested','requested','accepted','declined'))`
-- `created_at timestamptz not null default now()`
-- `unique (event_id, user_id)`
+## Bug 1 — Dark/Light theme
 
-RLS:
-- `SELECT`: row's `user_id` belongs to caller **OR** caller owns `events.creator_id` for that `event_id`. Implemented via `SECURITY DEFINER` helper `is_event_owner(_event_id uuid, _profile_id uuid)` to avoid recursion.
-- `INSERT`: authenticated; `user_id` must be the caller's profile; `status` must be `interested` or `requested`; caller must NOT be the event creator (enforced in policy via the helper).
-- `UPDATE`:
-  - Caller updating own row → may move between `interested`/`requested` or delete (cancel).
-  - Event owner → may set `status` to `accepted` or `declined`.
-- `DELETE`: own row only.
+`tailwind.config.ts` already has `darkMode: ["class"]` and a `ThemeProvider` toggles the class on `<html>`. Chat files use hardcoded hex everywhere (`bg-[#0A0A0F]`, `bg-[#12121A]`, `text-white`, `text-[#A0A0B0]`, `bg-white/[0.06]`, etc.), so light mode looks broken.
 
-Notifications:
-- Extend the existing `notification_type` enum with `event_accepted` (and `event_declined` for symmetry).
-- Add trigger `notify_on_participation_change` on `event_participants` `AFTER UPDATE`: when status flips to `accepted` → notify `user_id`; when to `declined` → notify `user_id`. Reuses the existing `create_notification(...)` helper.
-- INSERT trigger when `status='requested'` → notify creator with type `event_join_request` (already exists in enum).
+Fix by replacing every hardcoded color with a `dark:` variant pair per spec:
 
-## New hook `src/hooks/useEventParticipation.ts`
-Exports:
-- `useMyParticipation(eventId)` → current user's row (status or null).
-- `useRequestJoin()` → upsert row with `status='requested'`.
-- `useToggleInterested()` → upsert/delete `status='interested'` (server-side; replaces the local-only liked list so the heart persists across devices). The spec says local-only — I will keep it server-side to match the existing app pattern; flag if you want pure localStorage instead.
-- `useMyUpcomingParticipations()` → all my rows where `status in ('requested','accepted')` joined with `events` (future `starts_at` only), ordered by `starts_at`.
-- `useEventParticipants(eventId)` → host view: rows joined with `profiles`.
-- `useHostDecision()` → `{ participantId, decision: 'accepted'|'declined' }`.
+- Page shell / header: `bg-[#F5F5F7] dark:bg-[#0A0A0F]`, border `border-gray-200 dark:border-white/10`
+- Card backgrounds (chat list items, request cards, skeleton): `bg-white dark:bg-[#12121A]` + `border-gray-200 dark:border-white/10`
+- Primary text: `text-[#0A0A0F] dark:text-white`; muted text: `text-gray-500 dark:text-[#A0A0B0]`
+- Tab pills: active gradient stays (brand); inactive `bg-gray-100 text-gray-600 dark:bg-white/5 dark:text-[#A0A0B0]`
+- Conversation modal:
+  - container `bg-white dark:bg-[#12121A]`
+  - own bubble `bg-purple-100 text-purple-900 dark:bg-purple-600 dark:text-white`
+  - other bubble `bg-white text-gray-900 border border-gray-200 dark:bg-white/10 dark:text-white dark:border-transparent`
+  - input area `bg-white border-gray-200 dark:bg-white/5 dark:border-white/10`, textarea same, placeholder `placeholder:text-gray-400 dark:placeholder:text-[#A0A0B0]`
 
-## New component `src/components/events/ParticipantManager.tsx`
-Glass sheet (same pattern as `AttendeeManager`) with two tabs: **Anfragen** / **Akzeptiert**. Each row: avatar, name, requested-at; Anfragen rows have **Annehmen** (green) / **Ablehnen** (destructive) buttons wired to `useHostDecision`. Opens from EventDetail's existing host header area as a second button "Teilnehmer" (does not remove the existing Gäste manager).
+No design tokens added — straight Tailwind `dark:` variants per the spec.
 
-## EventDetail rewrite (action buttons only)
-Replace the current `Zusagen/Absagen` + `Teilen` row with:
+## Bug 2 — Accept once, chat forever
 
-1. **Creator guard** — if `profile.id === event.creator_id`:
-   - Hide `Gefällt mir` and `Anfragen`.
-   - Show a glass card: "Du hast dieses Event erstellt" + link button "Teilnehmer verwalten" → opens `ParticipantManager`.
-2. **Non-creator** — render based on `useMyParticipation`:
-   - No row → two buttons: ❤️ **Gefällt mir** (toggles `interested`) and 💬 **Anfragen** (sets `requested`).
-   - `interested` → heart filled + still show **Anfragen**.
-   - `requested` → disabled pill **Anfrage gesendet · warte auf Bestätigung**, with a small "Zurückziehen" link.
-   - `accepted` → green pill **Du bist dabei ✓**.
-   - `declined` → muted pill **Anfrage abgelehnt**.
-   - **Teilen** button stays.
+### New table `chat_requests` (only schema change)
 
-The existing `useRSVP`/`event_attendees` calls on this page are removed from the action row, but the Zusagen-list Sheet (going avatars/progress) stays untouched.
+```sql
+create table public.chat_requests (
+  id uuid primary key default gen_random_uuid(),
+  sender_id uuid not null,        -- profiles.id (matches existing pattern; not auth.users)
+  recipient_id uuid not null,
+  status text not null default 'pending'
+    check (status in ('pending','accepted','declined')),
+  created_at timestamptz not null default now(),
+  unique(sender_id, recipient_id)
+);
+alter table public.chat_requests enable row level security;
+-- SELECT: either side via profiles lookup of auth.uid()
+-- INSERT: sender_id maps to auth.uid()
+-- UPDATE: recipient_id maps to auth.uid() (accept/decline)
+```
 
-## Anstehend tab rebuild (`src/pages/Events.tsx`)
-Drop the current "show all events" content. New layout (top → bottom):
+Note: spec says `references auth.users`, but the rest of the project consistently uses `profiles.id` for user references — I'll use `profiles.id` to match `direct_messages.sender_id/recipient_id` so joins work. Confirm if you prefer literal `auth.users`.
 
-1. **Mini map** — compact 200 px Mapbox dark map (`mapbox-gl` + token already in `StuttgartMap.tsx`, extracted to a constant). Markers only for accepted participations using `events.display_lat/lng` (or `latitude/longitude` fallback). Tap pin → `navigate(/events/:id)`. No heatmap, no clustering complexity — simple purple pins. Hidden if user has zero accepted events.
-2. **Section "Ausstehend"** — rows from `useMyUpcomingParticipations` where `status='requested'`. Card shows cover, name, host, datetime, sub-label "Ausstehend — warte auf Bestätigung", and a "Zurückziehen" button.
-3. **Section "Zusagen"** — rows where `status='accepted'`. Tappable EventCard-style row that navigates to EventDetail.
-4. Excludes events the current user created and the generic "all upcoming" feed (those move out of this tab entirely; discovery still happens on `/discover` and the map).
-5. Empty state if both sections empty.
+Helper SQL function `chat_request_status(a uuid, b uuid)` (SECURITY DEFINER) returning the canonical status for the pair (checks both directions). Used by client and to short-circuit when mutual follow exists.
 
-The Zusagen and Meine sibling tabs (`my-rsvps`, `my-events`) remain unchanged.
+### Hook `useChatRequest.ts`
+
+- `useChatRequestStatus(otherProfileId)` → `{ status: 'none'|'pending_outgoing'|'pending_incoming'|'accepted'|'declined', mutualFollow: boolean, requestId? }`. Combines `chat_requests` row + mutual-follow check on `follows`.
+- `useAcceptChatRequest(id)` / `useDeclineChatRequest(id)` mutations.
+- `useEnsureChatRequest()` — called from `useSendDM` before insert: if mutual follow → auto-create row with `status='accepted'`; else upsert pending row (no-op if exists).
+
+### `useDirectMessages.ts` changes
+
+- `useSendDM`: before inserting message, call ensure-request. If status is `pending_outgoing` or new → still insert message (it shows as pending). If status `declined` and not recipient-initiated → throw error "Anfrage wurde abgelehnt".
+- Add `useConversations()` selector that groups DMs by other-user (one row per partner, latest message) instead of one row per message. The existing list returns flat messages — that's why each looks like its own request.
+
+### `Messages.tsx` (chat list)
+
+- Replace per-message rendering with per-conversation rendering using `useConversations()`.
+- "Chats" tab: conversations where `chat_requests.status='accepted'` OR mutual follow OR I am the sender (outgoing pending shown with "warte auf Bestätigung" subtitle).
+- "Anfragen" tab: conversations where I am recipient and status is `pending` (one entry per sender, not per message). Accept/Decline buttons call the new mutations and update the request row, not the message.
+- Tapping a conversation opens `SendMessageDialog` (modal stays as the chat surface) — already supports per-pair filtering.
+
+### `SendMessageDialog.tsx` (conversation view)
+
+- Read `useChatRequestStatus(recipient.id)`.
+- If `status === 'pending_incoming'` (I'm recipient, not yet accepted): show banner at top "{display_name} möchte mit dir schreiben" with Annehmen / Ablehnen. Render messages below as greyed-out (`opacity-60`), input disabled.
+- If `status === 'pending_outgoing'`: input enabled (so they can keep typing additional intro messages) but show small note "Nachricht gesendet — warte auf Bestätigung". Per spec the first send already triggers notification.
+- If `status === 'declined'` and I'm sender: input disabled, banner "Anfrage wurde abgelehnt".
+- If `accepted` or `mutualFollow`: normal chat, input unlocked both ways.
+- Light/dark fixes from Bug 1 applied here too.
+
+### Notifications
+
+A `message_request` notification is already created by the existing `notify_on_first_dm` trigger. No new notification logic needed — the chat_request row is just the gate for the input.
 
 ## Files
-- **Create**
-  - `src/hooks/useEventParticipation.ts`
-  - `src/components/events/ParticipantManager.tsx`
-- **Modify**
-  - `src/pages/Events.tsx` — rewrite `TabsContent value="upcoming"` only.
-  - `src/pages/EventDetail.tsx` — replace action buttons + add creator guard + ParticipantManager trigger.
-- **Migration** — new table, RLS, helper function, enum extension, two triggers.
 
-## Untouched
-Map rendering logic, event creation, public feed/discovery, notifications drawer/bell, chat, the existing `event_attendees`/`AttendeeManager` flow.
+Modify:
+- `src/pages/Messages.tsx`
+- `src/components/messaging/SendMessageDialog.tsx`
+- `src/hooks/useDirectMessages.ts` (add `useConversations`, gate `useSendDM`)
 
-## Open questions
-1. **Profile vs Events page** — confirm rebuild on `/events` Anstehend tab (only place named "Anstehend"), or do you want a brand-new tab inside `/profile`?
-2. **"Gefällt mir" persistence** — server-side (`status='interested'`, syncs across devices, hosts can see interest counts) or strictly localStorage as the spec literally says? I default to server-side; tell me to switch if not.
+Create:
+- `src/hooks/useChatRequest.ts`
+- migration: `chat_requests` table + RLS + `chat_request_status` helper
+
+Out of scope: notification table, events, map, profile, anything else.
+
+## Open question
+
+The spec literally says `sender_id uuid references auth.users`. The existing chat (`direct_messages`, `follows`, `profiles`) all reference `profiles.id`, which makes joins and RLS simple. I'll use `profiles.id` for consistency unless you tell me to use `auth.users`.
