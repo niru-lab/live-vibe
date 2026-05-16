@@ -100,6 +100,7 @@ export default function EventDetail() {
         </div>
       </header>
       {isCreator && <AttendeeManager open={showAttendeeManager} onOpenChange={setShowAttendeeManager} eventId={event?.id || ''} eventName={event?.name || ''} eventAddress={`${event?.address}, ${event?.city}`} />}
+      {isCreator && <ParticipantManager open={showParticipantManager} onOpenChange={setShowParticipantManager} eventId={event?.id || ''} />}
       <div className="pb-24" data-testid="event-detail">
         <div className="relative aspect-video bg-muted">
           {event.cover_image_url ? <img src={event.cover_image_url} alt={event.name} className="h-full w-full object-cover" /> : <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20"><span className="text-7xl">{categoryEmojis[event.category] || '🎉'}</span></div>}
