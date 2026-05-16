@@ -83,54 +83,77 @@ export default function Events() {
           <Plus weight="bold" className="h-7 w-7" />
         </button>
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsContent value="upcoming" className="mt-0 space-y-4">
-            {invitations.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-                  <Envelope weight="thin" className="h-4 w-4" />
-                  Einladungen ({invitations.length})
-                </div>
-                {invitations.map((invite: any) => (
-                  <div key={invite.id} className="rounded-xl border-2 border-primary/30 bg-card p-4 transition">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-accent/20">
-                        {invite.event?.cover_image_url ? (
-                          <img src={invite.event.cover_image_url} alt="" className="h-full w-full object-cover rounded-xl" />
-                        ) : (
-                          <span className="text-xl">🎉</span>
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold truncate">{invite.event?.name}</h3>
-                        <p className="text-xs text-muted-foreground">
-                          {invite.event?.starts_at && format(new Date(invite.event.starts_at), 'EEE, d. MMM • HH:mm', { locale: de })}
-                        </p>
-                        <p className="text-xs text-muted-foreground">von @{invite.event?.creator?.username}</p>
-                      </div>
-                    </div>
-                    <div className="flex gap-2">
-                      <Button size="sm" className="flex-1 gap-1 bg-primary" onClick={() => handleInviteResponse(invite.id, true)} disabled={respondToInvite.isPending}>
-                        <Check weight="thin" className="h-4 w-4" /> Annehmen
-                      </Button>
-                      <Button size="sm" variant="outline" className="flex-1 gap-1" onClick={() => handleInviteResponse(invite.id, false)} disabled={respondToInvite.isPending}>
-                        <X weight="thin" className="h-4 w-4" /> Ablehnen
-                      </Button>
+          <TabsContent value="upcoming" className="mt-0 space-y-6">
+            {!user ? (
+              <EmptyState title="Nicht angemeldet" description="Melde dich an, um deine anstehenden Events zu sehen." onAction={() => navigate('/auth')} actionLabel="Anmelden" />
+            ) : partLoading ? <EventsSkeleton /> : (
+              <>
+                {mapPins.length > 0 && (
+                  <div className="overflow-hidden rounded-2xl border border-border/50">
+                    <div className="h-48 w-full">
+                      <Map
+                        mapboxAccessToken={MAPBOX_TOKEN}
+                        mapStyle={MAP_STYLE}
+                        initialViewState={{ latitude: mapCenter.lat, longitude: mapCenter.lng, zoom: 11 }}
+                        attributionControl={false}
+                      >
+                        {mapPins.map((p: any) => (
+                          <Marker key={p.id} latitude={p.lat} longitude={p.lng} anchor="bottom" onClick={(e) => { e.originalEvent.stopPropagation(); navigate(`/events/${p.id}`); }}>
+                            <div className="flex h-8 w-8 -translate-y-1 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg ring-2 ring-background cursor-pointer">
+                              <MapPin weight="fill" className="h-4 w-4" />
+                            </div>
+                          </Marker>
+                        ))}
+                      </Map>
                     </div>
                   </div>
-                ))}
-              </div>
+                )}
+
+                {pending.length > 0 && (
+                  <section className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                      <Hourglass weight="thin" className="h-4 w-4" /> Ausstehend ({pending.length})
+                    </div>
+                    {pending.map((p: any) => (
+                      <div key={p.id} className="rounded-2xl border border-primary/30 bg-card p-4 space-y-3">
+                        <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate(`/events/${p.event?.id}`)}>
+                          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 overflow-hidden">
+                            {p.event?.cover_image_url ? <img src={p.event.cover_image_url} alt="" className="h-full w-full object-cover" /> : <span className="text-xl">🎉</span>}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-semibold truncate">{p.event?.name}</h3>
+                            <p className="text-xs text-muted-foreground">{p.event?.starts_at && format(new Date(p.event.starts_at), 'EEE, d. MMM • HH:mm', { locale: de })}</p>
+                            <p className="text-xs text-primary mt-0.5 flex items-center gap-1"><Hourglass weight="thin" className="h-3 w-3 animate-pulse" /> Ausstehend — warte auf Bestätigung</p>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="ghost" className="w-full text-muted-foreground" onClick={() => setParticipation.mutate({ eventId: p.event.id, status: null }, { onSuccess: () => toast.success('Anfrage zurückgezogen') })} disabled={setParticipation.isPending}>
+                          Zurückziehen
+                        </Button>
+                      </div>
+                    ))}
+                  </section>
+                )}
+
+                {accepted.length > 0 && (
+                  <section className="space-y-3">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                      <CheckCircle weight="thin" className="h-4 w-4 text-green-500" /> Zusagen ({accepted.length})
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      {accepted.map((p: any) => (
+                        <div key={p.id} data-testid="event-card">
+                          <EventCard event={p.event} onClick={() => navigate(`/events/${p.event?.id}`)} />
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {pending.length === 0 && accepted.length === 0 && (
+                  <EmptyState title="Nichts Anstehendes" description="Stelle eine Anfrage zu einem Event und es erscheint hier." onAction={() => navigate('/discover')} actionLabel="Events entdecken" />
+                )}
+              </>
             )}
-            {upcomingLoading ? <EventsSkeleton /> : upcomingEvents && upcomingEvents.length > 0 ? (
-              <div className="grid gap-4 sm:grid-cols-2">
-                {upcomingEvents.map((event) => (
-                  <div key={event.id} data-testid="event-card">
-                    <EventCard event={event} onClick={() => navigate(`/events/${event.id}`)} />
-                  </div>
-                ))}
-              </div>
-            ) : invitations.length === 0 ? (
-              <EmptyState title="Keine Events" description="Es gibt noch keine anstehenden Events. Erstelle eins über das + unten." />
-            ) : null}
           </TabsContent>
 
           <TabsContent value="my-rsvps" className="mt-0">
