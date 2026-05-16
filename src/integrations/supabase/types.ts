@@ -397,6 +397,30 @@ export type Database = {
           },
         ]
       }
+      event_participants: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       events: {
         Row: {
           address: string
@@ -1429,6 +1453,10 @@ export type Database = {
       get_user_room_ids: { Args: { _profile_id: string }; Returns: string[] }
       is_blocked: {
         Args: { checker_id: string; target_id: string }
+        Returns: boolean
+      }
+      is_event_owner: {
+        Args: { _event_id: string; _profile_id: string }
         Returns: boolean
       }
       is_room_member: {
