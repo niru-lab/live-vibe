@@ -89,6 +89,10 @@ export const useSendDM = () => {
   return useMutation({
     mutationFn: async ({ recipientId, content }: { recipientId: string; content: string }) => {
       if (!profile?.id) throw new Error('Not authenticated');
+      const { ensureChatRequest } = await import('./useChatRequest');
+      const status = await ensureChatRequest(profile.id, recipientId);
+      if (status === 'declined') throw new Error('Anfrage wurde abgelehnt');
+      if (status === 'pending_incoming') throw new Error('Du musst die Anfrage erst annehmen');
       const { data, error } = await supabase
         .from('direct_messages')
         .insert({ sender_id: profile.id, recipient_id: recipientId, content })
@@ -99,8 +103,44 @@ export const useSendDM = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['direct-messages'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-request'] });
+      queryClient.invalidateQueries({ queryKey: ['chat-requests-all'] });
     },
   });
+};
+
+/** Group flat DMs by conversation partner (one row per partner, latest message). */
+export interface Conversation {
+  otherId: string;
+  other?: DirectMessage['sender'];
+  lastMessage: DirectMessage;
+  unread: boolean;
+}
+
+export const useConversations = () => {
+  const { data: profile } = useProfile();
+  const dms = useDirectMessages();
+  const conversations: Conversation[] = (() => {
+    if (!profile?.id || !dms.data) return [];
+    const map = new Map<string, Conversation>();
+    for (const m of dms.data) {
+      const otherId = m.sender_id === profile.id ? m.recipient_id : m.sender_id;
+      const other = m.sender_id === profile.id ? m.recipient : m.sender;
+      const existing = map.get(otherId);
+      const isIncomingUnread = m.recipient_id === profile.id && !m.is_read;
+      if (!existing) {
+        map.set(otherId, { otherId, other, lastMessage: m, unread: isIncomingUnread });
+      } else if (new Date(m.created_at).getTime() > new Date(existing.lastMessage.created_at).getTime()) {
+        map.set(otherId, { otherId, other: other ?? existing.other, lastMessage: m, unread: isIncomingUnread || existing.unread });
+      } else if (isIncomingUnread) {
+        existing.unread = true;
+      }
+    }
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime(),
+    );
+  })();
+  return { data: conversations, isLoading: dms.isLoading };
 };
 
 export const useRespondDM = () => {
