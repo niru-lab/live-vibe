@@ -39,7 +39,10 @@ export default function EventDetail() {
   const deleteEventMutation = useDeleteEvent();
   const [showAttendees, setShowAttendees] = useState(false);
   const [showAttendeeManager, setShowAttendeeManager] = useState(false);
+  const [showParticipantManager, setShowParticipantManager] = useState(false);
   const { data: pendingAttendees } = usePendingAttendees(id);
+  const { data: myParticipation } = useMyParticipation(id);
+  const setParticipation = useSetParticipation();
 
   const handleDeleteEvent = async () => {
     if (!event) return;
