@@ -1,6 +1,12 @@
 import StaggeredChips from '../StaggeredChips';
 
-const GENRES = ['Hip-Hop','House','Techno','R&B','Pop','Afrobeats','Drum & Bass','Reggaeton','Indie','Latin'];
+const GENRES = [
+  'Hip-Hop','House','Techno','R&B','Pop','Afrobeats','Drum & Bass','Reggaeton',
+  'Indie','Latin','Amapiano','Trap','Dancehall','Deep House','Tech House',
+  'Minimal','Trance','Hardstyle','EDM','Disco','Funk','Soul','Jazz','Rock',
+  'Alternative','Metal','Punk','K-Pop','Schlager','電子音楽','Reggae','Dub',
+  'Garage','UK Drill','Phonk','Hyperpop','Lo-Fi','Classical','Balkan','Türkçe',
+];
 
 interface Props {
   selected: string[];

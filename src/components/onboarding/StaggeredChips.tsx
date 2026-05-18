@@ -31,10 +31,8 @@ export default function StaggeredChips({ options, selected, onToggle }: Props) {
         display: 'flex',
         flexDirection: 'column',
         gap: 10,
-        // let chips bleed slightly past the card edge for the staggered effect
-        marginLeft: -10,
-        marginRight: -10,
-        overflow: 'hidden',
+        marginLeft: -18,
+        marginRight: -18,
       }}
     >
       <Row items={rowA} selected={selected} onToggle={onToggle} offset={0} />
@@ -48,12 +46,16 @@ function Row({
 }: { items: Option[]; selected: string[]; onToggle: (l: string) => void; offset: number }) {
   return (
     <div
+      className="no-scrollbar"
       style={{
         display: 'flex',
         flexWrap: 'nowrap',
         gap: 8,
-        paddingLeft: offset,
-        paddingRight: 10,
+        paddingLeft: 18 + offset,
+        paddingRight: 18,
+        overflowX: 'auto',
+        scrollbarWidth: 'none',
+        WebkitOverflowScrolling: 'touch',
       }}
     >
       {items.map((o) => {
