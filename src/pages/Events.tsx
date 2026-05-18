@@ -27,11 +27,7 @@ import { cn } from '@/lib/utils';
 
 const GENRES = ['Techno', 'House', 'Jazz', 'Indie', 'Hip-Hop', 'Pop', 'Electronic'];
 
-type DateFilter =
-  | { key: 'all'; label: 'Alle Tage'; date: null }
-  | { key: 'today'; label: 'Heute'; date: Date }
-  | { key: 'tomorrow'; label: 'Morgen'; date: Date }
-  | { key: 'd2' | 'd3' | 'd4' | 'd5' | 'd6'; label: string; date: Date };
+type DateFilter = { key: string; label: string; date: Date | null };
 
 function buildDateFilters(): DateFilter[] {
   const today = new Date();
@@ -43,7 +39,7 @@ function buildDateFilters(): DateFilter[] {
   for (let i = 2; i <= 6; i++) {
     const d = addDays(today, i);
     filters.push({
-      key: `d${i}` as DateFilter['key'],
+      key: `d${i}`,
       label: format(d, 'EEE, d. MMM', { locale: de }),
       date: d,
     });
