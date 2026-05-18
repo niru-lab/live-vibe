@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useEvents, useMyEvents } from '@/hooks/useEvents';
-import { useMyRSVPs } from '@/hooks/useEventAttendees';
+import { useMyRSVPs, useMyInvitations, useRespondToInvitation } from '@/hooks/useEventAttendees';
 import { useMyUpcomingParticipations, useSetParticipation } from '@/hooks/useEventParticipation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
