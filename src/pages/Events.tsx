@@ -175,12 +175,31 @@ export default function Events() {
             <TabsContent value="upcoming" className="mt-0 space-y-4">
               {!user ? (
                 <EmptyState title="Nicht angemeldet" description="Melde dich an, um deine anstehenden Events zu sehen." onAction={() => navigate('/auth')} actionLabel="Anmelden" />
-              ) : partLoading ? (
+              ) : partLoading || invitesLoading ? (
                 <EventListSkeleton />
-              ) : pending.length === 0 && accepted.length === 0 ? (
+              ) : pending.length === 0 && accepted.length === 0 && invitations.length === 0 ? (
                 <EmptyState title="Nichts Anstehendes" description="Stelle eine Anfrage zu einem Event und es erscheint hier." onAction={() => setActiveTab('discover')} actionLabel="Events entdecken" />
               ) : (
                 <>
+                  {invitations.length > 0 && (
+                    <section className="space-y-3">
+                      <SectionLabel title={`Einladungen (${invitations.length})`} />
+                      {invitations.map((inv: any) => (
+                        <div key={inv.id} className="rounded-2xl border border-primary/40 bg-card overflow-hidden">
+                          <EventListCard event={inv.event} onClick={() => navigate(`/events/${inv.event?.id}`)} />
+                          <div className="flex gap-2 border-t border-border/50 px-3 py-2">
+                            <Button size="sm" variant="ghost" className="flex-1 text-muted-foreground" onClick={() => respondInvitation.mutate({ attendeeId: inv.id, accept: false }, { onSuccess: () => toast.success('Einladung abgelehnt') })} disabled={respondInvitation.isPending}>
+                              Ablehnen
+                            </Button>
+                            <Button size="sm" className="flex-1" onClick={() => respondInvitation.mutate({ attendeeId: inv.id, accept: true }, { onSuccess: () => toast.success('Du bist dabei! 🎉') })} disabled={respondInvitation.isPending}>
+                              Annehmen
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </section>
+                  )}
+
                   {pending.length > 0 && (
                     <section className="space-y-3">
                       <SectionLabel icon={<Hourglass weight="regular" className="h-4 w-4" />} title={`Ausstehend (${pending.length})`} />
