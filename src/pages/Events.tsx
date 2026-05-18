@@ -52,7 +52,7 @@ export default function Events() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('discover');
   const [search, setSearch] = useState('');
-  const [dateKey, setDateKey] = useState<DateFilter['key']>('all');
+  const [dateKey, setDateKey] = useState<string>('all');
   const [genre, setGenre] = useState<string | null>(null);
 
   const dateFilters = useMemo(buildDateFilters, []);
