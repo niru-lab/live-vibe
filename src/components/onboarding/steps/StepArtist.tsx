@@ -1,4 +1,16 @@
-import { MagnifyingGlass } from '@phosphor-icons/react';
+import StaggeredChips from '../StaggeredChips';
+
+const ARTISTS = [
+  'Bicep','Fred again..','FKA twigs','Peggy Gou','Charli XCX','Travis Scott',
+  'Bad Bunny','Rosalía','Burna Boy','SZA','Drake','The Weeknd','Tame Impala',
+  'Boys Noize','Skrillex','Daft Punk','Disclosure','Four Tet','Floating Points',
+  'Aphex Twin','Nina Kraviz','Amelie Lens','Solomun','Black Coffee','Honey Dijon',
+  'DJ Snake','Calvin Harris','Tiësto','David Guetta','Marshmello','Diplo',
+  'Ayra Starr','Tyla','Asake','Wizkid','Davido','PartyNextDoor','21 Savage',
+  'Central Cee','Stormzy','Dave','Aitch','RAYE','PinkPantheress','Doja Cat',
+  'Olivia Rodrigo','Billie Eilish','Dua Lipa','Lana Del Rey','Mitski',
+  'Phoebe Bridgers','Arctic Monkeys','The 1975','Fontaines D.C.','Idles',
+];
 
 interface Props {
   artist: string;
@@ -7,32 +19,12 @@ interface Props {
 
 export default function StepArtist({ artist, onChange }: Props) {
   return (
-    <div style={{ position: 'relative' }}>
-      <MagnifyingGlass
-        size={20}
-        weight="regular"
-        color="rgba(255,255,255,0.4)"
-        style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }}
-      />
-      <input
-        type="text"
-        value={artist}
-        onChange={e => onChange(e.target.value.slice(0, 60))}
-        placeholder="z.B. Bicep, Fred again.., FKA twigs…"
-        autoFocus
-        style={{
-          width: '100%',
-          background: 'rgba(255,255,255,0.05)',
-          border: '0.5px solid rgba(255,255,255,0.1)',
-          borderRadius: 14,
-          color: '#fff',
-          padding: '16px 18px 16px 46px',
-          fontSize: 16,
-          fontWeight: 500,
-          outline: 'none',
-          backdropFilter: 'blur(12px)',
-        }}
-      />
-    </div>
+    <StaggeredChips
+      options={ARTISTS.map(a => ({ label: a }))}
+      selected={artist ? [artist] : []}
+      onToggle={(l) => onChange(artist === l ? '' : l)}
+      allowCustom
+      customPlaceholder="Eigenen Artist eintragen…"
+    />
   );
 }
