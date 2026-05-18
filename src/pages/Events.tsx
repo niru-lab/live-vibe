@@ -62,7 +62,9 @@ export default function Events() {
   const { data: myEvents, isLoading: myEventsLoading } = useMyEvents();
   const { data: myRSVPs, isLoading: rsvpsLoading } = useMyRSVPs();
   const { data: participations = [], isLoading: partLoading } = useMyUpcomingParticipations();
+  const { data: invitations = [], isLoading: invitesLoading } = useMyInvitations();
   const setParticipation = useSetParticipation();
+  const respondInvitation = useRespondToInvitation();
 
   const filteredEvents = useMemo(() => {
     return allEvents.filter((e: any) => {
