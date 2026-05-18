@@ -30,6 +30,8 @@ export default function StepDrink({ value, onChange }: Props) {
       options={DRINKS}
       selected={value ? [value] : []}
       onToggle={(l) => onChange(value === l ? '' : l)}
+      allowCustom
+      customPlaceholder="Eigenes Getränk hinzufügen…"
     />
   );
 }

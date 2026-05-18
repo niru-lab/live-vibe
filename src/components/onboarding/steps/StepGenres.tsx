@@ -23,6 +23,8 @@ export default function StepGenres({ selected, onChange }: Props) {
       selected={selected}
       onToggle={toggle}
       multi
+      allowCustom
+      customPlaceholder="Eigenes Genre hinzufügen…"
     />
   );
 }
