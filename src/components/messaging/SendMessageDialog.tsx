@@ -156,8 +156,8 @@ export function SendMessageDialog({ open, onOpenChange, recipient }: SendMessage
                   className={cn(
                     'max-w-[80%] rounded-2xl px-3 py-2 text-sm',
                     isMine
-                      ? 'self-end bg-purple-100 text-purple-900 dark:bg-purple-600 dark:text-white'
-                      : 'self-start bg-white border border-gray-200 text-gray-900 dark:bg-white/10 dark:text-white dark:border-transparent',
+                      ? 'self-end bg-gray-900 text-white dark:bg-purple-600 dark:text-white'
+                      : 'self-start bg-gray-100 border border-gray-200 text-gray-900 dark:bg-white/10 dark:text-white dark:border-transparent',
                   )}
                 >
                   <span data-testid="chat-message">{m.content}</span>
