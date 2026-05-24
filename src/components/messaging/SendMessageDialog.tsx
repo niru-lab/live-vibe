@@ -101,7 +101,7 @@ export function SendMessageDialog({ open, onOpenChange, recipient }: SendMessage
         </DialogHeader>
 
         {isPendingIncoming && acceptRequestId && (
-          <div className="mx-5 mt-3 rounded-xl border border-[#7C3AED]/40 bg-purple-50 dark:bg-[#7C3AED]/10 p-3">
+          <div className="mx-5 mt-3 rounded-xl border border-gray-200 dark:border-[#7C3AED]/40 bg-gray-50 dark:bg-[#7C3AED]/10 p-3">
             <p className="text-sm text-gray-900 dark:text-white">
               <span className="font-semibold">{recipient.display_name}</span> möchte mit dir schreiben
             </p>
@@ -156,8 +156,8 @@ export function SendMessageDialog({ open, onOpenChange, recipient }: SendMessage
                   className={cn(
                     'max-w-[80%] rounded-2xl px-3 py-2 text-sm',
                     isMine
-                      ? 'self-end bg-purple-100 text-purple-900 dark:bg-purple-600 dark:text-white'
-                      : 'self-start bg-white border border-gray-200 text-gray-900 dark:bg-white/10 dark:text-white dark:border-transparent',
+                      ? 'self-end bg-gray-900 text-white dark:bg-purple-600 dark:text-white'
+                      : 'self-start bg-gray-100 border border-gray-200 text-gray-900 dark:bg-white/10 dark:text-white dark:border-transparent',
                   )}
                 >
                   <span data-testid="chat-message">{m.content}</span>
