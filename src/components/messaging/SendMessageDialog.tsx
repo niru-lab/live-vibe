@@ -101,7 +101,7 @@ export function SendMessageDialog({ open, onOpenChange, recipient }: SendMessage
         </DialogHeader>
 
         {isPendingIncoming && acceptRequestId && (
-          <div className="mx-5 mt-3 rounded-xl border border-[#7C3AED]/40 bg-purple-50 dark:bg-[#7C3AED]/10 p-3">
+          <div className="mx-5 mt-3 rounded-xl border border-gray-200 dark:border-[#7C3AED]/40 bg-gray-50 dark:bg-[#7C3AED]/10 p-3">
             <p className="text-sm text-gray-900 dark:text-white">
               <span className="font-semibold">{recipient.display_name}</span> möchte mit dir schreiben
             </p>
