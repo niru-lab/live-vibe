@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DotsThree, Cloud } from '@phosphor-icons/react';
+import { Cloud } from '@phosphor-icons/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -35,11 +35,6 @@ export const ProfileHeader = ({ profile, isLoading, followersCount, followingCou
       <div className="relative overflow-hidden rounded-[28px] border border-border bg-card card-glow">
         <div className="absolute inset-0 opacity-60" style={{ background: 'radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.18), transparent 60%)' }} />
         <div className="relative p-6">
-          <div className="absolute right-4 top-4">
-            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full glass-pill" onClick={() => setSettingsOpen(true)}>
-              <DotsThree weight="bold" className="h-5 w-5 text-foreground" />
-            </Button>
-          </div>
             <div className="flex flex-col items-center text-center pt-2">
               {isLoading ? <Skeleton className="h-[90px] w-[90px] rounded-full" /> : (
                 <button onClick={() => setAchievementsOpen(true)} className="relative group">
