@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 // Routes that should NOT be gated (auth, onboarding itself, callback, public profile pages)
 const ALLOWED_PREFIXES = [
   '/auth',
+  '/welcome',
   '/register',
   '/verify',
   '/onboarding',

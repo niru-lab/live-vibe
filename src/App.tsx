@@ -12,6 +12,8 @@ import { SwipeBackProvider } from "@/components/layout/SwipeBackProvider";
 import { OnboardingGate } from "@/components/auth/OnboardingGate";
 import Feed from "./pages/Feed";
 import Welcome from "./pages/Welcome";
+import RolePicker from "./pages/RolePicker";
+import Auth from "./pages/Auth";
 import Register from "./pages/Register";
 import Verify from "./pages/Verify";
 import Onboarding from "./pages/Onboarding";
@@ -54,10 +56,12 @@ const App = () => (
                 <SwipeBackProvider />
                 <OnboardingGate />
                 <Routes>
-                  <Route path="/" element={<Welcome />} />
+                  <Route path="/" element={<RolePicker />} />
+                  <Route path="/welcome" element={<RolePicker />} />
                   <Route path="/feed" element={<Feed />} />
                   <Route path="/profile/:username" element={<UserProfile />} />
-                  <Route path="/auth" element={<Welcome />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route path="/auth/legacy" element={<Welcome />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/verify" element={<Verify />} />
                   <Route path="/onboarding" element={<Onboarding />} />

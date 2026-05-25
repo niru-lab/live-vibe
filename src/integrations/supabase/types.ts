@@ -1043,6 +1043,7 @@ export type Database = {
           persona_text: string | null
           price_segment: string | null
           profile_type: Database["public"]["Enums"]["profile_type"]
+          role: string | null
           show_badge_in_bio: boolean
           show_sc_in_bio: boolean
           social_cloud_points: number
@@ -1078,6 +1079,7 @@ export type Database = {
           persona_text?: string | null
           price_segment?: string | null
           profile_type?: Database["public"]["Enums"]["profile_type"]
+          role?: string | null
           show_badge_in_bio?: boolean
           show_sc_in_bio?: boolean
           social_cloud_points?: number
@@ -1113,6 +1115,7 @@ export type Database = {
           persona_text?: string | null
           price_segment?: string | null
           profile_type?: Database["public"]["Enums"]["profile_type"]
+          role?: string | null
           show_badge_in_bio?: boolean
           show_sc_in_bio?: boolean
           social_cloud_points?: number
