@@ -10,6 +10,7 @@ const ALLOWED_PREFIXES = [
   '/register',
   '/verify',
   '/onboarding',
+  '/onboarding-venue',
 ];
 
 export const OnboardingGate = () => {
@@ -28,14 +29,15 @@ export const OnboardingGate = () => {
     let cancelled = false;
     supabase
       .from('profiles')
-      .select('onboarding_complete')
+      .select('onboarding_complete, role')
       .eq('user_id', user.id)
       .maybeSingle()
       .then(({ data }) => {
         if (cancelled) return;
         setCheckedFor(user.id);
         if (!data || !data.onboarding_complete) {
-          navigate('/onboarding', { replace: true });
+          const target = (data as any)?.role === 'venue_owner' ? '/onboarding-venue' : '/onboarding';
+          navigate(target, { replace: true });
         } else if (location.pathname === '/') {
           navigate('/feed', { replace: true });
         }
