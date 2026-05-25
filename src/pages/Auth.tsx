@@ -25,6 +25,8 @@ export default function Auth() {
   
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const role: 'guest' | 'venue_owner' = (location.state as { role?: 'guest' | 'venue_owner' } | null)?.role ?? 'guest';
   const { toast } = useToast();
 
   useEffect(() => {
