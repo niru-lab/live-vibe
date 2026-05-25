@@ -1,93 +1,117 @@
-## Fix scope
+# Venue-Onboarding (Teil 2/3) — Plan
 
-Chat module only: `src/pages/Messages.tsx`, `src/components/messaging/SendMessageDialog.tsx`, `src/hooks/useDirectMessages.ts`, plus one new hook `src/hooks/useChatRequest.ts`. Map, events, notifications, profile tabs are not touched.
+## Wichtige Abweichung von der Spec (bitte bestätigen oder ich passe an)
 
-## Bug 1 — Dark/Light theme
+Die `venues`-Tabelle existiert bereits, hat **134 geseedete Datensätze** und wird von `StuttgartMap`, `VenueEventSelector`, posts u.a. benutzt. Sie kann nicht neu angelegt werden. Bestehendes Schema:
 
-`tailwind.config.ts` already has `darkMode: ["class"]` and a `ThemeProvider` toggles the class on `<html>`. Chat files use hardcoded hex everywhere (`bg-[#0A0A0F]`, `bg-[#12121A]`, `text-white`, `text-[#A0A0B0]`, `bg-white/[0.06]`, etc.), so light mode looks broken.
+- `owner_profile_id` (→ profiles.id) statt `owner_user_id` (→ auth.users)
+- `latitude/longitude` statt `lat/lng`
+- `address`, `city` (NOT NULL), `category` (NOT NULL), `is_verified` (bool)
+- Keine Felder für venue_type, time_slots, day_pattern, offerings, price_tier, phone, whatsapp_ok, address_street, address_zip, address_skipped, verification_tier
 
-Fix by replacing every hardcoded color with a `dark:` variant pair per spec:
+**Vorgehen:** Bestehende Tabelle per `ALTER` erweitern, statt droppen. Ich folge zwei Lovable-Cloud-Regeln, die der Spec widersprechen:
 
-- Page shell / header: `bg-[#F5F5F7] dark:bg-[#0A0A0F]`, border `border-gray-200 dark:border-white/10`
-- Card backgrounds (chat list items, request cards, skeleton): `bg-white dark:bg-[#12121A]` + `border-gray-200 dark:border-white/10`
-- Primary text: `text-[#0A0A0F] dark:text-white`; muted text: `text-gray-500 dark:text-[#A0A0B0]`
-- Tab pills: active gradient stays (brand); inactive `bg-gray-100 text-gray-600 dark:bg-white/5 dark:text-[#A0A0B0]`
-- Conversation modal:
-  - container `bg-white dark:bg-[#12121A]`
-  - own bubble `bg-purple-100 text-purple-900 dark:bg-purple-600 dark:text-white`
-  - other bubble `bg-white text-gray-900 border border-gray-200 dark:bg-white/10 dark:text-white dark:border-transparent`
-  - input area `bg-white border-gray-200 dark:bg-white/5 dark:border-white/10`, textarea same, placeholder `placeholder:text-gray-400 dark:placeholder:text-[#A0A0B0]`
+1. **`owner_profile_id` (profiles.id)** statt `owner_user_id` (auth.users) — FK auf `auth.users` ist in Lovable Cloud verboten.
+2. **`latitude/longitude`** wiederverwenden statt neuer `lat/lng`-Spalten — keine Duplikate.
 
-No design tokens added — straight Tailwind `dark:` variants per the spec.
+Für nomadische Event-Crews muss `latitude/longitude/address/city` nullable werden. `category` bleibt NOT NULL und wird automatisch mit `venue_type` befüllt.
 
-## Bug 2 — Accept once, chat forever
-
-### New table `chat_requests` (only schema change)
+## Migration
 
 ```sql
-create table public.chat_requests (
-  id uuid primary key default gen_random_uuid(),
-  sender_id uuid not null,        -- profiles.id (matches existing pattern; not auth.users)
-  recipient_id uuid not null,
-  status text not null default 'pending'
-    check (status in ('pending','accepted','declined')),
-  created_at timestamptz not null default now(),
-  unique(sender_id, recipient_id)
-);
-alter table public.chat_requests enable row level security;
--- SELECT: either side via profiles lookup of auth.uid()
--- INSERT: sender_id maps to auth.uid()
--- UPDATE: recipient_id maps to auth.uid() (accept/decline)
+-- Nullable machen für nomadische Venues
+ALTER TABLE public.venues
+  ALTER COLUMN address DROP NOT NULL,
+  ALTER COLUMN city DROP NOT NULL,
+  ALTER COLUMN latitude DROP NOT NULL,
+  ALTER COLUMN longitude DROP NOT NULL;
+
+-- Neue Spalten
+ALTER TABLE public.venues
+  ADD COLUMN IF NOT EXISTS venue_type TEXT,
+  ADD COLUMN IF NOT EXISTS address_street TEXT,
+  ADD COLUMN IF NOT EXISTS address_zip TEXT,
+  ADD COLUMN IF NOT EXISTS address_city TEXT,
+  ADD COLUMN IF NOT EXISTS address_skipped BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS time_slots TEXT[] DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS day_pattern TEXT,
+  ADD COLUMN IF NOT EXISTS offerings TEXT[] DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS price_tier TEXT,
+  ADD COLUMN IF NOT EXISTS phone TEXT,
+  ADD COLUMN IF NOT EXISTS whatsapp_ok BOOLEAN DEFAULT false,
+  ADD COLUMN IF NOT EXISTS verification_tier INT DEFAULT 1
+    CHECK (verification_tier BETWEEN 1 AND 3);
+
+-- RLS Policies hinzufügen (bestehende „Venues viewable by everyone" SELECT bleibt für seed-Daten)
+CREATE POLICY "Owners can insert own venues" ON public.venues
+  FOR INSERT WITH CHECK (
+    owner_profile_id IN (SELECT id FROM profiles WHERE user_id = auth.uid())
+  );
+-- UPDATE-Policy für Owner existiert bereits.
 ```
 
-Note: spec says `references auth.users`, but the rest of the project consistently uses `profiles.id` for user references — I'll use `profiles.id` to match `direct_messages.sender_id/recipient_id` so joins work. Confirm if you prefer literal `auth.users`.
+Hinweis: Die bestehende `SELECT USING (true)` Policy macht *alle* Venues öffentlich lesbar — das ist für die Map gewollt und bleibt. Die geplante „nur verifiziert sichtbar"-Regel würde alle 134 Seed-Venues verstecken; deshalb übersprungen.
 
-Helper SQL function `chat_request_status(a uuid, b uuid)` (SECURITY DEFINER) returning the canonical status for the pair (checks both directions). Used by client and to short-circuit when mutual follow exists.
+## Datei-Struktur (alle neu, nichts unter `src/components/onboarding/` angefasst)
 
-### Hook `useChatRequest.ts`
+```text
+src/pages/OnboardingVenue.tsx              # Wrapper, State, Finish-Logik, Confetti
+src/components/venue-onboarding/
+  VenueOnboardingLayout.tsx                # Top-Bar (Back + 8-Step Progress), Sticky-CTA
+  VenueStepTransition.tsx                  # Slide-Transition (Kopie von StepTransition)
+  VenueOfferingChips.tsx                   # StaggeredChips-Variante für Step 6
+  VenueMiniMap.tsx                         # Mapbox 200px, draggable Pin, Gradient
+  steps/
+    StepVenueType.tsx                      # 1
+    StepVenueName.tsx                      # 2 (rotierender Placeholder)
+    StepVenueAddress.tsx                   # 3 (mit Skip für Event-Crew + Geocoding)
+    StepVenueTimeSlots.tsx                 # 4
+    StepVenueDayPattern.tsx                # 5
+    StepVenueOfferings.tsx                 # 6
+    StepVenuePriceTier.tsx                 # 7
+    StepVenueContact.tsx                   # 8 (Telefon + WhatsApp Toggle)
+```
 
-- `useChatRequestStatus(otherProfileId)` → `{ status: 'none'|'pending_outgoing'|'pending_incoming'|'accepted'|'declined', mutualFollow: boolean, requestId? }`. Combines `chat_requests` row + mutual-follow check on `follows`.
-- `useAcceptChatRequest(id)` / `useDeclineChatRequest(id)` mutations.
-- `useEnsureChatRequest()` — called from `useSendDM` before insert: if mutual follow → auto-create row with `status='accepted'`; else upsert pending row (no-op if exists).
+## Routing
 
-### `useDirectMessages.ts` changes
+- Neue Route `/onboarding-venue` → `OnboardingVenue`
+- `OnboardingGate`: Wenn `profiles.role === 'venue_owner'` UND `onboarding_complete === false` → redirect auf `/onboarding-venue` (statt `/onboarding`). Gast-Branch bleibt 1:1.
+- `/onboarding-venue` zur `ALLOWED_PREFIXES` ergänzen.
 
-- `useSendDM`: before inserting message, call ensure-request. If status is `pending_outgoing` or new → still insert message (it shows as pending). If status `declined` and not recipient-initiated → throw error "Anfrage wurde abgelehnt".
-- Add `useConversations()` selector that groups DMs by other-user (one row per partner, latest message) instead of one row per message. The existing list returns flat messages — that's why each looks like its own request.
+## Step-Verhalten
 
-### `Messages.tsx` (chat list)
+- Single-Select Steps (1, 5, 7): Tap auf Karte selektiert + advanciert nicht automatisch — Sticky-CTA „Weiter" aktiviert sich.
+- Multi-Select (4, 6): mind. 1 Pflicht, max 8 bei Offerings.
+- Step 2: Placeholder rotiert per `setInterval` alle 3s durch 4 Beispiele.
+- Step 3: Wenn `venue_type === 'event_crew'` (Wert aus Step 1) → Skip-Button sichtbar. Sobald Straße + 5-stellige PLZ + Stadt befüllt → debounced (800ms) Mapbox-Geocode → Mini-Map mit draggable Pin rendert. Drag-End updated lokalen state.
+- Step 8: DE-Regex Validierung, WhatsApp-Toggle.
 
-- Replace per-message rendering with per-conversation rendering using `useConversations()`.
-- "Chats" tab: conversations where `chat_requests.status='accepted'` OR mutual follow OR I am the sender (outgoing pending shown with "warte auf Bestätigung" subtitle).
-- "Anfragen" tab: conversations where I am recipient and status is `pending` (one entry per sender, not per message). Accept/Decline buttons call the new mutations and update the request row, not the message.
-- Tapping a conversation opens `SendMessageDialog` (modal stays as the chat surface) — already supports per-pair filtering.
+## Finish-Logik
 
-### `SendMessageDialog.tsx` (conversation view)
+1. `supabase.from('venues').insert({...})` mit:
+   - `owner_profile_id` (profiles.id des eingeloggten Users)
+   - `name`, `venue_type`, `category: venue_type` (damit NOT NULL erfüllt)
+   - `address_street`, `address_zip`, `address_city`, `address_skipped`
+   - `address = "<street>, <zip> <city>"` (falls nicht skipped, für Bestandscode-Kompatibilität)
+   - `city = address_city`
+   - `latitude/longitude` (aus Geocode/Drag, oder NULL bei skipped)
+   - `time_slots`, `day_pattern`, `offerings`, `price_tier`, `phone`, `whatsapp_ok`
+   - `verification_tier: 1`
+2. `profiles.update({ onboarding_complete: true })`
+3. Confetti (`canvas-confetti` falls vorhanden, sonst CSS-Pulse) + Toast „Willkommen bei Feyrn! Dein Spot ist drin 🔥"
+4. Redirect `/` → OnboardingGate schickt weiter zu `/feed` (Dashboard kommt in Teil 3)
 
-- Read `useChatRequestStatus(recipient.id)`.
-- If `status === 'pending_incoming'` (I'm recipient, not yet accepted): show banner at top "{display_name} möchte mit dir schreiben" with Annehmen / Ablehnen. Render messages below as greyed-out (`opacity-60`), input disabled.
-- If `status === 'pending_outgoing'`: input enabled (so they can keep typing additional intro messages) but show small note "Nachricht gesendet — warte auf Bestätigung". Per spec the first send already triggers notification.
-- If `status === 'declined'` and I'm sender: input disabled, banner "Anfrage wurde abgelehnt".
-- If `accepted` or `mutualFollow`: normal chat, input unlocked both ways.
-- Light/dark fixes from Bug 1 applied here too.
+## Validierungen (zod)
 
-### Notifications
+- Name: 2–60 Zeichen
+- PLZ: `/^\d{5}$/`
+- Phone: `/^(\+49|0)[1-9][0-9]{8,11}$/`
+- Offerings: 1–8 Einträge
 
-A `message_request` notification is already created by the existing `notify_on_first_dm` trigger. No new notification logic needed — the chat_request row is just the gate for the input.
+## Design-Tokens
 
-## Files
+Trotz Spec-Hex-Werten (#0A0A0F, #12121A, #7C3AED→#EC4899) verwende ich die bestehenden semantischen Tokens (`bg-background`, `bg-card/80`, `border-border/50`, `primary`→`accent`-Gradient), damit das visuelle System konsistent mit Gast-Onboarding und Welcome-Screen bleibt.
 
-Modify:
-- `src/pages/Messages.tsx`
-- `src/components/messaging/SendMessageDialog.tsx`
-- `src/hooks/useDirectMessages.ts` (add `useConversations`, gate `useSendDM`)
+## Bestätigung gewünscht
 
-Create:
-- `src/hooks/useChatRequest.ts`
-- migration: `chat_requests` table + RLS + `chat_request_status` helper
-
-Out of scope: notification table, events, map, profile, anything else.
-
-## Open question
-
-The spec literally says `sender_id uuid references auth.users`. The existing chat (`direct_messages`, `follows`, `profiles`) all reference `profiles.id`, which makes joins and RLS simple. I'll use `profiles.id` for consistency unless you tell me to use `auth.users`.
+Falls du die Spec-Schema-Punkte (eigene `lat/lng`-Spalten, FK auf `auth.users`, „nur verifiziert sichtbar"-Policy) zwingend so willst, sag Bescheid — dann besprechen wir Migrationsweg ohne Datenverlust.

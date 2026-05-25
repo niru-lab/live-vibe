@@ -17,6 +17,7 @@ import Auth from "./pages/Auth";
 import Register from "./pages/Register";
 import Verify from "./pages/Verify";
 import Onboarding from "./pages/Onboarding";
+import OnboardingVenue from "./pages/OnboardingVenue";
 import AuthCallback from "./pages/AuthCallback";
 import Discover from "./pages/Discover";
 import Events from "./pages/Events";
@@ -65,6 +66,7 @@ const App = () => (
                   <Route path="/register" element={<Register />} />
                   <Route path="/verify" element={<Verify />} />
                   <Route path="/onboarding" element={<Onboarding />} />
+                  <Route path="/onboarding-venue" element={<OnboardingVenue />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="/discover" element={<Discover />} />
                   <Route path="/map" element={<Discover />} />

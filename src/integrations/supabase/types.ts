@@ -1381,49 +1381,85 @@ export type Database = {
       }
       venues: {
         Row: {
-          address: string
+          address: string | null
+          address_city: string | null
+          address_skipped: boolean | null
+          address_street: string | null
+          address_zip: string | null
           category: string
-          city: string
+          city: string | null
           created_at: string
+          day_pattern: string | null
           description: string | null
           id: string
           image_url: string | null
           is_verified: boolean
-          latitude: number
-          longitude: number
+          latitude: number | null
+          longitude: number | null
           name: string
+          offerings: string[] | null
           owner_profile_id: string | null
+          phone: string | null
+          price_tier: string | null
+          time_slots: string[] | null
           updated_at: string
+          venue_type: string | null
+          verification_tier: number | null
+          whatsapp_ok: boolean | null
         }
         Insert: {
-          address: string
+          address?: string | null
+          address_city?: string | null
+          address_skipped?: boolean | null
+          address_street?: string | null
+          address_zip?: string | null
           category: string
-          city?: string
+          city?: string | null
           created_at?: string
+          day_pattern?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           is_verified?: boolean
-          latitude: number
-          longitude: number
+          latitude?: number | null
+          longitude?: number | null
           name: string
+          offerings?: string[] | null
           owner_profile_id?: string | null
+          phone?: string | null
+          price_tier?: string | null
+          time_slots?: string[] | null
           updated_at?: string
+          venue_type?: string | null
+          verification_tier?: number | null
+          whatsapp_ok?: boolean | null
         }
         Update: {
-          address?: string
+          address?: string | null
+          address_city?: string | null
+          address_skipped?: boolean | null
+          address_street?: string | null
+          address_zip?: string | null
           category?: string
-          city?: string
+          city?: string | null
           created_at?: string
+          day_pattern?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
           is_verified?: boolean
-          latitude?: number
-          longitude?: number
+          latitude?: number | null
+          longitude?: number | null
           name?: string
+          offerings?: string[] | null
           owner_profile_id?: string | null
+          phone?: string | null
+          price_tier?: string | null
+          time_slots?: string[] | null
           updated_at?: string
+          venue_type?: string | null
+          verification_tier?: number | null
+          whatsapp_ok?: boolean | null
         }
         Relationships: [
           {
