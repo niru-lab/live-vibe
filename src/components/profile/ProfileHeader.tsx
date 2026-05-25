@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { DotsThree, Cloud } from '@phosphor-icons/react';
+import { Cloud } from '@phosphor-icons/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
