@@ -71,6 +71,7 @@ export default function Auth() {
     const { error } = await signUp(email, password, {
       username: username || undefined,
       display_name: displayName || undefined,
+      role,
     });
     setLoading(false);
     if (error) {
