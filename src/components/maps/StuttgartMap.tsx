@@ -351,7 +351,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
           latitude: 48.7758,
           longitude: 9.1829,
           zoom: 13,
-          pitch: 45,
+          pitch: 0,
         }}
         style={{ width: '100%', height: '100%' }}
         mapStyle={MAP_STYLE}
