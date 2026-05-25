@@ -12,6 +12,8 @@ import { SwipeBackProvider } from "@/components/layout/SwipeBackProvider";
 import { OnboardingGate } from "@/components/auth/OnboardingGate";
 import Feed from "./pages/Feed";
 import Welcome from "./pages/Welcome";
+import RolePicker from "./pages/RolePicker";
+import Auth from "./pages/Auth";
 import Register from "./pages/Register";
 import Verify from "./pages/Verify";
 import Onboarding from "./pages/Onboarding";
