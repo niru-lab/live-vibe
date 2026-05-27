@@ -26,6 +26,8 @@ export const OnboardingGate = () => {
     // redirected to /onboarding (if incomplete) or /feed (if complete).
     if (checkedFor === user.id && location.pathname !== '/') return;
 
+    const VENUE_HOME = '/'; // later '/dashboard' once it exists
+
     let cancelled = false;
     supabase
       .from('profiles')
@@ -35,11 +37,15 @@ export const OnboardingGate = () => {
       .then(({ data }) => {
         if (cancelled) return;
         setCheckedFor(user.id);
+        const role = (data as any)?.role;
         if (!data || !data.onboarding_complete) {
-          const target = (data as any)?.role === 'venue_owner' ? '/onboarding-venue' : '/onboarding';
-          navigate(target, { replace: true });
+          navigate(role === 'venue_owner' ? '/onboarding-venue' : '/onboarding', { replace: true });
         } else if (location.pathname === '/') {
-          navigate('/feed', { replace: true });
+          if (role === 'venue_owner') {
+            if (VENUE_HOME !== '/') navigate(VENUE_HOME, { replace: true });
+          } else {
+            navigate('/feed', { replace: true });
+          }
         }
       });
 
