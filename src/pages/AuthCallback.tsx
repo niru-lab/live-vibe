@@ -15,10 +15,11 @@ export default function AuthCallback() {
         .eq('user_id', user.id)
         .maybeSingle()
         .then(({ data }) => {
+          const role = data?.role;
           if (!data || !data.onboarding_complete) {
-            navigate((data as any)?.role === 'venue_owner' ? '/onboarding-venue' : '/onboarding', { replace: true });
+            navigate(role === 'venue_owner' ? '/onboarding-venue' : '/onboarding', { replace: true });
           } else {
-            navigate((data as any)?.role === 'venue_owner' ? '/' : '/feed', { replace: true });
+            navigate(role === 'venue_owner' ? '/' : '/feed', { replace: true });
           }
         });
     } else if (!loading && !user) {
