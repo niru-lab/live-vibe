@@ -1,14 +1,32 @@
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { useToast } from '@/hooks/use-toast';
 
 type Role = 'guest' | 'venue_owner';
 
 export default function RolePicker() {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [saving, setSaving] = useState<Role | null>(null);
 
-  const pick = (role: Role) => {
-    navigate('/auth', { state: { role } });
+  const pick = async (role: Role) => {
+    if (!user || saving) return;
+    setSaving(role);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ role })
+      .eq('user_id', user.id);
+    setSaving(null);
+    if (error) {
+      toast({ variant: 'destructive', title: 'Fehler', description: error.message });
+      return;
+    }
+    navigate(role === 'venue_owner' ? '/onboarding-venue' : '/onboarding', { replace: true });
   };
 
   return (
@@ -44,30 +62,30 @@ export default function RolePicker() {
         <div className="flex w-full flex-col gap-4">
           <motion.button
             whileTap={{ scale: 0.96 }}
+            disabled={!!saving}
             onClick={() => pick('guest')}
-            className="group w-full rounded-[20px] border border-border/50 bg-card/80 p-6 text-left backdrop-blur-xl transition-shadow hover:shadow-[0_0_30px_-10px_hsl(var(--primary)/0.5)]"
+            className="group w-full rounded-[20px] border border-border/50 bg-card/80 p-6 text-left backdrop-blur-xl transition-shadow hover:shadow-[0_0_30px_-10px_hsl(var(--primary)/0.5)] disabled:opacity-50"
           >
             <div className="mb-3 text-[32px] leading-none">🎉</div>
-            <div className="text-[20px] font-bold text-foreground">Ich will rausgehen</div>
-            <div
-              className="mt-1 text-[14px]"
-              style={{ color: 'hsl(var(--foreground) / 0.6)' }}
-            >
+            <div className="text-[20px] font-bold text-foreground">
+              {saving === 'guest' ? 'Wird gespeichert…' : 'Ich will rausgehen'}
+            </div>
+            <div className="mt-1 text-[14px]" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>
               Zeig mir, wo heute was geht
             </div>
           </motion.button>
 
           <motion.button
             whileTap={{ scale: 0.96 }}
+            disabled={!!saving}
             onClick={() => pick('venue_owner')}
-            className="group w-full rounded-[20px] border border-border/50 bg-card/80 p-6 text-left backdrop-blur-xl transition-shadow hover:shadow-[0_0_30px_-10px_hsl(var(--primary)/0.5)]"
+            className="group w-full rounded-[20px] border border-border/50 bg-card/80 p-6 text-left backdrop-blur-xl transition-shadow hover:shadow-[0_0_30px_-10px_hsl(var(--primary)/0.5)] disabled:opacity-50"
           >
             <div className="mb-3 text-[32px] leading-none">🏛️</div>
-            <div className="text-[20px] font-bold text-foreground">Ich BIN der Spot</div>
-            <div
-              className="mt-1 text-[14px]"
-              style={{ color: 'hsl(var(--foreground) / 0.6)' }}
-            >
+            <div className="text-[20px] font-bold text-foreground">
+              {saving === 'venue_owner' ? 'Wird gespeichert…' : 'Ich BIN der Spot'}
+            </div>
+            <div className="mt-1 text-[14px]" style={{ color: 'hsl(var(--foreground) / 0.6)' }}>
               Du bringst die Leute, wir die Reichweite
             </div>
           </motion.button>
