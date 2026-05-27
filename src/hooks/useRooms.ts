@@ -128,15 +128,24 @@ export const useRooms = () => {
   const joinRoom = useMutation({
     mutationFn: async (roomId: string) => {
       if (!profile?.id) throw new Error('Not logged in');
+      const { data: room } = await supabase
+        .from('rooms')
+        .select('requires_approval')
+        .eq('id', roomId)
+        .single();
+      const requiresApproval = (room as any)?.requires_approval ?? true;
+      const status = requiresApproval ? 'pending' : 'approved';
       const { error } = await supabase
         .from('room_members')
-        .insert({ room_id: roomId, user_id: profile.id, role: 'member' });
+        .insert({ room_id: roomId, user_id: profile.id, role: 'member', status } as any);
       if (error) throw error;
+      return { status };
     },
-    onSuccess: () => {
+    onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['rooms'] });
       queryClient.invalidateQueries({ queryKey: ['my-rooms'] });
-      toast.success('Beigetreten!');
+      queryClient.invalidateQueries({ queryKey: ['room-members'] });
+      toast.success(res?.status === 'pending' ? 'Anfrage gesendet — warte auf Host' : 'Beigetreten!');
     },
     onError: (err: any) => toast.error(err.message),
   });
