@@ -3,10 +3,10 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
-// Routes that should NOT be gated (auth, onboarding itself, callback, public profile pages)
 const ALLOWED_PREFIXES = [
   '/auth',
   '/welcome',
+  '/role',
   '/register',
   '/verify',
   '/onboarding',
@@ -22,11 +22,9 @@ export const OnboardingGate = () => {
   useEffect(() => {
     if (loading || !user) return;
     if (ALLOWED_PREFIXES.some((p) => location.pathname.startsWith(p))) return;
-    // Note: '/' is intentionally NOT excluded — logged-in users on '/' should be
-    // redirected to /onboarding (if incomplete) or /feed (if complete).
     if (checkedFor === user.id && location.pathname !== '/') return;
 
-    const VENUE_HOME = '/'; // later '/dashboard' once it exists
+    const VENUE_HOME = '/';
 
     let cancelled = false;
     supabase
@@ -37,9 +35,13 @@ export const OnboardingGate = () => {
       .then(({ data }) => {
         if (cancelled) return;
         setCheckedFor(user.id);
-        const role = (data as any)?.role;
+        const role = data?.role as 'guest' | 'venue_owner' | null | undefined;
         if (!data || !data.onboarding_complete) {
-          navigate(role === 'venue_owner' ? '/onboarding-venue' : '/onboarding', { replace: true });
+          if (!role) {
+            navigate('/role', { replace: true });
+          } else {
+            navigate(role === 'venue_owner' ? '/onboarding-venue' : '/onboarding', { replace: true });
+          }
         } else if (location.pathname === '/') {
           if (role === 'venue_owner') {
             if (VENUE_HOME !== '/') navigate(VENUE_HOME, { replace: true });
