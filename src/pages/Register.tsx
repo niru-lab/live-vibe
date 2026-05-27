@@ -46,19 +46,8 @@ export default function Register() {
         }
         return;
       }
-      // Check onboarding status before routing
-      const uid = signInData.user?.id;
-      let onboardingDone = false;
-      if (uid) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('onboarding_complete')
-          .eq('user_id', uid)
-          .maybeSingle();
-        onboardingDone = !!profile?.onboarding_complete;
-      }
       setLoading(false);
-      navigate(onboardingDone ? '/' : '/onboarding', { replace: true });
+      navigate('/', { replace: true });
       return;
     }
 

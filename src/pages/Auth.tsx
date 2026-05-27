@@ -26,7 +26,7 @@ export default function Auth() {
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const role: 'guest' | 'venue_owner' = (location.state as { role?: 'guest' | 'venue_owner' } | null)?.role ?? 'guest';
+  const role: 'guest' | 'venue_owner' | undefined = (location.state as { role?: 'guest' | 'venue_owner' } | null)?.role;
   const { toast } = useToast();
 
   useEffect(() => {
@@ -98,11 +98,13 @@ export default function Auth() {
       </div>
 
       <Card className="relative z-10 w-full max-w-md border-border/50 bg-card/80 backdrop-blur-xl">
-        <span
-          className="pointer-events-none absolute right-3 top-3 z-20 rounded-full border border-border/50 bg-background/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur"
-        >
-          {role === 'venue_owner' ? 'Als Venue anmelden' : 'Als Gast anmelden'}
-        </span>
+        {role && (
+          <span
+            className="pointer-events-none absolute right-3 top-3 z-20 rounded-full border border-border/50 bg-background/60 px-2 py-0.5 text-[10px] font-medium text-muted-foreground backdrop-blur"
+          >
+            {role === 'venue_owner' ? 'Als Venue anmelden' : 'Als Gast anmelden'}
+          </span>
+        )}
         <Tabs defaultValue="login" className="w-full">
           <CardHeader>
             <TabsList className="grid w-full grid-cols-2">
