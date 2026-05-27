@@ -57,8 +57,9 @@ const App = () => (
                 <SwipeBackProvider />
                 <OnboardingGate />
                 <Routes>
-                  <Route path="/" element={<RolePicker />} />
+                  <Route path="/" element={<Welcome />} />
                   <Route path="/welcome" element={<Welcome />} />
+                  <Route path="/role" element={<RolePicker />} />
                   <Route path="/feed" element={<Feed />} />
                   <Route path="/profile/:username" element={<UserProfile />} />
                   <Route path="/auth" element={<Auth />} />
