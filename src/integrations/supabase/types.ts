@@ -1136,6 +1136,7 @@ export type Database = {
           joined_at: string
           role: string
           room_id: string
+          status: string
           user_id: string
         }
         Insert: {
@@ -1143,6 +1144,7 @@ export type Database = {
           joined_at?: string
           role?: string
           room_id: string
+          status?: string
           user_id: string
         }
         Update: {
@@ -1150,6 +1152,7 @@ export type Database = {
           joined_at?: string
           role?: string
           room_id?: string
+          status?: string
           user_id?: string
         }
         Relationships: [
@@ -1165,6 +1168,45 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      room_posts: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          room_id: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          room_id: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          room_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "room_posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "room_posts_room_id_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
             referencedColumns: ["id"]
           },
         ]
@@ -1224,6 +1266,7 @@ export type Database = {
           activity: string | null
           address: string | null
           category: string
+          chat_policy: string
           city: string | null
           cover_image_url: string | null
           created_at: string
@@ -1235,6 +1278,7 @@ export type Database = {
           location_name: string | null
           longitude: number | null
           name: string
+          requires_approval: boolean
           updated_at: string
           visibility: string
         }
@@ -1242,6 +1286,7 @@ export type Database = {
           activity?: string | null
           address?: string | null
           category?: string
+          chat_policy?: string
           city?: string | null
           cover_image_url?: string | null
           created_at?: string
@@ -1253,6 +1298,7 @@ export type Database = {
           location_name?: string | null
           longitude?: number | null
           name: string
+          requires_approval?: boolean
           updated_at?: string
           visibility?: string
         }
@@ -1260,6 +1306,7 @@ export type Database = {
           activity?: string | null
           address?: string | null
           category?: string
+          chat_policy?: string
           city?: string | null
           cover_image_url?: string | null
           created_at?: string
@@ -1271,6 +1318,7 @@ export type Database = {
           location_name?: string | null
           longitude?: number | null
           name?: string
+          requires_approval?: boolean
           updated_at?: string
           visibility?: string
         }
@@ -1524,6 +1572,10 @@ export type Database = {
       }
       is_event_owner: {
         Args: { _event_id: string; _profile_id: string }
+        Returns: boolean
+      }
+      is_room_approved_member: {
+        Args: { _room_id: string; _user_id: string }
         Returns: boolean
       }
       is_room_member: {
