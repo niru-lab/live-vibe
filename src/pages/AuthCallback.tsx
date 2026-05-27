@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function AuthCallback() {
   const { user, loading } = useAuth();
@@ -8,10 +9,22 @@ export default function AuthCallback() {
 
   useEffect(() => {
     if (!loading && user) {
-      navigate('/onboarding', { replace: true });
+      supabase
+        .from('profiles')
+        .select('onboarding_complete, role')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          const role = data?.role;
+          if (!data || !data.onboarding_complete) {
+            navigate(role === 'venue_owner' ? '/onboarding-venue' : '/onboarding', { replace: true });
+          } else {
+            navigate(role === 'venue_owner' ? '/' : '/feed', { replace: true });
+          }
+        });
     } else if (!loading && !user) {
       // Wait a moment for session to settle
-      const t = setTimeout(() => navigate('/auth', { replace: true }), 3000);
+      const t = setTimeout(() => navigate('/welcome', { replace: true }), 3000);
       return () => clearTimeout(t);
     }
   }, [user, loading, navigate]);
