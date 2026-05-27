@@ -58,7 +58,7 @@ const App = () => (
                 <OnboardingGate />
                 <Routes>
                   <Route path="/" element={<RolePicker />} />
-                  <Route path="/welcome" element={<RolePicker />} />
+                  <Route path="/welcome" element={<Welcome />} />
                   <Route path="/feed" element={<Feed />} />
                   <Route path="/profile/:username" element={<UserProfile />} />
                   <Route path="/auth" element={<Auth />} />
