@@ -14,7 +14,24 @@ export default function Verify() {
   const [resending, setResending] = useState(false);
 
   useEffect(() => {
-    if (user) navigate('/onboarding', { replace: true });
+    if (!user) return;
+    let cancelled = false;
+    supabase
+      .from('profiles')
+      .select('onboarding_complete, role')
+      .eq('user_id', user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return;
+        const role = data?.role as 'guest' | 'venue_owner' | null | undefined;
+        if (!data || !data.onboarding_complete) {
+          if (!role) navigate('/role', { replace: true });
+          else navigate(role === 'venue_owner' ? '/onboarding-venue' : '/onboarding', { replace: true });
+        } else {
+          navigate(role === 'venue_owner' ? '/' : '/feed', { replace: true });
+        }
+      });
+    return () => { cancelled = true; };
   }, [user, navigate]);
 
   useEffect(() => {
