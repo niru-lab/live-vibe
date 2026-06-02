@@ -1556,6 +1556,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      current_profile_id: { Args: never; Returns: string }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
