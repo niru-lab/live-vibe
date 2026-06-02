@@ -32,6 +32,7 @@ const STEP_TITLES: Record<number, { title: string; subtitle: string }> = {
 export default function OnboardingVenue() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const venueHome = '/events';
 
   const [profileId, setProfileId] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
@@ -70,7 +71,7 @@ export default function OnboardingVenue() {
         return;
       }
       if (data.onboarding_complete) {
-        navigate('/', { replace: true });
+        navigate(venueHome, { replace: true });
         return;
       }
       setProfileId(data.id);
@@ -137,7 +138,7 @@ export default function OnboardingVenue() {
 
       toast.success('Willkommen bei Feyrn! Dein Spot ist drin 🔥');
       setSuccess(true);
-      setTimeout(() => navigate('/', { replace: true }), 1600);
+      setTimeout(() => navigate(venueHome, { replace: true }), 1600);
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || 'Konnte Spot nicht speichern');

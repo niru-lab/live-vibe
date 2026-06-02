@@ -23,7 +23,7 @@ export default function AuthCallback() {
               navigate(role === 'venue_owner' ? '/onboarding-venue' : '/onboarding', { replace: true });
             }
           } else {
-            navigate(role === 'venue_owner' ? '/' : '/feed', { replace: true });
+            navigate(role === 'venue_owner' ? '/events' : '/feed', { replace: true });
           }
         });
     } else if (!loading && !user) {

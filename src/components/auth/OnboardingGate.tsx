@@ -24,7 +24,7 @@ export const OnboardingGate = () => {
     if (ALLOWED_PREFIXES.some((p) => location.pathname.startsWith(p))) return;
     if (checkedFor === user.id && location.pathname !== '/') return;
 
-    const VENUE_HOME = '/';
+    const VENUE_HOME = '/events';
 
     let cancelled = false;
     supabase
@@ -44,7 +44,7 @@ export const OnboardingGate = () => {
           }
         } else if (location.pathname === '/') {
           if (role === 'venue_owner') {
-            if (VENUE_HOME !== '/') navigate(VENUE_HOME, { replace: true });
+            navigate(VENUE_HOME, { replace: true });
           } else {
             navigate('/feed', { replace: true });
           }

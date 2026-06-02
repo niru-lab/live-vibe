@@ -60,7 +60,7 @@ export default function Onboarding() {
       }
 
       if (data.onboarding_complete) {
-        navigate('/', { replace: true });
+        navigate('/feed', { replace: true });
         return;
       }
 
