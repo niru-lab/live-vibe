@@ -28,7 +28,7 @@ export const FeyrnLogo = ({ size = 'md', className = '', asLink = true }: FeyrnL
   }
 
   return (
-    <Link to="/" aria-label="Zum Feed" className={`${classes} cursor-pointer transition-opacity hover:opacity-80`}>
+    <Link to="/feed" aria-label="Zum Feed" className={`${classes} cursor-pointer transition-opacity hover:opacity-80`}>
       {content}
     </Link>
   );
