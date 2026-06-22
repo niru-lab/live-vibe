@@ -6,7 +6,7 @@ import { PostTypeSelector } from '@/components/create/PostTypeSelector';
 import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 
 const navItems = [
-  { icon: House, label: 'Feed', path: '/', badgeKey: null },
+  { icon: House, label: 'Feed', path: '/feed', badgeKey: null },
   { icon: MagnifyingGlass, label: 'Discover', path: '/discover', badgeKey: null },
   { icon: PlusCircle, label: 'Post', path: '/create', isCenter: true, badgeKey: null },
   { icon: CalendarBlank, label: 'Events', path: '/events', badgeKey: 'events' as const },
@@ -59,7 +59,7 @@ export const BottomNav = () => {
                 <Link
                   key={path}
                   to={path}
-                  data-testid={path === '/discover' ? 'nav-map' : path === '/' ? 'nav-feed' : path === '/events' ? 'nav-events' : path === '/profile' ? 'nav-profile' : undefined}
+                  data-testid={path === '/discover' ? 'nav-map' : path === '/feed' ? 'nav-feed' : path === '/events' ? 'nav-events' : path === '/profile' ? 'nav-profile' : undefined}
                   className={cn(
                     'relative flex flex-col items-center gap-0.5 px-1 py-1.5 rounded-xl transition-all duration-300'
                   )}
