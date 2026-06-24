@@ -19,7 +19,9 @@ import {
   MusicNote,
   Plus,
   Hourglass,
+  CalendarStar,
 } from '@phosphor-icons/react';
+import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { format, isToday, isTomorrow, addDays, isSameDay } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -89,8 +91,15 @@ export default function Events() {
       <div className="fixed inset-0 bg-background -z-10" />
 
       {/* Header */}
-      <header className="px-5 pt-6 pb-2">
-        <h1 className="font-display text-[34px] font-bold tracking-tight text-foreground">Events</h1>
+      <header className="px-4 pb-2" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 16px)' }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full glass-pill">
+              <CalendarStar weight="fill" className="h-4 w-4 text-primary" />
+            </div>
+            <FeyrnLogo size="sm" />
+          </div>
+        </div>
       </header>
 
       {/* Search */}
