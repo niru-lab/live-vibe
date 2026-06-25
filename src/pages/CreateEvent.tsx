@@ -157,6 +157,9 @@ export default function CreateEvent() {
         is_free: data.is_free, entry_price: data.is_free ? 0 : (data.entry_price || 0), dresscode: data.dresscode || null,
         dos_and_donts: data.dos_and_donts || null, category: data.category, cover_image_url: coverImageUrl,
         visibility: data.visibility,
+        ...(ownedVenue && ownedVenue.name === data.location_name && ownedVenue.latitude != null && ownedVenue.longitude != null
+          ? { latitude: ownedVenue.latitude, longitude: ownedVenue.longitude }
+          : {}),
       });
       if (invitedFollowers.length > 0 && newEvent?.id) {
         const invitations = invitedFollowers.map((userId) => ({ event_id: newEvent.id, user_id: userId, status: 'invited' as const }));
