@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense, useCallback } from 'react';
+import { useState, lazy, Suspense, useCallback, useEffect, useRef } from 'react';
 import { FilterState } from '@/components/discover/DiscoverFilters';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Input } from '@/components/ui/input';
@@ -9,15 +9,45 @@ import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { DiscoverFilters } from '@/components/discover/DiscoverFilters';
 import { RoomzSheet } from '@/components/discover/RoomzSheet';
 import { useQueryClient } from '@tanstack/react-query';
+import { useProfile } from '@/hooks/useProfile';
 
 const StuttgartMap = lazy(() => import('@/components/maps/StuttgartMap').then(m => ({ default: m.StuttgartMap })));
 
+// Normalize free-form city names → canonical keys used in StuttgartMap.cityCenters
+const CITY_ALIASES: Record<string, string> = {
+  'stuttgart': 'Stuttgart',
+  'aalen': 'Aalen',
+  'ulm': 'Ulm',
+  'frankfurt': 'Frankfurt am Main',
+  'frankfurt am main': 'Frankfurt am Main',
+  'münchen': 'München',
+  'munchen': 'München',
+  'munich': 'München',
+  'berlin': 'Berlin',
+  'hamburg': 'Hamburg',
+  'köln': 'Köln',
+  'koeln': 'Köln',
+  'cologne': 'Köln',
+};
+
 export default function Discover() {
+  const { data: profile } = useProfile();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const userTouchedCity = useRef(false);
   const queryClient = useQueryClient();
+
+  // Auto-center on user's home city once profile loads (unless user already picked one)
+  useEffect(() => {
+    if (userTouchedCity.current) return;
+    if (selectedCity) return;
+    const raw = profile?.city?.trim().toLowerCase();
+    if (!raw) return;
+    const canonical = CITY_ALIASES[raw] || profile!.city;
+    setSelectedCity(canonical);
+  }, [profile?.city, selectedCity]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
