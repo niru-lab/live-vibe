@@ -87,6 +87,7 @@ export default function Discover() {
             </div>
             <div className="flex items-center gap-2">
               <DiscoverFilters onFiltersChange={(f) => {
+                userTouchedCity.current = true;
                 setSelectedCity(f.city);
                 const catMap: Record<string, string> = { 'Bar': 'bar', 'Club': 'club', 'Café': 'cafe', 'Events': 'event' };
                 setSelectedCategory(f.category ? catMap[f.category] || null : null);
