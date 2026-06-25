@@ -1,0 +1,1 @@
+UPDATE public.venues SET owner_profile_id = '9241914b-4905-4ae9-97ee-9d0eea34eb30' WHERE id = '19f859c7-5adc-4bf2-ae27-af88394fc87e';

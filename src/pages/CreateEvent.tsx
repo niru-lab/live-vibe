@@ -77,7 +77,7 @@ export default function CreateEvent() {
   // Venue partner → prefill location with their primary venue
   const { data: ownedVenue } = useQuery({
     queryKey: ['owned-venue', profile?.id],
-    enabled: !!profile?.id && profile?.role === 'venue',
+    enabled: !!profile?.id && profile?.role === 'venue_owner',
     queryFn: async () => {
       const { data, error } = await supabase
         .from('venues')
