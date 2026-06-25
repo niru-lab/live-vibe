@@ -65,6 +65,7 @@ const categories = [
 export default function CreateEvent() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: profile } = useProfile();
   const { toast } = useToast();
   const createEvent = useCreateEvent();
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
@@ -73,10 +74,43 @@ export default function CreateEvent() {
   const [isUploading, setIsUploading] = useState(false);
   const [invitedFollowers, setInvitedFollowers] = useState<string[]>([]);
 
+  // Venue partner → prefill location with their primary venue
+  const { data: ownedVenue } = useQuery({
+    queryKey: ['owned-venue', profile?.id],
+    enabled: !!profile?.id && profile?.role === 'venue',
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('venues')
+        .select('id, name, address, city, latitude, longitude, category')
+        .eq('owner_profile_id', profile!.id)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
     defaultValues: { name: '', description: '', location_name: '', area: '', city: '', is_free: true, entry_price: 0, category: 'other', starts_at_time: '22:00', ends_at_time: '04:00', visibility: 'public' },
   });
+
+  // Apply venue defaults once when owned venue arrives — don't overwrite if user already typed
+  useEffect(() => {
+    if (!ownedVenue) return;
+    const v = form.getValues();
+    const patch: Partial<EventFormData> = {};
+    if (!v.location_name && ownedVenue.name) patch.location_name = ownedVenue.name;
+    if (!v.area && ownedVenue.address) patch.area = ownedVenue.address;
+    if (!v.city && ownedVenue.city) patch.city = ownedVenue.city;
+    if (!v.category || v.category === 'other') {
+      const c = ownedVenue.category;
+      if (c === 'club' || c === 'bar') patch.category = c;
+    }
+    if (Object.keys(patch).length) form.reset({ ...v, ...patch });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ownedVenue]);
 
   const handleFilesSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files; if (!files) return;
