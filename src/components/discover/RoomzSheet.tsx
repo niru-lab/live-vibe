@@ -33,7 +33,7 @@ const RoomCard = ({ room, isMember, onJoin, onOpen }: { room: Room & { myRole?: 
       <div className="flex items-center gap-2">
         <Avatar className="h-6 w-6 ring-1 ring-primary/40">
           <AvatarImage src={room.hoster?.avatar_url || ''} />
-          <AvatarFallback className="text-xs bg-gradient-to-br from-[#7C3AED] to-[#EC4899] text-white">{room.hoster?.display_name?.[0]}</AvatarFallback>
+          <AvatarFallback className="text-xs bg-primary text-primary-foreground">{room.hoster?.display_name?.[0]}</AvatarFallback>
         </Avatar>
         <span className="text-xs text-muted-foreground">@{room.hoster?.username}</span>
       </div>
