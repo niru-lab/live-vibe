@@ -27,7 +27,7 @@ const RoomCard = ({ room, isMember, onJoin, onOpen }: { room: Room & { myRole?: 
     </div>
     <div className="flex items-center gap-3 text-xs text-muted-foreground">
       {room.city && <span className="flex items-center gap-1"><MapPin weight="fill" className="h-3 w-3 text-primary" />{room.city}</span>}
-      {room.activity && <span className="flex items-center gap-1"><Lightning weight="fill" className="h-3 w-3 text-[#EC4899]" />{room.activity}</span>}
+      {room.activity && <span className="flex items-center gap-1"><Lightning weight="fill" className="h-3 w-3 text-primary" />{room.activity}</span>}
     </div>
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
