@@ -78,7 +78,7 @@ export function RoomzSheet() {
               </div>
               <h2 className="text-xl font-bold text-foreground">Roomz</h2>
             </div>
-            <Button size="sm" className="gap-1.5 bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white border-0" onClick={() => go('/roomz/create')}>
+            <Button size="sm" className="gap-1.5 bg-primary text-primary-foreground hover:bg-primary/90 border-0" onClick={() => go('/roomz/create')}>
               <Plus weight="bold" className="h-4 w-4" />
               Erstellen
             </Button>
@@ -88,10 +88,10 @@ export function RoomzSheet() {
             <Input placeholder="Roomz suchen..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 glass-pill border-0 text-foreground placeholder:text-muted-foreground" />
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setTab('my')} className={cn('px-4 py-2 rounded-full text-sm transition-all', tab === 'my' ? 'bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white font-bold' : 'glass-pill text-muted-foreground font-medium')}>
+            <button onClick={() => setTab('my')} className={cn('px-4 py-2 rounded-full text-sm transition-all whitespace-nowrap', tab === 'my' ? 'bg-primary text-primary-foreground font-bold' : 'glass-pill text-muted-foreground font-medium')}>
               Meine Roomz
             </button>
-            <button onClick={() => setTab('explore')} className={cn('px-4 py-2 rounded-full text-sm transition-all', tab === 'explore' ? 'bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white font-bold' : 'glass-pill text-muted-foreground font-medium')}>
+            <button onClick={() => setTab('explore')} className={cn('px-4 py-2 rounded-full text-sm transition-all whitespace-nowrap', tab === 'explore' ? 'bg-primary text-primary-foreground font-bold' : 'glass-pill text-muted-foreground font-medium')}>
               Entdecken
             </button>
           </div>
