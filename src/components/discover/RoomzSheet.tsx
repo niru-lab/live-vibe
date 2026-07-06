@@ -27,20 +27,20 @@ const RoomCard = ({ room, isMember, onJoin, onOpen }: { room: Room & { myRole?: 
     </div>
     <div className="flex items-center gap-3 text-xs text-muted-foreground">
       {room.city && <span className="flex items-center gap-1"><MapPin weight="fill" className="h-3 w-3 text-primary" />{room.city}</span>}
-      {room.activity && <span className="flex items-center gap-1"><Lightning weight="fill" className="h-3 w-3 text-[#EC4899]" />{room.activity}</span>}
+      {room.activity && <span className="flex items-center gap-1"><Lightning weight="fill" className="h-3 w-3 text-primary" />{room.activity}</span>}
     </div>
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-2">
         <Avatar className="h-6 w-6 ring-1 ring-primary/40">
           <AvatarImage src={room.hoster?.avatar_url || ''} />
-          <AvatarFallback className="text-xs bg-gradient-to-br from-[#7C3AED] to-[#EC4899] text-white">{room.hoster?.display_name?.[0]}</AvatarFallback>
+          <AvatarFallback className="text-xs bg-primary text-primary-foreground">{room.hoster?.display_name?.[0]}</AvatarFallback>
         </Avatar>
         <span className="text-xs text-muted-foreground">@{room.hoster?.username}</span>
       </div>
       {isMember ? (
         <Badge className="text-xs glass-pill text-foreground border-0">{room.myRole === 'hoster' ? 'Hoster' : 'Mitglied'}</Badge>
       ) : (
-        <Button size="sm" className="h-7 text-xs bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white border-0" onClick={(e) => { e.stopPropagation(); onJoin(); }}>
+        <Button size="sm" className="h-7 text-xs bg-primary text-primary-foreground hover:bg-primary/90 border-0" onClick={(e) => { e.stopPropagation(); onJoin(); }}>
           Beitreten
         </Button>
       )}
