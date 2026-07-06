@@ -17,41 +17,27 @@ export const AchievementsView = ({ open, onOpenChange, badgeData }: Achievements
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        className="w-full sm:max-w-md overflow-y-auto border-l-0 p-5"
-        style={{ background: '#0A0A0F' }}
-      >
+      <SheetContent className="w-full sm:max-w-md overflow-y-auto border-l-0 p-5 bg-background">
         <SheetHeader className="hidden">
           <SheetTitle>Meine Erfolge</SheetTitle>
         </SheetHeader>
 
         <div className="mt-6 space-y-2.5">
           {/* Block 1 — Level Hero Card */}
-          <div
-            className="rounded-[20px] p-5"
-            style={{ background: '#12121A', border: '0.5px solid #1e1e2e' }}
-          >
+          <div className="rounded-[20px] p-5 bg-card border border-border">
             <p
-              className="mb-3"
-              style={{
-                fontSize: '10px',
-                letterSpacing: '0.12em',
-                color: '#4a4a5e',
-                textTransform: 'uppercase',
-              }}
+              className="mb-3 text-muted-foreground uppercase"
+              style={{ fontSize: '10px', letterSpacing: '0.12em' }}
             >
               Aktuelles Level
             </p>
             <div className="flex items-center gap-3.5">
               <div
-                className="flex items-center justify-center"
+                className="flex items-center justify-center bg-primary/10 border border-primary/40 text-primary"
                 style={{
                   width: '48px',
                   height: '48px',
                   borderRadius: '14px',
-                  background: '#1a1025',
-                  border: '0.5px solid #3d2a6e',
-                  color: '#9b7de8',
                   fontSize: '13px',
                   fontWeight: 600,
                 }}
@@ -59,13 +45,8 @@ export const AchievementsView = ({ open, onOpenChange, badgeData }: Achievements
                 Lv.{badgeData.level}
               </div>
               <p
-                className="truncate"
-                style={{
-                  fontSize: '18px',
-                  fontWeight: 600,
-                  color: '#e8e4f0',
-                  letterSpacing: '-0.02em',
-                }}
+                className="truncate text-foreground"
+                style={{ fontSize: '18px', fontWeight: 600, letterSpacing: '-0.02em' }}
               >
                 {badgeData.name}
               </p>
@@ -75,59 +56,43 @@ export const AchievementsView = ({ open, onOpenChange, badgeData }: Achievements
           {/* Block 2 — Stats Row */}
           <div className="grid grid-cols-2" style={{ gap: '10px' }}>
             {/* Social Cloud */}
-            <div
-              className="rounded-2xl p-4"
-              style={{ background: '#12121A', border: '0.5px solid #1e1e2e' }}
-            >
+            <div className="rounded-2xl p-4 bg-card border border-border">
               <div
-                className="flex items-center justify-center mb-3"
-                style={{
-                  width: '28px',
-                  height: '28px',
-                  borderRadius: '8px',
-                  background: '#1a1025',
-                }}
+                className="flex items-center justify-center mb-3 bg-primary/10"
+                style={{ width: '28px', height: '28px', borderRadius: '8px' }}
               >
-                <Circle weight="fill" style={{ width: '12px', height: '12px', color: '#7C3AED' }} />
+                <Circle weight="fill" className="text-primary" style={{ width: '12px', height: '12px' }} />
               </div>
-              <p style={{ fontSize: '22px', fontWeight: 600, color: '#e8e4f0', lineHeight: 1.1 }}>
+              <p className="text-foreground" style={{ fontSize: '22px', fontWeight: 600, lineHeight: 1.1 }}>
                 {badgeData.totalPoints.toLocaleString()}
               </p>
               {badgeData.weeklyGain > 0 && (
-                <p className="mt-1" style={{ fontSize: '11px', color: '#7C3AED' }}>
+                <p className="mt-1 text-primary" style={{ fontSize: '11px' }}>
                   +{badgeData.weeklyGain.toLocaleString()} diese Woche
                 </p>
               )}
               <p
-                className="mt-2"
-                style={{
-                  fontSize: '11px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  color: '#4a4a5e',
-                }}
+                className="mt-2 text-muted-foreground uppercase"
+                style={{ fontSize: '11px', letterSpacing: '0.04em' }}
               >
                 Social Cloud
               </p>
             </div>
 
             {/* Streak */}
-            <div
-              className="rounded-2xl p-4"
-              style={{ background: '#12121A', border: '0.5px solid #1e1e2e' }}
-            >
+            <div className="rounded-2xl p-4 bg-card border border-border">
               <div
                 className="flex items-center justify-center mb-3"
                 style={{
                   width: '28px',
                   height: '28px',
                   borderRadius: '8px',
-                  background: '#1a1408',
+                  background: 'hsl(30 80% 50% / 0.12)',
                 }}
               >
                 <Fire weight="fill" style={{ width: '14px', height: '14px', color: '#c17a2a' }} />
               </div>
-              <p style={{ fontSize: '22px', fontWeight: 600, color: '#e8e4f0', lineHeight: 1.1 }}>
+              <p className="text-foreground" style={{ fontSize: '22px', fontWeight: 600, lineHeight: 1.1 }}>
                 {streakDays}
                 <span style={{ fontSize: '13px', fontWeight: 400, marginLeft: '4px' }}>Tage</span>
               </p>
@@ -135,13 +100,8 @@ export const AchievementsView = ({ open, onOpenChange, badgeData }: Achievements
                 {activeStreak ? 'Streak aktiv' : 'Kein Streak'}
               </p>
               <p
-                className="mt-2"
-                style={{
-                  fontSize: '11px',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.04em',
-                  color: '#4a4a5e',
-                }}
+                className="mt-2 text-muted-foreground uppercase"
+                style={{ fontSize: '11px', letterSpacing: '0.04em' }}
               >
                 Login Streak
               </p>
