@@ -101,25 +101,25 @@ export default function UserProfile() {
 
   return (
     <AppLayout>
-      <div className="fixed inset-0 -z-10 bg-[#0A0A0F]" />
+      <div className="fixed inset-0 -z-10 bg-background" />
       <div className="min-h-screen" data-testid="profile-container">
         <header className="flex items-center justify-between px-4 py-4">
           <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full glass-pill" onClick={() => navigate(-1)}>
-            <ArrowLeft weight="bold" className="h-4 w-4 text-white" />
+            <ArrowLeft weight="bold" className="h-4 w-4 text-foreground" />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full glass-pill">
-                <DotsThree weight="bold" className="h-5 w-5 text-white" />
+                <DotsThree weight="bold" className="h-5 w-5 text-foreground" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-[#12121A] border-white/[0.08] text-white min-w-[180px]">
-              <DropdownMenuItem onClick={() => setMessageOpen(true)} className="gap-2 cursor-pointer focus:bg-white/[0.06] focus:text-white">
+            <DropdownMenuContent align="end" className="bg-popover border-border text-popover-foreground min-w-[180px]">
+              <DropdownMenuItem onClick={() => setMessageOpen(true)} className="gap-2 cursor-pointer">
                 <ChatCircleDots weight="bold" className="h-4 w-4" />
                 Nachricht senden
               </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-white/[0.08]" />
-              <DropdownMenuItem onClick={() => setBlockConfirmOpen(true)} className="gap-2 cursor-pointer text-red-400 focus:bg-red-500/10 focus:text-red-400">
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setBlockConfirmOpen(true)} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
                 <Prohibit weight="bold" className="h-4 w-4" />
                 Blockieren
               </DropdownMenuItem>
@@ -128,29 +128,29 @@ export default function UserProfile() {
         </header>
 
         <div className="px-4 pb-24 space-y-5">
-          <div className="relative overflow-hidden rounded-[28px] border border-white/[0.08]" style={{ background: '#12121A' }}>
-            <div className="absolute inset-0 opacity-60" style={{ background: 'radial-gradient(circle at 50% 0%, rgba(124,58,237,0.18), transparent 60%)' }} />
+          <div className="relative overflow-hidden rounded-[28px] border border-border bg-card">
+            <div className="absolute inset-0 opacity-60" style={{ background: 'radial-gradient(circle at 50% 0%, hsl(var(--primary) / 0.18), transparent 60%)' }} />
             <div className="relative p-6 flex flex-col items-center text-center">
-              <Avatar className="h-[84px] w-[84px] border-2" style={{ borderColor: '#0A0A0F' }}>
+              <Avatar className="h-[84px] w-[84px] border-2 border-background">
                 <AvatarImage src={profile.avatar_url || ''} className="object-cover" />
-                <AvatarFallback className="bg-[#1A1A24] text-xl text-white font-bold">{profile.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+                <AvatarFallback className="bg-muted text-xl text-foreground font-bold">{profile.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
               </Avatar>
-              <p className="mt-3 text-base font-bold text-white">{profile.display_name}</p>
-              <p data-testid="profile-username" className="text-sm text-[#A0A0B0]">@{profile.username}</p>
-              {profile.bio && <p className="mt-3 text-xs max-w-xs leading-relaxed text-[#A0A0B0]">{profile.bio}</p>}
+              <p className="mt-3 text-base font-bold text-foreground">{profile.display_name}</p>
+              <p data-testid="profile-username" className="text-sm text-muted-foreground">@{profile.username}</p>
+              {profile.bio && <p className="mt-3 text-xs max-w-xs leading-relaxed text-muted-foreground">{profile.bio}</p>}
 
               <div className="mt-5 grid grid-cols-3 w-full max-w-[280px]">
                 <div className="flex flex-col items-center px-2">
-                  <span className="text-white font-bold text-[24px] leading-tight">{postsCount || 0}</span>
-                  <span className="text-[12px] mt-0.5 text-[#A0A0B0]">Posts</span>
+                  <span className="text-foreground font-bold text-[24px] leading-tight">{postsCount || 0}</span>
+                  <span className="text-[12px] mt-0.5 text-muted-foreground">Posts</span>
                 </div>
-                <div className="flex flex-col items-center px-2 border-x border-white/[0.08]">
-                  <span data-testid="follower-count" className="text-white font-bold text-[24px] leading-tight">{followStats?.followers || 0}</span>
-                  <span className="text-[12px] mt-0.5 text-[#A0A0B0]">Followers</span>
+                <div className="flex flex-col items-center px-2 border-x border-border">
+                  <span data-testid="follower-count" className="text-foreground font-bold text-[24px] leading-tight">{followStats?.followers || 0}</span>
+                  <span className="text-[12px] mt-0.5 text-muted-foreground">Followers</span>
                 </div>
                 <div className="flex flex-col items-center px-2">
-                  <span className="text-white font-bold text-[24px] leading-tight">{followStats?.following || 0}</span>
-                  <span className="text-[12px] mt-0.5 text-[#A0A0B0]">Folgt</span>
+                  <span className="text-foreground font-bold text-[24px] leading-tight">{followStats?.following || 0}</span>
+                  <span className="text-[12px] mt-0.5 text-muted-foreground">Folgt</span>
                 </div>
               </div>
 
@@ -159,15 +159,17 @@ export default function UserProfile() {
                   data-testid="follow-btn"
                   onClick={handleFollow}
                   disabled={toggleFollow.isPending}
-                  className={`flex-1 gap-1.5 ${isFollowing ? 'bg-white/[0.06] text-white border border-white/[0.08] hover:bg-white/[0.1]' : 'bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white border-0'}`}
+                  className={`flex-1 gap-1.5 ${isFollowing ? 'bg-muted text-foreground border border-border hover:bg-muted/80' : 'bg-gradient-to-r from-primary to-accent text-primary-foreground border-0'}`}
                 >
                   {isFollowing ? <><Check weight="bold" className="h-4 w-4" /> Following</> : <><Plus weight="bold" className="h-4 w-4" /> Folgen</>}
                 </Button>
-                <Button data-testid="message-btn" onClick={() => setMessageOpen(true)} variant="outline" size="icon" className="bg-white/[0.04] border-white/[0.08] text-white hover:bg-white/[0.1]">
+                <Button data-testid="message-btn" onClick={() => setMessageOpen(true)} variant="outline" size="icon">
                   <ChatCircleDots weight="bold" className="h-4 w-4" />
                 </Button>
               </div>
             </div>
+          </div>
+
           </div>
 
           {/* Posts grid */}
