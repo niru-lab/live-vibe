@@ -131,7 +131,7 @@ export const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDi
             </div>
           </div>
         </div>
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-0 px-6 pb-6 pt-2 border-t border-border">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
           <Button onClick={handleSave} disabled={!canSave}>
             {isUploading ? (<><SpinnerGap weight="thin" className="mr-2 h-4 w-4 animate-spin" />Speichern...</>) : 'Speichern'}
