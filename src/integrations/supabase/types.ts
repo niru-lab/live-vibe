@@ -1133,6 +1133,85 @@ export type Database = {
         }
         Relationships: []
       }
+      push_tokens: {
+        Row: {
+          created_at: string
+          id: string
+          platform: string
+          profile_id: string
+          token: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          platform: string
+          profile_id: string
+          token: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          platform?: string
+          profile_id?: string
+          token?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_tokens_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reports: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_id: string
+          reviewed_at: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          reason: Database["public"]["Enums"]["report_reason"]
+          reporter_id: string
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id: string
+          target_type: Database["public"]["Enums"]["report_target"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          reason?: Database["public"]["Enums"]["report_reason"]
+          reporter_id?: string
+          reviewed_at?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          target_id?: string
+          target_type?: Database["public"]["Enums"]["report_target"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       room_members: {
         Row: {
           id: string
@@ -1635,6 +1714,21 @@ export type Database = {
       outbox_status: "pending" | "processing" | "done" | "failed"
       post_type: "normal" | "moment_x"
       profile_type: "user" | "club" | "organizer" | "eventer"
+      report_reason:
+        | "spam"
+        | "harassment"
+        | "nudity"
+        | "violence"
+        | "illegal"
+        | "other"
+      report_status: "pending" | "reviewed" | "actioned" | "dismissed"
+      report_target:
+        | "post"
+        | "profile"
+        | "room"
+        | "event"
+        | "message"
+        | "comment"
       visibility_level: "public" | "followers" | "private"
     }
     CompositeTypes: {
@@ -1793,6 +1887,16 @@ export const Constants = {
       outbox_status: ["pending", "processing", "done", "failed"],
       post_type: ["normal", "moment_x"],
       profile_type: ["user", "club", "organizer", "eventer"],
+      report_reason: [
+        "spam",
+        "harassment",
+        "nudity",
+        "violence",
+        "illegal",
+        "other",
+      ],
+      report_status: ["pending", "reviewed", "actioned", "dismissed"],
+      report_target: ["post", "profile", "room", "event", "message", "comment"],
       visibility_level: ["public", "followers", "private"],
     },
   },

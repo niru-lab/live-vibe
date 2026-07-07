@@ -3,9 +3,12 @@ import { Capacitor } from '@capacitor/core';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { Geolocation } from '@capacitor/geolocation';
 import { PushNotifications } from '@capacitor/push-notifications';
+import { supabase } from '@/integrations/supabase/client';
+import { useProfile } from './useProfile';
 
 export const useNativeFeatures = () => {
   const isNative = Capacitor.isNativePlatform();
+  const { data: profile } = useProfile();
 
   // Push Notifications
   const initPushNotifications = useCallback(async () => {
@@ -16,9 +19,19 @@ export const useNativeFeatures = () => {
       await PushNotifications.register();
     }
 
-    PushNotifications.addListener('registration', (token) => {
+    PushNotifications.addListener('registration', async (token) => {
       console.log('Push registration token:', token.value);
-      // TODO: Send token to backend for storage
+      if (!profile) return;
+      const platform = Capacitor.getPlatform() as 'ios' | 'android' | 'web';
+      const { error } = await supabase.from('push_tokens').upsert(
+        {
+          profile_id: profile.id,
+          token: token.value,
+          platform,
+        },
+        { onConflict: 'token' },
+      );
+      if (error) console.error('Failed to store push token:', error);
     });
 
     PushNotifications.addListener('registrationError', (err) => {
@@ -32,7 +45,7 @@ export const useNativeFeatures = () => {
     PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
       console.log('Push notification action:', notification);
     });
-  }, [isNative]);
+  }, [isNative, profile]);
 
   // Camera
   const takePhoto = useCallback(async () => {
@@ -68,12 +81,12 @@ export const useNativeFeatures = () => {
     return null;
   }, []);
 
-  // Initialize push notifications on mount
+  // Initialize push notifications when profile is available
   useEffect(() => {
-    if (isNative) {
+    if (isNative && profile) {
       initPushNotifications();
     }
-  }, [isNative, initPushNotifications]);
+  }, [isNative, profile, initPushNotifications]);
 
   return {
     isNative,
