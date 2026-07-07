@@ -469,6 +469,7 @@ export type Database = {
           latitude: number | null
           location_name: string
           longitude: number | null
+          music_genres: string[]
           name: string
           starts_at: string
           updated_at: string
@@ -494,6 +495,7 @@ export type Database = {
           latitude?: number | null
           location_name: string
           longitude?: number | null
+          music_genres?: string[]
           name: string
           starts_at: string
           updated_at?: string
@@ -519,6 +521,7 @@ export type Database = {
           latitude?: number | null
           location_name?: string
           longitude?: number | null
+          music_genres?: string[]
           name?: string
           starts_at?: string
           updated_at?: string

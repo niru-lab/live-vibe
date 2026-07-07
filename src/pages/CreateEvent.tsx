@@ -42,6 +42,7 @@ const eventSchema = z.object({
   dresscode: z.string().max(80).optional(),
   dos_and_donts: z.string().max(500).optional(),
   category: z.enum(['club', 'house_party', 'bar', 'festival', 'concert', 'sport', 'other']),
+  music_genres: z.array(z.string()).default([]),
   visibility: z.enum(['public', 'private']),
 }).refine((data) => {
   const [h, m] = data.starts_at_time.split(':').map(Number);
@@ -61,6 +62,8 @@ const categories = [
   { value: 'sport', label: '⚽ Sport', emoji: '⚽' },
   { value: 'other', label: '✨ Andere', emoji: '✨' },
 ];
+
+const GENRE_OPTIONS = ['Techno', 'House', 'Hip-Hop', 'Jazz', 'Indie', 'Pop', 'Latin', 'R&B', 'Afrobeats', 'Drum & Bass', 'Rock', 'Electronic', 'Reggaeton', 'Amapiano', 'Mixed'];
 
 export default function CreateEvent() {
   const navigate = useNavigate();
@@ -93,7 +96,7 @@ export default function CreateEvent() {
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
-    defaultValues: { name: '', description: '', location_name: '', area: '', city: '', is_free: true, entry_price: 0, category: 'other', starts_at_time: '22:00', ends_at_time: '04:00', visibility: 'public' },
+    defaultValues: { name: '', description: '', location_name: '', area: '', city: '', is_free: true, entry_price: 0, category: 'other', music_genres: [], starts_at_time: '22:00', ends_at_time: '04:00', visibility: 'public' },
   });
 
   // Apply venue defaults once when owned venue arrives — don't overwrite if user already typed
@@ -156,6 +159,7 @@ export default function CreateEvent() {
         starts_at: startsAt.toISOString(), ends_at: endsAt?.toISOString() || null, expected_attendees: data.expected_attendees || null,
         is_free: data.is_free, entry_price: data.is_free ? 0 : (data.entry_price || 0), dresscode: data.dresscode || null,
         dos_and_donts: data.dos_and_donts || null, category: data.category, cover_image_url: coverImageUrl,
+        music_genres: data.music_genres ?? [],
         visibility: data.visibility,
         ...(ownedVenue && ownedVenue.name === data.location_name && ownedVenue.latitude != null && ownedVenue.longitude != null
           ? { latitude: ownedVenue.latitude, longitude: ownedVenue.longitude }
@@ -219,6 +223,28 @@ export default function CreateEvent() {
               <FormField control={form.control} name="category" render={({ field }) => (
                 <FormItem><FormLabel>Kategorie *</FormLabel><div className="grid grid-cols-4 gap-1.5">{categories.map((cat) => (<button key={cat.value} type="button" onClick={() => field.onChange(cat.value)} className={cn('flex flex-col items-center gap-0.5 rounded-lg border p-2 transition-all text-center', field.value === cat.value ? 'border-primary bg-primary/10' : 'border-border/50 hover:border-primary/50')}><span className="text-lg">{cat.emoji}</span><span className="text-[10px] font-medium leading-tight">{cat.label.split(' ')[1]}</span></button>))}</div><FormMessage /></FormItem>
               )} />
+              <FormField control={form.control} name="music_genres" render={({ field }) => {
+                const selected = field.value ?? [];
+                const toggle = (g: string) => field.onChange(selected.includes(g) ? selected.filter((x: string) => x !== g) : [...selected, g]);
+                return (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2"><MusicNote weight="thin" className="h-4 w-4" /> Genres</FormLabel>
+                    <div className="flex flex-wrap gap-1.5">
+                      {GENRE_OPTIONS.map((g) => {
+                        const sel = selected.includes(g);
+                        return (
+                          <button key={g} type="button" onClick={() => toggle(g)}
+                            className={cn('rounded-full border px-3 py-1 text-xs font-medium transition-all',
+                              sel ? 'border-primary bg-primary/15 text-primary' : 'border-border/50 text-muted-foreground hover:border-primary/50')}>
+                            {g}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }} />
               <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>Beschreibung</FormLabel><FormControl><Textarea placeholder="Erzähle mehr über dein Event..." className="min-h-[60px]" {...field} /></FormControl><FormMessage /></FormItem>)} />
             </div>
 
