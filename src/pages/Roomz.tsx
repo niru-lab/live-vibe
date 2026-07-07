@@ -43,7 +43,7 @@ const RoomCard = ({ room, isMember, onJoin }: { room: Room & { myRole?: string }
         )}
         {room.activity && (
           <span className="flex items-center gap-1">
-            <Lightning weight="fill" className="h-3 w-3 text-[#EC4899]" />
+            <Lightning weight="fill" className="h-3 w-3 text-accent" />
             {room.activity}
           </span>
         )}
