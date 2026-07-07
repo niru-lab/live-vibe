@@ -56,6 +56,7 @@ export default function Events() {
   const [search, setSearch] = useState('');
   const [dateKey, setDateKey] = useState<string>('all');
   const [genre, setGenre] = useState<string | null>(null);
+  const [myEventsView, setMyEventsView] = useState<'upcoming' | 'past'>('upcoming');
 
   const dateFilters = useMemo(buildDateFilters, []);
   const activeDate = dateFilters.find((f) => f.key === dateKey)?.date ?? null;
