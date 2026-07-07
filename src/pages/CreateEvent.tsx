@@ -223,6 +223,28 @@ export default function CreateEvent() {
               <FormField control={form.control} name="category" render={({ field }) => (
                 <FormItem><FormLabel>Kategorie *</FormLabel><div className="grid grid-cols-4 gap-1.5">{categories.map((cat) => (<button key={cat.value} type="button" onClick={() => field.onChange(cat.value)} className={cn('flex flex-col items-center gap-0.5 rounded-lg border p-2 transition-all text-center', field.value === cat.value ? 'border-primary bg-primary/10' : 'border-border/50 hover:border-primary/50')}><span className="text-lg">{cat.emoji}</span><span className="text-[10px] font-medium leading-tight">{cat.label.split(' ')[1]}</span></button>))}</div><FormMessage /></FormItem>
               )} />
+              <FormField control={form.control} name="music_genres" render={({ field }) => {
+                const selected = field.value ?? [];
+                const toggle = (g: string) => field.onChange(selected.includes(g) ? selected.filter((x: string) => x !== g) : [...selected, g]);
+                return (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2"><MusicNote weight="thin" className="h-4 w-4" /> Genres</FormLabel>
+                    <div className="flex flex-wrap gap-1.5">
+                      {GENRE_OPTIONS.map((g) => {
+                        const sel = selected.includes(g);
+                        return (
+                          <button key={g} type="button" onClick={() => toggle(g)}
+                            className={cn('rounded-full border px-3 py-1 text-xs font-medium transition-all',
+                              sel ? 'border-primary bg-primary/15 text-primary' : 'border-border/50 text-muted-foreground hover:border-primary/50')}>
+                            {g}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                );
+              }} />
               <FormField control={form.control} name="description" render={({ field }) => (<FormItem><FormLabel>Beschreibung</FormLabel><FormControl><Textarea placeholder="Erzähle mehr über dein Event..." className="min-h-[60px]" {...field} /></FormControl><FormMessage /></FormItem>)} />
             </div>
 
