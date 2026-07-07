@@ -84,9 +84,9 @@ export const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDi
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader><DialogTitle>Profil bearbeiten</DialogTitle></DialogHeader>
-        <div className="space-y-6 py-4">
+      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6"><DialogTitle>Profil bearbeiten</DialogTitle></DialogHeader>
+        <div className="space-y-6 py-4 px-6 overflow-y-auto flex-1 min-h-0">
           <div className="flex flex-col items-center">
             <div className="relative">
               <Avatar className="h-24 w-24 ring-4 ring-muted">
