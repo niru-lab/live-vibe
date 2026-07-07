@@ -103,7 +103,7 @@ const Roomz = () => {
             <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full glass-pill">
               <GearSix weight="thin" className="h-4 w-4 text-muted-foreground" />
             </Button>
-            <Button size="sm" className="gap-1.5 bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white border-0 shadow-[0_0_16px_rgba(124,58,237,0.4)]" onClick={() => navigate('/roomz/create')}>
+            <Button size="sm" className="gap-1.5 text-primary-foreground border-0 shadow-[0_0_16px_hsl(var(--primary)/0.4)]" style={{ background: 'var(--gradient-primary)' }} onClick={() => navigate('/roomz/create')}>
               <Plus weight="bold" className="h-4 w-4" />
               Erstellen
             </Button>
