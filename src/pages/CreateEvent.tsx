@@ -96,7 +96,7 @@ export default function CreateEvent() {
 
   const form = useForm<EventFormData>({
     resolver: zodResolver(eventSchema),
-    defaultValues: { name: '', description: '', location_name: '', area: '', city: '', is_free: true, entry_price: 0, category: 'other', starts_at_time: '22:00', ends_at_time: '04:00', visibility: 'public' },
+    defaultValues: { name: '', description: '', location_name: '', area: '', city: '', is_free: true, entry_price: 0, category: 'other', music_genres: [], starts_at_time: '22:00', ends_at_time: '04:00', visibility: 'public' },
   });
 
   // Apply venue defaults once when owned venue arrives — don't overwrite if user already typed
