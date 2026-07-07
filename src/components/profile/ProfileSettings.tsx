@@ -4,7 +4,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { Lock, Bell, MapPin, MusicNote, Users, Gear, SignOut, PencilSimple, Star, Shield, CaretLeft, Moon, Sun } from '@phosphor-icons/react';
+import { Lock, SignOut, PencilSimple, Star, Shield, CaretLeft, Moon, Sun } from '@phosphor-icons/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/components/ThemeProvider';
 import { EditProfileDialog } from './EditProfileDialog';
@@ -46,13 +46,6 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
     },
   ];
 
-  const otherItems = [
-    { icon: Bell, label: 'Benachrichtigungen', onClick: () => {} },
-    { icon: MapPin, label: 'Standort-Einstellungen', onClick: () => {} },
-    { icon: MusicNote, label: 'Musik-Bibliothek', onClick: () => {} },
-    { icon: Users, label: 'Freunde & Follower', onClick: () => {} },
-    { icon: Gear, label: 'App-Einstellungen', onClick: () => {} },
-  ];
 
   return (
     <>
@@ -117,14 +110,6 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
                 </div>
                 <Switch checked={isDark} onCheckedChange={handleThemeToggle} aria-label="Dark Mode umschalten" />
               </div>
-            </div>
-            <Separator />
-            <div className="space-y-1">
-              {otherItems.map((item) => (
-                <Button key={item.label} variant="ghost" className="w-full justify-start gap-3 h-11" onClick={item.onClick}>
-                  <item.icon weight="thin" className="h-4 w-4 text-muted-foreground" /><span>{item.label}</span>
-                </Button>
-              ))}
             </div>
             <Separator />
             <Button variant="ghost" className="w-full justify-start gap-3 h-11 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleSignOut}>
