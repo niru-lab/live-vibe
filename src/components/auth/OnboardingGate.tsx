@@ -11,6 +11,9 @@ const ALLOWED_PREFIXES = [
   '/verify',
   '/onboarding',
   '/onboarding-venue',
+  '/impressum',
+  '/datenschutz',
+  '/agb',
 ];
 
 export const OnboardingGate = () => {
