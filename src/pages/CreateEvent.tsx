@@ -62,6 +62,8 @@ const categories = [
   { value: 'other', label: '✨ Andere', emoji: '✨' },
 ];
 
+const GENRE_OPTIONS = ['Techno', 'House', 'Hip-Hop', 'Jazz', 'Indie', 'Pop', 'Latin', 'R&B', 'Afrobeats', 'Drum & Bass', 'Rock', 'Electronic', 'Reggaeton', 'Amapiano', 'Mixed'];
+
 export default function CreateEvent() {
   const navigate = useNavigate();
   const { user } = useAuth();
