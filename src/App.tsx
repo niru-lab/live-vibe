@@ -32,6 +32,9 @@ import Roomz from "./pages/Roomz";
 import CreateRoom from "./pages/CreateRoom";
 import RoomDetail from "./pages/RoomDetail";
 import NotFound from "./pages/NotFound";
+import Impressum from "./pages/legal/Impressum";
+import Datenschutz from "./pages/legal/Datenschutz";
+import AGB from "./pages/legal/AGB";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -82,6 +85,9 @@ const App = () => (
                   <Route path="/roomz" element={<Roomz />} />
                   <Route path="/roomz/create" element={<CreateRoom />} />
                   <Route path="/roomz/:id" element={<RoomDetail />} />
+                  <Route path="/impressum" element={<Impressum />} />
+                  <Route path="/datenschutz" element={<Datenschutz />} />
+                  <Route path="/agb" element={<AGB />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
