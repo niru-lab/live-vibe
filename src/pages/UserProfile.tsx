@@ -145,12 +145,12 @@ export default function UserProfile() {
                   <span className="text-[12px] mt-0.5 text-muted-foreground">Posts</span>
                 </div>
                 <div className="flex flex-col items-center px-2 border-x border-border">
-                  <span data-testid="follower-count" className="text-foreground font-bold text-[24px] leading-tight">{followStats?.followers || 0}</span>
-                  <span className="text-[12px] mt-0.5 text-muted-foreground">Followers</span>
+                  <span className="text-foreground font-bold text-[24px] leading-tight">0</span>
+                  <span className="text-[12px] mt-0.5 text-muted-foreground">Events</span>
                 </div>
                 <div className="flex flex-col items-center px-2">
-                  <span className="text-foreground font-bold text-[24px] leading-tight">{followStats?.following || 0}</span>
-                  <span className="text-[12px] mt-0.5 text-muted-foreground">Folgt</span>
+                  <span data-testid="follower-count" className="text-foreground font-bold text-[24px] leading-tight">{followStats?.followers || 0}</span>
+                  <span className="text-[12px] mt-0.5 text-muted-foreground">Followers</span>
                 </div>
               </div>
 
