@@ -199,7 +199,7 @@ export default function UserProfile() {
             )}
           </div>
         </div>
-      </div>
+
 
       <SendMessageDialog
         open={messageOpen}
