@@ -46,13 +46,6 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
     },
   ];
 
-  const otherItems = [
-    { icon: Bell, label: 'Benachrichtigungen', onClick: () => {} },
-    { icon: MapPin, label: 'Standort-Einstellungen', onClick: () => {} },
-    { icon: MusicNote, label: 'Musik-Bibliothek', onClick: () => {} },
-    { icon: Users, label: 'Freunde & Follower', onClick: () => {} },
-    { icon: Gear, label: 'App-Einstellungen', onClick: () => {} },
-  ];
 
   return (
     <>
