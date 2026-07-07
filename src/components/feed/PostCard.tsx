@@ -1,13 +1,13 @@
 import { useState } from 'react';
-import { Heart, ChatCircle, DotsThreeVertical, Trash } from '@phosphor-icons/react';
+import { Heart, ChatCircle, DotsThreeVertical, Trash, Flag, Prohibit } from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -23,6 +23,8 @@ import {
 import { cn } from '@/lib/utils';
 import { useProfile } from '@/hooks/useProfile';
 import { useDeletePost } from '@/hooks/usePosts';
+import { useBlockUser } from '@/hooks/useBlockUser';
+import { ReportDialog } from '@/components/moderation/ReportDialog';
 import type { PostWithAuthor } from '@/hooks/usePosts';
 
 interface PostCardProps {
@@ -36,12 +38,15 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
   const author = post.author;
   const { data: currentProfile } = useProfile();
   const deletePost = useDeletePost();
+  const blockUser = useBlockUser();
   const timeAgo = formatDistanceToNow(new Date(post.created_at), {
     addSuffix: false,
     locale: de,
   });
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showBlockDialog, setShowBlockDialog] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
   const isOwnPost = currentProfile?.id === post.author_id;
 
   // Derive title (first line of caption) + description (rest) from existing caption field
@@ -126,7 +131,7 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
                 {timeAgo}
               </span>
 
-              {isOwnPost && (
+              {currentProfile && (
                 <div className="ml-auto shrink-0">
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -135,13 +140,30 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem
-                        className="text-destructive focus:text-destructive"
-                        onClick={() => setShowDeleteDialog(true)}
-                      >
-                        <Trash weight="thin" className="mr-2 h-4 w-4" />
-                        Löschen
-                      </DropdownMenuItem>
+                      {isOwnPost ? (
+                        <DropdownMenuItem
+                          className="text-destructive focus:text-destructive"
+                          onClick={() => setShowDeleteDialog(true)}
+                        >
+                          <Trash weight="thin" className="mr-2 h-4 w-4" />
+                          Löschen
+                        </DropdownMenuItem>
+                      ) : (
+                        <>
+                          <DropdownMenuItem onClick={() => setShowReportDialog(true)}>
+                            <Flag weight="thin" className="mr-2 h-4 w-4" />
+                            Melden
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive focus:text-destructive"
+                            onClick={() => setShowBlockDialog(true)}
+                          >
+                            <Prohibit weight="thin" className="mr-2 h-4 w-4" />
+                            Nutzer blockieren
+                          </DropdownMenuItem>
+                        </>
+                      )}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
