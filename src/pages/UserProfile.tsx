@@ -172,11 +172,11 @@ export default function UserProfile() {
 
           {/* Posts grid */}
           <div>
-            <h2 className="text-sm font-semibold text-white mb-3">Beiträge</h2>
+            <h2 className="text-sm font-semibold text-foreground mb-3">Beiträge</h2>
             {!posts || posts.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 text-center rounded-2xl border border-white/[0.04] bg-[#12121A]">
-                <Lock weight="thin" className="h-8 w-8 text-[#A0A0B0] mb-2" />
-                <p className="text-sm text-[#A0A0B0]">Noch keine Beiträge</p>
+              <div className="flex flex-col items-center justify-center py-12 text-center rounded-2xl border border-border bg-card">
+                <Lock weight="thin" className="h-8 w-8 text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">Noch keine Beiträge</p>
               </div>
             ) : (
               <div className="grid grid-cols-3 gap-1">
