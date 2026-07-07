@@ -1537,6 +1537,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      archive_old_events: { Args: never; Returns: undefined }
       calculate_level: { Args: { pts: number }; Returns: number }
       can_send_dm: {
         Args: { recipient_id: string; sender_id: string }
