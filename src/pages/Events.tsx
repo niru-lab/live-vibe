@@ -144,14 +144,11 @@ export default function Events() {
             <TabsTrigger value="discover" className="rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
               Entdecken
             </TabsTrigger>
-            <TabsTrigger value="upcoming" className="rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
-              Anstehend
-              {pending.length > 0 && (
-                <Badge className="ml-1.5 h-5 min-w-5 rounded-full bg-primary px-1.5 text-xs text-primary-foreground border-0">{pending.length}</Badge>
+            <TabsTrigger value="requested" className="rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
+              Angefragt
+              {(pending.length + invitations.length) > 0 && (
+                <Badge className="ml-1.5 h-5 min-w-5 rounded-full bg-primary px-1.5 text-xs text-primary-foreground border-0">{pending.length + invitations.length}</Badge>
               )}
-            </TabsTrigger>
-            <TabsTrigger value="my-rsvps" className="rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
-              Zusagen
             </TabsTrigger>
             <TabsTrigger value="my-events" className="rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
               Meine
@@ -184,13 +181,13 @@ export default function Events() {
               )}
             </TabsContent>
 
-            <TabsContent value="upcoming" className="mt-0 space-y-4">
+            <TabsContent value="requested" className="mt-0 space-y-4">
               {!user ? (
-                <EmptyState title="Nicht angemeldet" description="Melde dich an, um deine anstehenden Events zu sehen." onAction={() => navigate('/auth')} actionLabel="Anmelden" />
+                <EmptyState title="Nicht angemeldet" description="Melde dich an, um deine Anfragen zu sehen." onAction={() => navigate('/auth')} actionLabel="Anmelden" />
               ) : partLoading || invitesLoading ? (
                 <EventListSkeleton />
-              ) : pending.length === 0 && accepted.length === 0 && invitations.length === 0 ? (
-                <EmptyState title="Nichts Anstehendes" description="Stelle eine Anfrage zu einem Event und es erscheint hier." onAction={() => setActiveTab('discover')} actionLabel="Events entdecken" />
+              ) : pending.length === 0 && invitations.length === 0 ? (
+                <EmptyState title="Keine offenen Anfragen" description="Frag ein Event an oder warte auf Einladungen." onAction={() => setActiveTab('discover')} actionLabel="Events entdecken" />
               ) : (
                 <>
                   {invitations.length > 0 && (
@@ -227,57 +224,54 @@ export default function Events() {
                       ))}
                     </section>
                   )}
-
-                  {accepted.length > 0 && (
-                    <section className="space-y-3">
-                      <SectionLabel title={`Zusagen (${accepted.length})`} />
-                      {accepted.map((p: any) => (
-                        <EventListCard key={p.id} event={p.event} onClick={() => navigate(`/events/${p.event?.id}`)} />
-                      ))}
-                    </section>
-                  )}
                 </>
-              )}
-            </TabsContent>
-
-            <TabsContent value="my-rsvps" className="mt-0 space-y-4">
-              {!user ? (
-                <EmptyState title="Nicht angemeldet" description="Melde dich an, um deine Zusagen zu sehen." onAction={() => navigate('/auth')} actionLabel="Anmelden" />
-              ) : rsvpsLoading ? (
-                <EventListSkeleton />
-              ) : myRSVPs && myRSVPs.length > 0 ? (
-                myRSVPs.map((rsvp: any) => (
-                  <EventListCard key={rsvp.id} event={rsvp.event} onClick={() => navigate(`/events/${rsvp.event.id}`)} />
-                ))
-              ) : (
-                <EmptyState title="Keine Zusagen" description="Du hast noch keinem Event zugesagt." onAction={() => setActiveTab('discover')} actionLabel="Events entdecken" />
               )}
             </TabsContent>
 
             <TabsContent value="my-events" className="mt-0 space-y-4">
               {!user ? (
                 <EmptyState title="Nicht angemeldet" description="Melde dich an, um deine Events zu sehen." onAction={() => navigate('/auth')} actionLabel="Anmelden" />
-              ) : myEventsLoading ? (
+              ) : (myEventsLoading || rsvpsLoading) ? (
                 <EventListSkeleton />
-              ) : myEvents && myEvents.length > 0 ? (
+              ) : (
                 (() => {
                   const now = Date.now();
-                  const endedAt = (e: any) => new Date(e.ends_at ?? new Date(new Date(e.starts_at).getTime() + 6 * 3600 * 1000)).getTime();
-                  const upcoming = myEvents.filter((e: any) => endedAt(e) >= now).sort((a: any, b: any) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
-                  const past = myEvents.filter((e: any) => endedAt(e) < now).sort((a: any, b: any) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime());
-                  const list = myEventsView === 'upcoming' ? upcoming : past;
+                  const endedAt = (e: any) => new Date(e?.ends_at ?? new Date(new Date(e?.starts_at).getTime() + 6 * 3600 * 1000)).getTime();
+                  const hosted = (myEvents ?? []).filter((e: any) => e);
+                  const guestEvents = (myRSVPs ?? []).map((r: any) => r.event).filter(Boolean);
+
+                  const anstehend = hosted.filter((e: any) => endedAt(e) >= now).sort((a: any, b: any) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
+                  const zugesagt = guestEvents.filter((e: any) => endedAt(e) >= now).sort((a: any, b: any) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
+                  const pastMap = new Map<string, any>();
+                  [...hosted, ...guestEvents].filter((e: any) => endedAt(e) < now).forEach((e: any) => pastMap.set(e.id, e));
+                  const vergangen = Array.from(pastMap.values()).sort((a: any, b: any) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime());
+
+                  const list = myEventsView === 'zugesagt' ? zugesagt : myEventsView === 'anstehend' ? anstehend : vergangen;
+
+                  if (hosted.length === 0 && guestEvents.length === 0) {
+                    return <EmptyState title="Noch nichts hier" description="Erstelle ein Event oder sag bei einem zu." onAction={() => navigate('/events/create')} actionLabel="Event erstellen" />;
+                  }
+
                   return (
                     <>
                       <div className="flex gap-2">
-                        <button onClick={() => setMyEventsView('upcoming')} className={cn('rounded-full px-4 py-1.5 text-xs font-medium transition', myEventsView === 'upcoming' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground')}>
-                          Anstehend ({upcoming.length})
+                        <button onClick={() => setMyEventsView('zugesagt')} className={cn('rounded-full px-4 py-1.5 text-xs font-medium transition', myEventsView === 'zugesagt' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground')}>
+                          Zugesagt ({zugesagt.length})
                         </button>
-                        <button onClick={() => setMyEventsView('past')} className={cn('rounded-full px-4 py-1.5 text-xs font-medium transition', myEventsView === 'past' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground')}>
-                          Vergangen ({past.length})
+                        <button onClick={() => setMyEventsView('anstehend')} className={cn('rounded-full px-4 py-1.5 text-xs font-medium transition', myEventsView === 'anstehend' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground')}>
+                          Anstehend ({anstehend.length})
+                        </button>
+                        <button onClick={() => setMyEventsView('vergangen')} className={cn('rounded-full px-4 py-1.5 text-xs font-medium transition', myEventsView === 'vergangen' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground')}>
+                          Vergangen ({vergangen.length})
                         </button>
                       </div>
                       {list.length === 0 ? (
-                        <EmptyState title={myEventsView === 'upcoming' ? 'Keine anstehenden Events' : 'Keine vergangenen Events'} description={myEventsView === 'upcoming' ? 'Erstelle dein nächstes Event.' : 'Deine vergangenen Events erscheinen hier.'} onAction={myEventsView === 'upcoming' ? () => navigate('/events/create') : undefined} actionLabel={myEventsView === 'upcoming' ? 'Event erstellen' : undefined} />
+                        <EmptyState
+                          title={myEventsView === 'zugesagt' ? 'Keine Zusagen' : myEventsView === 'anstehend' ? 'Keine anstehenden Events' : 'Keine vergangenen Events'}
+                          description={myEventsView === 'zugesagt' ? 'Sobald ein Host dich bestätigt, erscheint das Event hier.' : myEventsView === 'anstehend' ? 'Erstelle dein nächstes Event.' : 'Deine vergangenen Events erscheinen hier.'}
+                          onAction={myEventsView === 'anstehend' ? () => navigate('/events/create') : myEventsView === 'zugesagt' ? () => setActiveTab('discover') : undefined}
+                          actionLabel={myEventsView === 'anstehend' ? 'Event erstellen' : myEventsView === 'zugesagt' ? 'Events entdecken' : undefined}
+                        />
                       ) : (
                         list.map((event: any) => (
                           <EventListCard key={event.id} event={event} onClick={() => navigate(`/events/${event.id}`)} />
@@ -286,8 +280,6 @@ export default function Events() {
                     </>
                   );
                 })()
-              ) : (
-                <EmptyState title="Keine eigenen Events" description="Du hast noch keine Events erstellt." onAction={() => navigate('/events/create')} actionLabel="Erstes Event erstellen" />
               )}
             </TabsContent>
           </div>
