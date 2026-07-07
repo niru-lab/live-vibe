@@ -112,14 +112,6 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
               </div>
             </div>
             <Separator />
-            <div className="space-y-1">
-              {otherItems.map((item) => (
-                <Button key={item.label} variant="ghost" className="w-full justify-start gap-3 h-11" onClick={item.onClick}>
-                  <item.icon weight="thin" className="h-4 w-4 text-muted-foreground" /><span>{item.label}</span>
-                </Button>
-              ))}
-            </div>
-            <Separator />
             <Button variant="ghost" className="w-full justify-start gap-3 h-11 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleSignOut}>
               <SignOut weight="thin" className="h-4 w-4" /><span>Abmelden</span>
             </Button>
