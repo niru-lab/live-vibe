@@ -260,9 +260,32 @@ export default function Events() {
               ) : myEventsLoading ? (
                 <EventListSkeleton />
               ) : myEvents && myEvents.length > 0 ? (
-                myEvents.map((event: any) => (
-                  <EventListCard key={event.id} event={event} onClick={() => navigate(`/events/${event.id}`)} />
-                ))
+                (() => {
+                  const now = Date.now();
+                  const endedAt = (e: any) => new Date(e.ends_at ?? new Date(new Date(e.starts_at).getTime() + 6 * 3600 * 1000)).getTime();
+                  const upcoming = myEvents.filter((e: any) => endedAt(e) >= now).sort((a: any, b: any) => new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime());
+                  const past = myEvents.filter((e: any) => endedAt(e) < now).sort((a: any, b: any) => new Date(b.starts_at).getTime() - new Date(a.starts_at).getTime());
+                  const list = myEventsView === 'upcoming' ? upcoming : past;
+                  return (
+                    <>
+                      <div className="flex gap-2">
+                        <button onClick={() => setMyEventsView('upcoming')} className={cn('rounded-full px-4 py-1.5 text-xs font-medium transition', myEventsView === 'upcoming' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground')}>
+                          Anstehend ({upcoming.length})
+                        </button>
+                        <button onClick={() => setMyEventsView('past')} className={cn('rounded-full px-4 py-1.5 text-xs font-medium transition', myEventsView === 'past' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground')}>
+                          Vergangen ({past.length})
+                        </button>
+                      </div>
+                      {list.length === 0 ? (
+                        <EmptyState title={myEventsView === 'upcoming' ? 'Keine anstehenden Events' : 'Keine vergangenen Events'} description={myEventsView === 'upcoming' ? 'Erstelle dein nächstes Event.' : 'Deine vergangenen Events erscheinen hier.'} onAction={myEventsView === 'upcoming' ? () => navigate('/events/create') : undefined} actionLabel={myEventsView === 'upcoming' ? 'Event erstellen' : undefined} />
+                      ) : (
+                        list.map((event: any) => (
+                          <EventListCard key={event.id} event={event} onClick={() => navigate(`/events/${event.id}`)} />
+                        ))
+                      )}
+                    </>
+                  );
+                })()
               ) : (
                 <EmptyState title="Keine eigenen Events" description="Du hast noch keine Events erstellt." onAction={() => navigate('/events/create')} actionLabel="Erstes Event erstellen" />
               )}
