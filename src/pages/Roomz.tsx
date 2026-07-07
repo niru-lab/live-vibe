@@ -127,8 +127,9 @@ const Roomz = () => {
             onClick={() => setTab('my')}
             className={cn(
               "px-4 py-2 rounded-full text-sm transition-all",
-              tab === 'my' ? 'bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white font-bold shadow-[0_0_16px_rgba(124,58,237,0.4)]' : 'glass-pill text-muted-foreground font-medium'
+              tab === 'my' ? 'text-primary-foreground font-bold shadow-[0_0_16px_hsl(var(--primary)/0.4)]' : 'glass-pill text-muted-foreground font-medium'
             )}
+            style={tab === 'my' ? { background: 'var(--gradient-primary)' } : undefined}
           >
             Meine Roomz
           </button>
@@ -136,8 +137,9 @@ const Roomz = () => {
             onClick={() => setTab('explore')}
             className={cn(
               "px-4 py-2 rounded-full text-sm transition-all",
-              tab === 'explore' ? 'bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white font-bold shadow-[0_0_16px_rgba(124,58,237,0.4)]' : 'glass-pill text-muted-foreground font-medium'
+              tab === 'explore' ? 'text-primary-foreground font-bold shadow-[0_0_16px_hsl(var(--primary)/0.4)]' : 'glass-pill text-muted-foreground font-medium'
             )}
+            style={tab === 'explore' ? { background: 'var(--gradient-primary)' } : undefined}
           >
             Entdecken
           </button>
