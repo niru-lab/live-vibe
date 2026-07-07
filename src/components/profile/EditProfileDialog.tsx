@@ -84,9 +84,9 @@ export const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDi
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader><DialogTitle>Profil bearbeiten</DialogTitle></DialogHeader>
-        <div className="space-y-6 py-4">
+      <DialogContent className="sm:max-w-md max-h-[90vh] flex flex-col p-0">
+        <DialogHeader className="px-6 pt-6"><DialogTitle>Profil bearbeiten</DialogTitle></DialogHeader>
+        <div className="space-y-6 py-4 px-6 overflow-y-auto flex-1 min-h-0">
           <div className="flex flex-col items-center">
             <div className="relative">
               <Avatar className="h-24 w-24 ring-4 ring-muted">
@@ -131,7 +131,7 @@ export const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDi
             </div>
           </div>
         </div>
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="gap-2 sm:gap-0 px-6 pb-6 pt-2 border-t border-border">
           <Button variant="outline" onClick={() => onOpenChange(false)}>Abbrechen</Button>
           <Button onClick={handleSave} disabled={!canSave}>
             {isUploading ? (<><SpinnerGap weight="thin" className="mr-2 h-4 w-4 animate-spin" />Speichern...</>) : 'Speichern'}
