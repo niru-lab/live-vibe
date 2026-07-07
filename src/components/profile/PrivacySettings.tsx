@@ -103,7 +103,6 @@ export const PrivacySettings = ({ open, onOpenChange }: PrivacySettingsProps) =>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="public">🌍 Öffentlich</SelectItem>
-                  <SelectItem value="followers">👥 Nur Follower</SelectItem>
                   <SelectItem value="private">🔒 Privat</SelectItem>
                 </SelectContent>
               </Select>
