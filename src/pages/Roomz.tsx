@@ -43,7 +43,7 @@ const RoomCard = ({ room, isMember, onJoin }: { room: Room & { myRole?: string }
         )}
         {room.activity && (
           <span className="flex items-center gap-1">
-            <Lightning weight="fill" className="h-3 w-3 text-[#EC4899]" />
+            <Lightning weight="fill" className="h-3 w-3 text-accent" />
             {room.activity}
           </span>
         )}
@@ -53,7 +53,7 @@ const RoomCard = ({ room, isMember, onJoin }: { room: Room & { myRole?: string }
         <div className="flex items-center gap-2">
           <Avatar className="h-6 w-6 ring-1 ring-primary/40">
             <AvatarImage src={room.hoster?.avatar_url || ''} />
-            <AvatarFallback className="text-xs bg-gradient-to-br from-[#7C3AED] to-[#EC4899] text-white">{room.hoster?.display_name?.[0]}</AvatarFallback>
+            <AvatarFallback className="text-xs text-primary-foreground" style={{ background: 'var(--gradient-primary)' }}>{room.hoster?.display_name?.[0]}</AvatarFallback>
           </Avatar>
           <span className="text-xs text-muted-foreground">@{room.hoster?.username}</span>
         </div>
@@ -61,7 +61,7 @@ const RoomCard = ({ room, isMember, onJoin }: { room: Room & { myRole?: string }
         {isMember ? (
           <Badge className="text-xs glass-pill text-foreground border-0">{room.myRole === 'hoster' ? 'Hoster' : 'Mitglied'}</Badge>
         ) : (
-          <Button size="sm" className="h-7 text-xs bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white border-0" onClick={(e) => { e.stopPropagation(); onJoin(); }}>
+          <Button size="sm" className="h-7 text-xs text-primary-foreground border-0" style={{ background: 'var(--gradient-primary)' }} onClick={(e) => { e.stopPropagation(); onJoin(); }}>
             Beitreten
           </Button>
         )}
@@ -103,7 +103,7 @@ const Roomz = () => {
             <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full glass-pill">
               <GearSix weight="thin" className="h-4 w-4 text-muted-foreground" />
             </Button>
-            <Button size="sm" className="gap-1.5 bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white border-0 shadow-[0_0_16px_rgba(124,58,237,0.4)]" onClick={() => navigate('/roomz/create')}>
+            <Button size="sm" className="gap-1.5 text-primary-foreground border-0 shadow-[0_0_16px_hsl(var(--primary)/0.4)]" style={{ background: 'var(--gradient-primary)' }} onClick={() => navigate('/roomz/create')}>
               <Plus weight="bold" className="h-4 w-4" />
               Erstellen
             </Button>
@@ -127,8 +127,9 @@ const Roomz = () => {
             onClick={() => setTab('my')}
             className={cn(
               "px-4 py-2 rounded-full text-sm transition-all",
-              tab === 'my' ? 'bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white font-bold shadow-[0_0_16px_rgba(124,58,237,0.4)]' : 'glass-pill text-muted-foreground font-medium'
+              tab === 'my' ? 'text-primary-foreground font-bold shadow-[0_0_16px_hsl(var(--primary)/0.4)]' : 'glass-pill text-muted-foreground font-medium'
             )}
+            style={tab === 'my' ? { background: 'var(--gradient-primary)' } : undefined}
           >
             Meine Roomz
           </button>
@@ -136,8 +137,9 @@ const Roomz = () => {
             onClick={() => setTab('explore')}
             className={cn(
               "px-4 py-2 rounded-full text-sm transition-all",
-              tab === 'explore' ? 'bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white font-bold shadow-[0_0_16px_rgba(124,58,237,0.4)]' : 'glass-pill text-muted-foreground font-medium'
+              tab === 'explore' ? 'text-primary-foreground font-bold shadow-[0_0_16px_hsl(var(--primary)/0.4)]' : 'glass-pill text-muted-foreground font-medium'
             )}
+            style={tab === 'explore' ? { background: 'var(--gradient-primary)' } : undefined}
           >
             Entdecken
           </button>
