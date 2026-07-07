@@ -61,7 +61,7 @@ const RoomCard = ({ room, isMember, onJoin }: { room: Room & { myRole?: string }
         {isMember ? (
           <Badge className="text-xs glass-pill text-foreground border-0">{room.myRole === 'hoster' ? 'Hoster' : 'Mitglied'}</Badge>
         ) : (
-          <Button size="sm" className="h-7 text-xs bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white border-0" onClick={(e) => { e.stopPropagation(); onJoin(); }}>
+          <Button size="sm" className="h-7 text-xs text-primary-foreground border-0" style={{ background: 'var(--gradient-primary)' }} onClick={(e) => { e.stopPropagation(); onJoin(); }}>
             Beitreten
           </Button>
         )}
