@@ -42,6 +42,7 @@ const eventSchema = z.object({
   dresscode: z.string().max(80).optional(),
   dos_and_donts: z.string().max(500).optional(),
   category: z.enum(['club', 'house_party', 'bar', 'festival', 'concert', 'sport', 'other']),
+  music_genres: z.array(z.string()).default([]),
   visibility: z.enum(['public', 'private']),
 }).refine((data) => {
   const [h, m] = data.starts_at_time.split(':').map(Number);
