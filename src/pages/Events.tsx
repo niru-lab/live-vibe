@@ -75,9 +75,11 @@ export default function Events() {
       }
       if (activeDate && !isSameDay(new Date(e.starts_at), activeDate)) return false;
       if (genre) {
-        const tags: string[] = (e.music_genres ?? e.genres ?? []) as string[];
-        const hay = `${e.name} ${(tags || []).join(' ')}`.toLowerCase();
-        if (!hay.includes(genre.toLowerCase())) return false;
+        const tags: string[] = ((e.music_genres ?? e.genres ?? []) as string[]).map((t) => t.toLowerCase());
+        const g = genre.toLowerCase();
+        const matchesTag = tags.includes(g);
+        const matchesName = (e.name ?? '').toLowerCase().includes(g);
+        if (!matchesTag && !matchesName) return false;
       }
       return true;
     });
