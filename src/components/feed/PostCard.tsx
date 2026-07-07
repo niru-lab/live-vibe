@@ -305,6 +305,33 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={showBlockDialog} onOpenChange={setShowBlockDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{author?.username || 'Nutzer'} blockieren?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Du siehst danach keine Beiträge, Kommentare oder Nachrichten mehr von dieser Person.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Abbrechen</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => blockUser.mutate(post.author_id)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Blockieren
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <ReportDialog
+        open={showReportDialog}
+        onOpenChange={setShowReportDialog}
+        targetType="post"
+        targetId={post.id}
+      />
     </>
   );
 };

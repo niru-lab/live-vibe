@@ -14,6 +14,26 @@ export const usePosts = (city?: string) => {
   return useQuery({
     queryKey: ['posts', city],
     queryFn: async () => {
+      // Fetch caller's blocks (both directions) so blocked users' posts disappear
+      const { data: { user } } = await supabase.auth.getUser();
+      let hiddenIds: string[] = [];
+      if (user) {
+        const { data: myProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        if (myProfile) {
+          const { data: blocks } = await supabase
+            .from('blocks')
+            .select('blocker_id, blocked_id')
+            .or(`blocker_id.eq.${myProfile.id},blocked_id.eq.${myProfile.id}`);
+          hiddenIds = (blocks ?? [])
+            .map((b) => (b.blocker_id === myProfile.id ? b.blocked_id : b.blocker_id))
+            .filter(Boolean) as string[];
+        }
+      }
+
       let query = supabase
         .from('posts')
         .select(`
@@ -28,9 +48,12 @@ export const usePosts = (city?: string) => {
       if (city) {
         query = query.ilike('city', `%${city}%`);
       }
+      if (hiddenIds.length > 0) {
+        query = query.not('author_id', 'in', `(${hiddenIds.join(',')})`);
+      }
 
       const { data, error } = await query;
-      
+
       if (error) throw error;
       return data as PostWithAuthor[];
     },
