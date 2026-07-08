@@ -55,7 +55,7 @@ export default function Events() {
   const [activeTab, setActiveTab] = useState('discover');
   const [search, setSearch] = useState('');
   const [dateKey, setDateKey] = useState<string>('all');
-  const [genre, setGenre] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
   const [myEventsView, setMyEventsView] = useState<'zugesagt' | 'anstehend' | 'vergangen'>('anstehend');
 
   const dateFilters = useMemo(buildDateFilters, []);
