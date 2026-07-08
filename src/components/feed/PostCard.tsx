@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { memo, useState } from 'react';
 import { Heart, ChatCircle, DotsThreeVertical, Trash, Flag, Prohibit } from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -34,7 +34,7 @@ interface PostCardProps {
   onDeleted?: () => void;
 }
 
-export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) => {
+const PostCardComponent = ({ post, isLiked, onLike, onDeleted }: PostCardProps) => {
   const author = post.author;
   const { data: currentProfile } = useProfile();
   const deletePost = useDeletePost();
@@ -335,3 +335,5 @@ export const PostCard = ({ post, isLiked, onLike, onDeleted }: PostCardProps) =>
     </>
   );
 };
+
+export const PostCard = memo(PostCardComponent);
