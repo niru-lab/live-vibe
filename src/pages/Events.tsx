@@ -28,6 +28,16 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const CITIES = ['Stuttgart', 'Aalen', 'Frankfurt'];
+const CATEGORIES: { key: string; label: string }[] = [
+  { key: 'club', label: 'Club' },
+  { key: 'bar', label: 'Bar' },
+  { key: 'house_party', label: 'House Party' },
+  { key: 'festival', label: 'Festival' },
+  { key: 'concert', label: 'Konzert' },
+  { key: 'sport', label: 'Sport' },
+  { key: 'other', label: 'Sonstiges' },
+];
+
 
 type DateFilter = { key: string; label: string; date: Date | null };
 
@@ -56,6 +66,8 @@ export default function Events() {
   const [search, setSearch] = useState('');
   const [dateKey, setDateKey] = useState<string>('all');
   const [city, setCity] = useState<string | null>(null);
+  const [category, setCategory] = useState<string | null>(null);
+
   const [myEventsView, setMyEventsView] = useState<'zugesagt' | 'anstehend' | 'vergangen'>('anstehend');
 
   const dateFilters = useMemo(buildDateFilters, []);
@@ -79,9 +91,11 @@ export default function Events() {
         const evCity = (e.city ?? '').toString().toLowerCase();
         if (evCity !== city.toLowerCase()) return false;
       }
+      if (category && (e.category ?? '') !== category) return false;
       return true;
     });
-  }, [allEvents, search, activeDate, city]);
+  }, [allEvents, search, activeDate, city, category]);
+
 
 
   const pending = participations.filter((p: any) => p.status === 'requested');
@@ -134,6 +148,17 @@ export default function Events() {
           </Chip>
         ))}
       </ChipRow>
+
+      {/* Category chips */}
+      <ChipRow>
+        <Chip active={category === null} onClick={() => setCategory(null)}>Alle Arten</Chip>
+        {CATEGORIES.map((c) => (
+          <Chip key={c.key} active={category === c.key} onClick={() => setCategory(c.key)}>
+            {c.label}
+          </Chip>
+        ))}
+      </ChipRow>
+
 
 
       {/* Tabs */}
