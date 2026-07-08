@@ -22,8 +22,9 @@ interface DiscoverGridProps {
 
 export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
   const navigate = useNavigate();
+  useLivePosts();
   const { data: rawPosts, isLoading: postsLoading } = usePosts();
-  const rankedPosts = useFeedAlgorithm(rawPosts);
+  const rankedPosts = useFeedAlgorithm(rawPosts) as PostWithAuthor[] | undefined;
   const { data: events, isLoading: eventsLoading } = useEvents();
   const { data: profile } = useProfile();
 
