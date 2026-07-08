@@ -71,7 +71,7 @@ export default function Auth() {
     setLoading(true);
     const { error } = await signUp(email, password, {
       username: username || undefined,
-      display_name: displayName || undefined,
+      display_name: username || undefined,
       role,
     });
     setLoading(false);
@@ -83,6 +83,18 @@ export default function Auth() {
       toast({ title: 'Willkommen bei Feyrn! 🎉', description: 'Dein Account wurde erfolgreich erstellt.' });
     }
   };
+
+  const handleGoogle = async () => {
+    setLoading(true);
+    const { error } = await lovable.auth.signInWithOAuth('google', {
+      redirect_uri: `${window.location.origin}/auth/callback`,
+    });
+    if (error) {
+      setLoading(false);
+      toast({ variant: 'destructive', title: 'Google-Anmeldung fehlgeschlagen', description: error.message });
+    }
+  };
+
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-background p-4">
