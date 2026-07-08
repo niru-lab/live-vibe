@@ -85,7 +85,7 @@ export default function Feed() {
           </div>
         ) : activePosts && activePosts.length > 0 ? (
           <div className="flex flex-col" style={{ gap: '10px' }}>
-            {activePosts.map((post: any) => (
+            {activePosts.map((post) => (
               <button
                 key={post.id}
                 type="button"
@@ -95,7 +95,7 @@ export default function Feed() {
                 <PostCard
                   post={post}
                   isLiked={likedPosts.includes(post.id)}
-                  onLike={(id, liked) => handleLike(id, liked)}
+                  onLike={handleLike}
                 />
               </button>
             ))}
