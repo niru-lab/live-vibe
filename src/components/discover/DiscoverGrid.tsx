@@ -87,58 +87,63 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
   }) || [];
 
   // Combine and sort with algorithm prioritization
-  const combinedItems = [
-    ...filteredPosts.map(post => ({ 
-      type: 'post' as const, 
-      data: post, 
+  const combinedItems: CombinedItem[] = [
+    ...filteredPosts.map((post) => ({
+      type: 'post' as const,
+      data: post,
       date: new Date(post.created_at),
-      priority: calculatePostPriority(post)
+      priority: calculatePostPriority(post),
     })),
-    ...filteredEvents.map(event => ({ 
-      type: 'event' as const, 
-      data: event, 
+    ...filteredEvents.map((event) => ({
+      type: 'event' as const,
+      data: event,
       date: new Date(event.created_at),
-      priority: calculateEventPriority(event)
+      priority: calculateEventPriority(event),
     })),
   ].sort((a, b) => b.priority - a.priority);
 
   // Priority calculation functions
-  function calculatePostPriority(post: any): number {
+  function calculatePostPriority(post: PostWithAuthor): number {
     let priority = 0;
     const postAge = (Date.now() - new Date(post.created_at).getTime()) / (1000 * 60);
-    
+
     // 1. Live posts (last 30min) → Top priority
     if (postAge < 30) priority += 100;
     else if (postAge < 60) priority += 50;
-    
+
     // 2. Moment X posts get boost
     if (post.is_moment_x) priority += 30;
-    
+
     // 3. Posts with music
     if (post.music_url) priority += 10;
-    
+
     // 4. Engagement boost
     priority += (post.likes_count || 0) * 2;
     priority += (post.comments_count || 0) * 3;
-    
+
     return priority;
   }
 
-  function calculateEventPriority(event: any): number {
+  function calculateEventPriority(event: EventWithCreator): number {
     let priority = 0;
-    
+
     // Events with >50 expected attendees
     if ((event.expected_attendees || 0) > 50) priority += 80;
     else if ((event.expected_attendees || 0) > 20) priority += 40;
-    
+
     // Free events get slight boost
     if (event.is_free) priority += 10;
-    
+
     // Upcoming events today
     if (new Date(event.starts_at).toDateString() === new Date().toDateString()) priority += 60;
-    
+
     return priority;
   }
+
+  const handleNavigate = useCallback<NavigateFunction>(
+    ((to: string) => navigate(to)) as NavigateFunction,
+    [navigate],
+  );
 
   if (isLoading) {
     return (
