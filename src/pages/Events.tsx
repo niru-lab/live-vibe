@@ -28,6 +28,16 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
 const CITIES = ['Stuttgart', 'Aalen', 'Frankfurt'];
+const CATEGORIES: { key: string; label: string }[] = [
+  { key: 'club', label: 'Club' },
+  { key: 'bar', label: 'Bar' },
+  { key: 'house_party', label: 'House Party' },
+  { key: 'festival', label: 'Festival' },
+  { key: 'concert', label: 'Konzert' },
+  { key: 'sport', label: 'Sport' },
+  { key: 'other', label: 'Sonstiges' },
+];
+
 
 type DateFilter = { key: string; label: string; date: Date | null };
 
