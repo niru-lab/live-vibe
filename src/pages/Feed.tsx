@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePosts, useLikePost, useUserLikes } from '@/hooks/usePosts';
 import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
 import { useTaggedPosts } from '@/hooks/useEvents';
+import { useLivePosts } from '@/hooks/useLivePosts';
 import { PostCard } from '@/components/feed/PostCard';
 import { PostDetailDialog } from '@/components/feed/PostDetailDialog';
 import { FeedHeader } from '@/components/feed/FeedHeader';
