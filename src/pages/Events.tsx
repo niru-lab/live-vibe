@@ -27,7 +27,7 @@ import { de } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-const GENRES = ['Techno', 'House', 'Jazz', 'Indie', 'Hip-Hop', 'Pop', 'Electronic'];
+const CITIES = ['Stuttgart', 'Aalen', 'Frankfurt'];
 
 type DateFilter = { key: string; label: string; date: Date | null };
 
@@ -55,7 +55,7 @@ export default function Events() {
   const [activeTab, setActiveTab] = useState('discover');
   const [search, setSearch] = useState('');
   const [dateKey, setDateKey] = useState<string>('all');
-  const [genre, setGenre] = useState<string | null>(null);
+  const [city, setCity] = useState<string | null>(null);
   const [myEventsView, setMyEventsView] = useState<'zugesagt' | 'anstehend' | 'vergangen'>('anstehend');
 
   const dateFilters = useMemo(buildDateFilters, []);
@@ -75,16 +75,14 @@ export default function Events() {
         return false;
       }
       if (activeDate && !isSameDay(new Date(e.starts_at), activeDate)) return false;
-      if (genre) {
-        const tags: string[] = ((e.music_genres ?? e.genres ?? []) as string[]).map((t) => t.toLowerCase());
-        const g = genre.toLowerCase();
-        const matchesTag = tags.includes(g);
-        const matchesName = (e.name ?? '').toLowerCase().includes(g);
-        if (!matchesTag && !matchesName) return false;
+      if (city) {
+        const evCity = (e.city ?? '').toString().toLowerCase();
+        if (evCity !== city.toLowerCase()) return false;
       }
       return true;
     });
-  }, [allEvents, search, activeDate, genre]);
+  }, [allEvents, search, activeDate, city]);
+
 
   const pending = participations.filter((p: any) => p.status === 'requested');
   const accepted = participations.filter((p: any) => p.status === 'accepted');
@@ -127,15 +125,16 @@ export default function Events() {
         ))}
       </ChipRow>
 
-      {/* Genre chips */}
+      {/* City chips */}
       <ChipRow>
-        <Chip active={genre === null} onClick={() => setGenre(null)}>Genres</Chip>
-        {GENRES.map((g) => (
-          <Chip key={g} active={genre === g} onClick={() => setGenre(g)}>
-            {g}
+        <Chip active={city === null} onClick={() => setCity(null)}>Alle Städte</Chip>
+        {CITIES.map((c) => (
+          <Chip key={c} active={city === c} onClick={() => setCity(c)}>
+            {c}
           </Chip>
         ))}
       </ChipRow>
+
 
       {/* Tabs */}
       <div className="px-5 pt-4">
