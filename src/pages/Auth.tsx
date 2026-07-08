@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Sparkle, Confetti } from '@phosphor-icons/react';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
+import { lovable } from '@/integrations/lovable/index';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Bitte gib eine gültige E-Mail-Adresse ein');
@@ -19,9 +20,9 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
-  const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; username?: string }>({});
+
   
   const { signIn, signUp, user } = useAuth();
   const navigate = useNavigate();
