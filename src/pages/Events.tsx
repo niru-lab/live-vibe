@@ -91,9 +91,11 @@ export default function Events() {
         const evCity = (e.city ?? '').toString().toLowerCase();
         if (evCity !== city.toLowerCase()) return false;
       }
+      if (category && (e.category ?? '') !== category) return false;
       return true;
     });
-  }, [allEvents, search, activeDate, city]);
+  }, [allEvents, search, activeDate, city, category]);
+
 
 
   const pending = participations.filter((p: any) => p.status === 'requested');
