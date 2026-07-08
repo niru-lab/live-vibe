@@ -1,0 +1,2 @@
+ALTER TABLE public.venues DROP CONSTRAINT IF EXISTS venues_owner_profile_id_fkey;
+ALTER TABLE public.venues ADD CONSTRAINT venues_owner_profile_id_fkey FOREIGN KEY (owner_profile_id) REFERENCES public.profiles(id) ON DELETE SET NULL;
