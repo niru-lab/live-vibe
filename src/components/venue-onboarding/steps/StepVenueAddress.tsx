@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import VenueMiniMap from '../VenueMiniMap';
-
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiZmV5cm4iLCJhIjoiY21tNjZrYm5xMGRwMTJwcnp5bmhwbGU2aSJ9.qvMwkRPWhHDXQYrsYpN2Yw';
+import { MAPBOX_TOKEN } from '@/lib/mapbox';
 
 export interface AddressData {
   street: string;

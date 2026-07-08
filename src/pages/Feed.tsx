@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePosts, useLikePost, useUserLikes } from '@/hooks/usePosts';
 import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
 import { useTaggedPosts } from '@/hooks/useEvents';
+import { useLivePosts } from '@/hooks/useLivePosts';
 import { PostCard } from '@/components/feed/PostCard';
 import { PostDetailDialog } from '@/components/feed/PostDetailDialog';
 import { FeedHeader } from '@/components/feed/FeedHeader';
@@ -26,17 +28,22 @@ export default function Feed() {
   const { data: likedPosts = [] } = useUserLikes();
   const likeMutation = useLikePost();
 
+  useLivePosts();
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/');
     }
   }, [user, authLoading, navigate]);
 
-  const handleLike = (postId: string, isLiked: boolean) => {
-    likeMutation.mutate({ postId, isLiked });
-  };
+  const handleLike = useCallback(
+    (postId: string, isLiked: boolean) => {
+      likeMutation.mutate({ postId, isLiked });
+    },
+    [likeMutation],
+  );
 
-  const activePosts = venueFilter ? taggedPosts : posts;
+  const activePosts = (venueFilter ? taggedPosts : posts) as PostWithAuthor[] | undefined;
   const isLoading = venueFilter ? taggedLoading : postsLoading;
 
   if (authLoading) {
@@ -78,7 +85,7 @@ export default function Feed() {
           </div>
         ) : activePosts && activePosts.length > 0 ? (
           <div className="flex flex-col" style={{ gap: '10px' }}>
-            {activePosts.map((post: any) => (
+            {activePosts.map((post) => (
               <button
                 key={post.id}
                 type="button"
@@ -88,7 +95,7 @@ export default function Feed() {
                 <PostCard
                   post={post}
                   isLiked={likedPosts.includes(post.id)}
-                  onLike={(id, liked) => handleLike(id, liked)}
+                  onLike={handleLike}
                 />
               </button>
             ))}

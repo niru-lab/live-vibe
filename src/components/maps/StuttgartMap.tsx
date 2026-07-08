@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { getEventStatus } from '@/lib/utils';
 
-const MAPBOX_TOKEN = 'pk.eyJ1IjoiZmV5cm4iLCJhIjoiY21tNjZrYm5xMGRwMTJwcnp5bmhwbGU2aSJ9.qvMwkRPWhHDXQYrsYpN2Yw';
+import { MAPBOX_TOKEN } from '@/lib/mapbox';
 
 // feyrn dark map style
 const MAP_STYLE = 'mapbox://styles/mapbox/dark-v11';

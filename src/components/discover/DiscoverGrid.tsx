@@ -1,14 +1,19 @@
-import { useState, useRef, useEffect } from 'react';
+import { memo, useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { usePosts } from '@/hooks/usePosts';
+import { usePosts, type PostWithAuthor } from '@/hooks/usePosts';
 import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
-import { useEvents } from '@/hooks/useEvents';
+import { useEvents, type EventWithCreator } from '@/hooks/useEvents';
 import { useProfile } from '@/hooks/useProfile';
+import { useLivePosts } from '@/hooks/useLivePosts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Heart, ChatCircle, Users, CalendarBlank, Play, MapPin, MusicNote, CheckCircle } from '@phosphor-icons/react';
 import type { FilterState } from './DiscoverFilters';
+
+type CombinedItem =
+  | { type: 'post'; data: PostWithAuthor; date: Date; priority: number }
+  | { type: 'event'; data: EventWithCreator; date: Date; priority: number };
 
 interface DiscoverGridProps {
   searchQuery?: string;
@@ -17,8 +22,9 @@ interface DiscoverGridProps {
 
 export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
   const navigate = useNavigate();
+  useLivePosts();
   const { data: rawPosts, isLoading: postsLoading } = usePosts();
-  const rankedPosts = useFeedAlgorithm(rawPosts);
+  const rankedPosts = useFeedAlgorithm(rawPosts) as PostWithAuthor[] | undefined;
   const { data: events, isLoading: eventsLoading } = useEvents();
   const { data: profile } = useProfile();
 
@@ -81,58 +87,60 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
   }) || [];
 
   // Combine and sort with algorithm prioritization
-  const combinedItems = [
-    ...filteredPosts.map(post => ({ 
-      type: 'post' as const, 
-      data: post, 
+  const combinedItems: CombinedItem[] = [
+    ...filteredPosts.map((post) => ({
+      type: 'post' as const,
+      data: post,
       date: new Date(post.created_at),
-      priority: calculatePostPriority(post)
+      priority: calculatePostPriority(post),
     })),
-    ...filteredEvents.map(event => ({ 
-      type: 'event' as const, 
-      data: event, 
+    ...filteredEvents.map((event) => ({
+      type: 'event' as const,
+      data: event,
       date: new Date(event.created_at),
-      priority: calculateEventPriority(event)
+      priority: calculateEventPriority(event),
     })),
   ].sort((a, b) => b.priority - a.priority);
 
   // Priority calculation functions
-  function calculatePostPriority(post: any): number {
+  function calculatePostPriority(post: PostWithAuthor): number {
     let priority = 0;
     const postAge = (Date.now() - new Date(post.created_at).getTime()) / (1000 * 60);
-    
+
     // 1. Live posts (last 30min) → Top priority
     if (postAge < 30) priority += 100;
     else if (postAge < 60) priority += 50;
-    
+
     // 2. Moment X posts get boost
     if (post.is_moment_x) priority += 30;
-    
+
     // 3. Posts with music
     if (post.music_url) priority += 10;
-    
+
     // 4. Engagement boost
     priority += (post.likes_count || 0) * 2;
     priority += (post.comments_count || 0) * 3;
-    
+
     return priority;
   }
 
-  function calculateEventPriority(event: any): number {
+  function calculateEventPriority(event: EventWithCreator): number {
     let priority = 0;
-    
+
     // Events with >50 expected attendees
     if ((event.expected_attendees || 0) > 50) priority += 80;
     else if ((event.expected_attendees || 0) > 20) priority += 40;
-    
+
     // Free events get slight boost
     if (event.is_free) priority += 10;
-    
+
     // Upcoming events today
     if (new Date(event.starts_at).toDateString() === new Date().toDateString()) priority += 60;
-    
+
     return priority;
   }
+
+  const handleNavigate = useCallback((path: string) => navigate(path), [navigate]);
 
   if (isLoading) {
     return (
@@ -164,7 +172,7 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
         <GridItem
           key={`${item.type}-${item.data.id}`}
           item={item}
-          onNavigate={navigate}
+          onNavigate={handleNavigate}
         />
       ))}
     </div>
@@ -172,11 +180,11 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
 }
 
 interface GridItemProps {
-  item: { type: 'post' | 'event'; data: any; priority: number };
+  item: CombinedItem;
   onNavigate: (path: string) => void;
 }
 
-function GridItem({ item, onNavigate }: GridItemProps) {
+const GridItem = memo(function GridItem({ item, onNavigate }: GridItemProps) {
   const [isHovered, setIsHovered] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -186,7 +194,7 @@ function GridItem({ item, onNavigate }: GridItemProps) {
       audioRef.current = new Audio(item.data.music_url);
       audioRef.current.volume = 0.3;
       audioRef.current.play().catch(() => {});
-      
+
       const timeout = setTimeout(() => {
         audioRef.current?.pause();
       }, 2000);
@@ -218,24 +226,24 @@ function GridItem({ item, onNavigate }: GridItemProps) {
       onClick={handleClick}
     >
       {item.type === 'post' ? (
-        <PostGridItem 
-          post={item.data} 
+        <PostGridItem
+          post={item.data}
           isHovered={isHovered}
           onProfileClick={handleProfileClick}
         />
       ) : (
-        <EventGridItem 
-          event={item.data} 
+        <EventGridItem
+          event={item.data}
           isHovered={isHovered}
           onProfileClick={handleProfileClick}
         />
       )}
     </div>
   );
-}
+});
 
 interface PostGridItemProps {
-  post: any;
+  post: PostWithAuthor;
   isHovered: boolean;
   onProfileClick: (e: React.MouseEvent, username: string) => void;
 }
@@ -354,7 +362,7 @@ function PostGridItem({ post, isHovered, onProfileClick }: PostGridItemProps) {
 }
 
 interface EventGridItemProps {
-  event: any;
+  event: EventWithCreator;
   isHovered: boolean;
   onProfileClick: (e: React.MouseEvent, username: string) => void;
 }
