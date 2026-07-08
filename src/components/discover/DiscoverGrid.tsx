@@ -362,7 +362,7 @@ function PostGridItem({ post, isHovered, onProfileClick }: PostGridItemProps) {
 }
 
 interface EventGridItemProps {
-  event: any;
+  event: EventWithCreator;
   isHovered: boolean;
   onProfileClick: (e: React.MouseEvent, username: string) => void;
 }
