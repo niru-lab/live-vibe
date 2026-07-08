@@ -27,7 +27,6 @@ import { de } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-const CITIES = ['Stuttgart', 'Aalen', 'Frankfurt'];
 const CATEGORIES: { key: string; label: string }[] = [
   { key: 'club', label: 'Club' },
   { key: 'bar', label: 'Bar' },
@@ -65,7 +64,7 @@ export default function Events() {
   const [activeTab, setActiveTab] = useState('discover');
   const [search, setSearch] = useState('');
   const [dateKey, setDateKey] = useState<string>('all');
-  const [city, setCity] = useState<string | null>(null);
+  
   const [category, setCategory] = useState<string | null>(null);
 
   const [myEventsView, setMyEventsView] = useState<'zugesagt' | 'anstehend' | 'vergangen'>('anstehend');
@@ -87,14 +86,10 @@ export default function Events() {
         return false;
       }
       if (activeDate && !isSameDay(new Date(e.starts_at), activeDate)) return false;
-      if (city) {
-        const evCity = (e.city ?? '').toString().toLowerCase();
-        if (evCity !== city.toLowerCase()) return false;
-      }
       if (category && (e.category ?? '') !== category) return false;
       return true;
     });
-  }, [allEvents, search, activeDate, city, category]);
+  }, [allEvents, search, activeDate, category]);
 
 
 
@@ -139,15 +134,6 @@ export default function Events() {
         ))}
       </ChipRow>
 
-      {/* City chips */}
-      <ChipRow>
-        <Chip active={city === null} onClick={() => setCity(null)}>Alle Städte</Chip>
-        {CITIES.map((c) => (
-          <Chip key={c} active={city === c} onClick={() => setCity(c)}>
-            {c}
-          </Chip>
-        ))}
-      </ChipRow>
 
       {/* Category chips */}
       <ChipRow>
