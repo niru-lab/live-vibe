@@ -149,6 +149,17 @@ export default function Events() {
         ))}
       </ChipRow>
 
+      {/* Category chips */}
+      <ChipRow>
+        <Chip active={category === null} onClick={() => setCategory(null)}>Alle Arten</Chip>
+        {CATEGORIES.map((c) => (
+          <Chip key={c.key} active={category === c.key} onClick={() => setCategory(c.key)}>
+            {c.label}
+          </Chip>
+        ))}
+      </ChipRow>
+
+
 
       {/* Tabs */}
       <div className="px-5 pt-4">
