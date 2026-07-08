@@ -65,6 +65,7 @@ export const UserSearchBar = () => {
 
       const privacyMap = new Map((privacy || []).map((p: any) => [p.profile_id, p.profile_visibility]));
       const followingSet = new Set((follows || []).map((f: any) => f.following_id));
+      const viewerIsVenue = (myProfile as any)?.role === 'venue';
 
       return profiles
         .filter((p) => p.id !== myProfile?.id)
@@ -75,7 +76,8 @@ export const UserSearchBar = () => {
           avatar_url: p.avatar_url,
           profile_visibility: (privacyMap.get(p.id) as any) || 'public',
           is_following: followingSet.has(p.id),
-        }));
+        }))
+        .filter((r) => !(viewerIsVenue && r.profile_visibility === 'private'));
     },
     enabled: debounced.length >= 1,
   });

@@ -37,10 +37,21 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
     if (!searchQuery && !filters) return true;
     
     const query = searchQuery?.toLowerCase() || '';
+    const categoryLabels: Record<string, string[]> = {
+      club: ['club', 'clubs'],
+      bar: ['bar', 'bars'],
+      house_party: ['house party', 'houseparty', 'hausparty'],
+      festival: ['festival'],
+      concert: ['konzert', 'concert'],
+      sport: ['sport'],
+      other: ['sonstiges'],
+    };
+    const catMatch = !!query && (categoryLabels[event.category] || []).some((l) => l.includes(query) || query.includes(l));
     const matchesSearch = !searchQuery || (
       event.name.toLowerCase().includes(query) ||
       event.location_name.toLowerCase().includes(query) ||
-      event.city.toLowerCase().includes(query)
+      event.city.toLowerCase().includes(query) ||
+      catMatch
     );
 
     // Apply time filter
