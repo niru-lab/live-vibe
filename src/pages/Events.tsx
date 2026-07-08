@@ -27,7 +27,7 @@ import { de } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 
-const GENRES = ['Techno', 'House', 'Jazz', 'Indie', 'Hip-Hop', 'Pop', 'Electronic'];
+const CITIES = ['Stuttgart', 'Aalen', 'Frankfurt'];
 
 type DateFilter = { key: string; label: string; date: Date | null };
 
