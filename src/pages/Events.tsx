@@ -75,16 +75,14 @@ export default function Events() {
         return false;
       }
       if (activeDate && !isSameDay(new Date(e.starts_at), activeDate)) return false;
-      if (genre) {
-        const tags: string[] = ((e.music_genres ?? e.genres ?? []) as string[]).map((t) => t.toLowerCase());
-        const g = genre.toLowerCase();
-        const matchesTag = tags.includes(g);
-        const matchesName = (e.name ?? '').toLowerCase().includes(g);
-        if (!matchesTag && !matchesName) return false;
+      if (city) {
+        const evCity = (e.city ?? '').toString().toLowerCase();
+        if (evCity !== city.toLowerCase()) return false;
       }
       return true;
     });
-  }, [allEvents, search, activeDate, genre]);
+  }, [allEvents, search, activeDate, city]);
+
 
   const pending = participations.filter((p: any) => p.status === 'requested');
   const accepted = participations.filter((p: any) => p.status === 'accepted');
