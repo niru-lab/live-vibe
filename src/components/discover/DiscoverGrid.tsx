@@ -172,7 +172,7 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
         <GridItem
           key={`${item.type}-${item.data.id}`}
           item={item}
-          onNavigate={navigate}
+          onNavigate={handleNavigate}
         />
       ))}
     </div>
@@ -180,11 +180,11 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
 }
 
 interface GridItemProps {
-  item: { type: 'post' | 'event'; data: any; priority: number };
+  item: CombinedItem;
   onNavigate: (path: string) => void;
 }
 
-function GridItem({ item, onNavigate }: GridItemProps) {
+const GridItem = memo(function GridItem({ item, onNavigate }: GridItemProps) {
   const [isHovered, setIsHovered] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -194,7 +194,7 @@ function GridItem({ item, onNavigate }: GridItemProps) {
       audioRef.current = new Audio(item.data.music_url);
       audioRef.current.volume = 0.3;
       audioRef.current.play().catch(() => {});
-      
+
       const timeout = setTimeout(() => {
         audioRef.current?.pause();
       }, 2000);
@@ -226,24 +226,24 @@ function GridItem({ item, onNavigate }: GridItemProps) {
       onClick={handleClick}
     >
       {item.type === 'post' ? (
-        <PostGridItem 
-          post={item.data} 
+        <PostGridItem
+          post={item.data}
           isHovered={isHovered}
           onProfileClick={handleProfileClick}
         />
       ) : (
-        <EventGridItem 
-          event={item.data} 
+        <EventGridItem
+          event={item.data}
           isHovered={isHovered}
           onProfileClick={handleProfileClick}
         />
       )}
     </div>
   );
-}
+});
 
 interface PostGridItemProps {
-  post: any;
+  post: PostWithAuthor;
   isHovered: boolean;
   onProfileClick: (e: React.MouseEvent, username: string) => void;
 }
