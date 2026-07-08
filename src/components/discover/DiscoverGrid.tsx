@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useEffect, useCallback } from 'react';
-import { useNavigate, type NavigateFunction } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { usePosts, type PostWithAuthor } from '@/hooks/usePosts';
 import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
 import { useEvents, type EventWithCreator } from '@/hooks/useEvents';
@@ -140,10 +140,7 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
     return priority;
   }
 
-  const handleNavigate = useCallback<NavigateFunction>(
-    ((to: string) => navigate(to)) as NavigateFunction,
-    [navigate],
-  );
+  const handleNavigate = useCallback((path: string) => navigate(path), [navigate]);
 
   if (isLoading) {
     return (
