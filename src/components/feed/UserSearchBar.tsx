@@ -65,7 +65,7 @@ export const UserSearchBar = () => {
 
       const privacyMap = new Map((privacy || []).map((p: any) => [p.profile_id, p.profile_visibility]));
       const followingSet = new Set((follows || []).map((f: any) => f.following_id));
-      const viewerIsVenue = (myProfile as any)?.role === 'venue';
+      const viewerIsVenue = myProfile?.role === 'venue_owner';
 
       return profiles
         .filter((p) => p.id !== myProfile?.id)
