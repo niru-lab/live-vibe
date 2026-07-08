@@ -28,17 +28,22 @@ export default function Feed() {
   const { data: likedPosts = [] } = useUserLikes();
   const likeMutation = useLikePost();
 
+  useLivePosts();
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/');
     }
   }, [user, authLoading, navigate]);
 
-  const handleLike = (postId: string, isLiked: boolean) => {
-    likeMutation.mutate({ postId, isLiked });
-  };
+  const handleLike = useCallback(
+    (postId: string, isLiked: boolean) => {
+      likeMutation.mutate({ postId, isLiked });
+    },
+    [likeMutation],
+  );
 
-  const activePosts = venueFilter ? taggedPosts : posts;
+  const activePosts = (venueFilter ? taggedPosts : posts) as PostWithAuthor[] | undefined;
   const isLoading = venueFilter ? taggedLoading : postsLoading;
 
   if (authLoading) {
