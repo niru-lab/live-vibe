@@ -125,15 +125,16 @@ export default function Events() {
         ))}
       </ChipRow>
 
-      {/* Genre chips */}
+      {/* City chips */}
       <ChipRow>
-        <Chip active={genre === null} onClick={() => setGenre(null)}>Genres</Chip>
-        {GENRES.map((g) => (
-          <Chip key={g} active={genre === g} onClick={() => setGenre(g)}>
-            {g}
+        <Chip active={city === null} onClick={() => setCity(null)}>Alle Städte</Chip>
+        {CITIES.map((c) => (
+          <Chip key={c} active={city === c} onClick={() => setCity(c)}>
+            {c}
           </Chip>
         ))}
       </ChipRow>
+
 
       {/* Tabs */}
       <div className="px-5 pt-4">
