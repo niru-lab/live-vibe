@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,10 +11,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
 import { VenueEventSelector, type SelectedTag } from '@/components/create/VenueEventSelector';
 import { LocationPicker, type PickedLocation } from '@/components/create/LocationPicker';
-import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo } from '@phosphor-icons/react';
+import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo, UserPlus, X } from '@phosphor-icons/react';
+
+interface TaggedPerson {
+  id: string;
+  username: string;
+  display_name: string;
+  avatar_url: string | null;
+}
+
 
 export default function CreatePost() {
   const navigate = useNavigate();
