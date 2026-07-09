@@ -113,6 +113,15 @@ const categoryLabels: Record<string, string> = {
   event: 'Events',
 };
 
+const timeSlotLabels: Record<string, string> = {
+  breakfast: 'Frühstück',
+  day: 'Day-Vibe',
+  afterwork: 'Afterwork',
+  night: 'Nightlife',
+  sunrise: 'Bis Sonnenaufgang',
+  flex: 'Flexibel',
+};
+
 const cityCenters: Record<string, { center: [number, number]; zoom: number }> = {
   'Stuttgart': { center: [48.7758, 9.1829], zoom: 13 },
   'Aalen': { center: [48.8375, 10.0933], zoom: 13 },
