@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,10 +11,19 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
 import { VenueEventSelector, type SelectedTag } from '@/components/create/VenueEventSelector';
 import { LocationPicker, type PickedLocation } from '@/components/create/LocationPicker';
-import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo } from '@phosphor-icons/react';
+import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo, UserPlus, X } from '@phosphor-icons/react';
+
+interface TaggedPerson {
+  id: string;
+  username: string;
+  display_name: string;
+  avatar_url: string | null;
+}
+
 
 export default function CreatePost() {
   const navigate = useNavigate();
@@ -35,6 +44,27 @@ export default function CreatePost() {
   const [selectedTag, setSelectedTag] = useState<SelectedTag | null>(null);
   const [shareToInstagram, setShareToInstagram] = useState(false);
   const [locationError, setLocationError] = useState(false);
+  const [taggedPerson, setTaggedPerson] = useState<TaggedPerson | null>(null);
+  const [personQuery, setPersonQuery] = useState('');
+  const [personResults, setPersonResults] = useState<TaggedPerson[]>([]);
+  const [personSearchOpen, setPersonSearchOpen] = useState(false);
+
+  useEffect(() => {
+    if (taggedPerson) return;
+    const q = personQuery.trim();
+    if (q.length < 1) { setPersonResults([]); return; }
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, username, display_name, avatar_url')
+        .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+        .neq('id', profile?.id ?? '00000000-0000-0000-0000-000000000000')
+        .limit(8);
+      if (!cancelled) setPersonResults((data as TaggedPerson[]) || []);
+    }, 250);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [personQuery, taggedPerson, profile?.id]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -85,6 +115,7 @@ export default function CreatePost() {
         expires_at: expiresAt,
         venue_id: pickedLocation?.venue_id || (selectedTag?.type === 'venue' ? selectedTag.id : null),
         event_id: selectedTag?.type === 'event' ? selectedTag.id : null,
+        location_id: taggedPerson?.id ?? null,
       });
       toast({ title: 'Gepostet! 🎉', description: 'Dein Beitrag wurde erfolgreich geteilt.' });
       navigate('/');
@@ -161,6 +192,75 @@ export default function CreatePost() {
           <div className="flex items-center gap-2"><Tag weight="thin" className="h-4 w-4 text-primary" /><Label>Venue oder Event markieren</Label></div>
           <VenueEventSelector selectedTag={selectedTag} onSelect={setSelectedTag} />
           {selectedTag && <p className="text-xs text-muted-foreground">⏱️ Post erscheint 24h im Feed von {selectedTag.name}</p>}
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <UserPlus weight="thin" className="h-4 w-4 text-primary" />
+            <Label>Person markieren</Label>
+          </div>
+          {taggedPerson ? (
+            <div data-testid="tagged-person" className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 px-3 py-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={taggedPerson.avatar_url || ''} className="object-cover" />
+                <AvatarFallback className="text-xs">{taggedPerson.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium truncate">{taggedPerson.display_name}</div>
+                <div className="text-[11px] text-muted-foreground truncate">@{taggedPerson.username}</div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => { setTaggedPerson(null); setPersonQuery(''); }}
+                aria-label="Markierung entfernen"
+              >
+                <X weight="bold" className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="relative">
+              <Input
+                data-testid="tag-person-input"
+                placeholder="Person suchen (@username oder Name)…"
+                value={personQuery}
+                onChange={(e) => { setPersonQuery(e.target.value); setPersonSearchOpen(true); }}
+                onFocus={() => setPersonSearchOpen(true)}
+              />
+              {personSearchOpen && personResults.length > 0 && (
+                <ul className="absolute z-30 left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
+                  {personResults.map((p) => (
+                    <li
+                      key={p.id}
+                      data-testid="tag-person-result"
+                      className="flex items-center gap-3 px-3 py-2 hover:bg-accent/50 cursor-pointer"
+                      onClick={() => {
+                        setTaggedPerson(p);
+                        setPersonQuery('');
+                        setPersonResults([]);
+                        setPersonSearchOpen(false);
+                      }}
+                    >
+                      <Avatar className="h-7 w-7">
+                        <AvatarImage src={p.avatar_url || ''} className="object-cover" />
+                        <AvatarFallback className="text-[10px]">{p.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm truncate">{p.display_name}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">@{p.username}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+          {taggedPerson && (
+            <p className="text-xs text-muted-foreground">
+              🏷️ @{taggedPerson.username} sieht diesen Post in seinen Markierungen.
+            </p>
+          )}
         </div>
         <div className="space-y-2">
           <Label htmlFor="caption">Beschreibung</Label>

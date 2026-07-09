@@ -236,7 +236,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from('posts')
-        .select('id, latitude, longitude, caption, media_url, created_at')
+        .select('id, latitude, longitude, caption, media_url, created_at, author_id, author:profiles!posts_author_id_fkey(id, username, display_name, avatar_url)')
         .eq('is_moment_x', true)
         .gte('created_at', since)
         .not('latitude', 'is', null)
@@ -629,6 +629,23 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                   >
                     ⚡ Moment X
                   </span>
+                  {popupInfo.data.author?.username && (
+                    <Link
+                      to={`/u/${popupInfo.data.author.username}`}
+                      className="flex items-center gap-2 mb-2 no-underline"
+                      onClick={() => setPopupInfo(null)}
+                    >
+                      <img
+                        src={popupInfo.data.author.avatar_url || ''}
+                        alt={popupInfo.data.author.display_name || popupInfo.data.author.username}
+                        className="h-5 w-5 rounded-full object-cover border border-white/30"
+                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      />
+                      <span className="text-xs text-muted-foreground">
+                        von <span className="font-medium text-foreground hover:underline">@{popupInfo.data.author.username}</span>
+                      </span>
+                    </Link>
+                  )}
                   {popupInfo.data.media_url && (
                     <img src={popupInfo.data.media_url} alt="" className="w-full h-32 object-cover rounded-lg mb-2" />
                   )}
@@ -638,7 +655,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                   <Button
                     size="sm"
                     className="w-full mt-1 bg-gradient-neon text-white text-xs"
-                    onClick={() => navigate(`/?post=${popupInfo.data.id}`)}
+                    onClick={() => { setPopupInfo(null); navigate(`/feed?post=${popupInfo.data.id}`); }}
                   >
                     Post ansehen
                   </Button>
