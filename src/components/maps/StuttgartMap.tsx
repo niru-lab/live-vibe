@@ -495,20 +495,20 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                       </span>
                     )}
                   </div>
-                  <h3 className="font-bold mb-1 text-sm text-white">{popupInfo.data.name}</h3>
-                  <p className="text-xs text-neutral-400 mb-2 flex items-center gap-1">
+                  <h3 className="font-bold mb-1 text-sm text-foreground">{popupInfo.data.name}</h3>
+                  <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     {popupInfo.data.address}
                   </p>
                   {(popupInfo.data.price_tier || (popupInfo.data.time_slots && popupInfo.data.time_slots.length > 0)) && (
                     <div className="flex items-center gap-1.5 mb-2 flex-wrap">
                       {popupInfo.data.price_tier && (
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-white/10 text-white/90">
+                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-foreground/10 text-foreground">
                           {popupInfo.data.price_tier}
                         </span>
                       )}
                       {(popupInfo.data.time_slots || []).slice(0, 3).map((slot: string) => (
-                        <span key={slot} className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/5 text-white/70">
+                        <span key={slot} className="text-[10px] px-1.5 py-0.5 rounded-full bg-foreground/5 text-muted-foreground">
                           {timeSlotLabels[slot] || slot}
                         </span>
                       ))}
@@ -577,19 +577,19 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                       );
                     })()}
                   </div>
-                  <h3 className="font-bold mb-1 text-sm text-white">{popupInfo.data.name}</h3>
-                  <p className="text-xs text-neutral-400 mb-1 flex items-center gap-1">
+                  <h3 className="font-bold mb-1 text-sm text-foreground">{popupInfo.data.name}</h3>
+                  <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
                     <MapPin className="h-3 w-3" />
                     {popupInfo.data.isPrivateHouseParty
                       ? `🔒 Hausparty • ${popupInfo.data.directionLabel} von ${popupInfo.data.city} (genaue Adresse nach Zusage)`
                       : `${popupInfo.data.address}, ${popupInfo.data.city}`}
                   </p>
-                  <p className="text-xs text-neutral-400 mb-1 flex items-center gap-1">
+                  <p className="text-xs text-muted-foreground mb-1 flex items-center gap-1">
                     <Calendar className="h-3 w-3" />
                     {format(new Date(popupInfo.data.starts_at), 'dd. MMM, HH:mm', { locale: de })} Uhr
                   </p>
                   {popupInfo.data.expected_attendees && (
-                    <p className="text-xs text-neutral-400 mb-2 flex items-center gap-1">
+                    <p className="text-xs text-muted-foreground mb-2 flex items-center gap-1">
                       <Users className="h-3 w-3" />
                       ~{popupInfo.data.expected_attendees} erwartet
                     </p>
@@ -649,7 +649,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                   {popupInfo.data.media_url && (
                     <img src={popupInfo.data.media_url} alt="" className="w-full h-32 object-cover rounded-lg mb-2" />
                   )}
-                  <p data-testid="post-content" className="text-xs text-white mb-2">
+                  <p data-testid="post-content" className="text-xs text-foreground mb-2">
                     {popupInfo.data.caption || 'Live Moment'}
                   </p>
                   <Button
