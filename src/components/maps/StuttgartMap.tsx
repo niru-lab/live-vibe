@@ -315,17 +315,20 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
 
   const searchLower = searchQuery.toLowerCase().trim();
 
+  // If search resolves to a known city, that city overrides the selectedCity filter
+  const effectiveCity = searchCity || selectedCity;
+
   // Build venue markers
   const venueMarkers = useMemo(() => {
     const filtered = (venues || []).filter(v => {
-      if (selectedCity && selectedCity !== 'Alle' && v.city?.toLowerCase() !== selectedCity.toLowerCase()) return false;
+      if (effectiveCity && effectiveCity !== 'Alle' && v.city?.toLowerCase() !== effectiveCity.toLowerCase()) return false;
       if (selectedCategory && selectedCategory !== 'event' && v.category !== selectedCategory) return false;
       if (selectedCategory === 'event') return false;
-      if (searchLower && !v.name.toLowerCase().includes(searchLower) && !v.address.toLowerCase().includes(searchLower) && !v.category.toLowerCase().includes(searchLower) && !v.city?.toLowerCase().includes(searchLower)) return false;
+      if (searchLower && !searchCity && !v.name.toLowerCase().includes(searchLower) && !v.address.toLowerCase().includes(searchLower) && !v.category.toLowerCase().includes(searchLower) && !v.city?.toLowerCase().includes(searchLower)) return false;
       return true;
     });
     return filtered;
-  }, [venues, selectedCity, selectedCategory, searchLower]);
+  }, [venues, effectiveCity, selectedCategory, searchLower, searchCity]);
 
   // Build event markers (for popup interaction)
   const eventMarkers = useMemo(() => {
@@ -336,7 +339,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         if (event.latitude && event.longitude) coords = [event.latitude, event.longitude];
         else coords = getEventCoordinates(event.city, event.address);
         if (!coords) return null;
-        if (selectedCity && selectedCity !== 'Alle' && event.city?.toLowerCase() !== selectedCity.toLowerCase()) return null;
+        if (effectiveCity && effectiveCity !== 'Alle' && event.city?.toLowerCase() !== effectiveCity.toLowerCase()) return null;
         const isPrivateHouseParty = event.category === 'house_party' && !acceptedHouseParties?.has(event.id);
         let directionLabel: string | null = null;
         if (isPrivateHouseParty) {
@@ -344,11 +347,11 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
           coords = fuzzed.coords;
           directionLabel = fuzzed.label;
         }
-        if (searchLower && !event.name.toLowerCase().includes(searchLower) && !event.location_name.toLowerCase().includes(searchLower) && !(event.address || '').toLowerCase().includes(searchLower) && !event.city?.toLowerCase().includes(searchLower)) return null;
+        if (searchLower && !searchCity && !event.name.toLowerCase().includes(searchLower) && !event.location_name.toLowerCase().includes(searchLower) && !(event.address || '').toLowerCase().includes(searchLower) && !event.city?.toLowerCase().includes(searchLower)) return null;
         return { ...event, coords, isPrivateHouseParty, directionLabel };
       })
       .filter(Boolean) as any[];
-  }, [events, selectedCity, selectedCategory, searchLower, acceptedHouseParties]);
+  }, [events, effectiveCity, selectedCategory, searchLower, searchCity, acceptedHouseParties]);
 
   const getCategoryCount = useCallback((category: string) => {
     const cityFilter = (city?: string | null) =>
