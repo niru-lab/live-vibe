@@ -649,7 +649,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                   {popupInfo.data.media_url && (
                     <img src={popupInfo.data.media_url} alt="" className="w-full h-32 object-cover rounded-lg mb-2" />
                   )}
-                  <p data-testid="post-content" className="text-xs text-white mb-2">
+                  <p data-testid="post-content" className="text-xs text-foreground mb-2">
                     {popupInfo.data.caption || 'Live Moment'}
                   </p>
                   <Button
