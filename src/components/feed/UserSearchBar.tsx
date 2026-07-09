@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MagnifyingGlass, X, Lock, GlobeHemisphereWest, Check, Plus } from '@phosphor-icons/react';
+import { MagnifyingGlass, X, Lock, GlobeHemisphereWest, Check, Plus, UsersThree } from '@phosphor-icons/react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
