@@ -158,6 +158,13 @@ const cityCenters: Record<string, { center: [number, number]; zoom: number }> = 
   'Wiesbaden': { center: [50.0782, 8.2398], zoom: 12.5 },
 };
 
+const normalizeSearchText = (value?: string | null) =>
+  (value || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+
 // Heatmap layer style
 const heatmapLayer: any = {
   id: 'events-heat',
@@ -253,12 +260,20 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
     },
     refetchInterval: 60_000,
   });
-  // Resolve city from search query (e.g. "berlin" → "Berlin")
+  // Resolve city from search query (e.g. "aalen", "Aalen und so" → "Aalen")
   const searchCity = useMemo(() => {
-    const q = searchQuery.toLowerCase().trim();
+    const q = normalizeSearchText(searchQuery);
     if (!q) return null;
-    return Object.keys(cityCenters).find(c => c.toLowerCase().includes(q) || q.includes(c.toLowerCase())) || null;
-  }, [searchQuery]);
+    const knownCities = [
+      ...Object.keys(cityCenters),
+      ...(venues || []).map(v => v.city).filter(Boolean),
+      ...(events || []).map(e => e.city).filter(Boolean),
+    ];
+    return knownCities.find(city => {
+      const normalizedCity = normalizeSearchText(city);
+      return normalizedCity.includes(q) || q.includes(normalizedCity);
+    }) || null;
+  }, [searchQuery, venues, events]);
 
   const searchLower = searchQuery.toLowerCase().trim();
 
@@ -269,15 +284,30 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   useEffect(() => {
     if (!mapRef.current) return;
     const cityKey = (searchCity || (selectedCity && selectedCity !== 'Alle' ? selectedCity : null));
+    const dynamicCityMarkers = cityKey && !cityCenters[cityKey]
+      ? [
+          ...(venues || [])
+            .filter(v => normalizeSearchText(v.city) === normalizeSearchText(cityKey))
+            .map(v => [v.latitude, v.longitude] as [number, number]),
+          ...(events || [])
+            .filter(e => normalizeSearchText(e.city) === normalizeSearchText(cityKey) && e.latitude && e.longitude)
+            .map(e => [e.latitude!, e.longitude!] as [number, number]),
+        ]
+      : [];
+    const dynamicCenter = dynamicCityMarkers.length > 0
+      ? dynamicCityMarkers.reduce<[number, number]>((acc, coord) => [acc[0] + coord[0], acc[1] + coord[1]], [0, 0]).map(sum => sum / dynamicCityMarkers.length) as [number, number]
+      : null;
     const target = cityKey && cityCenters[cityKey]
       ? cityCenters[cityKey]
-      : { center: [48.7758, 9.1829] as [number, number], zoom: 13 };
+      : dynamicCenter
+        ? { center: dynamicCenter, zoom: 13 }
+        : { center: [48.7758, 9.1829] as [number, number], zoom: 13 };
     mapRef.current.flyTo({
       center: [target.center[1], target.center[0]],
       zoom: target.zoom,
       duration: 1500,
     });
-  }, [selectedCity, searchCity]);
+  }, [selectedCity, searchCity, venues, events]);
 
   // Build heatmap GeoJSON from events
   const heatmapData = useMemo(() => {
