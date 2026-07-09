@@ -510,8 +510,8 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                   {(popupInfo.data.price_tier || (popupInfo.data.time_slots && popupInfo.data.time_slots.length > 0)) && (
                     <div className="flex items-center gap-1.5 mb-2 flex-wrap">
                       {popupInfo.data.price_tier && (
-                        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-foreground/10 text-foreground">
-                          {popupInfo.data.price_tier}
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+                          {priceTierLabels[popupInfo.data.price_tier] || popupInfo.data.price_tier}
                         </span>
                       )}
                       {(popupInfo.data.time_slots || []).slice(0, 3).map((slot: string) => (
