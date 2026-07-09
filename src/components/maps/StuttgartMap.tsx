@@ -122,6 +122,13 @@ const timeSlotLabels: Record<string, string> = {
   flex: 'Flexibel',
 };
 
+const priceTierLabels: Record<string, string> = {
+  student: '💸 Student-friendly',
+  mid: '💸💸 Mittelklasse',
+  premium: '💸💸💸 Premium',
+  free: '🎁 Free',
+};
+
 const cityCenters: Record<string, { center: [number, number]; zoom: number }> = {
   'Stuttgart': { center: [48.7758, 9.1829], zoom: 13 },
   'Aalen': { center: [48.8375, 10.0933], zoom: 13 },
