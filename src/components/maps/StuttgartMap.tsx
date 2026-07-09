@@ -339,7 +339,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         if (event.latitude && event.longitude) coords = [event.latitude, event.longitude];
         else coords = getEventCoordinates(event.city, event.address);
         if (!coords) return null;
-        if (selectedCity && selectedCity !== 'Alle' && event.city?.toLowerCase() !== selectedCity.toLowerCase()) return null;
+        if (effectiveCity && effectiveCity !== 'Alle' && event.city?.toLowerCase() !== effectiveCity.toLowerCase()) return null;
         const isPrivateHouseParty = event.category === 'house_party' && !acceptedHouseParties?.has(event.id);
         let directionLabel: string | null = null;
         if (isPrivateHouseParty) {
@@ -347,11 +347,11 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
           coords = fuzzed.coords;
           directionLabel = fuzzed.label;
         }
-        if (searchLower && !event.name.toLowerCase().includes(searchLower) && !event.location_name.toLowerCase().includes(searchLower) && !(event.address || '').toLowerCase().includes(searchLower) && !event.city?.toLowerCase().includes(searchLower)) return null;
+        if (searchLower && !searchCity && !event.name.toLowerCase().includes(searchLower) && !event.location_name.toLowerCase().includes(searchLower) && !(event.address || '').toLowerCase().includes(searchLower) && !event.city?.toLowerCase().includes(searchLower)) return null;
         return { ...event, coords, isPrivateHouseParty, directionLabel };
       })
       .filter(Boolean) as any[];
-  }, [events, selectedCity, selectedCategory, searchLower, acceptedHouseParties]);
+  }, [events, effectiveCity, selectedCategory, searchLower, searchCity, acceptedHouseParties]);
 
   const getCategoryCount = useCallback((category: string) => {
     const cityFilter = (city?: string | null) =>
