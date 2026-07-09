@@ -260,10 +260,15 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
     return Object.keys(cityCenters).find(c => c.toLowerCase().includes(q) || q.includes(c.toLowerCase())) || null;
   }, [searchQuery]);
 
+  const searchLower = searchQuery.toLowerCase().trim();
+
+  // If search resolves to a known city, that city overrides the selectedCity filter
+  const effectiveCity = searchCity || selectedCity;
+
   // Fly to city when filter or search changes
   useEffect(() => {
     if (!mapRef.current) return;
-    const cityKey = (selectedCity && selectedCity !== 'Alle' ? selectedCity : null) || searchCity;
+    const cityKey = (searchCity || (selectedCity && selectedCity !== 'Alle' ? selectedCity : null));
     const target = cityKey && cityCenters[cityKey]
       ? cityCenters[cityKey]
       : { center: [48.7758, 9.1829] as [number, number], zoom: 13 };
@@ -287,7 +292,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         if (!coords) return null;
 
         // Filter by city
-        if (selectedCity && selectedCity !== 'Alle' && event.city?.toLowerCase() !== selectedCity.toLowerCase()) return null;
+        if (effectiveCity && effectiveCity !== 'Alle' && event.city?.toLowerCase() !== effectiveCity.toLowerCase()) return null;
 
         // Privacy: fuzz house parties unless user is accepted
         if (event.category === 'house_party' && !acceptedHouseParties?.has(event.id)) {
@@ -311,12 +316,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       .filter(Boolean);
 
     return { type: 'FeatureCollection' as const, features };
-  }, [events, selectedCity, acceptedHouseParties]);
-
-  const searchLower = searchQuery.toLowerCase().trim();
-
-  // If search resolves to a known city, that city overrides the selectedCity filter
-  const effectiveCity = searchCity || selectedCity;
+  }, [events, effectiveCity, acceptedHouseParties]);
 
   // Build venue markers
   const venueMarkers = useMemo(() => {
