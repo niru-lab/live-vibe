@@ -236,7 +236,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from('posts')
-        .select('id, latitude, longitude, caption, media_url, created_at')
+        .select('id, latitude, longitude, caption, media_url, created_at, author_id, author:profiles!posts_author_id_fkey(id, username, display_name, avatar_url)')
         .eq('is_moment_x', true)
         .gte('created_at', since)
         .not('latitude', 'is', null)
