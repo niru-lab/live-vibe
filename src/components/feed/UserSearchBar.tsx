@@ -82,6 +82,24 @@ export const UserSearchBar = () => {
     enabled: debounced.length >= 1,
   });
 
+  // Bug 3: public Roomz appear in global search alongside users.
+  const { data: roomResults = [] } = useQuery({
+    queryKey: ['room-search', debounced],
+    queryFn: async () => {
+      if (!debounced || debounced.length < 1) return [];
+      const { data, error } = await supabase
+        .from('rooms')
+        .select('id, name, description, category, cover_image_url, city')
+        .eq('is_active', true)
+        .eq('visibility', 'public')
+        .or(`name.ilike.%${debounced}%,description.ilike.%${debounced}%,category.ilike.%${debounced}%`)
+        .limit(8);
+      if (error) return [];
+      return data || [];
+    },
+    enabled: debounced.length >= 1,
+  });
+
   const handleFollow = (e: React.MouseEvent, r: SearchResult) => {
     e.stopPropagation();
     toggleFollow.mutate(
