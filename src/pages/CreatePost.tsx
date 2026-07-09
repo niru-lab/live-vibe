@@ -44,6 +44,27 @@ export default function CreatePost() {
   const [selectedTag, setSelectedTag] = useState<SelectedTag | null>(null);
   const [shareToInstagram, setShareToInstagram] = useState(false);
   const [locationError, setLocationError] = useState(false);
+  const [taggedPerson, setTaggedPerson] = useState<TaggedPerson | null>(null);
+  const [personQuery, setPersonQuery] = useState('');
+  const [personResults, setPersonResults] = useState<TaggedPerson[]>([]);
+  const [personSearchOpen, setPersonSearchOpen] = useState(false);
+
+  useEffect(() => {
+    if (taggedPerson) return;
+    const q = personQuery.trim();
+    if (q.length < 1) { setPersonResults([]); return; }
+    let cancelled = false;
+    const t = setTimeout(async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, username, display_name, avatar_url')
+        .or(`username.ilike.%${q}%,display_name.ilike.%${q}%`)
+        .neq('id', profile?.id ?? '00000000-0000-0000-0000-000000000000')
+        .limit(8);
+      if (!cancelled) setPersonResults((data as TaggedPerson[]) || []);
+    }, 250);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [personQuery, taggedPerson, profile?.id]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
