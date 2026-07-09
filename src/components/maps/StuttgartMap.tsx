@@ -315,17 +315,20 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
 
   const searchLower = searchQuery.toLowerCase().trim();
 
+  // If search resolves to a known city, that city overrides the selectedCity filter
+  const effectiveCity = searchCity || selectedCity;
+
   // Build venue markers
   const venueMarkers = useMemo(() => {
     const filtered = (venues || []).filter(v => {
-      if (selectedCity && selectedCity !== 'Alle' && v.city?.toLowerCase() !== selectedCity.toLowerCase()) return false;
+      if (effectiveCity && effectiveCity !== 'Alle' && v.city?.toLowerCase() !== effectiveCity.toLowerCase()) return false;
       if (selectedCategory && selectedCategory !== 'event' && v.category !== selectedCategory) return false;
       if (selectedCategory === 'event') return false;
-      if (searchLower && !v.name.toLowerCase().includes(searchLower) && !v.address.toLowerCase().includes(searchLower) && !v.category.toLowerCase().includes(searchLower) && !v.city?.toLowerCase().includes(searchLower)) return false;
+      if (searchLower && !searchCity && !v.name.toLowerCase().includes(searchLower) && !v.address.toLowerCase().includes(searchLower) && !v.category.toLowerCase().includes(searchLower) && !v.city?.toLowerCase().includes(searchLower)) return false;
       return true;
     });
     return filtered;
-  }, [venues, selectedCity, selectedCategory, searchLower]);
+  }, [venues, effectiveCity, selectedCategory, searchLower, searchCity]);
 
   // Build event markers (for popup interaction)
   const eventMarkers = useMemo(() => {
