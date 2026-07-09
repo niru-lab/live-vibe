@@ -14,12 +14,14 @@ import type { PostWithAuthor } from '@/hooks/usePosts';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Lightning, Confetti, ArrowLeft } from '@phosphor-icons/react';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function Feed() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const venueFilter = searchParams.get('venue');
+  const postParam = searchParams.get('post');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [openPost, setOpenPost] = useState<PostWithAuthor | null>(null);
   const { data: rawPosts, isLoading: postsLoading } = usePosts(selectedCity === 'all' ? undefined : selectedCity);
@@ -36,12 +38,29 @@ export default function Feed() {
     }
   }, [user, authLoading, navigate]);
 
+  // Deep-link: /feed?post=<id> opens the PostDetailDialog for that post.
+  useEffect(() => {
+    if (!postParam) return;
+    if (openPost?.id === postParam) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('posts')
+        .select(`*, author:profiles!posts_author_id_fkey(*), event:events(*), location:profiles!posts_location_id_fkey(*)`)
+        .eq('id', postParam)
+        .maybeSingle();
+      if (!cancelled && data) setOpenPost(data as unknown as PostWithAuthor);
+    })();
+    return () => { cancelled = true; };
+  }, [postParam, openPost?.id]);
+
   const handleLike = useCallback(
     (postId: string, isLiked: boolean) => {
       likeMutation.mutate({ postId, isLiked });
     },
     [likeMutation],
   );
+
 
   const activePosts = (venueFilter ? taggedPosts : posts) as PostWithAuthor[] | undefined;
   const isLoading = venueFilter ? taggedLoading : postsLoading;
