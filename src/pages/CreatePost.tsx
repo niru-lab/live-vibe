@@ -115,6 +115,7 @@ export default function CreatePost() {
         expires_at: expiresAt,
         venue_id: pickedLocation?.venue_id || (selectedTag?.type === 'venue' ? selectedTag.id : null),
         event_id: selectedTag?.type === 'event' ? selectedTag.id : null,
+        location_id: taggedPerson?.id ?? null,
       });
       toast({ title: 'Gepostet! 🎉', description: 'Dein Beitrag wurde erfolgreich geteilt.' });
       navigate('/');
