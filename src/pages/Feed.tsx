@@ -149,7 +149,14 @@ export default function Feed() {
         post={openPost}
         isLiked={openPost ? likedPosts.includes(openPost.id) : false}
         onLike={handleLike}
-        onClose={() => setOpenPost(null)}
+        onClose={() => {
+          setOpenPost(null);
+          if (postParam) {
+            const next = new URLSearchParams(searchParams);
+            next.delete('post');
+            setSearchParams(next, { replace: true });
+          }
+        }}
       />
     </AppLayout>
   );
