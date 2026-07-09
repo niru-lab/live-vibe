@@ -194,6 +194,75 @@ export default function CreatePost() {
           {selectedTag && <p className="text-xs text-muted-foreground">⏱️ Post erscheint 24h im Feed von {selectedTag.name}</p>}
         </div>
         <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <UserPlus weight="thin" className="h-4 w-4 text-primary" />
+            <Label>Person markieren</Label>
+          </div>
+          {taggedPerson ? (
+            <div data-testid="tagged-person" className="flex items-center gap-3 rounded-xl border border-border bg-muted/40 px-3 py-2">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={taggedPerson.avatar_url || ''} className="object-cover" />
+                <AvatarFallback className="text-xs">{taggedPerson.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="text-sm font-medium truncate">{taggedPerson.display_name}</div>
+                <div className="text-[11px] text-muted-foreground truncate">@{taggedPerson.username}</div>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                onClick={() => { setTaggedPerson(null); setPersonQuery(''); }}
+                aria-label="Markierung entfernen"
+              >
+                <X weight="bold" className="h-4 w-4" />
+              </Button>
+            </div>
+          ) : (
+            <div className="relative">
+              <Input
+                data-testid="tag-person-input"
+                placeholder="Person suchen (@username oder Name)…"
+                value={personQuery}
+                onChange={(e) => { setPersonQuery(e.target.value); setPersonSearchOpen(true); }}
+                onFocus={() => setPersonSearchOpen(true)}
+              />
+              {personSearchOpen && personResults.length > 0 && (
+                <ul className="absolute z-30 left-0 right-0 mt-1 max-h-60 overflow-y-auto rounded-xl border border-border bg-card shadow-lg">
+                  {personResults.map((p) => (
+                    <li
+                      key={p.id}
+                      data-testid="tag-person-result"
+                      className="flex items-center gap-3 px-3 py-2 hover:bg-accent/50 cursor-pointer"
+                      onClick={() => {
+                        setTaggedPerson(p);
+                        setPersonQuery('');
+                        setPersonResults([]);
+                        setPersonSearchOpen(false);
+                      }}
+                    >
+                      <Avatar className="h-7 w-7">
+                        <AvatarImage src={p.avatar_url || ''} className="object-cover" />
+                        <AvatarFallback className="text-[10px]">{p.display_name?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm truncate">{p.display_name}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">@{p.username}</div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+          {taggedPerson && (
+            <p className="text-xs text-muted-foreground">
+              🏷️ @{taggedPerson.username} sieht diesen Post in seinen Markierungen.
+            </p>
+          )}
+        </div>
+        <div className="space-y-2">
           <Label htmlFor="caption">Beschreibung</Label>
           <Textarea data-testid="post-text-input" id="caption" placeholder="Was geht gerade ab? 🎉" value={caption} onChange={(e) => setCaption(e.target.value)} className="min-h-[100px]" />
         </div>
