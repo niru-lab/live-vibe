@@ -132,7 +132,7 @@ export default function OnboardingVenue() {
 
       const { error: profErr } = await supabase
         .from('profiles')
-        .update({ onboarding_complete: true })
+        .update({ onboarding_complete: true, display_name: name.trim() })
         .eq('id', profileId);
       if (profErr) throw profErr;
 
