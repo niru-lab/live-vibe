@@ -150,8 +150,8 @@ export const UserSearchBar = () => {
         <div className="absolute left-0 right-0 top-[calc(100%+8px)] z-50 max-h-[60vh] overflow-y-auto rounded-2xl border border-border bg-card shadow-2xl">
           {isLoading ? (
             <div className="p-4 text-center text-xs text-muted-foreground">Suche…</div>
-          ) : results.length === 0 ? (
-            <div data-testid="no-results-msg" className="p-4 text-center text-xs text-muted-foreground">Keine Accounts gefunden</div>
+          ) : results.length === 0 && roomResults.length === 0 ? (
+            <div data-testid="no-results-msg" className="p-4 text-center text-xs text-muted-foreground">Keine Ergebnisse</div>
           ) : (
             <ul className="py-1">
               {results.map((r) => {
@@ -198,10 +198,44 @@ export const UserSearchBar = () => {
                   </li>
                 );
               })}
+              {roomResults.length > 0 && (
+                <>
+                  <li className="px-3 pt-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    Roomz
+                  </li>
+                  {roomResults.map((room: any) => (
+                    <li
+                      key={`room-${room.id}`}
+                      data-testid="search-result-room"
+                      className="flex items-center gap-3 px-3 py-2.5 hover:bg-accent/50 cursor-pointer"
+                      onClick={() => {
+                        setOpen(false);
+                        setQuery('');
+                        navigate(`/roomz/${room.id}`);
+                      }}
+                    >
+                      <div className="h-9 w-9 shrink-0 rounded-lg overflow-hidden bg-muted flex items-center justify-center">
+                        {room.cover_image_url ? (
+                          <img src={room.cover_image_url} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                          <UsersThree weight="fill" className="h-4 w-4 text-primary" />
+                        )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-foreground truncate">{room.name}</div>
+                        <div className="text-[11px] text-muted-foreground truncate">
+                          Room · {room.category}{room.city ? ` · ${room.city}` : ''}
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </>
+              )}
             </ul>
           )}
         </div>
       )}
+
     </div>
   );
 };
