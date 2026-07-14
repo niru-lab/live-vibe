@@ -14,7 +14,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Lock, SignOut, PencilSimple, Star, Shield, CaretLeft, Moon, Sun, Trash, FileText, Scales, ShieldCheck } from '@phosphor-icons/react';
+import { Lock, SignOut, PencilSimple, Star, Shield, CaretLeft, Moon, Sun, Trash, FileText, Scales, ShieldCheck, Prohibit } from '@phosphor-icons/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/components/ThemeProvider';
 import { EditProfileDialog } from './EditProfileDialog';
@@ -76,6 +76,7 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
         { icon: PencilSimple, label: 'Profil bearbeiten', onClick: () => setEditOpen(true) },
         { icon: Star, label: 'Verifizierungsantrag (Clubs)', onClick: () => {} },
         { icon: Shield, label: 'Privacy-Einstellungen', onClick: () => setPrivacyOpen(true) },
+        { icon: Prohibit, label: 'Blockierte Nutzer', onClick: () => { onOpenChange(false); navigate('/settings/privacy/blocked'); } },
       ],
     },
   ];
