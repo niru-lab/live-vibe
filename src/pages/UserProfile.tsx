@@ -7,16 +7,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { ArrowLeft, DotsThree, ChatCircleDots, Prohibit, Check, Plus, Lock } from '@phosphor-icons/react';
+import { ArrowLeft, DotsThree, ChatCircleDots, Prohibit, Check, Plus, Lock, EyeSlash } from '@phosphor-icons/react';
 import { useProfile } from '@/hooks/useProfile';
 import { useFollowStats, usePostsCount, useIsFollowing, useToggleFollow } from '@/hooks/useFollowStats';
 import { useUserPosts } from '@/hooks/useUserPosts';
-import { useBlockUser } from '@/hooks/useDirectMessages';
+import { useIsBlockedEitherWay } from '@/hooks/useBlockUser';
+import { BlockSheet } from '@/components/safety/BlockSheet';
 import { useUserLikes, useLikePost, type PostWithAuthor } from '@/hooks/usePosts';
 import { PostDetailDialog } from '@/components/feed/PostDetailDialog';
 import { SendMessageDialog } from '@/components/messaging/SendMessageDialog';
-import { toast } from '@/hooks/use-toast';
 
 export default function UserProfile() {
   const { username } = useParams<{ username: string }>();
