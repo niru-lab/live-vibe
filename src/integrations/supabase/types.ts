@@ -1618,6 +1618,10 @@ export type Database = {
       }
       archive_old_events: { Args: never; Returns: undefined }
       calculate_level: { Args: { pts: number }; Returns: number }
+      can_see_user: {
+        Args: { target_id: string; viewer_id: string }
+        Returns: boolean
+      }
       can_send_dm: {
         Args: { recipient_id: string; sender_id: string }
         Returns: boolean
