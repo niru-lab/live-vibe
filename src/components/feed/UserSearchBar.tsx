@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useProfile } from '@/hooks/useProfile';
 import { useToggleFollow } from '@/hooks/useFollowStats';
+import { useHiddenUserIds } from '@/hooks/useBlockUser';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface SearchResult {
@@ -26,6 +27,7 @@ export const UserSearchBar = () => {
   const toggleFollow = useToggleFollow();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { blocked: hiddenUserIds } = useHiddenUserIds();
 
   useEffect(() => {
     const t = setTimeout(() => setDebounced(query.trim()), 250);
@@ -40,8 +42,9 @@ export const UserSearchBar = () => {
     return () => document.removeEventListener('mousedown', onClick);
   }, []);
 
+  const hiddenKey = Array.from(hiddenUserIds).sort().join(',');
   const { data: results = [], isLoading } = useQuery({
-    queryKey: ['user-search', debounced, myProfile?.id],
+    queryKey: ['user-search', debounced, myProfile?.id, hiddenKey],
     queryFn: async (): Promise<SearchResult[]> => {
       if (!debounced || debounced.length < 1) return [];
 
@@ -69,6 +72,7 @@ export const UserSearchBar = () => {
 
       return profiles
         .filter((p) => p.id !== myProfile?.id)
+        .filter((p) => !hiddenUserIds.has(p.id))
         .map((p) => ({
           id: p.id,
           username: p.username,

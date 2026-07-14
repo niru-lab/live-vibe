@@ -35,6 +35,7 @@ import NotFound from "./pages/NotFound";
 import Impressum from "./pages/legal/Impressum";
 import Datenschutz from "./pages/legal/Datenschutz";
 import AGB from "./pages/legal/AGB";
+import BlockedUsers from "./pages/BlockedUsers";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -88,6 +89,8 @@ const App = () => (
                   <Route path="/impressum" element={<Impressum />} />
                   <Route path="/datenschutz" element={<Datenschutz />} />
                   <Route path="/agb" element={<AGB />} />
+                  <Route path="/settings/privacy/blocked" element={<BlockedUsers />} />
+
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>

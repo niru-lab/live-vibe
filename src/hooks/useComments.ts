@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
+import { useHiddenUserIds } from '@/hooks/useBlockUser';
 import { toast } from '@/hooks/use-toast';
 
 export interface CommentWithAuthor {
@@ -18,8 +19,10 @@ export interface CommentWithAuthor {
 }
 
 export const useComments = (postId?: string) => {
+  const { blocked } = useHiddenUserIds();
+  const hiddenKey = Array.from(blocked).sort().join(',');
   return useQuery({
-    queryKey: ['comments', postId],
+    queryKey: ['comments', postId, hiddenKey],
     queryFn: async (): Promise<CommentWithAuthor[]> => {
       if (!postId) return [];
       const { data, error } = await supabase
@@ -28,14 +31,15 @@ export const useComments = (postId?: string) => {
         .eq('post_id', postId)
         .order('created_at', { ascending: true });
       if (error) throw error;
-      const userIds = Array.from(new Set((data || []).map((c) => c.user_id)));
+      const filtered = (data || []).filter((c) => !blocked.has(c.user_id));
+      const userIds = Array.from(new Set(filtered.map((c) => c.user_id)));
       if (userIds.length === 0) return [];
       const { data: authors } = await supabase
         .from('profiles')
         .select('id, username, display_name, avatar_url')
         .in('id', userIds);
       const map = new Map((authors || []).map((a) => [a.id, a]));
-      return (data || []).map((c) => ({ ...c, author: (map.get(c.user_id) as any) || null }));
+      return filtered.map((c) => ({ ...c, author: (map.get(c.user_id) as any) || null }));
     },
     enabled: !!postId,
   });

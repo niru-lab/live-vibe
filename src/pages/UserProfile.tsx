@@ -7,16 +7,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { ArrowLeft, DotsThree, ChatCircleDots, Prohibit, Check, Plus, Lock } from '@phosphor-icons/react';
+import { ArrowLeft, DotsThree, ChatCircleDots, Prohibit, Check, Plus, Lock, EyeSlash } from '@phosphor-icons/react';
 import { useProfile } from '@/hooks/useProfile';
 import { useFollowStats, usePostsCount, useIsFollowing, useToggleFollow } from '@/hooks/useFollowStats';
 import { useUserPosts } from '@/hooks/useUserPosts';
-import { useBlockUser } from '@/hooks/useDirectMessages';
+import { useIsBlockedEitherWay } from '@/hooks/useBlockUser';
+import { BlockSheet } from '@/components/safety/BlockSheet';
 import { useUserLikes, useLikePost, type PostWithAuthor } from '@/hooks/usePosts';
 import { PostDetailDialog } from '@/components/feed/PostDetailDialog';
 import { SendMessageDialog } from '@/components/messaging/SendMessageDialog';
-import { toast } from '@/hooks/use-toast';
 
 export default function UserProfile() {
   const { username } = useParams<{ username: string }>();
@@ -50,24 +49,8 @@ export default function UserProfile() {
   const { data: isFollowing } = useIsFollowing(profile?.id);
   const { data: posts } = useUserPosts(profile?.id);
   const toggleFollow = useToggleFollow();
-  const blockUser = useBlockUser();
+  const { isBlocked, ready: blockReady } = useIsBlockedEitherWay(profile?.id);
 
-  // Redirect to own profile page if user lands on their own
-  if (isOwn) {
-    navigate('/profile', { replace: true });
-    return null;
-  }
-
-  const handleBlock = async () => {
-    if (!profile) return;
-    try {
-      await blockUser.mutateAsync(profile.id);
-      toast({ title: 'Blockiert', description: `@${profile.username} wurde blockiert.` });
-      navigate(-1);
-    } catch (e: any) {
-      toast({ title: 'Fehler', description: e.message, variant: 'destructive' });
-    }
-  };
 
   const handleFollow = () => {
     if (!profile) return;
@@ -93,6 +76,27 @@ export default function UserProfile() {
       <AppLayout>
         <div className="min-h-screen bg-[#0A0A0F] flex flex-col items-center justify-center p-6 text-center">
           <p className="text-white text-lg font-bold mb-2">Profil nicht gefunden</p>
+          <Button variant="outline" onClick={() => navigate(-1)}>Zurück</Button>
+        </div>
+      </AppLayout>
+    );
+  }
+
+  if (isOwn) {
+    navigate('/profile', { replace: true });
+    return null;
+  }
+
+  // Phase 0 client guard: if either side blocked, hide the profile.
+  if (blockReady && isBlocked) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+          <Prohibit weight="thin" className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="text-foreground text-lg font-bold mb-1">Profil nicht verfügbar</p>
+          <p className="text-xs text-muted-foreground mb-5 max-w-[260px]">
+            Dieses Profil ist für dich nicht sichtbar. Blockierungen kannst du in den Einstellungen verwalten.
+          </p>
           <Button variant="outline" onClick={() => navigate(-1)}>Zurück</Button>
         </div>
       </AppLayout>
@@ -207,22 +211,12 @@ export default function UserProfile() {
         recipient={{ id: profile.id, username: profile.username, display_name: profile.display_name, avatar_url: profile.avatar_url }}
       />
 
-      <AlertDialog open={blockConfirmOpen} onOpenChange={setBlockConfirmOpen}>
-        <AlertDialogContent className="bg-[#12121A] border-white/[0.08] text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">@{profile.username} blockieren?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#A0A0B0]">
-              Diese Person kann dich nicht mehr finden, dir folgen oder dir Nachrichten senden. Du kannst die Blockierung später aufheben.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/[0.04] border-white/[0.08] text-white hover:bg-white/[0.1]">Abbrechen</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBlock} className="bg-red-500 hover:bg-red-600 text-white">
-              Blockieren
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <BlockSheet
+        open={blockConfirmOpen}
+        onOpenChange={setBlockConfirmOpen}
+        target={{ id: profile.id, username: profile.username, display_name: profile.display_name, avatar_url: profile.avatar_url }}
+        onBlocked={() => navigate(-1)}
+      />
 
       <PostDetailDialog
         post={selectedPost}
