@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useProfile } from '@/hooks/useProfile';
 import { useToggleFollow } from '@/hooks/useFollowStats';
+import { useHiddenUserIds } from '@/hooks/useBlockUser';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface SearchResult {
