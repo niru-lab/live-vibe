@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
+import { useHiddenUserIds } from '@/hooks/useBlockUser';
 import { toast } from '@/hooks/use-toast';
 
 export interface CommentWithAuthor {
@@ -18,8 +19,10 @@ export interface CommentWithAuthor {
 }
 
 export const useComments = (postId?: string) => {
+  const { blocked } = useHiddenUserIds();
+  const hiddenKey = Array.from(blocked).sort().join(',');
   return useQuery({
-    queryKey: ['comments', postId],
+    queryKey: ['comments', postId, hiddenKey],
     queryFn: async (): Promise<CommentWithAuthor[]> => {
       if (!postId) return [];
       const { data, error } = await supabase
