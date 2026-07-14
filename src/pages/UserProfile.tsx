@@ -49,24 +49,8 @@ export default function UserProfile() {
   const { data: isFollowing } = useIsFollowing(profile?.id);
   const { data: posts } = useUserPosts(profile?.id);
   const toggleFollow = useToggleFollow();
-  const blockUser = useBlockUser();
+  const { isBlocked, ready: blockReady } = useIsBlockedEitherWay(profile?.id);
 
-  // Redirect to own profile page if user lands on their own
-  if (isOwn) {
-    navigate('/profile', { replace: true });
-    return null;
-  }
-
-  const handleBlock = async () => {
-    if (!profile) return;
-    try {
-      await blockUser.mutateAsync(profile.id);
-      toast({ title: 'Blockiert', description: `@${profile.username} wurde blockiert.` });
-      navigate(-1);
-    } catch (e: any) {
-      toast({ title: 'Fehler', description: e.message, variant: 'destructive' });
-    }
-  };
 
   const handleFollow = () => {
     if (!profile) return;
