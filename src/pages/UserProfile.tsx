@@ -82,6 +82,27 @@ export default function UserProfile() {
     );
   }
 
+  if (isOwn) {
+    navigate('/profile', { replace: true });
+    return null;
+  }
+
+  // Phase 0 client guard: if either side blocked, hide the profile.
+  if (blockReady && isBlocked) {
+    return (
+      <AppLayout>
+        <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 text-center">
+          <Prohibit weight="thin" className="h-10 w-10 text-muted-foreground mb-3" />
+          <p className="text-foreground text-lg font-bold mb-1">Profil nicht verfügbar</p>
+          <p className="text-xs text-muted-foreground mb-5 max-w-[260px]">
+            Dieses Profil ist für dich nicht sichtbar. Blockierungen kannst du in den Einstellungen verwalten.
+          </p>
+          <Button variant="outline" onClick={() => navigate(-1)}>Zurück</Button>
+        </div>
+      </AppLayout>
+    );
+  }
+
   return (
     <AppLayout>
       <div className="fixed inset-0 -z-10 bg-background" />
@@ -190,22 +211,12 @@ export default function UserProfile() {
         recipient={{ id: profile.id, username: profile.username, display_name: profile.display_name, avatar_url: profile.avatar_url }}
       />
 
-      <AlertDialog open={blockConfirmOpen} onOpenChange={setBlockConfirmOpen}>
-        <AlertDialogContent className="bg-[#12121A] border-white/[0.08] text-white">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-white">@{profile.username} blockieren?</AlertDialogTitle>
-            <AlertDialogDescription className="text-[#A0A0B0]">
-              Diese Person kann dich nicht mehr finden, dir folgen oder dir Nachrichten senden. Du kannst die Blockierung später aufheben.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/[0.04] border-white/[0.08] text-white hover:bg-white/[0.1]">Abbrechen</AlertDialogCancel>
-            <AlertDialogAction onClick={handleBlock} className="bg-red-500 hover:bg-red-600 text-white">
-              Blockieren
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <BlockSheet
+        open={blockConfirmOpen}
+        onOpenChange={setBlockConfirmOpen}
+        target={{ id: profile.id, username: profile.username, display_name: profile.display_name, avatar_url: profile.avatar_url }}
+        onBlocked={() => navigate(-1)}
+      />
 
       <PostDetailDialog
         post={selectedPost}
