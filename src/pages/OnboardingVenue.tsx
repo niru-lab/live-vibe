@@ -138,7 +138,7 @@ export default function OnboardingVenue() {
 
       toast.success('Willkommen bei Feyrn! Dein Spot ist drin 🔥');
       setSuccess(true);
-      setTimeout(() => navigate(venueHome, { replace: true }), 1600);
+      setTimeout(() => navigate(venueHome, { replace: true, state: { startAppTour: true } }), 1600);
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || 'Konnte Spot nicht speichern');
