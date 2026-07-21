@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { CaretLeft } from '@phosphor-icons/react';
 
-// TODO: Platzhalter-AGB. Vor Release anwaltlich prüfen lassen.
 export default function AGB() {
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -14,14 +13,11 @@ export default function AGB() {
       <main className="mx-auto max-w-2xl px-5 py-8 space-y-6 text-sm leading-relaxed">
         <h1 className="text-2xl font-bold">Allgemeine Nutzungsbedingungen</h1>
 
-        <section className="rounded-xl border border-dashed border-amber-500/40 bg-amber-500/5 p-4 text-xs text-amber-600 dark:text-amber-400">
-          ⚠️ Platzhalter. Vor App-Store-Einreichung durch finale AGB (mit korrekter Firmierung) ersetzen.
-        </section>
-
         <section className="space-y-2">
           <h2 className="font-semibold">1. Anbieter</h2>
           <p>
-            Anbieter der App „Feyrn" ist [Firmenname / Inhaber], [Anschrift]. Kontakt: [kontakt@feyrn.de]. Vollständige
+            Anbieter der App „Feyrn" ist Niruban Yeyavathanan, Nalla Pillai (Einzelunternehmen),
+            Breslauer Str. 70, 73432 Aalen, Deutschland. Kontakt: hello@feyrn.de. Vollständige
             Angaben siehe <Link to="/impressum" className="text-primary underline">Impressum</Link>.
           </p>
         </section>
