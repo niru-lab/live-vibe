@@ -90,7 +90,7 @@ export default function AGB() {
           <p>Es gilt das Recht der Bundesrepublik Deutschland unter Ausschluss des UN-Kaufrechts.</p>
         </section>
 
-        <p className="pt-6 text-xs text-muted-foreground">Stand: [Datum]</p>
+        <p className="pt-6 text-xs text-muted-foreground">Stand: Juli 2026</p>
       </main>
     </div>
   );
