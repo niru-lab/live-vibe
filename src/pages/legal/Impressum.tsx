@@ -27,7 +27,6 @@ export default function Impressum() {
         <section className="space-y-2">
           <h2 className="font-semibold">Kontakt</h2>
           <p>
-            Telefon: [Telefonnummer]<br />
             E-Mail: hello@feyrn.de
           </p>
         </section>
