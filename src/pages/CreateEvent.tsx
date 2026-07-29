@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -67,6 +67,9 @@ const GENRE_OPTIONS = ['Techno', 'House', 'Hip-Hop', 'Jazz', 'Indie', 'Pop', 'La
 
 export default function CreateEvent() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Guided entry for the venue activation nudge (first event only).
+  const firstEventMode = searchParams.get('first') === '1';
   const { user } = useAuth();
   const { data: profile } = useProfile();
   const { toast } = useToast();
