@@ -92,11 +92,8 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
   const handleFinish = async () => {
     setSaving(true);
     const ageNum = parseInt(data.birthdate, 10);
-    // profiles has a single `city` text column — primary city goes there, the
-    // full multi-select is kept client-side as a discovery preference.
-    try {
-      localStorage.setItem('feyrn.cities', JSON.stringify(data.cities));
-    } catch { /* storage unavailable — non-critical */ }
+    // `city` keeps the primary city (used by feed/map filters), `cities` holds
+    // the full multi-select preference.
     await supabase.from('profiles').update({
       username: data.username,
       age: isNaN(ageNum) ? null : ageNum,
@@ -106,6 +103,7 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
       perfect_evening: data.weekendType || null,
       favorite_drink: data.drink || null,
       city: data.cities[0] || 'Stuttgart',
+      cities: data.cities,
       onboarding_complete: true,
     } as any).eq('id', profileId);
     setSaving(false);
