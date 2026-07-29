@@ -1,18 +1,38 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { resolvePostAuthRoute } from '@/lib/authRouting';
 
 type Role = 'guest' | 'venue_owner';
 
 export default function RolePicker() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { toast } = useToast();
   const [saving, setSaving] = useState<Role | null>(null);
+  const [checking, setChecking] = useState(true);
+  const checked = useRef(false);
+
+  // If the user already has a role (or no session), don't let them get stuck here.
+  useEffect(() => {
+    if (loading) return;
+    if (!user) {
+      navigate('/welcome', { replace: true });
+      return;
+    }
+    if (checked.current) return;
+    checked.current = true;
+    resolvePostAuthRoute(user)
+      .then((route) => {
+        if (route !== '/role') navigate(route, { replace: true });
+        else setChecking(false);
+      })
+      .catch(() => setChecking(false));
+  }, [user, loading, navigate]);
 
   const pick = async (role: Role) => {
     if (!user || saving) return;
@@ -21,13 +41,22 @@ export default function RolePicker() {
       .from('profiles')
       .update({ role })
       .eq('user_id', user.id);
-    setSaving(null);
     if (error) {
+      setSaving(null);
       toast({ variant: 'destructive', title: 'Fehler', description: error.message });
       return;
     }
     navigate(role === 'venue_owner' ? '/onboarding-venue' : '/onboarding', { replace: true });
   };
+
+  if (loading || checking) {
+    return (
+      <div className="flex min-h-[100dvh] items-center justify-center bg-background">
+        <span className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-primary/30 border-t-primary" />
+      </div>
+    );
+  }
+
 
   return (
     <div className="relative flex min-h-[100dvh] flex-col items-center justify-center bg-background px-6">
