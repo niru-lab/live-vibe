@@ -15,6 +15,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Lightning, Confetti, ArrowLeft } from '@phosphor-icons/react';
 import { supabase } from '@/integrations/supabase/client';
+import { useGuestActivation } from '@/hooks/useGuestActivation';
+import { GuestFirstPostNudge } from '@/components/feed/GuestFirstPostNudge';
 
 export default function Feed() {
   const { user, loading: authLoading } = useAuth();
@@ -29,6 +31,8 @@ export default function Feed() {
   const { data: taggedPosts, isLoading: taggedLoading } = useTaggedPosts(venueFilter || undefined);
   const { data: likedPosts = [] } = useUserLikes();
   const likeMutation = useLikePost();
+  const { isEligible: showGuestNudge, isLoading: activationLoading } = useGuestActivation();
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
 
   useLivePosts();
 
@@ -89,7 +93,7 @@ export default function Feed() {
             </span>
           </div>
         )}
-        {isLoading ? (
+        {isLoading || (!venueFilter && activationLoading) ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="space-y-3">
@@ -102,6 +106,11 @@ export default function Feed() {
               </div>
             ))}
           </div>
+        ) : !venueFilter && showGuestNudge && !nudgeDismissed ? (
+          <GuestFirstPostNudge
+            onStart={() => navigate('/create')}
+            onExplore={() => setNudgeDismissed(true)}
+          />
         ) : activePosts && activePosts.length > 0 ? (
           <div className="flex flex-col" style={{ gap: '10px' }}>
             {activePosts.map((post) => (
