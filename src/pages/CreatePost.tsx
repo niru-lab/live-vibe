@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { useProfile } from '@/hooks/useProfile';
@@ -15,7 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
 import { VenueEventSelector, type SelectedTag } from '@/components/create/VenueEventSelector';
 import { LocationPicker, type PickedLocation } from '@/components/create/LocationPicker';
-import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo, UserPlus, X } from '@phosphor-icons/react';
+import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo, UserPlus, X, CaretDown } from '@phosphor-icons/react';
 
 interface TaggedPerson {
   id: string;
@@ -31,6 +32,14 @@ export default function CreatePost() {
   const { data: profile } = useProfile();
   const { toast } = useToast();
   const createPost = useCreatePost();
+  const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  // First-post mode: only a lightweight entry from the guest activation nudge.
+  const firstMode = searchParams.get('first') === '1';
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const simple = firstMode && !showAdvanced;
+
+
 
   const [caption, setCaption] = useState('');
   const [location, setLocation] = useState('');
@@ -117,6 +126,7 @@ export default function CreatePost() {
         event_id: selectedTag?.type === 'event' ? selectedTag.id : null,
         location_id: taggedPerson?.id ?? null,
       });
+      queryClient.invalidateQueries({ queryKey: ['guest-activation'] });
       toast({ title: 'Gepostet! 🎉', description: 'Dein Beitrag wurde erfolgreich geteilt.' });
       navigate('/');
     } catch (error: any) { console.error('Upload error:', error); toast({ variant: 'destructive', title: 'Fehler beim Upload', description: error.message || 'Bitte versuche es erneut.' }); }
@@ -132,6 +142,17 @@ export default function CreatePost() {
         </Button>
       </header>
       <div data-testid={isMomentX ? 'moment-x-composer' : 'post-composer'} className="p-4 space-y-6">
+        {firstMode && (
+          <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Sparkle weight="fill" className="h-4 w-4 text-primary" />Dein erster Post
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Foto wählen, kurz beschreiben, teilen. Mehr brauchst du nicht.
+            </p>
+          </div>
+        )}
+        {!simple && (<>
         <div className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent"><Lightning weight="fill" className="h-5 w-5 text-primary-foreground" /></div>
@@ -167,6 +188,7 @@ export default function CreatePost() {
             </p>
           </div>
         )}
+        </>)}
         <div className="space-y-3">
           <Label>Foto oder Video</Label>
           {previewUrl ? (
@@ -187,6 +209,7 @@ export default function CreatePost() {
             </label>
           )}
         </div>
+        {!simple && (<>
         <div className="space-y-2"><Label>Musik</Label><MusicSelector selectedTrack={selectedMusic} onSelect={setSelectedMusic} /></div>
         <div className="space-y-2">
           <div className="flex items-center gap-2"><Tag weight="thin" className="h-4 w-4 text-primary" /><Label>Venue oder Event markieren</Label></div>
@@ -262,6 +285,7 @@ export default function CreatePost() {
             </p>
           )}
         </div>
+        </>)}
         <div className="space-y-2">
           <Label htmlFor="caption">Beschreibung</Label>
           <Textarea data-testid="post-text-input" id="caption" placeholder="Was geht gerade ab? 🎉" value={caption} onChange={(e) => setCaption(e.target.value)} className="min-h-[100px]" />
@@ -274,15 +298,36 @@ export default function CreatePost() {
               Für Moment X ist eine Location erforderlich.
             </p>
           )}
-          <div className="relative">
-            <MapPin weight="thin" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input id="location" placeholder="Oder freier Text…" value={location} onChange={(e) => setLocation(e.target.value)} className="pl-10" />
+          {!simple && (
+            <div className="relative">
+              <MapPin weight="thin" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input id="location" placeholder="Oder freier Text…" value={location} onChange={(e) => setLocation(e.target.value)} className="pl-10" />
+            </div>
+          )}
+        </div>
+        {firstMode && (
+          <div className="space-y-3 pb-4">
+            <Button
+              data-testid="post-submit-btn-primary"
+              onClick={handleSubmit}
+              disabled={isUploading}
+              className="h-12 w-full bg-gradient-to-r from-primary to-accent text-base font-semibold"
+            >
+              {isUploading ? (<><SpinnerGap weight="thin" className="mr-2 h-5 w-5 animate-spin" />Lädt...</>) : 'Ersten Post teilen'}
+            </Button>
+            {simple && (
+              <Button variant="ghost" className="w-full gap-2 text-muted-foreground" onClick={() => setShowAdvanced(true)}>
+                <CaretDown weight="thin" className="h-4 w-4" />Mehr Optionen
+              </Button>
+            )}
           </div>
-        </div>
-        <div className="rounded-xl bg-muted/50 p-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-foreground"><Sparkle weight="thin" className="h-4 w-4 text-primary" />Tipps für mehr Reichweite</div>
-          <ul className="mt-2 space-y-1 text-sm text-muted-foreground"><li>• Poste im besten Moment der Party</li><li>• Nutze Moment-X für maximale Sichtbarkeit</li><li>• Tagge die Location für Club-Integration</li></ul>
-        </div>
+        )}
+        {!simple && (
+          <div className="rounded-xl bg-muted/50 p-4">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground"><Sparkle weight="thin" className="h-4 w-4 text-primary" />Tipps für mehr Reichweite</div>
+            <ul className="mt-2 space-y-1 text-sm text-muted-foreground"><li>• Poste im besten Moment der Party</li><li>• Nutze Moment-X für maximale Sichtbarkeit</li><li>• Tagge die Location für Club-Integration</li></ul>
+          </div>
+        )}
       </div>
     </AppLayout>
   );
