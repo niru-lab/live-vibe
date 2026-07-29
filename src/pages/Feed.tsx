@@ -31,6 +31,8 @@ export default function Feed() {
   const { data: taggedPosts, isLoading: taggedLoading } = useTaggedPosts(venueFilter || undefined);
   const { data: likedPosts = [] } = useUserLikes();
   const likeMutation = useLikePost();
+  const { isEligible: showGuestNudge, isLoading: activationLoading } = useGuestActivation();
+  const [nudgeDismissed, setNudgeDismissed] = useState(false);
 
   useLivePosts();
 
