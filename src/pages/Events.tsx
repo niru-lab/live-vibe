@@ -118,6 +118,21 @@ export default function Events() {
         </div>
       </header>
 
+      {venueActivationLoading ? (
+        <div className="space-y-4 px-5 pt-8">
+          <Skeleton className="mx-auto h-20 w-20 rounded-full" />
+          <Skeleton className="mx-auto h-6 w-2/3" />
+          <Skeleton className="mx-auto h-4 w-1/2" />
+        </div>
+      ) : showVenueActivation ? (
+        <VenueFirstEventNudge
+          onCreate={() => navigate('/events/create?first=1')}
+          onExplore={() => setVenueNudgeDismissed(true)}
+        />
+      ) : (
+      <>
+
+
       {/* Search */}
       <div className="px-5 pt-3">
         <div className="flex h-12 items-center gap-3 rounded-2xl bg-muted/60 px-4">
