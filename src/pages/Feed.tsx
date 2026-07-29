@@ -93,7 +93,7 @@ export default function Feed() {
             </span>
           </div>
         )}
-        {isLoading ? (
+        {isLoading || (!venueFilter && activationLoading) ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="space-y-3">
