@@ -9,6 +9,8 @@ import StepGenres from './steps/StepGenres';
 import StepArtist from './steps/StepArtist';
 import StepWeekend from './steps/StepWeekend';
 import StepDrink from './steps/StepDrink';
+import StepCity from './steps/StepCity';
+import StepInvite from './steps/StepInvite';
 
 interface Props {
   profileId: string;
@@ -24,9 +26,10 @@ interface Data {
   artist: string;
   weekendType: string;
   drink: string;
+  cities: string[];
 }
 
-const TOTAL = 6;
+const TOTAL = 8;
 
 const TITLES: Record<number, { title: string; sub: string }> = {
   1: { title: 'Wie alt bist du?', sub: 'Wir fragen nur einmal. Versprochen.' },
@@ -35,6 +38,8 @@ const TITLES: Record<number, { title: string; sub: string }> = {
   4: { title: 'Wer ist dein Artist?', sub: 'Dein liebster Act, egal ob Club oder Festival.' },
   5: { title: 'Wie verbringst du deinen Freitag?', sub: 'Keine falsche Antwort.' },
   6: { title: 'Was trinkst du so?', sub: "Wir versprechen, wir erzählen's niemandem. 🤫" },
+  7: { title: 'Wo willst du raus?', sub: 'Wähl mindestens eine Stadt — mehrere gehen auch.' },
+  8: { title: 'Wen nimmst du mit?', sub: 'Optional — du kannst das auch überspringen.' },
 };
 
 export default function OnboardingFlow({ profileId, userId, initialUsername, onComplete }: Props) {
