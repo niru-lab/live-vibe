@@ -106,6 +106,11 @@ export default function Feed() {
               </div>
             ))}
           </div>
+        ) : !venueFilter && showGuestNudge && !nudgeDismissed ? (
+          <GuestFirstPostNudge
+            onStart={() => navigate('/create')}
+            onExplore={() => setNudgeDismissed(true)}
+          />
         ) : activePosts && activePosts.length > 0 ? (
           <div className="flex flex-col" style={{ gap: '10px' }}>
             {activePosts.map((post) => (
