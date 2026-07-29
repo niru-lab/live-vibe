@@ -37,6 +37,10 @@ export default function CreatePost() {
   // First-post mode: only a lightweight entry from the guest activation nudge.
   const firstMode = searchParams.get('first') === '1';
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const { isEligible: isFirstPostPending } = useGuestActivation();
+  // Post-activation share step: opened exactly once, after the first successful publish.
+  const [shareOpen, setShareOpen] = useState(false);
+  const shareFiredRef = useRef(false);
   const simple = firstMode && !showAdvanced;
 
 
@@ -126,8 +130,14 @@ export default function CreatePost() {
         event_id: selectedTag?.type === 'event' ? selectedTag.id : null,
         location_id: taggedPerson?.id ?? null,
       });
+      const wasFirstPost = isFirstPostPending;
       queryClient.invalidateQueries({ queryKey: ['guest-activation'] });
       toast({ title: 'Gepostet! 🎉', description: 'Dein Beitrag wurde erfolgreich geteilt.' });
+      if (wasFirstPost && !shareFiredRef.current) {
+        shareFiredRef.current = true;
+        setShareOpen(true);
+        return;
+      }
       navigate('/');
     } catch (error: any) { console.error('Upload error:', error); toast({ variant: 'destructive', title: 'Fehler beim Upload', description: error.message || 'Bitte versuche es erneut.' }); }
     finally { setIsUploading(false); }
