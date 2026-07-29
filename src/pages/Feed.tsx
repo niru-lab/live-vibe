@@ -108,7 +108,7 @@ export default function Feed() {
           </div>
         ) : !venueFilter && showGuestNudge && !nudgeDismissed ? (
           <GuestFirstPostNudge
-            onStart={() => navigate('/create')}
+            onStart={() => navigate('/create?first=1')}
             onExplore={() => setNudgeDismissed(true)}
           />
         ) : activePosts && activePosts.length > 0 ? (
