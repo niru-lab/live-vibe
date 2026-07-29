@@ -72,7 +72,6 @@ export default function Auth() {
     const { error } = await signUp(email, password, {
       username: username || undefined,
       display_name: username || undefined,
-      role,
     });
     setLoading(false);
     if (error) {
@@ -80,7 +79,8 @@ export default function Auth() {
       if (error.message.includes('already registered')) errorMessage = 'Diese E-Mail-Adresse ist bereits registriert';
       toast({ variant: 'destructive', title: 'Registrierung fehlgeschlagen', description: errorMessage });
     } else {
-      toast({ title: 'Willkommen bei Feyrn! 🎉', description: 'Dein Account wurde erfolgreich erstellt.' });
+      toast({ title: 'Fast geschafft! 📬', description: 'Bestätige deine E-Mail-Adresse.' });
+      navigate('/verify', { state: { method: 'email', contact: email, mode: 'register' }, replace: true });
     }
   };
 
