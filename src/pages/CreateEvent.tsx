@@ -186,6 +186,15 @@ export default function CreateEvent() {
         </header>
         <Form {...form}>
           <form data-testid="event-form" onSubmit={form.handleSubmit(onSubmit)} className="flex-1 overflow-y-auto space-y-3 p-4 pb-8">
+            {firstEventMode && (
+              <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+                <h2 className="text-sm font-semibold text-foreground">Dein erstes Event</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Name, Datum und Location genügen für den Start. Preise, Dresscode und Medien
+                  kannst du später jederzeit ergänzen.
+                </p>
+              </div>
+            )}
             {/* Media upload - compact */}
             <div className="space-y-2">
               <div className="flex items-center justify-between"><Label className="text-sm font-semibold">Medien</Label><span className="text-xs text-muted-foreground">{mediaItems.length}/10</span></div>
