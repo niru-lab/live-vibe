@@ -19,7 +19,7 @@ export const AppLayout = ({ children, hideNav = false }: AppLayoutProps) => {
         {children}
       </main>
       {!hideNav && <BottomNav />}
-      {!hideNav && <OnboardingOverlay />}
+      {!hideNav && <AppTour />}
     </div>
   );
 };
