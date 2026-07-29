@@ -214,6 +214,7 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
         {(step === 4 || step === 8) && (
           <button
             onClick={skip}
+            disabled={saving}
             style={{
               width: '100%',
               marginTop: 12,
