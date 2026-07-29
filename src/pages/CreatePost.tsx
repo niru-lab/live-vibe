@@ -126,6 +126,7 @@ export default function CreatePost() {
         event_id: selectedTag?.type === 'event' ? selectedTag.id : null,
         location_id: taggedPerson?.id ?? null,
       });
+      queryClient.invalidateQueries({ queryKey: ['guest-activation'] });
       toast({ title: 'Gepostet! 🎉', description: 'Dein Beitrag wurde erfolgreich geteilt.' });
       navigate('/');
     } catch (error: any) { console.error('Upload error:', error); toast({ variant: 'destructive', title: 'Fehler beim Upload', description: error.message || 'Bitte versuche es erneut.' }); }
@@ -141,6 +142,17 @@ export default function CreatePost() {
         </Button>
       </header>
       <div data-testid={isMomentX ? 'moment-x-composer' : 'post-composer'} className="p-4 space-y-6">
+        {firstMode && (
+          <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Sparkle weight="fill" className="h-4 w-4 text-primary" />Dein erster Post
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Foto wählen, kurz beschreiben, teilen. Mehr brauchst du nicht.
+            </p>
+          </div>
+        )}
+        {!simple && (<>
         <div className="flex items-center justify-between rounded-2xl border border-primary/30 bg-primary/5 p-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-accent"><Lightning weight="fill" className="h-5 w-5 text-primary-foreground" /></div>
@@ -176,6 +188,7 @@ export default function CreatePost() {
             </p>
           </div>
         )}
+        </>)}
         <div className="space-y-3">
           <Label>Foto oder Video</Label>
           {previewUrl ? (
