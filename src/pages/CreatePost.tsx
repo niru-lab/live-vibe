@@ -16,7 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { MusicSelector, type MusicTrack } from '@/components/create/MusicSelector';
 import { VenueEventSelector, type SelectedTag } from '@/components/create/VenueEventSelector';
 import { LocationPicker, type PickedLocation } from '@/components/create/LocationPicker';
-import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo, UserPlus, X } from '@phosphor-icons/react';
+import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo, UserPlus, X, CaretDown } from '@phosphor-icons/react';
 
 interface TaggedPerson {
   id: string;
@@ -32,6 +32,14 @@ export default function CreatePost() {
   const { data: profile } = useProfile();
   const { toast } = useToast();
   const createPost = useCreatePost();
+  const queryClient = useQueryClient();
+  const [searchParams] = useSearchParams();
+  // First-post mode: only a lightweight entry from the guest activation nudge.
+  const firstMode = searchParams.get('first') === '1';
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const simple = firstMode && !showAdvanced;
+
+
 
   const [caption, setCaption] = useState('');
   const [location, setLocation] = useState('');
