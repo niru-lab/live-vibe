@@ -26,6 +26,8 @@ import { format, isToday, isTomorrow, addDays, isSameDay } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useVenueActivation } from '@/hooks/useVenueActivation';
+import { VenueFirstEventNudge } from '@/components/events/VenueFirstEventNudge';
 
 const CATEGORIES: { key: string; label: string }[] = [
   { key: 'club', label: 'Club' },
