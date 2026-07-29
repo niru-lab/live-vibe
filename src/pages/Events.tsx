@@ -95,6 +95,10 @@ export default function Events() {
 
 
 
+  const { isEligible: venueActivationEligible, isLoading: venueActivationLoading } = useVenueActivation();
+  const [venueNudgeDismissed, setVenueNudgeDismissed] = useState(false);
+  const showVenueActivation = venueActivationEligible && !venueNudgeDismissed;
+
   const pending = participations.filter((p: any) => p.status === 'requested');
   const accepted = participations.filter((p: any) => p.status === 'accepted');
 
