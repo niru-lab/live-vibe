@@ -316,6 +316,8 @@ export default function Events() {
           </div>
         </Tabs>
       </div>
+      </>
+      )}
     </AppLayout>
   );
 }
