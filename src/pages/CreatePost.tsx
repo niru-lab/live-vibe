@@ -341,6 +341,12 @@ export default function CreatePost() {
           </div>
         )}
       </div>
+
+      <FirstActionShareModal
+        open={shareOpen}
+        role="guest"
+        onClose={() => { setShareOpen(false); navigate('/'); }}
+      />
     </AppLayout>
   );
 }
