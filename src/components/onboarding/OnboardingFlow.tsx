@@ -9,6 +9,8 @@ import StepGenres from './steps/StepGenres';
 import StepArtist from './steps/StepArtist';
 import StepWeekend from './steps/StepWeekend';
 import StepDrink from './steps/StepDrink';
+import StepCity from './steps/StepCity';
+import StepInvite from './steps/StepInvite';
 
 interface Props {
   profileId: string;
@@ -24,9 +26,10 @@ interface Data {
   artist: string;
   weekendType: string;
   drink: string;
+  cities: string[];
 }
 
-const TOTAL = 6;
+const TOTAL = 8;
 
 const TITLES: Record<number, { title: string; sub: string }> = {
   1: { title: 'Wie alt bist du?', sub: 'Wir fragen nur einmal. Versprochen.' },
@@ -35,6 +38,8 @@ const TITLES: Record<number, { title: string; sub: string }> = {
   4: { title: 'Wer ist dein Artist?', sub: 'Dein liebster Act, egal ob Club oder Festival.' },
   5: { title: 'Wie verbringst du deinen Freitag?', sub: 'Keine falsche Antwort.' },
   6: { title: 'Was trinkst du so?', sub: "Wir versprechen, wir erzählen's niemandem. 🤫" },
+  7: { title: 'Wo willst du raus?', sub: 'Wähl mindestens eine Stadt — mehrere gehen auch.' },
+  8: { title: 'Wen nimmst du mit?', sub: 'Optional — du kannst das auch überspringen.' },
 };
 
 export default function OnboardingFlow({ profileId, userId, initialUsername, onComplete }: Props) {
@@ -50,6 +55,7 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
     artist: '',
     weekendType: '',
     drink: '',
+    cities: [],
   });
 
   const update = <K extends keyof Data>(k: K, v: Data[K]) =>
@@ -65,6 +71,8 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
       case 4: return true; // optional
       case 5: return data.weekendType.length > 0;
       case 6: return data.drink.length > 0;
+      case 7: return data.cities.length >= 1;
+      case 8: return true; // optional nudge
       default: return false;
     }
   })();
@@ -75,12 +83,20 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
     setStep(s => s + 1);
   };
   const goBack = () => { setDirection(-1); setStep(s => Math.max(1, s - 1)); };
-  const skip = () => { setDirection(1); setStep(s => s + 1); };
+  const skip = () => {
+    if (step === TOTAL) { handleFinish(); return; }
+    setDirection(1);
+    setStep(s => s + 1);
+  };
 
   const handleFinish = async () => {
     setSaving(true);
-    console.log('Onboarding complete:', data);
     const ageNum = parseInt(data.birthdate, 10);
+    // profiles has a single `city` text column — primary city goes there, the
+    // full multi-select is kept client-side as a discovery preference.
+    try {
+      localStorage.setItem('feyrn.cities', JSON.stringify(data.cities));
+    } catch { /* storage unavailable — non-critical */ }
     await supabase.from('profiles').update({
       username: data.username,
       age: isNaN(ageNum) ? null : ageNum,
@@ -89,7 +105,7 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
       favorite_artist: data.artist || null,
       perfect_evening: data.weekendType || null,
       favorite_drink: data.drink || null,
-      city: 'Stuttgart',
+      city: data.cities[0] || 'Stuttgart',
       onboarding_complete: true,
     } as any).eq('id', profileId);
     setSaving(false);
@@ -157,6 +173,8 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
               {step === 4 && <StepArtist artist={data.artist} onChange={v => update('artist', v)} />}
               {step === 5 && <StepWeekend value={data.weekendType} onChange={v => update('weekendType', v)} />}
               {step === 6 && <StepDrink value={data.drink} onChange={v => update('drink', v)} />}
+              {step === 7 && <StepCity selected={data.cities} onChange={v => update('cities', v)} />}
+              {step === 8 && <StepInvite />}
             </div>
           </div>
         </StepTransition>
@@ -193,9 +211,10 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
         >
           {saving ? '...' : ctaLabel}
         </button>
-        {step === 4 && (
+        {(step === 4 || step === 8) && (
           <button
             onClick={skip}
+            disabled={saving}
             style={{
               width: '100%',
               marginTop: 12,
