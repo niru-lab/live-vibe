@@ -83,12 +83,20 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
     setStep(s => s + 1);
   };
   const goBack = () => { setDirection(-1); setStep(s => Math.max(1, s - 1)); };
-  const skip = () => { setDirection(1); setStep(s => s + 1); };
+  const skip = () => {
+    if (step === TOTAL) { handleFinish(); return; }
+    setDirection(1);
+    setStep(s => s + 1);
+  };
 
   const handleFinish = async () => {
     setSaving(true);
-    console.log('Onboarding complete:', data);
     const ageNum = parseInt(data.birthdate, 10);
+    // profiles has a single `city` text column — primary city goes there, the
+    // full multi-select is kept client-side as a discovery preference.
+    try {
+      localStorage.setItem('feyrn.cities', JSON.stringify(data.cities));
+    } catch { /* storage unavailable — non-critical */ }
     await supabase.from('profiles').update({
       username: data.username,
       age: isNaN(ageNum) ? null : ageNum,
@@ -97,7 +105,7 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
       favorite_artist: data.artist || null,
       perfect_evening: data.weekendType || null,
       favorite_drink: data.drink || null,
-      city: 'Stuttgart',
+      city: data.cities[0] || 'Stuttgart',
       onboarding_complete: true,
     } as any).eq('id', profileId);
     setSaving(false);
