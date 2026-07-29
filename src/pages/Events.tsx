@@ -26,6 +26,8 @@ import { format, isToday, isTomorrow, addDays, isSameDay } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useVenueActivation } from '@/hooks/useVenueActivation';
+import { VenueFirstEventNudge } from '@/components/events/VenueFirstEventNudge';
 
 const CATEGORIES: { key: string; label: string }[] = [
   { key: 'club', label: 'Club' },
@@ -93,6 +95,10 @@ export default function Events() {
 
 
 
+  const { isEligible: venueActivationEligible, isLoading: venueActivationLoading } = useVenueActivation();
+  const [venueNudgeDismissed, setVenueNudgeDismissed] = useState(false);
+  const showVenueActivation = venueActivationEligible && !venueNudgeDismissed;
+
   const pending = participations.filter((p: any) => p.status === 'requested');
   const accepted = participations.filter((p: any) => p.status === 'accepted');
 
@@ -111,6 +117,21 @@ export default function Events() {
           </div>
         </div>
       </header>
+
+      {venueActivationLoading ? (
+        <div className="space-y-4 px-5 pt-8">
+          <Skeleton className="mx-auto h-20 w-20 rounded-full" />
+          <Skeleton className="mx-auto h-6 w-2/3" />
+          <Skeleton className="mx-auto h-4 w-1/2" />
+        </div>
+      ) : showVenueActivation ? (
+        <VenueFirstEventNudge
+          onCreate={() => navigate('/events/create?first=1')}
+          onExplore={() => setVenueNudgeDismissed(true)}
+        />
+      ) : (
+      <>
+
 
       {/* Search */}
       <div className="px-5 pt-3">
@@ -295,6 +316,8 @@ export default function Events() {
           </div>
         </Tabs>
       </div>
+      </>
+      )}
     </AppLayout>
   );
 }
