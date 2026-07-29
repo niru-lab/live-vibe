@@ -173,6 +173,8 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
               {step === 4 && <StepArtist artist={data.artist} onChange={v => update('artist', v)} />}
               {step === 5 && <StepWeekend value={data.weekendType} onChange={v => update('weekendType', v)} />}
               {step === 6 && <StepDrink value={data.drink} onChange={v => update('drink', v)} />}
+              {step === 7 && <StepCity selected={data.cities} onChange={v => update('cities', v)} />}
+              {step === 8 && <StepInvite />}
             </div>
           </div>
         </StepTransition>
@@ -209,7 +211,7 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
         >
           {saving ? '...' : ctaLabel}
         </button>
-        {step === 4 && (
+        {(step === 4 || step === 8) && (
           <button
             onClick={skip}
             style={{
