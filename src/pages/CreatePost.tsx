@@ -209,6 +209,7 @@ export default function CreatePost() {
             </label>
           )}
         </div>
+        {!simple && (<>
         <div className="space-y-2"><Label>Musik</Label><MusicSelector selectedTrack={selectedMusic} onSelect={setSelectedMusic} /></div>
         <div className="space-y-2">
           <div className="flex items-center gap-2"><Tag weight="thin" className="h-4 w-4 text-primary" /><Label>Venue oder Event markieren</Label></div>
@@ -284,6 +285,7 @@ export default function CreatePost() {
             </p>
           )}
         </div>
+        </>)}
         <div className="space-y-2">
           <Label htmlFor="caption">Beschreibung</Label>
           <Textarea data-testid="post-text-input" id="caption" placeholder="Was geht gerade ab? 🎉" value={caption} onChange={(e) => setCaption(e.target.value)} className="min-h-[100px]" />
@@ -296,15 +298,36 @@ export default function CreatePost() {
               Für Moment X ist eine Location erforderlich.
             </p>
           )}
-          <div className="relative">
-            <MapPin weight="thin" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input id="location" placeholder="Oder freier Text…" value={location} onChange={(e) => setLocation(e.target.value)} className="pl-10" />
+          {!simple && (
+            <div className="relative">
+              <MapPin weight="thin" className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input id="location" placeholder="Oder freier Text…" value={location} onChange={(e) => setLocation(e.target.value)} className="pl-10" />
+            </div>
+          )}
+        </div>
+        {firstMode && (
+          <div className="space-y-3 pb-4">
+            <Button
+              data-testid="post-submit-btn-primary"
+              onClick={handleSubmit}
+              disabled={isUploading}
+              className="h-12 w-full bg-gradient-to-r from-primary to-accent text-base font-semibold"
+            >
+              {isUploading ? (<><SpinnerGap weight="thin" className="mr-2 h-5 w-5 animate-spin" />Lädt...</>) : 'Ersten Post teilen'}
+            </Button>
+            {simple && (
+              <Button variant="ghost" className="w-full gap-2 text-muted-foreground" onClick={() => setShowAdvanced(true)}>
+                <CaretDown weight="thin" className="h-4 w-4" />Mehr Optionen
+              </Button>
+            )}
           </div>
-        </div>
-        <div className="rounded-xl bg-muted/50 p-4">
-          <div className="flex items-center gap-2 text-sm font-medium text-foreground"><Sparkle weight="thin" className="h-4 w-4 text-primary" />Tipps für mehr Reichweite</div>
-          <ul className="mt-2 space-y-1 text-sm text-muted-foreground"><li>• Poste im besten Moment der Party</li><li>• Nutze Moment-X für maximale Sichtbarkeit</li><li>• Tagge die Location für Club-Integration</li></ul>
-        </div>
+        )}
+        {!simple && (
+          <div className="rounded-xl bg-muted/50 p-4">
+            <div className="flex items-center gap-2 text-sm font-medium text-foreground"><Sparkle weight="thin" className="h-4 w-4 text-primary" />Tipps für mehr Reichweite</div>
+            <ul className="mt-2 space-y-1 text-sm text-muted-foreground"><li>• Poste im besten Moment der Party</li><li>• Nutze Moment-X für maximale Sichtbarkeit</li><li>• Tagge die Location für Club-Integration</li></ul>
+          </div>
+        )}
       </div>
     </AppLayout>
   );
