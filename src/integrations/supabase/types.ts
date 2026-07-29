@@ -1026,6 +1026,7 @@ export type Database = {
         Row: {
           address: string | null
           age: number | null
+          app_tour_completed_at: string | null
           avatar_url: string | null
           bio: string | null
           birthdate: string | null
@@ -1063,6 +1064,7 @@ export type Database = {
         Insert: {
           address?: string | null
           age?: number | null
+          app_tour_completed_at?: string | null
           avatar_url?: string | null
           bio?: string | null
           birthdate?: string | null
@@ -1100,6 +1102,7 @@ export type Database = {
         Update: {
           address?: string | null
           age?: number | null
+          app_tour_completed_at?: string | null
           avatar_url?: string | null
           bio?: string | null
           birthdate?: string | null
