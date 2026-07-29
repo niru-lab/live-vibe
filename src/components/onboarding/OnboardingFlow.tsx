@@ -55,6 +55,7 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
     artist: '',
     weekendType: '',
     drink: '',
+    cities: [],
   });
 
   const update = <K extends keyof Data>(k: K, v: Data[K]) =>
@@ -70,6 +71,8 @@ export default function OnboardingFlow({ profileId, userId, initialUsername, onC
       case 4: return true; // optional
       case 5: return data.weekendType.length > 0;
       case 6: return data.drink.length > 0;
+      case 7: return data.cities.length >= 1;
+      case 8: return true; // optional nudge
       default: return false;
     }
   })();
