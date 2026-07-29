@@ -80,6 +80,11 @@ export default function CreateEvent() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const { isEligible: isFirstEventPending } = useVenueActivation();
+  // Post-activation share step: opened exactly once, after the first successful event publish.
+  const [shareOpen, setShareOpen] = useState(false);
+  const [shareUrl, setShareUrl] = useState<string | undefined>(undefined);
+  const shareFiredRef = useRef(false);
   const [invitedFollowers, setInvitedFollowers] = useState<string[]>([]);
 
   // Venue partner → prefill location with their primary venue
@@ -175,6 +180,12 @@ export default function CreateEvent() {
         await supabase.from('event_attendees').insert(invitations);
       }
       toast({ title: 'Event erstellt! 🎉', description: invitedFollowers.length > 0 ? `Dein Event ist live. ${invitedFollowers.length} Einladung(en) verschickt!` : 'Dein Event ist jetzt live.' });
+      if (isFirstEventPending && !shareFiredRef.current) {
+        shareFiredRef.current = true;
+        setShareUrl(newEvent?.id ? `${window.location.origin}/events/${newEvent.id}` : undefined);
+        setShareOpen(true);
+        return;
+      }
       navigate('/events');
     } catch (error) { console.error('Error:', error); toast({ variant: 'destructive', title: 'Fehler', description: 'Event konnte nicht erstellt werden.' }); }
     finally { setIsUploading(false); }
@@ -380,6 +391,13 @@ export default function CreateEvent() {
           </Button>
         </div>
       </div>
+
+      <FirstActionShareModal
+        open={shareOpen}
+        role="venue_owner"
+        shareUrl={shareUrl}
+        onClose={() => { setShareOpen(false); navigate('/events'); }}
+      />
     </AppLayout>
   );
 }
