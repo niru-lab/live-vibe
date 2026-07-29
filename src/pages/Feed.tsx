@@ -15,6 +15,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Lightning, Confetti, ArrowLeft } from '@phosphor-icons/react';
 import { supabase } from '@/integrations/supabase/client';
+import { useGuestActivation } from '@/hooks/useGuestActivation';
+import { GuestFirstPostNudge } from '@/components/feed/GuestFirstPostNudge';
 
 export default function Feed() {
   const { user, loading: authLoading } = useAuth();
