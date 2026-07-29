@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from './useProfile';
+import { useCityPreferences } from './useCityPreferences';
 import type { PostWithAuthor } from './usePosts';
 
 /**
@@ -30,7 +31,8 @@ export const useMyFollowingIds = () => {
 function calculatePostScore(
   post: PostWithAuthor,
   followingIds: string[],
-  locationCounts: Map<string, number>
+  locationCounts: Map<string, number>,
+  preferredCities: string[] = []
 ): number {
   let score = 0;
 
@@ -64,6 +66,14 @@ function calculatePostScore(
   // 7. Music bonus
   if (post.music_url) score += 5;
 
+  // 8. City preference boost (soft ranking only, never a hard filter)
+  if (preferredCities.length > 0 && post.city) {
+    const postCity = post.city.trim().toLowerCase();
+    if (preferredCities.some((c) => postCity.includes(c) || c.includes(postCity))) {
+      score += 22;
+    }
+  }
+
   return score;
 }
 
@@ -72,6 +82,7 @@ function calculatePostScore(
  */
 export function useFeedAlgorithm(posts: PostWithAuthor[] | undefined) {
   const { data: followingIds = [] } = useMyFollowingIds();
+  const { cities: preferredCities } = useCityPreferences();
 
   return useMemo(() => {
     if (!posts || posts.length === 0) return [];
@@ -88,11 +99,12 @@ export function useFeedAlgorithm(posts: PostWithAuthor[] | undefined) {
     // Score and sort
     const scored = posts.map((post) => ({
       post,
-      score: calculatePostScore(post, followingIds, locationCounts),
+      score: calculatePostScore(post, followingIds, locationCounts, preferredCities),
     }));
 
     scored.sort((a, b) => b.score - a.score);
 
     return scored.map((s) => s.post);
-  }, [posts, followingIds]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [posts, followingIds, preferredCities.join('|')]);
 }
