@@ -1029,6 +1029,7 @@ export type Database = {
           avatar_url: string | null
           bio: string | null
           birthdate: string | null
+          cities: string[]
           city: string | null
           closes_at: string | null
           created_at: string
@@ -1065,6 +1066,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           birthdate?: string | null
+          cities?: string[]
           city?: string | null
           closes_at?: string | null
           created_at?: string
@@ -1101,6 +1103,7 @@ export type Database = {
           avatar_url?: string | null
           bio?: string | null
           birthdate?: string | null
+          cities?: string[]
           city?: string | null
           closes_at?: string | null
           created_at?: string
