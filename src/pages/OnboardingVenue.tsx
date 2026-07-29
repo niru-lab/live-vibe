@@ -79,6 +79,14 @@ export default function OnboardingVenue() {
     })();
   }, [user, authLoading, navigate]);
 
+  // If the type is switched away from event_crew, a previously skipped address
+  // must be re-required (only event_crew may skip).
+  useEffect(() => {
+    if (venueType !== 'event_crew' && address.skipped) {
+      setAddress((a) => ({ ...a, skipped: false }));
+    }
+  }, [venueType, address.skipped]);
+
   const canProceed = (() => {
     switch (step) {
       case 1: return venueType.length > 0;
