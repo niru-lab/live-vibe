@@ -149,25 +149,30 @@ export async function sendPush(supabase: any, req: PushRequest): Promise<PushSta
       .eq('profile_id', req.profileId);
     if (!tokens || tokens.length === 0) return await record('skipped_no_token');
 
-    // 6. Delivery. Without a provider credential we record the decision honestly
-    //    instead of pretending the push went out.
-    const fcmKey = Deno.env.get('FCM_SERVER_KEY');
-    if (!fcmKey) return await record('skipped_no_provider');
+    // 6. Delivery via FCM HTTP v1 (Legacy Server Key is dead). Without a
+    //    service account we record the decision honestly instead of pretending.
+    if (!fcmConfigured()) return await record('skipped_no_provider');
 
-    await Promise.all(
+    const results = await Promise.all(
       tokens.map((t: any) =>
-        fetch('https://fcm.googleapis.com/fcm/send', {
-          method: 'POST',
-          headers: { Authorization: `key=${fcmKey}`, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            to: t.token,
-            notification: { title: req.title, body: req.body ?? '' },
-            data: { url: req.url ?? '/', category: req.category, trigger: req.triggerKey },
-          }),
-        }).catch(() => null),
+        sendFcm({
+          token: t.token,
+          title: req.title,
+          body: req.body,
+          data: { url: req.url ?? '/', category: req.category, trigger: req.triggerKey },
+        }).then((r) => ({ token: t.token, r })),
       ),
     );
-    return await record('delivered');
+
+    // Prune dead tokens so caps and counts stay honest.
+    const dead = results.filter((x) => !x.r.ok && (x.r as any).unregistered).map((x) => x.token);
+    if (dead.length > 0) {
+      await supabase.from('push_tokens').delete().in('token', dead);
+    }
+
+    const delivered = results.some((x) => x.r.ok);
+    return await record(delivered ? 'delivered' : 'skipped_no_token');
+
   } catch (err) {
     console.error('sendPush failed', req.triggerKey, err);
     return 'skipped_no_provider';
