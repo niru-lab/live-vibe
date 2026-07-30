@@ -19,6 +19,14 @@ const dayBucket = () => new Date().toISOString().slice(0, 10);
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
+  // Health check: verifies the FCM service account secret parses, without sending.
+  if (new URL(req.url).searchParams.get('diag') === '1') {
+    return new Response(JSON.stringify({ fcm_configured: fcmConfigured() }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
+
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
