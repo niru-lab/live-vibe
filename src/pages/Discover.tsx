@@ -10,6 +10,7 @@ import { DiscoverFilters } from '@/components/discover/DiscoverFilters';
 import { RoomzSheet } from '@/components/discover/RoomzSheet';
 import { useQueryClient } from '@tanstack/react-query';
 import { useProfile } from '@/hooks/useProfile';
+import { markSessionExploring } from '@/lib/nudgeConfig';
 
 const StuttgartMap = lazy(() => import('@/components/maps/StuttgartMap').then(m => ({ default: m.StuttgartMap })));
 
@@ -38,6 +39,11 @@ export default function Discover() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const userTouchedCity = useRef(false);
   const queryClient = useQueryClient();
+
+  // Self-propelled exploring → suppress activation nudges for this session.
+  useEffect(() => {
+    markSessionExploring();
+  }, []);
 
   // Auto-center on user's home city once profile loads (unless user already picked one)
   useEffect(() => {
