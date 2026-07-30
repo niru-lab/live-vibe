@@ -3,6 +3,8 @@
 // delivery decision (opt-out, quiet hours, caps, dedupe) to _shared/push.ts.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { PUSH_TRIGGERS, sendPush } from '../_shared/push.ts';
+import { fcmConfigured } from '../_shared/fcm.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,6 +18,14 @@ const dayBucket = () => new Date().toISOString().slice(0, 10);
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
+
+  // Health check: verifies the FCM service account secret parses, without sending.
+  if (new URL(req.url).searchParams.get('diag') === '1') {
+    return new Response(JSON.stringify({ fcm_configured: fcmConfigured() }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
 
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
