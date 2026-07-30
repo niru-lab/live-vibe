@@ -1,0 +1,1 @@
+SELECT cron.unschedule('push-lifecycle-daily');
