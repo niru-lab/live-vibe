@@ -134,6 +134,20 @@ export default function Feed() {
                 }}
               />
             )}
+            {!venueFilter &&
+              !(showRescue && !rescueDismissed) &&
+              showEngagement &&
+              engagementProgress &&
+              !engagementDismissed && (
+                <EngagementNudgeCard
+                  progress={engagementProgress}
+                  onDiscover={() => navigate('/discover')}
+                  onDismiss={() => {
+                    localStorage.setItem(ENGAGEMENT_DISMISS_KEY, '1');
+                    setEngagementDismissed(true);
+                  }}
+                />
+              )}
             {activePosts.map((post) => (
               <button
                 key={post.id}
