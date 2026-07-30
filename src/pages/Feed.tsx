@@ -19,6 +19,8 @@ import { useGuestActivation } from '@/hooks/useGuestActivation';
 import { GuestFirstPostNudge } from '@/components/feed/GuestFirstPostNudge';
 import { useFirstPostRescue, RESCUE_DISMISS_KEY } from '@/hooks/useFirstPostRescue';
 import { FirstPostRescueCard } from '@/components/feed/FirstPostRescueCard';
+import { useEngagementNudge, ENGAGEMENT_DISMISS_KEY } from '@/hooks/useEngagementNudge';
+import { EngagementNudgeCard } from '@/components/feed/EngagementNudgeCard';
 
 export default function Feed() {
   const { user, loading: authLoading } = useAuth();
@@ -37,6 +39,8 @@ export default function Feed() {
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
   const { isEligible: showRescue } = useFirstPostRescue();
   const [rescueDismissed, setRescueDismissed] = useState(false);
+  const { isEligible: showEngagement, progress: engagementProgress } = useEngagementNudge();
+  const [engagementDismissed, setEngagementDismissed] = useState(false);
 
   useLivePosts();
 
@@ -130,6 +134,20 @@ export default function Feed() {
                 }}
               />
             )}
+            {!venueFilter &&
+              !(showRescue && !rescueDismissed) &&
+              showEngagement &&
+              engagementProgress &&
+              !engagementDismissed && (
+                <EngagementNudgeCard
+                  progress={engagementProgress}
+                  onDiscover={() => navigate('/discover')}
+                  onDismiss={() => {
+                    localStorage.setItem(ENGAGEMENT_DISMISS_KEY, '1');
+                    setEngagementDismissed(true);
+                  }}
+                />
+              )}
             {activePosts.map((post) => (
               <button
                 key={post.id}
