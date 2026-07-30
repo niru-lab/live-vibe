@@ -17,6 +17,8 @@ import { Lightning, Confetti, ArrowLeft } from '@phosphor-icons/react';
 import { supabase } from '@/integrations/supabase/client';
 import { useGuestActivation } from '@/hooks/useGuestActivation';
 import { GuestFirstPostNudge } from '@/components/feed/GuestFirstPostNudge';
+import { useFirstPostRescue, RESCUE_DISMISS_KEY } from '@/hooks/useFirstPostRescue';
+import { FirstPostRescueCard } from '@/components/feed/FirstPostRescueCard';
 
 export default function Feed() {
   const { user, loading: authLoading } = useAuth();
