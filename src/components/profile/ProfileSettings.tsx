@@ -19,6 +19,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/components/ThemeProvider';
 import { EditProfileDialog } from './EditProfileDialog';
 import { PrivacySettings } from './PrivacySettings';
+import { PushSettings } from './PushSettings';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import type { Profile } from '@/hooks/useProfile';
@@ -133,6 +134,8 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
                 </div>
               </div>
             ))}
+            <Separator />
+            <PushSettings profile={profile} />
             <Separator />
             <div>
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-3">
