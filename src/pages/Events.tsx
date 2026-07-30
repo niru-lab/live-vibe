@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useEvents, useMyEvents } from '@/hooks/useEvents';
 import { useEventRanking } from '@/hooks/useEventRanking';
+import { useProfile } from '@/hooks/useProfile';
 import { useMyRSVPs, useMyInvitations, useRespondToInvitation } from '@/hooks/useEventAttendees';
 import { useMyUpcomingParticipations, useSetParticipation } from '@/hooks/useEventParticipation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -19,6 +20,7 @@ import {
   CurrencyEur,
   MusicNote,
   Plus,
+  ChartLineUp,
   Hourglass,
   CalendarStar,
 } from '@phosphor-icons/react';
@@ -75,6 +77,8 @@ export default function Events() {
   const dateFilters = useMemo(buildDateFilters, []);
   const activeDate = dateFilters.find((f) => f.key === dateKey)?.date ?? null;
 
+  const { data: myProfile } = useProfile();
+  const isVenueOwner = myProfile?.role === 'venue_owner';
   const { data: allEvents = [], isLoading: discoverLoading } = useEvents();
   const { data: myEvents, isLoading: myEventsLoading } = useMyEvents();
   const { data: myRSVPs, isLoading: rsvpsLoading } = useMyRSVPs();
@@ -119,6 +123,16 @@ export default function Events() {
             </div>
             <FeyrnLogo size="sm" />
           </div>
+          {isVenueOwner && (
+            <button
+              onClick={() => navigate('/venue')}
+              aria-label="Venue Dashboard"
+              className="flex h-9 items-center gap-2 rounded-full bg-muted/60 px-3 text-xs text-foreground"
+            >
+              <ChartLineUp weight="bold" className="h-4 w-4 text-primary" />
+              Dashboard
+            </button>
+          )}
         </div>
       </header>
 
