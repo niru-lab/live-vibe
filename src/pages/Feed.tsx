@@ -35,6 +35,8 @@ export default function Feed() {
   const likeMutation = useLikePost();
   const { isEligible: showGuestNudge, isLoading: activationLoading } = useGuestActivation();
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
+  const { isEligible: showRescue } = useFirstPostRescue();
+  const [rescueDismissed, setRescueDismissed] = useState(false);
 
   useLivePosts();
 
