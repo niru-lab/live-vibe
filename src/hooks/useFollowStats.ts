@@ -92,6 +92,7 @@ export const useToggleFollow = () => {
     onSuccess: (_, { targetProfileId }) => {
       queryClient.invalidateQueries({ queryKey: ['is-following', myProfile?.id, targetProfileId] });
       queryClient.invalidateQueries({ queryKey: ['follow-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['engagement-nudge'] });
     },
   });
 };

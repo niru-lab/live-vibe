@@ -63,6 +63,7 @@ export const useAddComment = () => {
       qc.invalidateQueries({ queryKey: ['comments', vars.postId] });
       qc.invalidateQueries({ queryKey: ['posts'] });
       qc.invalidateQueries({ queryKey: ['user-posts'] });
+      qc.invalidateQueries({ queryKey: ['engagement-nudge'] });
     },
     onError: (e: any) => toast({ title: 'Fehler', description: e.message, variant: 'destructive' }),
   });

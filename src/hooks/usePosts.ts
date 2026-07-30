@@ -116,6 +116,7 @@ export const useLikePost = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['likes'] });
+      queryClient.invalidateQueries({ queryKey: ['engagement-nudge'] });
     },
   });
 };
