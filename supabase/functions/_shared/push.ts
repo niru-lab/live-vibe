@@ -1,8 +1,10 @@
 // Shared push delivery guardrails (MVP).
 // Every push goes through `sendPush()` — never insert into push_sends directly.
 // All caps live here so they are easy to audit and tune.
+import { fcmConfigured, sendFcm } from './fcm.ts';
 
 export type PushCategory = 'social' | 'event' | 'lifecycle';
+
 
 /** Conservative defaults. Tune here — no other file hardcodes limits. */
 export const PUSH_CAPS = {
