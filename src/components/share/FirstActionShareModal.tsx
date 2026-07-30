@@ -3,6 +3,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Confetti, ShareNetwork, Check } from '@phosphor-icons/react';
 import { motion } from 'framer-motion';
+import { buildReferralUrl, logReferralShare, useReferralStats } from '@/hooks/useReferral';
 
 type ShareRole = 'guest' | 'venue_owner';
 
@@ -28,25 +29,32 @@ interface FirstActionShareModalProps {
   role: ShareRole;
   /** Optional deep link (e.g. event URL). Falls back to the app origin. */
   shareUrl?: string;
+  /** Own profile id — used to attribute referrals to this user. */
+  profileId?: string | null;
   onClose: () => void;
 }
 
-export const FirstActionShareModal = ({ open, role, shareUrl, onClose }: FirstActionShareModalProps) => {
+export const FirstActionShareModal = ({ open, role, shareUrl, profileId, onClose }: FirstActionShareModalProps) => {
   const [shared, setShared] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const copy = COPY[role];
+  const { data: stats } = useReferralStats(profileId);
 
   const handleShare = async () => {
     setError(null);
-    const url = shareUrl || window.location.origin;
+    const url = profileId
+      ? buildReferralUrl(profileId, shareUrl ? new URL(shareUrl, window.location.origin).pathname : '/')
+      : shareUrl || window.location.origin;
     try {
       if (navigator.share) {
         await navigator.share({ title: 'Feyrn', text: copy.shareText, url });
         setShared(true);
+        logReferralShare(profileId, `first_action_${role}`);
         return;
       }
       await navigator.clipboard.writeText(`${copy.shareText} ${url}`);
       setShared(true);
+      logReferralShare(profileId, `first_action_${role}`);
     } catch (e) {
       if ((e as Error)?.name === 'AbortError') return;
       setError('Teilen hat nicht geklappt — du kannst trotzdem weitermachen.');
@@ -82,6 +90,13 @@ export const FirstActionShareModal = ({ open, role, shareUrl, onClose }: FirstAc
             {copy.skip}
           </Button>
 
+          {shared && (
+            <p className="mt-3 text-xs text-muted-foreground">
+              {(stats?.joinedCount ?? 0) > 0
+                ? `Bisher ${stats!.joinedCount} über dich dabei.`
+                : 'Sobald jemand über deinen Link dazukommt, siehst du es in deinem Profil.'}
+            </p>
+          )}
           {error && <p className="mt-2 text-xs text-destructive">{error}</p>}
         </div>
       </DialogContent>

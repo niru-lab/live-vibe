@@ -345,6 +345,7 @@ export default function CreatePost() {
       <FirstActionShareModal
         open={shareOpen}
         role="guest"
+        profileId={profile?.id}
         onClose={() => { setShareOpen(false); navigate('/'); }}
       />
     </AppLayout>

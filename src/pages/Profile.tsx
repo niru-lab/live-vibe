@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfilePostsGrid } from '@/components/profile/ProfilePostsGrid';
 import { ProfileSettings } from '@/components/profile/ProfileSettings';
+import { ReferralProgressCard } from '@/components/referral/ReferralProgressCard';
 import { Users, GearSix, ChatCircleDots } from '@phosphor-icons/react';
 import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 
@@ -68,6 +69,12 @@ export default function Profile() {
         </header>
         <div className="px-4 pb-24">
           <ProfileHeader profile={profile || null} isLoading={isLoading} followersCount={followStats?.followers || 0} followingCount={followStats?.following || 0} postsCount={postsCount || 0} />
+          {profile && (
+            <ReferralProgressCard
+              profileId={profile.id}
+              role={profile.role === 'venue_owner' ? 'venue_owner' : 'guest'}
+            />
+          )}
           <ProfilePostsGrid profileId={profile?.id} />
         </div>
       </div>

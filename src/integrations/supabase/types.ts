@@ -1174,6 +1174,74 @@ export type Database = {
           },
         ]
       }
+      referral_shares: {
+        Row: {
+          channel: string
+          context: string | null
+          created_at: string
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          channel?: string
+          context?: string | null
+          created_at?: string
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          channel?: string
+          context?: string | null
+          created_at?: string
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_shares_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referred_profile_id: string
+          referrer_profile_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_profile_id: string
+          referrer_profile_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_profile_id?: string
+          referrer_profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referred_profile_id_fkey"
+            columns: ["referred_profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "referrals_referrer_profile_id_fkey"
+            columns: ["referrer_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string
@@ -1692,6 +1760,16 @@ export type Database = {
           message: Json
           msg_id: number
           read_ct: number
+        }[]
+      }
+      top_inviters: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          joined_count: number
+          profile_id: string
+          username: string
         }[]
       }
     }

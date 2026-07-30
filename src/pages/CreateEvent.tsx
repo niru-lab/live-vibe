@@ -396,6 +396,7 @@ export default function CreateEvent() {
         open={shareOpen}
         role="venue_owner"
         shareUrl={shareUrl}
+        profileId={profile?.id}
         onClose={() => { setShareOpen(false); navigate('/events'); }}
       />
     </AppLayout>

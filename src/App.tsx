@@ -10,6 +10,7 @@ import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { OfflineBanner } from "@/components/OfflineBanner";
 import { SwipeBackProvider } from "@/components/layout/SwipeBackProvider";
 import { OnboardingGate } from "@/components/auth/OnboardingGate";
+import { ReferralCapture } from "@/components/referral/ReferralCapture";
 import Feed from "./pages/Feed";
 import Welcome from "./pages/Welcome";
 import RolePicker from "./pages/RolePicker";
@@ -61,6 +62,7 @@ const App = () => (
               <BrowserRouter>
                 <SwipeBackProvider />
                 <OnboardingGate />
+                <ReferralCapture />
                 <Routes>
                   <Route path="/" element={<Welcome />} />
                   <Route path="/welcome" element={<Welcome />} />
