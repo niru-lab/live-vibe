@@ -3,6 +3,8 @@
 // delivery decision (opt-out, quiet hours, caps, dedupe) to _shared/push.ts.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { PUSH_TRIGGERS, sendPush } from '../_shared/push.ts';
+import { fcmConfigured } from '../_shared/fcm.ts';
+
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
