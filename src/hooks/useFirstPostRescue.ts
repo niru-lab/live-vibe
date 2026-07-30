@@ -6,8 +6,12 @@ import { useAuth } from '@/contexts/AuthContext';
  * Rescue nudge state: guest users whose first post got no engagement within an
  * early activation window. Isolated + easily tunable / removable.
  */
-const MIN_AGE_MS = 6 * 60 * 60 * 1000; // don't fire right after publishing
-const MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000; // early activation window only
+import {
+  RESCUE_MIN_AGE_MS as MIN_AGE_MS,
+  RESCUE_MAX_AGE_MS as MAX_AGE_MS,
+  isSessionExploring,
+  trackNudge,
+} from '@/lib/nudgeConfig';
 
 export const RESCUE_DISMISS_KEY = 'feyrn:first-post-rescue-dismissed';
 
@@ -19,6 +23,8 @@ export const useFirstPostRescue = () => {
     queryFn: async () => {
       if (!user) return { eligible: false };
       if (localStorage.getItem(RESCUE_DISMISS_KEY) === '1') return { eligible: false };
+      // Don't interrupt healthy self-propelled behaviour in this session.
+      if (isSessionExploring()) return { eligible: false };
 
       const { data: profile } = await supabase
         .from('profiles')
@@ -54,6 +60,7 @@ export const useFirstPostRescue = () => {
 
       if ((followCount ?? 0) > 0) return { eligible: false };
 
+      trackNudge('nudge_eligible', 'first_post_rescue');
       return { eligible: true };
     },
     enabled: !!user && !loading,

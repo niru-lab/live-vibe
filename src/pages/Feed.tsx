@@ -18,6 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useGuestActivation } from '@/hooks/useGuestActivation';
 import { GuestFirstPostNudge } from '@/components/feed/GuestFirstPostNudge';
 import { useFirstPostRescue, RESCUE_DISMISS_KEY } from '@/hooks/useFirstPostRescue';
+import { trackNudge } from '@/lib/nudgeConfig';
 import { FirstPostRescueCard } from '@/components/feed/FirstPostRescueCard';
 import { useEngagementNudge, ENGAGEMENT_DISMISS_KEY } from '@/hooks/useEngagementNudge';
 import { EngagementNudgeCard } from '@/components/feed/EngagementNudgeCard';
@@ -124,11 +125,13 @@ export default function Feed() {
             {!venueFilter && showRescue && !rescueDismissed && (
               <FirstPostRescueCard
                 onExplore={() => {
+                  trackNudge('nudge_cta_clicked', 'first_post_rescue');
                   localStorage.setItem(RESCUE_DISMISS_KEY, '1');
                   setRescueDismissed(true);
                   navigate('/discover');
                 }}
                 onDismiss={() => {
+                  trackNudge('nudge_dismissed', 'first_post_rescue');
                   localStorage.setItem(RESCUE_DISMISS_KEY, '1');
                   setRescueDismissed(true);
                 }}

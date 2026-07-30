@@ -1,6 +1,8 @@
+import { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, Compass, X } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
+import { trackNudge } from '@/lib/nudgeConfig';
 
 interface FirstPostRescueCardProps {
   onExplore: () => void;
@@ -8,6 +10,10 @@ interface FirstPostRescueCardProps {
 }
 
 export const FirstPostRescueCard = ({ onExplore, onDismiss }: FirstPostRescueCardProps) => {
+  useEffect(() => {
+    trackNudge('nudge_shown', 'first_post_rescue');
+  }, []);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
