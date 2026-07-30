@@ -17,6 +17,8 @@ import { Lightning, Confetti, ArrowLeft } from '@phosphor-icons/react';
 import { supabase } from '@/integrations/supabase/client';
 import { useGuestActivation } from '@/hooks/useGuestActivation';
 import { GuestFirstPostNudge } from '@/components/feed/GuestFirstPostNudge';
+import { useFirstPostRescue, RESCUE_DISMISS_KEY } from '@/hooks/useFirstPostRescue';
+import { FirstPostRescueCard } from '@/components/feed/FirstPostRescueCard';
 
 export default function Feed() {
   const { user, loading: authLoading } = useAuth();
@@ -33,6 +35,8 @@ export default function Feed() {
   const likeMutation = useLikePost();
   const { isEligible: showGuestNudge, isLoading: activationLoading } = useGuestActivation();
   const [nudgeDismissed, setNudgeDismissed] = useState(false);
+  const { isEligible: showRescue } = useFirstPostRescue();
+  const [rescueDismissed, setRescueDismissed] = useState(false);
 
   useLivePosts();
 
@@ -113,6 +117,19 @@ export default function Feed() {
           />
         ) : activePosts && activePosts.length > 0 ? (
           <div className="flex flex-col" style={{ gap: '10px' }}>
+            {!venueFilter && showRescue && !rescueDismissed && (
+              <FirstPostRescueCard
+                onExplore={() => {
+                  localStorage.setItem(RESCUE_DISMISS_KEY, '1');
+                  setRescueDismissed(true);
+                  navigate('/discover');
+                }}
+                onDismiss={() => {
+                  localStorage.setItem(RESCUE_DISMISS_KEY, '1');
+                  setRescueDismissed(true);
+                }}
+              />
+            )}
             {activePosts.map((post) => (
               <button
                 key={post.id}
