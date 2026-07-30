@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useEvents, useMyEvents } from '@/hooks/useEvents';
+import { useEventRanking } from '@/hooks/useEventRanking';
 import { useMyRSVPs, useMyInvitations, useRespondToInvitation } from '@/hooks/useEventAttendees';
 import { useMyUpcomingParticipations, useSetParticipation } from '@/hooks/useEventParticipation';
 import { useAuth } from '@/contexts/AuthContext';
@@ -92,6 +93,9 @@ export default function Events() {
       return true;
     });
   }, [allEvents, search, activeDate, category]);
+
+  // Soft personalization (city + genre) – reorders only, never filters.
+  const rankedEvents = useEventRanking(filteredEvents as any);
 
 
 
@@ -206,7 +210,7 @@ export default function Events() {
                   description="Passe deine Filter an oder versuche es später erneut."
                 />
               ) : (
-                filteredEvents.map((event: any) => (
+                rankedEvents.map((event: any) => (
                   <EventListCard key={event.id} event={event} onClick={() => navigate(`/events/${event.id}`)} />
                 ))
               )}
