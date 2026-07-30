@@ -117,6 +117,19 @@ export default function Feed() {
           />
         ) : activePosts && activePosts.length > 0 ? (
           <div className="flex flex-col" style={{ gap: '10px' }}>
+            {!venueFilter && showRescue && !rescueDismissed && (
+              <FirstPostRescueCard
+                onExplore={() => {
+                  localStorage.setItem(RESCUE_DISMISS_KEY, '1');
+                  setRescueDismissed(true);
+                  navigate('/discover');
+                }}
+                onDismiss={() => {
+                  localStorage.setItem(RESCUE_DISMISS_KEY, '1');
+                  setRescueDismissed(true);
+                }}
+              />
+            )}
             {activePosts.map((post) => (
               <button
                 key={post.id}
