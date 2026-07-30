@@ -1139,6 +1139,100 @@ export type Database = {
         }
         Relationships: []
       }
+      push_preferences: {
+        Row: {
+          enabled: boolean
+          event_enabled: boolean
+          id: string
+          lifecycle_enabled: boolean
+          profile_id: string
+          quiet_hours_end: number
+          quiet_hours_start: number
+          social_enabled: boolean
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          enabled?: boolean
+          event_enabled?: boolean
+          id?: string
+          lifecycle_enabled?: boolean
+          profile_id: string
+          quiet_hours_end?: number
+          quiet_hours_start?: number
+          social_enabled?: boolean
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          enabled?: boolean
+          event_enabled?: boolean
+          id?: string
+          lifecycle_enabled?: boolean
+          profile_id?: string
+          quiet_hours_end?: number
+          quiet_hours_start?: number
+          social_enabled?: boolean
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_preferences_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      push_sends: {
+        Row: {
+          body: string | null
+          category: string
+          created_at: string
+          dedupe_key: string
+          id: string
+          profile_id: string
+          status: string
+          title: string
+          trigger_key: string
+          url: string | null
+        }
+        Insert: {
+          body?: string | null
+          category: string
+          created_at?: string
+          dedupe_key: string
+          id?: string
+          profile_id: string
+          status?: string
+          title: string
+          trigger_key: string
+          url?: string | null
+        }
+        Update: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          dedupe_key?: string
+          id?: string
+          profile_id?: string
+          status?: string
+          title?: string
+          trigger_key?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_sends_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_tokens: {
         Row: {
           created_at: string
