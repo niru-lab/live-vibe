@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { PUSH_TRIGGERS, sendPush } from '../_shared/push.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -236,6 +237,24 @@ async function handleCommentAdded(supabase: any, payload: any) {
       title: 'Neuer Kommentar',
       body: 'Jemand hat deinen Post kommentiert',
     });
+
+    // Push: only for direct, personal engagement on your own content.
+    if (PUSH_TRIGGERS.comment_on_your_post) {
+      const { data: actor } = await supabase
+        .from('profiles')
+        .select('display_name, username')
+        .eq('id', user_id)
+        .maybeSingle();
+      const actorName = actor?.display_name || actor?.username || 'Jemand';
+      await sendPush(supabase, {
+        profileId: post.author_id,
+        category: 'social',
+        triggerKey: 'comment_on_your_post',
+        dedupeKey: `comment:${comment_id}`,
+        title: `${actorName} hat deinen Post kommentiert`,
+        url: `/feed?post=${post_id}`,
+      });
+    }
   }
 }
 
