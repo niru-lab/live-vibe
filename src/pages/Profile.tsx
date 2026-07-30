@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfilePostsGrid } from '@/components/profile/ProfilePostsGrid';
 import { ProfileSettings } from '@/components/profile/ProfileSettings';
+import { ReferralProgressCard } from '@/components/referral/ReferralProgressCard';
 import { Users, GearSix, ChatCircleDots } from '@phosphor-icons/react';
 import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 
