@@ -2,8 +2,10 @@ import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from './useProfile';
-import { useCityPreferences } from './useCityPreferences';
+import { useGuestPreferences } from './useGuestPreferences';
+import { personalizationBoost, type GuestPreferences } from '@/lib/personalization';
 import type { PostWithAuthor } from './usePosts';
+
 
 /**
  * Loads the list of profile IDs that the current user follows.
@@ -28,11 +30,20 @@ export const useMyFollowingIds = () => {
   });
 };
 
+const EMPTY_PREFS: GuestPreferences = { cities: [], genres: [] };
+
+/** Genre metadata for a post: tagged event genres first, then the post's own music info. */
+function postGenres(post: PostWithAuthor): string[] {
+  const eventGenres = (post.event?.music_genres as string[] | null) ?? [];
+  const extra = [post.music_title, post.music_artist].filter(Boolean) as string[];
+  return [...eventGenres, ...extra];
+}
+
 function calculatePostScore(
   post: PostWithAuthor,
   followingIds: string[],
   locationCounts: Map<string, number>,
-  preferredCities: string[] = []
+  prefs: GuestPreferences = EMPTY_PREFS
 ): number {
   let score = 0;
 
@@ -66,13 +77,12 @@ function calculatePostScore(
   // 7. Music bonus
   if (post.music_url) score += 5;
 
-  // 8. City preference boost (soft ranking only, never a hard filter)
-  if (preferredCities.length > 0 && post.city) {
-    const postCity = post.city.trim().toLowerCase();
-    if (preferredCities.some((c) => postCity.includes(c) || c.includes(postCity))) {
-      score += 22;
-    }
-  }
+  // 8. Personalization: city + genre soft boost (never a hard filter)
+  score += personalizationBoost(prefs, {
+    id: post.id,
+    city: post.city,
+    genres: postGenres(post),
+  });
 
   return score;
 }
@@ -82,7 +92,7 @@ function calculatePostScore(
  */
 export function useFeedAlgorithm(posts: PostWithAuthor[] | undefined) {
   const { data: followingIds = [] } = useMyFollowingIds();
-  const { cities: preferredCities } = useCityPreferences();
+  const { cities, genres } = useGuestPreferences();
 
   return useMemo(() => {
     if (!posts || posts.length === 0) return [];
@@ -96,15 +106,18 @@ export function useFeedAlgorithm(posts: PostWithAuthor[] | undefined) {
       }
     }
 
+    const prefs: GuestPreferences = { cities, genres };
+
     // Score and sort
     const scored = posts.map((post) => ({
       post,
-      score: calculatePostScore(post, followingIds, locationCounts, preferredCities),
+      score: calculatePostScore(post, followingIds, locationCounts, prefs),
     }));
 
     scored.sort((a, b) => b.score - a.score);
 
     return scored.map((s) => s.post);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [posts, followingIds, preferredCities.join('|')]);
+  }, [posts, followingIds, cities.join('|'), genres.join('|')]);
 }
+
