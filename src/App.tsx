@@ -62,6 +62,7 @@ const App = () => (
               <BrowserRouter>
                 <SwipeBackProvider />
                 <OnboardingGate />
+                <ReferralCapture />
                 <Routes>
                   <Route path="/" element={<Welcome />} />
                   <Route path="/welcome" element={<Welcome />} />
