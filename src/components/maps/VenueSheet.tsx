@@ -89,6 +89,10 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
   ];
 
   const openVenueProfile = () => {
+    if (profileState !== 'found') {
+      setTab('profile');
+      return;
+    }
     track('venue_profile_opened_from_map', { venueId: venue.id, surface: 'map' });
     onOpenChange(false);
     navigate(`/venues/${venue.id}`);
