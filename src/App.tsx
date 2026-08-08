@@ -23,6 +23,7 @@ import AuthCallback from "./pages/AuthCallback";
 import Discover from "./pages/Discover";
 import Events from "./pages/Events";
 import VenueDashboard from "./pages/VenueDashboard";
+import VenueProfile from "./pages/VenueProfile";
 import CreateEvent from "./pages/CreateEvent";
 import CreatePost from "./pages/CreatePost";
 import CreateCarousel from "./pages/CreateCarousel";
@@ -80,6 +81,7 @@ const App = () => (
                   <Route path="/map" element={<Discover />} />
                   <Route path="/events" element={<Events />} />
                   <Route path="/venue" element={<VenueDashboard />} />
+                  <Route path="/venues/:id" element={<VenueProfile />} />
                   <Route path="/events/create" element={<CreateEvent />} />
                   <Route path="/events/:id" element={<EventDetail />} />
                   <Route path="/create" element={<CreatePost />} />

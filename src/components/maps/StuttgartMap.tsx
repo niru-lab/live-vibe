@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import Map, { Marker, Popup, Source, Layer, NavigationControl } from 'react-map-gl/mapbox';
 import { MapEventRsvp } from '@/components/maps/MapEventRsvp';
+import { VenueSheet, type SheetVenue } from '@/components/maps/VenueSheet';
 import { track } from '@/lib/analytics';
 
 import type { MapRef } from 'react-map-gl/mapbox';
@@ -203,6 +204,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   const setSelectedCategory = (cat: string | null) => setInternalCategory(cat);
   const [legendCollapsed, setLegendCollapsed] = useState(true);
   const [popupInfo, setPopupInfo] = useState<any>(null);
+  const [sheetVenue, setSheetVenue] = useState<SheetVenue | null>(null);
   const { data: events } = useEvents();
   const { data: venues } = useVenues();
   const navigate = useNavigate();
@@ -402,6 +404,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
 
   return (
     <div data-testid="map-container" className="relative w-full h-[500px] rounded-xl overflow-hidden border border-border/50">
+      <VenueSheet venue={sheetVenue} open={!!sheetVenue} onOpenChange={(open) => !open && setSheetVenue(null)} />
       <Map
         ref={mapRef}
         initialViewState={{
@@ -437,7 +440,8 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
               anchor="center"
               onClick={e => {
                 e.originalEvent.stopPropagation();
-                setPopupInfo({ type: 'venue', data: venue });
+                setPopupInfo(null);
+                setSheetVenue(venue as SheetVenue);
               }}
             >
               <div
