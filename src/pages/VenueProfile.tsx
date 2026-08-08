@@ -16,7 +16,20 @@ export default function VenueProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { data: venue, isLoading, isError } = useVenueById(id);
+  const { state: profileState, profile, refetch } = useVenueProfile(id);
+  const venue = profile as
+    | (Record<string, unknown> & {
+        id: string;
+        name: string;
+        owner_profile_id?: string | null;
+        image_url?: string | null;
+        description?: string | null;
+        address?: string | null;
+        city?: string | null;
+        category?: string | null;
+        is_verified?: boolean | null;
+      })
+    | null;
   const { data: event } = useVenueActiveEvent(id, venue?.owner_profile_id);
   const { data: posts, isLoading: postsLoading } = useVenueLinkedPosts(id, event?.id ?? null, 30);
   const { data: counts } = useRsvpCounts(event?.id ? [event.id] : []);
@@ -35,9 +48,17 @@ export default function VenueProfile() {
           <ArrowLeft className="h-4 w-4" /> Zurück
         </button>
 
-        {isLoading && <Skeleton className="h-48 w-full rounded-xl" />}
-        {isError && <p className="text-sm text-muted-foreground">Venue konnte nicht geladen werden.</p>}
-        {!isLoading && !venue && <p className="text-sm text-muted-foreground">Venue nicht gefunden.</p>}
+        {profileState !== 'found' && (
+          <VenueProfileFallback
+            state={profileState}
+            hasEvent={!!event}
+            hasPosts={(posts?.length ?? 0) > 0}
+            onBackToEvent={event ? () => navigate(`/events/${event.id}`) : undefined}
+            onViewPosts={undefined}
+            onRetry={refetch}
+          />
+        )}
+
 
         {venue && (
           <>
