@@ -4,7 +4,8 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RsvpButtons } from '@/components/events/RsvpButtons';
-import { useVenueActiveEvent, useVenueLinkedPosts, type VenueEventStatus } from '@/hooks/useVenueSheet';
+import { useVenueActiveEvent, useVenueLinkedPosts, useVenueProfile, type VenueEventStatus } from '@/hooks/useVenueSheet';
+import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
 import { format } from 'date-fns';
@@ -57,6 +58,7 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
     isError: postsError,
   } = useVenueLinkedPosts(open ? venue?.id : undefined, event?.id ?? null, 12);
   const { data: counts } = useRsvpCounts(event?.id ? [event.id] : []);
+  const { state: profileState, profile, refetch: refetchProfile } = useVenueProfile(open ? venue?.id : undefined);
 
   // Event-first only when there really is an event.
   useEffect(() => {
@@ -87,6 +89,10 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
   ];
 
   const openVenueProfile = () => {
+    if (profileState !== 'found') {
+      setTab('profile');
+      return;
+    }
     track('venue_profile_opened_from_map', { venueId: venue.id, surface: 'map' });
     onOpenChange(false);
     navigate(`/venues/${venue.id}`);
@@ -229,29 +235,43 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
         )}
 
         {tab === 'profile' && (
-          <div className="space-y-3">
-            {venue.image_url && (
-              <img
-                src={venue.image_url}
-                alt={venue.name}
-                loading="lazy"
-                className="h-32 w-full rounded-xl object-cover"
-              />
-            )}
-            <p className="text-sm text-foreground">{venue.name}</p>
-            <p className="text-xs text-muted-foreground">
-              {venue.description || 'Keine Beschreibung hinterlegt.'}
-            </p>
-            <div className="flex gap-2 text-xs text-muted-foreground">
-              <span className="rounded-full bg-muted px-2 py-0.5">{venue.category}</span>
-              {event && <span className="rounded-full bg-muted px-2 py-0.5">1 Event geplant</span>}
-              <span className="rounded-full bg-muted px-2 py-0.5">{posts?.length ?? 0} Posts</span>
+          profileState !== 'found' ? (
+            <VenueProfileFallback
+              state={profileState}
+              hasEvent={!!event}
+              hasPosts={(posts?.length ?? 0) > 0}
+              onBackToEvent={() => setTab('event')}
+              onViewPosts={() => setTab('posts')}
+              onRetry={refetchProfile}
+            />
+          ) : (
+            <div className="space-y-3">
+              {typeof profile?.image_url === 'string' && profile.image_url && (
+                <img
+                  src={profile.image_url as string}
+                  alt={String(profile.name)}
+                  loading="lazy"
+                  className="h-32 w-full rounded-xl object-cover"
+                />
+              )}
+              <p className="text-sm text-foreground">{String(profile?.name)}</p>
+              {typeof profile?.description === 'string' && profile.description && (
+                <p className="text-xs text-muted-foreground">{profile.description}</p>
+              )}
+              <div className="flex gap-2 text-xs text-muted-foreground">
+                {typeof profile?.category === 'string' && profile.category && (
+                  <span className="rounded-full bg-muted px-2 py-0.5">{profile.category}</span>
+                )}
+                {event && <span className="rounded-full bg-muted px-2 py-0.5">1 Event geplant</span>}
+                <span className="rounded-full bg-muted px-2 py-0.5">{posts?.length ?? 0} Posts</span>
+              </div>
+              <Button className="min-h-[44px] w-full gap-1" onClick={openVenueProfile}>
+                Venue Profil öffnen <ArrowRight className="h-4 w-4" />
+              </Button>
             </div>
-            <Button className="min-h-[44px] w-full gap-1" onClick={openVenueProfile}>
-              Venue Profil öffnen <ArrowRight className="h-4 w-4" />
-            </Button>
-          </div>
+          )
         )}
+
       </SheetContent>
     </Sheet>
   );

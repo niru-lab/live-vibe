@@ -136,3 +136,70 @@ export const useVenueById = (venueId: string | undefined) => {
     },
   });
 };
+
+export type VenueProfileState = 'loading' | 'found' | 'not_found' | 'forbidden' | 'network_error' | 'error';
+
+interface SupabaseLikeError {
+  code?: string;
+  message?: string;
+  status?: number;
+}
+
+/** Distinguishes "no profile" from permission and network failures. */
+export const classifyVenueError = (error: unknown): Exclude<VenueProfileState, 'loading' | 'found'> => {
+  const err = (error ?? {}) as SupabaseLikeError;
+  const code = err.code ?? '';
+  const message = (err.message ?? '').toLowerCase();
+
+  if (code === 'PGRST116' || message.includes('no rows')) return 'not_found';
+  if (code === '42501' || code === 'PGRST301' || err.status === 401 || err.status === 403 ||
+      message.includes('permission denied') || message.includes('row-level security') || message.includes('jwt')) {
+    return 'forbidden';
+  }
+  if (message.includes('failed to fetch') || message.includes('networkerror') || message.includes('timeout') ||
+      message.includes('load failed') || (typeof err.status === 'number' && err.status >= 500)) {
+    return 'network_error';
+  }
+  return 'error';
+};
+
+export interface VenueProfileResult {
+  state: VenueProfileState;
+  /** Only set when state === 'found'. Never fabricated. */
+  profile: Record<string, unknown> | null;
+  refetch: () => void;
+}
+
+/**
+ * Resolves whether a real venue profile row exists. A row missing the minimum
+ * verified fields (id + name) is treated as "no profile" rather than rendering
+ * placeholder data.
+ */
+export const useVenueProfile = (venueId: string | undefined): VenueProfileResult => {
+  const query = useQuery({
+    queryKey: ['venue-profile', venueId],
+    enabled: !!venueId,
+    retry: 1,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('venues').select('*').eq('id', venueId!).maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  let state: VenueProfileState = 'loading';
+  if (!venueId) state = 'not_found';
+  else if (query.isLoading || query.isPending) state = 'loading';
+  else if (query.isError) state = classifyVenueError(query.error);
+  else if (!query.data) state = 'not_found';
+  else if (!(query.data as { id?: string; name?: string }).id || !(query.data as { name?: string }).name?.trim()) {
+    state = 'not_found';
+  } else state = 'found';
+
+  return {
+    state,
+    profile: state === 'found' ? (query.data as Record<string, unknown>) : null,
+    refetch: () => void query.refetch(),
+  };
+};
+
