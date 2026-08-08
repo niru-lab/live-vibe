@@ -1,8 +1,8 @@
-import { memo, useState, useRef, useEffect, useCallback } from 'react';
+import { memo, useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePosts, type PostWithAuthor } from '@/hooks/usePosts';
 import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
-import { useEvents, type EventWithCreator } from '@/hooks/useEvents';
+import { useEvents, useVenues, type EventWithCreator } from '@/hooks/useEvents';
 import { useProfile } from '@/hooks/useProfile';
 import { useLivePosts } from '@/hooks/useLivePosts';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,6 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Heart, ChatCircle, Users, CalendarBlank, Play, MapPin, MusicNote, CheckCircle } from '@phosphor-icons/react';
 import type { FilterState } from './DiscoverFilters';
+import { matchesEventFilters, filterVenues, filterPosts } from '@/lib/discoverFilters';
+
 
 type CombinedItem =
   | { type: 'post'; data: PostWithAuthor; date: Date; priority: number }
@@ -26,65 +28,61 @@ export function DiscoverGrid({ searchQuery, filters }: DiscoverGridProps) {
   const { data: rawPosts, isLoading: postsLoading } = usePosts();
   const rankedPosts = useFeedAlgorithm(rawPosts) as PostWithAuthor[] | undefined;
   const { data: events, isLoading: eventsLoading } = useEvents();
+  const { data: venues } = useVenues();
   const { data: profile } = useProfile();
 
   const isLoading = postsLoading || eventsLoading;
 
-  // Filter posts
-  const filteredPosts = rankedPosts?.filter(post => {
-    if (!searchQuery && !filters) return true;
-    
-    const query = searchQuery?.toLowerCase() || '';
-    return !searchQuery || (post.caption?.toLowerCase().includes(query) || post.location_name?.toLowerCase().includes(query) || post.author?.username?.toLowerCase().includes(query) || post.author?.display_name?.toLowerCase().includes(query) || post.city?.toLowerCase().includes(query));
-  }) || [];
+  const query = (searchQuery || '').toLowerCase();
 
-  // Filter events
-  const filteredEvents = events?.filter(event => {
-    if (!searchQuery && !filters) return true;
-    
-    const query = searchQuery?.toLowerCase() || '';
-    const categoryLabels: Record<string, string[]> = {
-      club: ['club', 'clubs'],
-      bar: ['bar', 'bars'],
-      house_party: ['house party', 'houseparty', 'hausparty'],
-      festival: ['festival'],
-      concert: ['konzert', 'concert'],
-      sport: ['sport'],
-      other: ['sonstiges'],
-    };
-    const catMatch = !!query && (categoryLabels[event.category] || []).some((l) => l.includes(query) || query.includes(l));
-    const matchesSearch = !searchQuery || (
-      event.name.toLowerCase().includes(query) ||
-      event.location_name.toLowerCase().includes(query) ||
-      event.city.toLowerCase().includes(query) ||
-      catMatch
+  // 1) Events that survive the filter selection (single source of truth)
+  const filteredEvents = useMemo(() => {
+    return (events || []).filter((event) => {
+      if (!matchesEventFilters(event as any, filters)) return false;
+      if (!query) return true;
+      const categoryLabels: Record<string, string[]> = {
+        club: ['club', 'clubs'],
+        bar: ['bar', 'bars'],
+        house_party: ['house party', 'houseparty', 'hausparty'],
+        festival: ['festival'],
+        concert: ['konzert', 'concert'],
+        sport: ['sport'],
+        other: ['sonstiges'],
+      };
+      const catMatch = (categoryLabels[event.category] || []).some((l) => l.includes(query) || query.includes(l));
+      return (
+        event.name.toLowerCase().includes(query) ||
+        event.location_name.toLowerCase().includes(query) ||
+        event.city.toLowerCase().includes(query) ||
+        catMatch
+      );
+    });
+  }, [events, filters, query]);
+
+  // 2) Venues that host at least one matching event
+  const matchingVenueIds = useMemo(
+    () => new Set(filterVenues((venues || []) as any[], filteredEvents as any[], filters).map((v: any) => v.id)),
+    [venues, filteredEvents, filters],
+  );
+  const matchingEventIds = useMemo(
+    () => new Set(filteredEvents.map((e) => e.id)),
+    [filteredEvents],
+  );
+
+  // 3) Posts: only those linked to a matching event or venue when filters are active
+  const filteredPosts = useMemo(() => {
+    const base = filterPosts((rankedPosts || []) as any[], matchingEventIds, matchingVenueIds, filters) as PostWithAuthor[];
+    if (!query) return base;
+    return base.filter(
+      (post) =>
+        post.caption?.toLowerCase().includes(query) ||
+        post.location_name?.toLowerCase().includes(query) ||
+        post.author?.username?.toLowerCase().includes(query) ||
+        post.author?.display_name?.toLowerCase().includes(query) ||
+        post.city?.toLowerCase().includes(query),
     );
+  }, [rankedPosts, matchingEventIds, matchingVenueIds, filters, query]);
 
-    // Apply time filter
-    if (filters?.time) {
-      const now = new Date();
-      const eventDate = new Date(event.starts_at);
-      
-      if (filters.time === 'Jetzt') {
-        const hoursAgo = (now.getTime() - eventDate.getTime()) / (1000 * 60 * 60);
-        if (hoursAgo > 6 || hoursAgo < -1) return false;
-      } else if (filters.time === 'Heute') {
-        if (eventDate.toDateString() !== now.toDateString()) return false;
-      } else if (filters.time === 'Wochenende') {
-        const dayOfWeek = eventDate.getDay();
-        if (dayOfWeek !== 5 && dayOfWeek !== 6 && dayOfWeek !== 0) return false;
-      }
-    }
-
-    // Apply price filter
-    if (filters?.price) {
-      if (filters.price === 'Kostenlos' && !event.is_free) return false;
-      if (filters.price === '< 10€' && (event.entry_price || 0) >= 10) return false;
-      if (filters.price === '< 20€' && (event.entry_price || 0) >= 20) return false;
-    }
-
-    return matchesSearch;
-  }) || [];
 
   // Combine and sort with algorithm prioritization
   const combinedItems: CombinedItem[] = [
