@@ -13,7 +13,6 @@ export interface VenueEvent {
   starts_at: string;
   ends_at: string | null;
   category: string;
-  venue_id: string | null;
   status: VenueEventStatus;
 }
 
@@ -29,22 +28,22 @@ export const resolveEventStatus = (startsAt: string, endsAt: string | null): Ven
 };
 
 /**
- * Active (running) or next upcoming event for a venue — via the real
- * `events.venue_id` relationship. Single query, no N+1.
+ * Real venue → event relationship in this schema: `events.creator_id` is the
+ * venue owner's profile (`venues.owner_profile_id`). There is no
+ * `events.venue_id` column, so we never invent one.
  */
-export const useVenueActiveEvent = (venueId: string | undefined) => {
+export const useVenueActiveEvent = (venueId: string | undefined, ownerProfileId: string | null | undefined) => {
   return useQuery({
-    queryKey: ['venue-active-event', venueId],
-    enabled: !!venueId,
+    queryKey: ['venue-active-event', venueId, ownerProfileId],
+    enabled: !!venueId && !!ownerProfileId,
     staleTime: 60_000,
     queryFn: async (): Promise<VenueEvent | null> => {
-      if (!venueId) return null;
-      // Events that are either still running (ends_at in the future) or start later.
+      if (!ownerProfileId) return null;
       const since = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from('events')
-        .select('id,name,cover_image_url,location_name,city,address,starts_at,ends_at,category,venue_id')
-        .eq('venue_id', venueId)
+        .select('id,name,cover_image_url,location_name,city,address,starts_at,ends_at,category')
+        .eq('creator_id', ownerProfileId)
         .eq('is_active', true)
         .is('deleted_at', null)
         .gte('starts_at', since)
@@ -53,15 +52,17 @@ export const useVenueActiveEvent = (venueId: string | undefined) => {
       if (error) throw error;
 
       const now = Date.now();
-      const rows = (data || []).filter((e) => {
+      const rows = (data ?? []).filter((e) => {
         const end = e.ends_at ? new Date(e.ends_at).getTime() : null;
         return end ? end >= now : new Date(e.starts_at).getTime() >= now - 6 * 60 * 60 * 1000;
       });
       if (rows.length === 0) return null;
 
-      const withStatus = rows.map((e) => ({ ...e, status: resolveEventStatus(e.starts_at, e.ends_at) }));
-      const live = withStatus.find((e) => e.status === 'live');
-      return (live || withStatus[0]) as VenueEvent;
+      const withStatus: VenueEvent[] = rows.map((e) => ({
+        ...e,
+        status: resolveEventStatus(e.starts_at, e.ends_at),
+      }));
+      return withStatus.find((e) => e.status === 'live') ?? withStatus[0];
     },
   });
 };
@@ -92,13 +93,13 @@ export const useVenueLinkedPosts = (
     staleTime: 30_000,
     queryFn: async (): Promise<LinkedPost[]> => {
       if (!venueId) return [];
-      const select =
-        'id,media_url,media_type,caption,created_at,event_id,venue_id,author:profiles!posts_author_id_fkey(username,display_name,avatar_url)';
       const filter = eventId ? `venue_id.eq.${venueId},event_id.eq.${eventId}` : `venue_id.eq.${venueId}`;
 
       const { data, error } = await supabase
         .from('posts')
-        .select(select)
+        .select(
+          'id,media_url,media_type,caption,created_at,event_id,venue_id,author:profiles!posts_author_id_fkey(username,display_name,avatar_url)',
+        )
         .or(filter)
         .is('deleted_at', null)
         .order('created_at', { ascending: false })
@@ -106,7 +107,7 @@ export const useVenueLinkedPosts = (
       if (error) throw error;
 
       const seen = new Set<string>();
-      const rows = ((data || []) as unknown as LinkedPost[]).filter((p) => {
+      const rows = ((data ?? []) as unknown as LinkedPost[]).filter((p) => {
         if (seen.has(p.id)) return false;
         seen.add(p.id);
         return true;
