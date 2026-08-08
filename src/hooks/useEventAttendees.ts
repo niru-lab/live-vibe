@@ -1,7 +1,9 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from './useProfile';
+import { track, type RsvpSurface } from '@/lib/analytics';
 import type { Tables } from '@/integrations/supabase/types';
+
 
 export type EventAttendee = Tables<'event_attendees'> & {
   profile: Tables<'profiles'> | null;
