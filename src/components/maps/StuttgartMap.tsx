@@ -323,6 +323,13 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   }, [selectedCity, searchCity, venues, events]);
 
   // Build heatmap GeoJSON from events
+  // Events that satisfy the shared filter object (music/vibes/time/price/category)
+  const matchingEvents = useMemo(
+    () => (events || []).filter((e: any) => matchesEventFilters(e, filters)),
+    [events, filters],
+  );
+  const matchingEventIds = useMemo(() => new Set(matchingEvents.map((e: any) => e.id)), [matchingEvents]);
+
   const heatmapData = useMemo(() => {
     const features = (events || [])
       .map(event => {
@@ -359,14 +366,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       .filter(Boolean);
 
     return { type: 'FeatureCollection' as const, features };
-  }, [events, effectiveCity, acceptedHouseParties]);
-
-  // Events that satisfy the shared filter object (music/vibes/time/price/category)
-  const matchingEvents = useMemo(
-    () => (events || []).filter((e: any) => matchesEventFilters(e, filters)),
-    [events, filters],
-  );
-  const matchingEventIds = useMemo(() => new Set(matchingEvents.map((e: any) => e.id)), [matchingEvents]);
+  }, [matchingEvents, effectiveCity, acceptedHouseParties]);
 
   // Build venue markers
   const venueMarkers = useMemo(() => {
