@@ -200,6 +200,10 @@ export default function EventDetail() {
                 </Button>
               </div>
 
+              <LiveOfferList offers={eventOffers} surface="event_detail" />
+
+
+
               {myParticipation?.status === 'requested' && (
                 <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 text-sm">
