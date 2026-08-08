@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Storefront, WarnCircle, WifiSlash, Lock } from '@phosphor-icons/react';
+import { Storefront, WarningCircle, WifiSlash, Lock } from '@phosphor-icons/react';
 import type { VenueProfileState } from '@/hooks/useVenueSheet';
 
 interface VenueProfileFallbackProps {
@@ -51,7 +51,7 @@ export const VenueProfileFallback = ({
   }
 
   if (state === 'network_error' || state === 'error') {
-    const Icon = state === 'network_error' ? WifiSlash : WarnCircle;
+    const Icon = state === 'network_error' ? WifiSlash : WarningCircle;
     return (
       <div className="py-10 text-center">
         <Icon weight="thin" className="mx-auto mb-3 h-8 w-8 text-muted-foreground" />
