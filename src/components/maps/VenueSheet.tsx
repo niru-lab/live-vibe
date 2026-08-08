@@ -8,6 +8,8 @@ import { VenueEventCard } from '@/components/maps/VenueEventCard';
 import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
+import { EventSocialProofCard } from '@/components/social/EventSocialProof';
+import { EventPostCta } from '@/components/social/EventPostCta';
 import { LiveOfferList } from '@/components/offers/LiveOfferCard';
 import { useVenueLiveOffers } from '@/hooks/useVenueOffers';
 import { MapPin, ArrowRight, Image as ImageIcon } from 'lucide-react';
