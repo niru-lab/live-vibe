@@ -122,6 +122,9 @@ export default function CreatePost() {
       const shouldExpire = is24hPost || selectedTag !== null || isMomentX;
       const expiresAt = shouldExpire ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null;
 
+      const linkedVenueId = pickedLocation?.venue_id || (selectedTag?.type === 'venue' ? selectedTag.id : null);
+      const linkedEventId = selectedTag?.type === 'event' ? selectedTag.id : null;
+
       await createPost.mutateAsync({
         media_url: publicUrl,
         media_type: mediaType,
@@ -134,11 +137,21 @@ export default function CreatePost() {
         music_title: selectedMusic?.title || null,
         music_artist: selectedMusic?.artist || null,
         expires_at: expiresAt,
-        venue_id: pickedLocation?.venue_id || (selectedTag?.type === 'venue' ? selectedTag.id : null),
-        event_id: selectedTag?.type === 'event' ? selectedTag.id : null,
+        venue_id: linkedVenueId,
+        event_id: linkedEventId,
         location_id: taggedPerson?.id ?? null,
       });
+
+      // Social Cloud: rewarded once per event/venue (server-side idempotent).
+      if (linkedEventId) {
+        track('event_linked_post_created', { eventId: linkedEventId, venueId: linkedVenueId ?? undefined });
+        track('social_cloud_nudge_completed', { eventId: linkedEventId });
+        awardSocialCloud.mutate({ action: 'event_linked_post', refType: 'event', refId: linkedEventId, silent: true });
+      } else if (linkedVenueId) {
+        awardSocialCloud.mutate({ action: 'venue_linked_post', refType: 'venue', refId: linkedVenueId, silent: true });
+      }
       const wasFirstPost = isFirstPostPending;
+
       queryClient.invalidateQueries({ queryKey: ['guest-activation'] });
       toast({ title: 'Gepostet! 🎉', description: 'Dein Beitrag wurde erfolgreich geteilt.' });
       if (wasFirstPost && !shareFiredRef.current) {
