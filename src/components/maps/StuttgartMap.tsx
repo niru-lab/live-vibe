@@ -331,7 +331,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   const matchingEventIds = useMemo(() => new Set(matchingEvents.map((e: any) => e.id)), [matchingEvents]);
 
   const heatmapData = useMemo(() => {
-    const features = (events || [])
+    const features = (matchingEvents || [])
       .map(event => {
         let coords: [number, number] | null = null;
         if (event.latitude && event.longitude) {
