@@ -1,5 +1,8 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import Map, { Marker, Popup, Source, Layer, NavigationControl } from 'react-map-gl/mapbox';
+import { MapEventRsvp } from '@/components/maps/MapEventRsvp';
+import { track } from '@/lib/analytics';
+
 import type { MapRef } from 'react-map-gl/mapbox';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { Link } from 'react-router-dom';
@@ -205,6 +208,11 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   const navigate = useNavigate();
   const mapRef = useRef<MapRef>(null);
   const { data: profile } = useProfile();
+
+  useEffect(() => {
+    track('event_map_viewed', { surface: 'map' });
+  }, []);
+
 
   // House parties the current user has been accepted into → real address visible
   const { data: acceptedHouseParties } = useQuery({
@@ -463,8 +471,10 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
               anchor="center"
               onClick={e => {
                 e.originalEvent.stopPropagation();
+                track('event_marker_opened', { eventId: event.id, eventType: event.category, surface: 'map' });
                 setPopupInfo({ type: 'event', data: event });
               }}
+
             >
               <div
                 className="rounded-full border-2 border-white/80 cursor-pointer animate-pulse"
@@ -658,6 +668,8 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                   >
                     Event ansehen
                   </Button>
+                  <MapEventRsvp eventId={popupInfo.data.id} />
+
                 </>
               )}
 

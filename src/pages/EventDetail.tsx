@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { track } from '@/lib/analytics';
+
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
@@ -44,6 +46,11 @@ export default function EventDetail() {
   const { data: myParticipation } = useMyParticipation(id);
   const setParticipation = useSetParticipation();
 
+  useEffect(() => {
+    if (event?.id) track('event_detail_viewed', { eventId: event.id, eventType: event.category });
+  }, [event?.id, event?.category]);
+
+
   const handleDeleteEvent = async () => {
     if (!event) return;
     try { await deleteEventMutation.mutateAsync(event.id); toast({ title: 'Event gelöscht', description: 'Das Event wurde erfolgreich entfernt.' }); navigate('/events'); }
@@ -63,11 +70,12 @@ export default function EventDetail() {
   const fillPercentage = Math.min((goingCount / expectedAttendees) * 100, 100);
 
   const handleRSVP = async (status: 'going' | 'interested' | null) => {
-    if (!user) { navigate('/auth'); return; }
+    if (!user) { navigate(`/auth?redirect=${encodeURIComponent(`/events/${event.id}`)}`); return; }
     try {
-      await rsvpMutation.mutateAsync({ eventId: event.id, status });
+      await rsvpMutation.mutateAsync({ eventId: event.id, status, surface: 'event_detail' });
       if (status === 'going') toast({ title: '✅ Zusage bestätigt!', description: `Du gehst zu "${event.name}" 🎉` });
-      else if (status === null) toast({ title: 'Zusage zurückgezogen', description: 'Du wurdest von der Liste entfernt.' });
+      else if (status === 'interested') toast({ title: '❤️ Als interessiert markiert' });
+      else toast({ title: 'Status entfernt', description: 'Du wurdest von der Liste entfernt.' });
     } catch { toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' }); }
   };
 
@@ -77,6 +85,8 @@ export default function EventDetail() {
   };
 
   const isGoing = userRSVP?.status === 'going';
+  const isInterested = userRSVP?.status === 'interested';
+
 
   return (
     <AppLayout hideNav>
@@ -165,6 +175,31 @@ export default function EventDetail() {
             </div>
           ) : (
             <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  className="gap-2 min-h-[48px]"
+                  variant={isGoing ? 'outline' : 'default'}
+                  aria-pressed={isGoing}
+                  aria-label={isGoing ? 'Zusage zurückziehen' : 'Zusagen'}
+                  disabled={rsvpMutation.isPending}
+                  onClick={() => handleRSVP(isGoing ? null : 'going')}
+                >
+                  <CheckCircle weight={isGoing ? 'fill' : 'thin'} className="h-5 w-5" />
+                  {isGoing ? 'Zugesagt ✓' : 'Zusagen'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className={`gap-2 min-h-[48px] ${isInterested ? 'border-primary text-primary' : ''}`}
+                  aria-pressed={isInterested}
+                  aria-label={isInterested ? 'Nicht mehr interessiert' : 'Interessiert'}
+                  disabled={rsvpMutation.isPending}
+                  onClick={() => handleRSVP(isInterested ? null : 'interested')}
+                >
+                  <Heart weight={isInterested ? 'fill' : 'thin'} className="h-5 w-5" />
+                  {isInterested ? 'Interessiert ✓' : 'Interessiert'}
+                </Button>
+              </div>
+
               {myParticipation?.status === 'requested' && (
                 <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 text-sm">

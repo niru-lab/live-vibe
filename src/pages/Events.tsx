@@ -6,6 +6,8 @@ import { useEventRanking } from '@/hooks/useEventRanking';
 import { useProfile } from '@/hooks/useProfile';
 import { useMyRSVPs, useMyInvitations, useRespondToInvitation } from '@/hooks/useEventAttendees';
 import { useMyUpcomingParticipations, useSetParticipation } from '@/hooks/useEventParticipation';
+import { RsvpButtons } from '@/components/events/RsvpButtons';
+
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -435,7 +437,11 @@ function EventListCard({ event, onClick, pendingNote = false }: { event: any; on
             </span>
           )}
         </div>
+        <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+          <RsvpButtons eventId={event.id} surface="events" />
+        </div>
       </div>
+
     </article>
   );
 }

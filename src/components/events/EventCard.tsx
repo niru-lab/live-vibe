@@ -1,4 +1,4 @@
-import { CalendarBlank, MapPin, Users, Clock, UserCheck, Flame } from '@phosphor-icons/react';
+import { CalendarBlank, MapPin, Users, Clock, UserCheck, Flame, Heart } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
@@ -7,36 +7,62 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Progress } from '@/components/ui/progress';
 import { cn, getEventStatus } from '@/lib/utils';
-import { useEventAttendees, useFriendsAttending, useUserEventRSVP, useRSVP } from '@/hooks/useEventAttendees';
+import { useEventAttendees, useFriendsAttending, useMyRsvpMap, useRSVP, useRsvpCounts } from '@/hooks/useEventAttendees';
 import { useAuth } from '@/contexts/AuthContext';
+import { useProfile } from '@/hooks/useProfile';
 import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
 import { BadgeDisplay } from '@/components/profile/BadgeDisplay';
+import type { RsvpSurface } from '@/lib/analytics';
 import type { EventWithCreator } from '@/hooks/useEvents';
 
 const categoryEmojis: Record<string, string> = { club: '🎧', house_party: '🏠', bar: '🍸', festival: '🎪', concert: '🎤', other: '✨' };
 
-interface EventCardProps { event: EventWithCreator; onClick: () => void; compact?: boolean; }
+interface EventCardProps {
+  event: EventWithCreator;
+  onClick: () => void;
+  compact?: boolean;
+  /** Pass batched counts from a list parent to avoid N+1 queries. */
+  rsvpCounts?: { going: number; interested: number };
+  surface?: RsvpSurface;
+}
 
-export const EventCard = ({ event, onClick, compact = false }: EventCardProps) => {
+export const EventCard = ({ event, onClick, compact = false, rsvpCounts, surface = 'events' }: EventCardProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { data: profile } = useProfile();
+  const { toast } = useToast();
   const startsAt = new Date(event.starts_at);
   const isToday = new Date().toDateString() === startsAt.toDateString();
   const isSoon = startsAt.getTime() - Date.now() < 3 * 60 * 60 * 1000;
-  const { data: attendees } = useEventAttendees(event.id);
   const { data: friendsAttending } = useFriendsAttending(event.id);
-  const { data: userRSVP } = useUserEventRSVP(event.id);
+  const { data: myRsvps } = useMyRsvpMap();
+  // Only query counts when the parent did not provide them.
+  const { data: fallbackCounts } = useRsvpCounts(rsvpCounts ? [] : [event.id]);
   const rsvpMutation = useRSVP();
-  const goingCount = attendees?.goingCount || 0;
+  const counts = rsvpCounts ?? fallbackCounts?.[event.id] ?? { going: 0, interested: 0 };
+  const goingCount = counts.going;
   const expectedAttendees = event.expected_attendees || 100;
   const fillPercentage = Math.min((goingCount / expectedAttendees) * 100, 100);
-  const isGoing = userRSVP?.status === 'going';
+  const myStatus = myRsvps?.[event.id] ?? null;
+  const isGoing = myStatus === 'going';
+  const isInterested = myStatus === 'interested';
+  const isOwnEvent = !!profile && profile.id === event.creator_id;
 
-  const handleRSVP = async (e: React.MouseEvent) => {
+  const setRsvp = async (e: React.MouseEvent, status: 'going' | 'interested') => {
     e.stopPropagation();
-    if (!user) { navigate('/auth'); return; }
-    await rsvpMutation.mutateAsync({ eventId: event.id, status: isGoing ? null : 'going' });
+    if (!user) {
+      navigate(`/auth?redirect=${encodeURIComponent(`/events/${event.id}`)}`);
+      return;
+    }
+    const next = myStatus === status ? null : status;
+    try {
+      await rsvpMutation.mutateAsync({ eventId: event.id, status: next, surface });
+    } catch {
+      toast({ variant: 'destructive', title: 'Fehler', description: 'Status konnte nicht gespeichert werden.' });
+    }
   };
+
 
   return (
     <article onClick={onClick} className="group animate-fade-in cursor-pointer overflow-hidden rounded-2xl border border-white/[0.08] bg-[#12121A] card-glow transition-all hover:border-[#7C3AED]/40">
@@ -67,6 +93,7 @@ export const EventCard = ({ event, onClick, compact = false }: EventCardProps) =
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">{goingCount}/{expectedAttendees} zugesagt</span>
+              {counts.interested > 0 && <span className="text-xs text-muted-foreground">· {counts.interested} interessiert</span>}
               {fillPercentage > 70 && <Flame weight="thin" className="h-4 w-4 text-orange-500" />}
             </div>
             <span className="text-xs text-muted-foreground">{Math.round(fillPercentage)}%</span>
@@ -90,13 +117,29 @@ export const EventCard = ({ event, onClick, compact = false }: EventCardProps) =
           <div className="flex items-center gap-2"><Clock weight="thin" className="h-4 w-4" /><span>{format(startsAt, 'HH:mm', { locale: de })} Uhr</span></div>
           <div className="flex items-center gap-2"><MapPin weight="thin" className="h-4 w-4" /><span className="line-clamp-1">{event.location_name}, {event.city}</span></div>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={handleRSVP} variant={isGoing ? 'outline' : 'default'} size="sm"
-            className={cn('flex-1 gap-1.5', isGoing ? 'border-green-500 text-green-500 hover:bg-green-500/10' : '')}
-            disabled={rsvpMutation.isPending}>
-            <UserCheck weight="thin" className="h-4 w-4" />{isGoing ? 'Zugesagt ✓' : 'Zusagen'}
+        {isOwnEvent ? (
+          <Button variant="outline" size="sm" className="w-full min-h-[44px]" onClick={(e) => { e.stopPropagation(); navigate(`/events/${event.id}`); }}>
+            Event verwalten
           </Button>
-        </div>
+        ) : (
+          <div className="flex gap-2">
+            <Button onClick={(e) => setRsvp(e, 'going')} variant={isGoing ? 'outline' : 'default'} size="sm"
+              aria-pressed={isGoing}
+              aria-label={isGoing ? 'Zusage zurückziehen' : 'Zusagen'}
+              className={cn('flex-1 gap-1.5 min-h-[44px]', isGoing ? 'border-green-500 text-green-500 hover:bg-green-500/10' : '')}
+              disabled={rsvpMutation.isPending}>
+              <UserCheck weight="thin" className="h-4 w-4" />{isGoing ? 'Zugesagt ✓' : 'Zusagen'}
+            </Button>
+            <Button onClick={(e) => setRsvp(e, 'interested')} variant="outline" size="sm"
+              aria-pressed={isInterested}
+              aria-label={isInterested ? 'Nicht mehr interessiert' : 'Interessiert'}
+              className={cn('flex-1 gap-1.5 min-h-[44px]', isInterested ? 'border-primary text-primary' : '')}
+              disabled={rsvpMutation.isPending}>
+              <Heart weight={isInterested ? 'fill' : 'thin'} className="h-4 w-4" />{isInterested ? 'Interessiert ✓' : 'Interessiert'}
+            </Button>
+          </div>
+        )}
+
         {(() => {
           const creator = Array.isArray(event.creator) ? event.creator[0] : event.creator;
           if (!creator?.username) return null;
