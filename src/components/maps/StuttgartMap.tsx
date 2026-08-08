@@ -1,6 +1,8 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import Map, { Marker, Popup, Source, Layer, NavigationControl } from 'react-map-gl/mapbox';
 import { MapEventRsvp } from '@/components/maps/MapEventRsvp';
+import type { FilterState } from '@/components/discover/DiscoverFilters';
+import { matchesEventFilters, filterVenues, filterPosts, hasContentFilters } from '@/lib/discoverFilters';
 import { VenueSheet, type SheetVenue } from '@/components/maps/VenueSheet';
 import { track } from '@/lib/analytics';
 
@@ -196,9 +198,10 @@ interface StuttgartMapProps {
   selectedCity?: string | null;
   selectedCategory?: string | null;
   searchQuery?: string;
+  filters?: FilterState | null;
 }
 
-export function StuttgartMap({ selectedCity, selectedCategory: externalCategory, searchQuery = '' }: StuttgartMapProps) {
+export function StuttgartMap({ selectedCity, selectedCategory: externalCategory, searchQuery = '', filters = null }: StuttgartMapProps) {
   const [internalCategory, setInternalCategory] = useState<string | null>(null);
   const selectedCategory = externalCategory ?? internalCategory;
   const setSelectedCategory = (cat: string | null) => setInternalCategory(cat);
@@ -320,8 +323,15 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   }, [selectedCity, searchCity, venues, events]);
 
   // Build heatmap GeoJSON from events
+  // Events that satisfy the shared filter object (music/vibes/time/price/category)
+  const matchingEvents = useMemo(
+    () => (events || []).filter((e: any) => matchesEventFilters(e, filters)),
+    [events, filters],
+  );
+  const matchingEventIds = useMemo(() => new Set(matchingEvents.map((e: any) => e.id)), [matchingEvents]);
+
   const heatmapData = useMemo(() => {
-    const features = (events || [])
+    const features = (matchingEvents || [])
       .map(event => {
         let coords: [number, number] | null = null;
         if (event.latitude && event.longitude) {
@@ -356,11 +366,12 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       .filter(Boolean);
 
     return { type: 'FeatureCollection' as const, features };
-  }, [events, effectiveCity, acceptedHouseParties]);
+  }, [matchingEvents, effectiveCity, acceptedHouseParties]);
 
   // Build venue markers
   const venueMarkers = useMemo(() => {
-    const filtered = (venues || []).filter(v => {
+    const base = filterVenues((venues || []) as any[], matchingEvents as any[], filters);
+    const filtered = base.filter((v: any) => {
       if (effectiveCity && effectiveCity !== 'Alle' && v.city?.toLowerCase() !== effectiveCity.toLowerCase()) return false;
       if (selectedCategory && selectedCategory !== 'event' && v.category !== selectedCategory) return false;
       if (selectedCategory === 'event') return false;
@@ -368,12 +379,26 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       return true;
     });
     return filtered;
-  }, [venues, effectiveCity, selectedCategory, searchLower, searchCity]);
+  }, [venues, matchingEvents, filters, effectiveCity, selectedCategory, searchLower, searchCity]);
+
+  const matchingVenueIds = useMemo(() => new Set(venueMarkers.map((v: any) => v.id)), [venueMarkers]);
+
+  // Posts stay linked to the filtered events/venues – never unrelated content.
+  const filteredVenuePosts = useMemo(() => {
+    if (!venuePosts) return venuePosts;
+    if (!hasContentFilters(filters)) return venuePosts;
+    const out: Record<string, any[]> = {};
+    Object.entries(venuePosts).forEach(([venueId, list]) => {
+      const kept = filterPosts((list || []) as any[], matchingEventIds, matchingVenueIds, filters);
+      if (kept.length > 0) out[venueId] = kept;
+    });
+    return out;
+  }, [venuePosts, filters, matchingEventIds, matchingVenueIds]);
 
   // Build event markers (for popup interaction)
   const eventMarkers = useMemo(() => {
     if (selectedCategory && selectedCategory !== 'event') return [];
-    return (events || [])
+    return (matchingEvents || [])
       .map(event => {
         let coords: [number, number] | null = null;
         if (event.latitude && event.longitude) coords = [event.latitude, event.longitude];
@@ -391,7 +416,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         return { ...event, coords, isPrivateHouseParty, directionLabel };
       })
       .filter(Boolean) as any[];
-  }, [events, effectiveCity, selectedCategory, searchLower, searchCity, acceptedHouseParties]);
+  }, [matchingEvents, effectiveCity, selectedCategory, searchLower, searchCity, acceptedHouseParties]);
 
   const getCategoryCount = useCallback((category: string) => {
     const cityFilter = (city?: string | null) =>
@@ -400,7 +425,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
     return (venues || []).filter(v => v.category === category && cityFilter(v.city)).length;
   }, [events, venues, selectedCity]);
 
-  const postCount = (venueId: string) => venuePosts?.[venueId]?.length || 0;
+  const postCount = (venueId: string) => filteredVenuePosts?.[venueId]?.length || 0;
 
   return (
     <div data-testid="map-container" className="relative w-full h-[500px] rounded-xl overflow-hidden border border-border/50">
@@ -494,7 +519,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         })}
 
         {/* Moment X Markers — pulsing neon-purple pins */}
-        {(momentXPosts || []).map(post => (
+        {(hasContentFilters(filters) ? [] : (momentXPosts || [])).map(post => (
           <Marker
             key={`mx-${post.id}`}
             latitude={post.latitude!}
@@ -569,8 +594,8 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                     {popupInfo.data.address}
                   </p>
                   {/* Post previews */}
-                  {venuePosts?.[popupInfo.data.id] && venuePosts[popupInfo.data.id].length > 0 && (() => {
-                    const posts = venuePosts[popupInfo.data.id];
+                  {filteredVenuePosts?.[popupInfo.data.id] && filteredVenuePosts[popupInfo.data.id].length > 0 && (() => {
+                    const posts = filteredVenuePosts[popupInfo.data.id];
                     const totalCount = posts.length;
                     const showPosts = posts.slice(0, 3);
                     const remaining = totalCount - 3;

@@ -36,6 +36,7 @@ export default function Discover() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterState | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const userTouchedCity = useRef(false);
   const queryClient = useQueryClient();
@@ -95,6 +96,7 @@ export default function Discover() {
               <DiscoverFilters onFiltersChange={(f) => {
                 userTouchedCity.current = true;
                 setSelectedCity(f.city);
+                setFilters(f);
                 const catMap: Record<string, string> = { 'Bar': 'bar', 'Club': 'club', 'Café': 'cafe', 'Events': 'event' };
                 setSelectedCategory(f.category ? catMap[f.category] || null : null);
               }} />
@@ -105,10 +107,11 @@ export default function Discover() {
         <div className="relative flex-1 min-h-0">
           <Suspense fallback={<Skeleton className="absolute inset-0 rounded-none" />}>
             <div className="absolute inset-0">
-              <StuttgartMap selectedCity={selectedCity} selectedCategory={selectedCategory} searchQuery={searchQuery} />
+              <StuttgartMap selectedCity={selectedCity} selectedCategory={selectedCategory} searchQuery={searchQuery} filters={filters} />
             </div>
           </Suspense>
         </div>
+
       </div>
     </AppLayout>
   );
