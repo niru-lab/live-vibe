@@ -36,6 +36,7 @@ export default function EventDetail() {
   const { data: profile } = useProfile();
   const { toast } = useToast();
   const { data: event, isLoading } = useEventById(id);
+  const { data: eventOffers } = useEventLiveOffers(id);
   const { data: attendees } = useEventAttendees(id);
   const { data: userRSVP } = useUserEventRSVP(id);
   const { data: friendsAttending } = useFriendsAttending(id);
