@@ -154,6 +154,7 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
                 </Button>
               </div>
             )}
+            {!eventLoading && !event && <LiveOfferList offers={venueLevelOffers} surface="venue_sheet" />}
             {event && (
               <>
                 {allRelevantEvents.length > 1 && (
@@ -167,6 +168,12 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
                   counts={counts?.[event.id]}
                   onOpenDetail={openEventDetail}
                 />
+
+                <LiveOfferList
+                  offers={liveOffers.filter((o) => o.event_id === event.id || o.event_id === null)}
+                  surface="venue_sheet"
+                />
+
 
                 {otherEvents.length > 0 && (
                   <section className="pt-2">
