@@ -221,7 +221,14 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
         )}
 
         {tab === 'posts' && (
-          <div>
+          <div className="space-y-3">
+            <EventPostCta
+              eventId={event?.id ?? null}
+              venueId={venue.id}
+              eventName={event?.name ?? null}
+              surface="venue_sheet"
+              active={tab === 'posts'}
+            />
             {postsLoading && (
               <div className="grid grid-cols-3 gap-1.5">
                 {[0, 1, 2, 3, 4, 5].map((i) => (
