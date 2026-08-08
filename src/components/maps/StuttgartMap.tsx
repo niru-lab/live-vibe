@@ -466,8 +466,10 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
               anchor="center"
               onClick={e => {
                 e.originalEvent.stopPropagation();
+                track('event_marker_opened', { eventId: event.id, eventType: event.category, surface: 'map' });
                 setPopupInfo({ type: 'event', data: event });
               }}
+
             >
               <div
                 className="rounded-full border-2 border-white/80 cursor-pointer animate-pulse"
