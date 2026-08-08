@@ -3,15 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RsvpButtons } from '@/components/events/RsvpButtons';
 import { useVenueEvents, useVenueProfile, useVenueLinkedPosts, getVenueEventState } from '@/hooks/useVenueSheet';
 import { VenueEventCard } from '@/components/maps/VenueEventCard';
 import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
-import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
-import { ArrowLeft, MapPin, Clock } from 'lucide-react';
+import { ArrowLeft, MapPin } from 'lucide-react';
 
 export default function VenueProfile() {
   const { id } = useParams<{ id: string }>();
