@@ -83,6 +83,10 @@ export default function VenueProfile() {
               {venue.is_verified && <span className="rounded-full bg-primary/20 px-2 py-1 text-primary">Verifiziert</span>}
             </div>
 
+            <div className="mt-4">
+              <LiveOfferList offers={venueLevelOffers} surface="venue_profile" />
+            </div>
+
             {event && (
               <section className="mt-6 rounded-xl border border-border/60 p-4">
                 <VenueEventCard
@@ -91,6 +95,12 @@ export default function VenueProfile() {
                   counts={counts?.[event.id]}
                   onOpenDetail={() => navigate(`/events/${event.id}`)}
                 />
+                <div className="mt-3">
+                  <LiveOfferList
+                    offers={liveOffers.filter((o) => o.event_id === event.id)}
+                    surface="venue_profile"
+                  />
+                </div>
               </section>
             )}
 
