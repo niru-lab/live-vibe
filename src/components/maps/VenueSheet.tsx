@@ -61,6 +61,8 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
   const { data: counts } = useRsvpCounts(allRelevantEvents.map((e) => e.id));
   const { state: rawProfileState, profile, isClaimed, refetch: refetchProfile } = useVenueProfile(open ? venue?.id : undefined);
   const profileState = rawProfileState === 'found' && !isClaimed ? 'not_found' : rawProfileState;
+  const { data: liveOffers = [] } = useVenueLiveOffers(open ? venue?.id : undefined);
+  const venueLevelOffers = liveOffers.filter((o) => o.event_id === null);
 
   // Event-first only when there really is an event.
   useEffect(() => {
