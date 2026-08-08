@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { track } from '@/lib/analytics';
+import { LiveOfferList } from '@/components/offers/LiveOfferCard';
+import { useEventLiveOffers } from '@/hooks/useVenueOffers';
 
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -34,6 +36,7 @@ export default function EventDetail() {
   const { data: profile } = useProfile();
   const { toast } = useToast();
   const { data: event, isLoading } = useEventById(id);
+  const { data: eventOffers } = useEventLiveOffers(id);
   const { data: attendees } = useEventAttendees(id);
   const { data: userRSVP } = useUserEventRSVP(id);
   const { data: friendsAttending } = useFriendsAttending(id);
@@ -199,6 +202,10 @@ export default function EventDetail() {
                   {isInterested ? 'Interessiert ✓' : 'Interessiert'}
                 </Button>
               </div>
+
+              <LiveOfferList offers={eventOffers} surface="event_detail" />
+
+
 
               {myParticipation?.status === 'requested' && (
                 <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 flex items-center justify-between gap-3">

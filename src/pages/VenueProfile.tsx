@@ -8,6 +8,8 @@ import { VenueEventCard } from '@/components/maps/VenueEventCard';
 import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
+import { LiveOfferList } from '@/components/offers/LiveOfferCard';
+import { useVenueLiveOffers } from '@/hooks/useVenueOffers';
 import { ArrowLeft, MapPin } from 'lucide-react';
 
 export default function VenueProfile() {
@@ -34,6 +36,8 @@ export default function VenueProfile() {
   const otherEvents = allRelevantEvents.slice(1);
   const { data: posts, isLoading: postsLoading } = useVenueLinkedPosts(id, event?.id ?? null, 30);
   const { data: counts } = useRsvpCounts(allRelevantEvents.map((e) => e.id));
+  const { data: liveOffers = [] } = useVenueLiveOffers(id);
+  const venueLevelOffers = liveOffers.filter((o) => o.event_id === null);
 
   useEffect(() => {
     if (venue?.id) track('venue_profile_opened_from_map', { venueId: venue.id, surface: 'venue_profile' });
@@ -83,6 +87,10 @@ export default function VenueProfile() {
               {venue.is_verified && <span className="rounded-full bg-primary/20 px-2 py-1 text-primary">Verifiziert</span>}
             </div>
 
+            <div className="mt-4">
+              <LiveOfferList offers={venueLevelOffers} surface="venue_profile" />
+            </div>
+
             {event && (
               <section className="mt-6 rounded-xl border border-border/60 p-4">
                 <VenueEventCard
@@ -91,6 +99,12 @@ export default function VenueProfile() {
                   counts={counts?.[event.id]}
                   onOpenDetail={() => navigate(`/events/${event.id}`)}
                 />
+                <div className="mt-3">
+                  <LiveOfferList
+                    offers={liveOffers.filter((o) => o.event_id === event.id)}
+                    surface="venue_profile"
+                  />
+                </div>
               </section>
             )}
 

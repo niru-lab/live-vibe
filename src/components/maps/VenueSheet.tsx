@@ -8,6 +8,8 @@ import { VenueEventCard } from '@/components/maps/VenueEventCard';
 import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
+import { LiveOfferList } from '@/components/offers/LiveOfferCard';
+import { useVenueLiveOffers } from '@/hooks/useVenueOffers';
 import { MapPin, ArrowRight, Image as ImageIcon } from 'lucide-react';
 
 export interface SheetVenue {
@@ -59,6 +61,8 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
   const { data: counts } = useRsvpCounts(allRelevantEvents.map((e) => e.id));
   const { state: rawProfileState, profile, isClaimed, refetch: refetchProfile } = useVenueProfile(open ? venue?.id : undefined);
   const profileState = rawProfileState === 'found' && !isClaimed ? 'not_found' : rawProfileState;
+  const { data: liveOffers = [] } = useVenueLiveOffers(open ? venue?.id : undefined);
+  const venueLevelOffers = liveOffers.filter((o) => o.event_id === null);
 
   // Event-first only when there really is an event.
   useEffect(() => {
@@ -154,6 +158,7 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
                 </Button>
               </div>
             )}
+            {!eventLoading && !event && <LiveOfferList offers={venueLevelOffers} surface="venue_sheet" />}
             {event && (
               <>
                 {allRelevantEvents.length > 1 && (
@@ -167,6 +172,12 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
                   counts={counts?.[event.id]}
                   onOpenDetail={openEventDetail}
                 />
+
+                <LiveOfferList
+                  offers={liveOffers.filter((o) => o.event_id === event.id || o.event_id === null)}
+                  surface="venue_sheet"
+                />
+
 
                 {otherEvents.length > 0 && (
                   <section className="pt-2">
@@ -276,6 +287,7 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
                 )}
                 <span className="rounded-full bg-muted px-2 py-0.5">{posts?.length ?? 0} Posts</span>
               </div>
+              <LiveOfferList offers={venueLevelOffers} surface="venue_sheet" />
               <Button className="min-h-[44px] w-full gap-1" onClick={openVenueProfile}>
                 Venue Profil öffnen <ArrowRight className="h-4 w-4" />
               </Button>

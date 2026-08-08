@@ -18,6 +18,7 @@ import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { useVenueAnalytics } from '@/hooks/useVenueAnalytics';
 import { useProfile } from '@/hooks/useProfile';
 import { VenueFirstEventNudge } from '@/components/events/VenueFirstEventNudge';
+import { VenueOffersSection } from '@/components/offers/VenueOffersSection';
 
 const KpiCard = ({
   icon: Icon,
@@ -164,6 +165,8 @@ export default function VenueDashboard() {
             {nextStep.cta}
           </Button>
         </section>
+
+        <VenueOffersSection />
 
         <section className="space-y-3">
           <h2 className="text-sm font-semibold text-foreground">Events</h2>
