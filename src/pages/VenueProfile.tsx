@@ -36,6 +36,8 @@ export default function VenueProfile() {
   const otherEvents = allRelevantEvents.slice(1);
   const { data: posts, isLoading: postsLoading } = useVenueLinkedPosts(id, event?.id ?? null, 30);
   const { data: counts } = useRsvpCounts(allRelevantEvents.map((e) => e.id));
+  const { data: liveOffers = [] } = useVenueLiveOffers(id);
+  const venueLevelOffers = liveOffers.filter((o) => o.event_id === null);
 
   useEffect(() => {
     if (venue?.id) track('venue_profile_opened_from_map', { venueId: venue.id, surface: 'venue_profile' });
