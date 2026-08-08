@@ -658,6 +658,8 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                   >
                     Event ansehen
                   </Button>
+                  <MapEventRsvp eventId={popupInfo.data.id} />
+
                 </>
               )}
 
