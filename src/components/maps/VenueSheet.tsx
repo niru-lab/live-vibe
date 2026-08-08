@@ -147,7 +147,7 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
             )}
             {!eventLoading && !eventError && !event && (
               <div className="py-8 text-center">
-                <p className="text-sm text-muted-foreground">Aktuell kein Event an dieser Location.</p>
+                <p className="text-sm text-muted-foreground">Keine aktuellen Events für diesen Spot</p>
                 <Button variant="outline" className="mt-3 min-h-[44px]" onClick={openVenueProfile}>
                   Venue ansehen
                 </Button>
@@ -155,39 +155,44 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
             )}
             {event && (
               <>
-                {event.cover_image_url && (
-                  <img
-                    src={event.cover_image_url}
-                    alt={event.name}
-                    loading="lazy"
-                    className="h-36 w-full rounded-xl object-cover"
-                  />
+                {allRelevantEvents.length > 1 && (
+                  <p className="text-xs font-medium text-muted-foreground" aria-live="polite">
+                    Event {eventIndex} von {allRelevantEvents.length}
+                  </p>
                 )}
-                <div className="flex items-center gap-2">
-                  {status && (
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${status.className}`}>
-                      {status.label}
-                    </span>
-                  )}
-                  <h3 className="text-sm font-semibold text-foreground">{event.name}</h3>
-                </div>
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {format(new Date(event.starts_at), 'EEE, dd. MMM · HH:mm', { locale: de })} Uhr
-                </p>
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <MapPin className="h-3 w-3" />
-                  {event.location_name}
-                  {event.city ? `, ${event.city}` : ''}
-                </p>
+                <VenueEventCard
+                  event={event}
+                  surface="venue_sheet"
+                  counts={counts?.[event.id]}
+                  onOpenDetail={openEventDetail}
+                />
 
-                <RsvpButtons eventId={event.id} surface="venue_sheet" counts={counts?.[event.id]} />
-
-                <Button variant="outline" className="min-h-[44px] w-full gap-1" onClick={openEventDetail}>
-                  Event Details <ArrowRight className="h-4 w-4" />
-                </Button>
+                {otherEvents.length > 0 && (
+                  <section className="pt-2">
+                    <h4 className="mb-2 text-xs font-semibold text-foreground">Weitere Events dieses Venues</h4>
+                    <div className="max-h-[45vh] space-y-2 overflow-y-auto pr-1">
+                      {otherEvents.map((e) => (
+                        <VenueEventCard
+                          key={e.id}
+                          event={e}
+                          variant="compact"
+                          surface="venue_sheet"
+                          counts={counts?.[e.id]}
+                          selected={false}
+                          onSelect={() => setSelectedEventId(e.id)}
+                          onOpenDetail={() => {
+                            track('event_detail_opened_from_map', { venueId: venue.id, eventId: e.id, surface: 'map' });
+                            onOpenChange(false);
+                            navigate(`/events/${e.id}`);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
               </>
             )}
+
           </div>
         )}
 
