@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { track } from '@/lib/analytics';
+import { LiveOfferList } from '@/components/offers/LiveOfferCard';
+import { useEventLiveOffers } from '@/hooks/useVenueOffers';
 
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
