@@ -93,6 +93,7 @@ export const EventCard = ({ event, onClick, compact = false, rsvpCounts, surface
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium">{goingCount}/{expectedAttendees} zugesagt</span>
+              {counts.interested > 0 && <span className="text-xs text-muted-foreground">· {counts.interested} interessiert</span>}
               {fillPercentage > 70 && <Flame weight="thin" className="h-4 w-4 text-orange-500" />}
             </div>
             <span className="text-xs text-muted-foreground">{Math.round(fillPercentage)}%</span>
@@ -116,13 +117,29 @@ export const EventCard = ({ event, onClick, compact = false, rsvpCounts, surface
           <div className="flex items-center gap-2"><Clock weight="thin" className="h-4 w-4" /><span>{format(startsAt, 'HH:mm', { locale: de })} Uhr</span></div>
           <div className="flex items-center gap-2"><MapPin weight="thin" className="h-4 w-4" /><span className="line-clamp-1">{event.location_name}, {event.city}</span></div>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={handleRSVP} variant={isGoing ? 'outline' : 'default'} size="sm"
-            className={cn('flex-1 gap-1.5', isGoing ? 'border-green-500 text-green-500 hover:bg-green-500/10' : '')}
-            disabled={rsvpMutation.isPending}>
-            <UserCheck weight="thin" className="h-4 w-4" />{isGoing ? 'Zugesagt ✓' : 'Zusagen'}
+        {isOwnEvent ? (
+          <Button variant="outline" size="sm" className="w-full min-h-[44px]" onClick={(e) => { e.stopPropagation(); navigate(`/events/${event.id}`); }}>
+            Event verwalten
           </Button>
-        </div>
+        ) : (
+          <div className="flex gap-2">
+            <Button onClick={(e) => setRsvp(e, 'going')} variant={isGoing ? 'outline' : 'default'} size="sm"
+              aria-pressed={isGoing}
+              aria-label={isGoing ? 'Zusage zurückziehen' : 'Zusagen'}
+              className={cn('flex-1 gap-1.5 min-h-[44px]', isGoing ? 'border-green-500 text-green-500 hover:bg-green-500/10' : '')}
+              disabled={rsvpMutation.isPending}>
+              <UserCheck weight="thin" className="h-4 w-4" />{isGoing ? 'Zugesagt ✓' : 'Zusagen'}
+            </Button>
+            <Button onClick={(e) => setRsvp(e, 'interested')} variant="outline" size="sm"
+              aria-pressed={isInterested}
+              aria-label={isInterested ? 'Nicht mehr interessiert' : 'Interessiert'}
+              className={cn('flex-1 gap-1.5 min-h-[44px]', isInterested ? 'border-primary text-primary' : '')}
+              disabled={rsvpMutation.isPending}>
+              <Heart weight={isInterested ? 'fill' : 'thin'} className="h-4 w-4" />{isInterested ? 'Interessiert ✓' : 'Interessiert'}
+            </Button>
+          </div>
+        )}
+
         {(() => {
           const creator = Array.isArray(event.creator) ? event.creator[0] : event.creator;
           if (!creator?.username) return null;
