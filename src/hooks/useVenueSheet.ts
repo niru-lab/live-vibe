@@ -167,6 +167,8 @@ export interface VenueProfileResult {
   state: VenueProfileState;
   /** Only set when state === 'found'. Never fabricated. */
   profile: Record<string, unknown> | null;
+  /** True only when the venue row is linked to a real venue account (owner_profile_id). */
+  isClaimed: boolean;
   refetch: () => void;
 }
 
@@ -199,6 +201,8 @@ export const useVenueProfile = (venueId: string | undefined): VenueProfileResult
   return {
     state,
     profile: state === 'found' ? (query.data as Record<string, unknown>) : null,
+    isClaimed:
+      state === 'found' && !!(query.data as { owner_profile_id?: string | null } | null)?.owner_profile_id,
     refetch: () => void query.refetch(),
   };
 };
