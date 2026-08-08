@@ -18,6 +18,8 @@ import { VenueEventSelector, type SelectedTag } from '@/components/create/VenueE
 import { LocationPicker, type PickedLocation } from '@/components/create/LocationPicker';
 import { useGuestActivation } from '@/hooks/useGuestActivation';
 import { FirstActionShareModal } from '@/components/share/FirstActionShareModal';
+import { useAwardSocialCloud } from '@/hooks/useSocialCloud';
+import { track } from '@/lib/analytics';
 import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo, UserPlus, X, CaretDown } from '@phosphor-icons/react';
 
 interface TaggedPerson {
@@ -38,6 +40,10 @@ export default function CreatePost() {
   const [searchParams] = useSearchParams();
   // First-post mode: only a lightweight entry from the guest activation nudge.
   const firstMode = searchParams.get('first') === '1';
+  // Contextual entry from an event/venue surface — keeps the real relation.
+  const contextEventId = searchParams.get('eventId');
+  const contextVenueId = searchParams.get('venueId');
+  const awardSocialCloud = useAwardSocialCloud();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const { isEligible: isFirstPostPending } = useGuestActivation();
   // Post-activation share step: opened exactly once, after the first successful publish.
@@ -63,6 +69,43 @@ export default function CreatePost() {
   const [personQuery, setPersonQuery] = useState('');
   const [personResults, setPersonResults] = useState<TaggedPerson[]>([]);
   const [personSearchOpen, setPersonSearchOpen] = useState(false);
+
+  // Preselect the event/venue relation when the composer is opened from an
+  // event or venue surface (?eventId= / ?venueId=). Real relation, no guessing.
+  useEffect(() => {
+    if (!contextEventId && !contextVenueId) return;
+    let cancelled = false;
+    (async () => {
+      if (contextEventId) {
+        const { data } = await supabase
+          .from('events')
+          .select('id,name,cover_image_url')
+          .eq('id', contextEventId)
+          .maybeSingle();
+        if (data && !cancelled) {
+          setSelectedTag({ type: 'event', id: data.id, name: data.name, imageUrl: data.cover_image_url || undefined });
+          return;
+        }
+      }
+      if (contextVenueId) {
+        const { data } = await supabase
+          .from('venues')
+          .select('id,name,image_url,category')
+          .eq('id', contextVenueId)
+          .maybeSingle();
+        if (data && !cancelled) {
+          setSelectedTag({
+            type: 'venue',
+            id: data.id,
+            name: data.name,
+            imageUrl: data.image_url || undefined,
+            category: data.category,
+          });
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [contextEventId, contextVenueId]);
 
   useEffect(() => {
     if (taggedPerson) return;
@@ -116,6 +159,9 @@ export default function CreatePost() {
       const shouldExpire = is24hPost || selectedTag !== null || isMomentX;
       const expiresAt = shouldExpire ? new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() : null;
 
+      const linkedVenueId = pickedLocation?.venue_id || (selectedTag?.type === 'venue' ? selectedTag.id : null);
+      const linkedEventId = selectedTag?.type === 'event' ? selectedTag.id : null;
+
       await createPost.mutateAsync({
         media_url: publicUrl,
         media_type: mediaType,
@@ -128,11 +174,21 @@ export default function CreatePost() {
         music_title: selectedMusic?.title || null,
         music_artist: selectedMusic?.artist || null,
         expires_at: expiresAt,
-        venue_id: pickedLocation?.venue_id || (selectedTag?.type === 'venue' ? selectedTag.id : null),
-        event_id: selectedTag?.type === 'event' ? selectedTag.id : null,
+        venue_id: linkedVenueId,
+        event_id: linkedEventId,
         location_id: taggedPerson?.id ?? null,
       });
+
+      // Social Cloud: rewarded once per event/venue (server-side idempotent).
+      if (linkedEventId) {
+        track('event_linked_post_created', { eventId: linkedEventId, venueId: linkedVenueId ?? undefined });
+        track('social_cloud_nudge_completed', { eventId: linkedEventId });
+        awardSocialCloud.mutate({ action: 'event_linked_post', refType: 'event', refId: linkedEventId, silent: true });
+      } else if (linkedVenueId) {
+        awardSocialCloud.mutate({ action: 'venue_linked_post', refType: 'venue', refId: linkedVenueId, silent: true });
+      }
       const wasFirstPost = isFirstPostPending;
+
       queryClient.invalidateQueries({ queryKey: ['guest-activation'] });
       toast({ title: 'Gepostet! 🎉', description: 'Dein Beitrag wurde erfolgreich geteilt.' });
       if (wasFirstPost && !shareFiredRef.current) {

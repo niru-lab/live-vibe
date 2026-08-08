@@ -64,7 +64,14 @@ export const useAddComment = () => {
       qc.invalidateQueries({ queryKey: ['posts'] });
       qc.invalidateQueries({ queryKey: ['user-posts'] });
       qc.invalidateQueries({ queryKey: ['engagement-nudge'] });
+      // Social Cloud: at most one reward per post, and only for real comments.
+      if (vars.content.trim().length >= 8) {
+        supabase
+          .rpc('award_social_cloud', { _reason: 'meaningful_comment', _ref_type: 'post', _ref_id: vars.postId })
+          .then(() => qc.invalidateQueries({ queryKey: ['user-points'] }));
+      }
     },
+
     onError: (e: any) => toast({ title: 'Fehler', description: e.message, variant: 'destructive' }),
   });
 };

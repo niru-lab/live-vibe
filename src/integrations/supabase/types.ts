@@ -1890,6 +1890,10 @@ export type Database = {
         Returns: undefined
       }
       archive_old_events: { Args: never; Returns: undefined }
+      award_social_cloud: {
+        Args: { _reason: string; _ref_id?: string; _ref_type?: string }
+        Returns: number
+      }
       calculate_level: { Args: { pts: number }; Returns: number }
       can_see_user: {
         Args: { target_id: string; viewer_id: string }

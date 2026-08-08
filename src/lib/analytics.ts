@@ -22,7 +22,16 @@ export type AnalyticsEvent =
   | 'offer_opened'
   | 'offer_activated'
   | 'offer_shared'
-  | 'offer_expired';
+  | 'offer_expired'
+  | 'event_social_proof_viewed'
+  | 'event_friend_signal_viewed'
+  | 'event_rsvp_cta_clicked'
+  | 'event_post_cta_clicked'
+  | 'event_linked_post_created'
+  | 'venue_follow_from_event'
+  | 'social_cloud_action_awarded'
+  | 'social_cloud_nudge_shown'
+  | 'social_cloud_nudge_completed';
 
 export type RsvpSurface = 'feed' | 'map' | 'discovery' | 'event_detail' | 'events' | 'venue_sheet' | 'venue_profile' | 'venue_dashboard';
 

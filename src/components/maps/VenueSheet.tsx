@@ -8,6 +8,8 @@ import { VenueEventCard } from '@/components/maps/VenueEventCard';
 import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
+import { EventSocialProofCard } from '@/components/social/EventSocialProof';
+import { EventPostCta } from '@/components/social/EventPostCta';
 import { LiveOfferList } from '@/components/offers/LiveOfferCard';
 import { useVenueLiveOffers } from '@/hooks/useVenueOffers';
 import { MapPin, ArrowRight, Image as ImageIcon } from 'lucide-react';
@@ -173,6 +175,16 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
                   onOpenDetail={openEventDetail}
                 />
 
+                <EventSocialProofCard eventId={event.id} surface="venue_sheet" compact />
+
+                <EventPostCta
+                  eventId={event.id}
+                  venueId={venue.id}
+                  eventName={event.name}
+                  surface="venue_sheet"
+                  active={tab === 'event'}
+                />
+
                 <LiveOfferList
                   offers={liveOffers.filter((o) => o.event_id === event.id || o.event_id === null)}
                   surface="venue_sheet"
@@ -209,7 +221,14 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
         )}
 
         {tab === 'posts' && (
-          <div>
+          <div className="space-y-3">
+            <EventPostCta
+              eventId={event?.id ?? null}
+              venueId={venue.id}
+              eventName={event?.name ?? null}
+              surface="venue_sheet"
+              active={tab === 'posts'}
+            />
             {postsLoading && (
               <div className="grid grid-cols-3 gap-1.5">
                 {[0, 1, 2, 3, 4, 5].map((i) => (

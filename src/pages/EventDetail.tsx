@@ -2,6 +2,10 @@ import { useState, useEffect } from 'react';
 import { track } from '@/lib/analytics';
 import { LiveOfferList } from '@/components/offers/LiveOfferCard';
 import { useEventLiveOffers } from '@/hooks/useVenueOffers';
+import { useAwardSocialCloud } from '@/hooks/useSocialCloud';
+import { useIsFollowing, useToggleFollow } from '@/hooks/useFollowStats';
+import { EventSocialProofCard } from '@/components/social/EventSocialProof';
+import { EventPostCta } from '@/components/social/EventPostCta';
 
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -43,6 +47,11 @@ export default function EventDetail() {
   const rsvpMutation = useRSVP();
   const deleteEventMutation = useDeleteEvent();
   const [showAttendees, setShowAttendees] = useState(false);
+  const [postCtaActive, setPostCtaActive] = useState(false);
+  const awardSocialCloud = useAwardSocialCloud();
+  const hostId = event?.creator_id;
+  const { data: isFollowingHost } = useIsFollowing(hostId);
+  const toggleFollow = useToggleFollow();
   const [showAttendeeManager, setShowAttendeeManager] = useState(false);
   const [showParticipantManager, setShowParticipantManager] = useState(false);
   const { data: pendingAttendees } = usePendingAttendees(id);
@@ -74,13 +83,35 @@ export default function EventDetail() {
 
   const handleRSVP = async (status: 'going' | 'interested' | null) => {
     if (!user) { navigate(`/auth?redirect=${encodeURIComponent(`/events/${event.id}`)}`); return; }
+    track('event_rsvp_cta_clicked', { eventId: event.id, status, surface: 'event_detail' });
     try {
       await rsvpMutation.mutateAsync({ eventId: event.id, status, surface: 'event_detail' });
-      if (status === 'going') toast({ title: '✅ Zusage bestätigt!', description: `Du gehst zu "${event.name}" 🎉` });
+      if (status === 'going') {
+        toast({ title: '✅ Zusage bestätigt!', description: `Du gehst zu "${event.name}" 🎉` });
+        // Rewarded once per event — toggling RSVP cannot farm points.
+        awardSocialCloud.mutate({ action: 'first_event_rsvp', refType: 'event', refId: event.id });
+        setPostCtaActive(true);
+      }
       else if (status === 'interested') toast({ title: '❤️ Als interessiert markiert' });
       else toast({ title: 'Status entfernt', description: 'Du wurdest von der Liste entfernt.' });
     } catch { toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' }); }
   };
+
+  const handleFollowHost = async () => {
+    if (!user) { navigate('/auth'); return; }
+    if (!hostId) return;
+    try {
+      await toggleFollow.mutateAsync({ targetProfileId: hostId, isFollowing: !!isFollowingHost });
+      if (!isFollowingHost) {
+        track('venue_follow_from_event', { eventId: event.id, surface: 'event_detail' });
+        awardSocialCloud.mutate({ action: 'venue_follow', refType: 'profile', refId: hostId });
+        toast({ title: 'Du folgst jetzt diesem Spot' });
+      } else {
+        toast({ title: 'Nicht mehr gefolgt' });
+      }
+    } catch { toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' }); }
+  };
+
 
   const handleShare = async () => {
     try { await navigator.share({ title: event.name, text: `Check out ${event.name} at ${event.location_name}!`, url: window.location.href }); }
@@ -203,7 +234,31 @@ export default function EventDetail() {
                 </Button>
               </div>
 
+              <EventSocialProofCard eventId={event.id} surface="event_detail" />
+
+              <EventPostCta
+                eventId={event.id}
+                venueId={null}
+                eventName={event.name}
+                surface="event_detail"
+                active={postCtaActive || isGoing}
+              />
+
+              {hostId && (
+                <Button
+                  variant="outline"
+                  className="w-full gap-2 min-h-[44px]"
+                  onClick={handleFollowHost}
+                  disabled={toggleFollow.isPending}
+                >
+                  <UserCheck weight={isFollowingHost ? 'fill' : 'thin'} className="h-4 w-4" />
+                  {isFollowingHost ? 'Du folgst diesem Spot' : 'Venue folgen'}
+                </Button>
+              )}
+
               <LiveOfferList offers={eventOffers} surface="event_detail" />
+
+
 
 
 
