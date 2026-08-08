@@ -18,6 +18,7 @@ import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { useVenueAnalytics } from '@/hooks/useVenueAnalytics';
 import { useProfile } from '@/hooks/useProfile';
 import { VenueFirstEventNudge } from '@/components/events/VenueFirstEventNudge';
+import { VenueOffersSection } from '@/components/offers/VenueOffersSection';
 
 const KpiCard = ({
   icon: Icon,
