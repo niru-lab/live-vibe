@@ -234,7 +234,31 @@ export default function EventDetail() {
                 </Button>
               </div>
 
+              <EventSocialProofCard eventId={event.id} surface="event_detail" />
+
+              <EventPostCta
+                eventId={event.id}
+                venueId={event.venue_id ?? null}
+                eventName={event.name}
+                surface="event_detail"
+                active={postCtaActive || isGoing}
+              />
+
+              {hostId && (
+                <Button
+                  variant="outline"
+                  className="w-full gap-2 min-h-[44px]"
+                  onClick={handleFollowHost}
+                  disabled={toggleFollow.isPending}
+                >
+                  <UserCheck weight={isFollowingHost ? 'fill' : 'thin'} className="h-4 w-4" />
+                  {isFollowingHost ? 'Du folgst diesem Spot' : 'Venue folgen'}
+                </Button>
+              )}
+
               <LiveOfferList offers={eventOffers} surface="event_detail" />
+
+
 
 
 
