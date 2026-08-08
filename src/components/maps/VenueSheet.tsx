@@ -58,7 +58,8 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
     isError: postsError,
   } = useVenueLinkedPosts(open ? venue?.id : undefined, event?.id ?? null, 12);
   const { data: counts } = useRsvpCounts(event?.id ? [event.id] : []);
-  const { state: profileState, profile, refetch: refetchProfile } = useVenueProfile(open ? venue?.id : undefined);
+  const { state: rawProfileState, profile, isClaimed, refetch: refetchProfile } = useVenueProfile(open ? venue?.id : undefined);
+  const profileState = rawProfileState === 'found' && !isClaimed ? 'not_found' : rawProfileState;
 
   // Event-first only when there really is an event.
   useEffect(() => {

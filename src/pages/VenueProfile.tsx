@@ -16,7 +16,7 @@ export default function VenueProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
 
-  const { state: profileState, profile, refetch } = useVenueProfile(id);
+  const { state: profileState, profile, isClaimed, refetch } = useVenueProfile(id);
   const venue = profile as
     | (Record<string, unknown> & {
         id: string;
@@ -121,9 +121,17 @@ export default function VenueProfile() {
                 </div>
               )}
               {!postsLoading && (posts?.length ?? 0) === 0 && (
-                <p className="py-8 text-center text-sm text-muted-foreground">
-                  Noch keine Posts von dieser Location.
-                </p>
+                isClaimed ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground">
+                    Noch keine Posts von dieser Location.
+                  </p>
+                ) : (
+                  <VenueProfileFallback
+                    state="not_found"
+                    hasEvent={!!event}
+                    onBackToEvent={event ? () => navigate(`/events/${event.id}`) : undefined}
+                  />
+                )
               )}
               {!postsLoading && (posts?.length ?? 0) > 0 && (
                 <div className="grid grid-cols-3 gap-1.5">
