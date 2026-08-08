@@ -112,11 +112,20 @@ export default function VenueDashboard() {
 
       <header className="px-5 pb-2" style={{ paddingTop: 'calc(env(safe-area-inset-top) + 16px)' }}>
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full glass-pill">
-              <ChartLineUp weight="fill" className="h-4 w-4 text-primary" />
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              aria-label="Zurück"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-muted/60 text-muted-foreground"
+            >
+              <ArrowLeft weight="bold" className="h-4 w-4" />
+            </button>
+            <div className="flex items-center gap-2">
+              <div className="flex h-8 w-8 items-center justify-center rounded-full glass-pill">
+                <ChartLineUp weight="fill" className="h-4 w-4 text-primary" />
+              </div>
+              <FeyrnLogo size="sm" />
             </div>
-            <FeyrnLogo size="sm" />
           </div>
           <button
             onClick={() => refetch()}
