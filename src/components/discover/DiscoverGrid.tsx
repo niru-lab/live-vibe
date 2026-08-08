@@ -1,8 +1,8 @@
-import { memo, useState, useRef, useEffect, useCallback } from 'react';
+import { memo, useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { usePosts, type PostWithAuthor } from '@/hooks/usePosts';
 import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
-import { useEvents, type EventWithCreator } from '@/hooks/useEvents';
+import { useEvents, useVenues, type EventWithCreator } from '@/hooks/useEvents';
 import { useProfile } from '@/hooks/useProfile';
 import { useLivePosts } from '@/hooks/useLivePosts';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,6 +10,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Heart, ChatCircle, Users, CalendarBlank, Play, MapPin, MusicNote, CheckCircle } from '@phosphor-icons/react';
 import type { FilterState } from './DiscoverFilters';
+import { matchesEventFilters, filterVenues, filterPosts, hasContentFilters } from '@/lib/discoverFilters';
+
 
 type CombinedItem =
   | { type: 'post'; data: PostWithAuthor; date: Date; priority: number }
