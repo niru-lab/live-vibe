@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Heart, ChatCircle, Users, CalendarBlank, Play, MapPin, MusicNote, CheckCircle } from '@phosphor-icons/react';
 import type { FilterState } from './DiscoverFilters';
-import { matchesEventFilters, filterVenues, filterPosts, hasContentFilters } from '@/lib/discoverFilters';
+import { matchesEventFilters, filterVenues, filterPosts } from '@/lib/discoverFilters';
 
 
 type CombinedItem =
