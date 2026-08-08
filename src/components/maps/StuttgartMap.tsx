@@ -209,6 +209,11 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   const mapRef = useRef<MapRef>(null);
   const { data: profile } = useProfile();
 
+  useEffect(() => {
+    track('event_map_viewed', { surface: 'map' });
+  }, []);
+
+
   // House parties the current user has been accepted into → real address visible
   const { data: acceptedHouseParties } = useQuery({
     queryKey: ['accepted-house-parties', profile?.id],
