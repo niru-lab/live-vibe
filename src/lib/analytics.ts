@@ -12,12 +12,18 @@ export type AnalyticsEvent =
   | 'rsvp_status_set'
   | 'rsvp_status_changed'
   | 'rsvp_removed'
-  | 'rsvp_error';
+  | 'rsvp_error'
+  | 'venue_marker_opened'
+  | 'venue_active_event_viewed'
+  | 'venue_live_posts_viewed'
+  | 'venue_profile_opened_from_map'
+  | 'event_detail_opened_from_map';
 
-export type RsvpSurface = 'feed' | 'map' | 'discovery' | 'event_detail' | 'events';
+export type RsvpSurface = 'feed' | 'map' | 'discovery' | 'event_detail' | 'events' | 'venue_sheet' | 'venue_profile';
 
 export interface AnalyticsProps {
   eventId?: string;
+  venueId?: string;
   eventType?: string | null;
   role?: string | null;
   status?: string | null;
