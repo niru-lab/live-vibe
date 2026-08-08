@@ -519,7 +519,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         })}
 
         {/* Moment X Markers — pulsing neon-purple pins */}
-        {(momentXPosts || []).map(post => (
+        {(hasContentFilters(filters) ? [] : (momentXPosts || [])).map(post => (
           <Marker
             key={`mx-${post.id}`}
             latitude={post.latitude!}
