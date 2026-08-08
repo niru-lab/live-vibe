@@ -36,6 +36,7 @@ export default function Discover() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [filters, setFilters] = useState<FilterState | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const userTouchedCity = useRef(false);
   const queryClient = useQueryClient();
