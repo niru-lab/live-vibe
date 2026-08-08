@@ -435,7 +435,11 @@ function EventListCard({ event, onClick, pendingNote = false }: { event: any; on
             </span>
           )}
         </div>
+        <div className="pt-1" onClick={(e) => e.stopPropagation()}>
+          <RsvpButtons eventId={event.id} surface="events" />
+        </div>
       </div>
+
     </article>
   );
 }
