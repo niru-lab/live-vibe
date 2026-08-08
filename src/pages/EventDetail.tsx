@@ -238,7 +238,7 @@ export default function EventDetail() {
 
               <EventPostCta
                 eventId={event.id}
-                venueId={event.venue_id ?? null}
+                venueId={null}
                 eventName={event.name}
                 surface="event_detail"
                 active={postCtaActive || isGoing}
