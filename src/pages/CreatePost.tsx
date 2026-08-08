@@ -18,6 +18,8 @@ import { VenueEventSelector, type SelectedTag } from '@/components/create/VenueE
 import { LocationPicker, type PickedLocation } from '@/components/create/LocationPicker';
 import { useGuestActivation } from '@/hooks/useGuestActivation';
 import { FirstActionShareModal } from '@/components/share/FirstActionShareModal';
+import { useAwardSocialCloud } from '@/hooks/useSocialCloud';
+import { track } from '@/lib/analytics';
 import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo, UserPlus, X, CaretDown } from '@phosphor-icons/react';
 
 interface TaggedPerson {
