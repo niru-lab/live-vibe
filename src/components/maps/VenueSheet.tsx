@@ -173,6 +173,16 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
                   onOpenDetail={openEventDetail}
                 />
 
+                <EventSocialProofCard eventId={event.id} surface="venue_sheet" compact />
+
+                <EventPostCta
+                  eventId={event.id}
+                  venueId={venue.id}
+                  eventName={event.name}
+                  surface="venue_sheet"
+                  active={tab === 'event'}
+                />
+
                 <LiveOfferList
                   offers={liveOffers.filter((o) => o.event_id === event.id || o.event_id === null)}
                   surface="venue_sheet"
