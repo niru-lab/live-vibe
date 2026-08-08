@@ -4,7 +4,8 @@ import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RsvpButtons } from '@/components/events/RsvpButtons';
-import { useVenueActiveEvent, useVenueProfile, useVenueLinkedPosts } from '@/hooks/useVenueSheet';
+import { useVenueEvents, useVenueProfile, useVenueLinkedPosts, getVenueEventState } from '@/hooks/useVenueSheet';
+import { VenueEventCard } from '@/components/maps/VenueEventCard';
 import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
@@ -30,9 +31,12 @@ export default function VenueProfile() {
         is_verified?: boolean | null;
       })
     | null;
-  const { data: event } = useVenueActiveEvent(id, venue?.owner_profile_id);
+  const { data: venueEvents = [] } = useVenueEvents(id, venue?.owner_profile_id);
+  const { primaryEvent, allRelevantEvents } = getVenueEventState(venueEvents);
+  const event = primaryEvent;
+  const otherEvents = allRelevantEvents.slice(1);
   const { data: posts, isLoading: postsLoading } = useVenueLinkedPosts(id, event?.id ?? null, 30);
-  const { data: counts } = useRsvpCounts(event?.id ? [event.id] : []);
+  const { data: counts } = useRsvpCounts(allRelevantEvents.map((e) => e.id));
 
   useEffect(() => {
     if (venue?.id) track('venue_profile_opened_from_map', { venueId: venue.id, surface: 'venue_profile' });

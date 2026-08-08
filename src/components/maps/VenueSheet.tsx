@@ -3,15 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RsvpButtons } from '@/components/events/RsvpButtons';
 import { useVenueEvents, useVenueLinkedPosts, useVenueProfile, getVenueEventState } from '@/hooks/useVenueSheet';
 import { VenueEventCard } from '@/components/maps/VenueEventCard';
 import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
-import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
-import { MapPin, Clock, ArrowRight, Image as ImageIcon } from 'lucide-react';
+import { MapPin, ArrowRight, Image as ImageIcon } from 'lucide-react';
 
 export interface SheetVenue {
   id: string;
@@ -69,6 +66,10 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
     if (eventLoading) return;
     setTab(event ? 'event' : 'profile');
   }, [open, eventLoading, event?.id]);
+
+  useEffect(() => {
+    setSelectedEventId(null);
+  }, [venue?.id, open]);
 
   useEffect(() => {
     if (!open || !venue) return;
@@ -268,7 +269,11 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
                 {typeof profile?.category === 'string' && profile.category && (
                   <span className="rounded-full bg-muted px-2 py-0.5">{profile.category}</span>
                 )}
-                {event && <span className="rounded-full bg-muted px-2 py-0.5">1 Event geplant</span>}
+                {allRelevantEvents.length > 0 && (
+                  <span className="rounded-full bg-muted px-2 py-0.5">
+                    {allRelevantEvents.length} {allRelevantEvents.length === 1 ? 'Event' : 'Events'} geplant
+                  </span>
+                )}
                 <span className="rounded-full bg-muted px-2 py-0.5">{posts?.length ?? 0} Posts</span>
               </div>
               <Button className="min-h-[44px] w-full gap-1" onClick={openVenueProfile}>
