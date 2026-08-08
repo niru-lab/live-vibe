@@ -114,6 +114,7 @@ export default function EventDetail() {
 
 
   const handleShare = async () => {
+    track('share_clicked', { eventId: event.id, surface: 'event_detail' });
     try { await navigator.share({ title: event.name, text: `Check out ${event.name} at ${event.location_name}!`, url: window.location.href }); }
     catch { navigator.clipboard.writeText(window.location.href); toast({ title: 'Link kopiert!', description: 'Event-Link in Zwischenablage.' }); }
   };
