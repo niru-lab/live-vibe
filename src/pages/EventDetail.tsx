@@ -70,11 +70,12 @@ export default function EventDetail() {
   const fillPercentage = Math.min((goingCount / expectedAttendees) * 100, 100);
 
   const handleRSVP = async (status: 'going' | 'interested' | null) => {
-    if (!user) { navigate('/auth'); return; }
+    if (!user) { navigate(`/auth?redirect=${encodeURIComponent(`/events/${event.id}`)}`); return; }
     try {
-      await rsvpMutation.mutateAsync({ eventId: event.id, status });
+      await rsvpMutation.mutateAsync({ eventId: event.id, status, surface: 'event_detail' });
       if (status === 'going') toast({ title: '✅ Zusage bestätigt!', description: `Du gehst zu "${event.name}" 🎉` });
-      else if (status === null) toast({ title: 'Zusage zurückgezogen', description: 'Du wurdest von der Liste entfernt.' });
+      else if (status === 'interested') toast({ title: '❤️ Als interessiert markiert' });
+      else toast({ title: 'Status entfernt', description: 'Du wurdest von der Liste entfernt.' });
     } catch { toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' }); }
   };
 
@@ -84,6 +85,8 @@ export default function EventDetail() {
   };
 
   const isGoing = userRSVP?.status === 'going';
+  const isInterested = userRSVP?.status === 'interested';
+
 
   return (
     <AppLayout hideNav>
