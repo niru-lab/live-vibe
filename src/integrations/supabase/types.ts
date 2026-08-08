@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          event_name: string
+          id: string
+          offer_id: string | null
+          post_id: string | null
+          surface: string | null
+          venue_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          event_name: string
+          id?: string
+          offer_id?: string | null
+          post_id?: string | null
+          surface?: string | null
+          venue_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          event_name?: string
+          id?: string
+          offer_id?: string | null
+          post_id?: string | null
+          surface?: string | null
+          venue_id?: string | null
+        }
+        Relationships: []
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -1975,6 +2008,61 @@ export type Database = {
           joined_count: number
           profile_id: string
           username: string
+        }[]
+      }
+      venue_analytics_overview: {
+        Args: { _since?: string }
+        Returns: {
+          event_views: number
+          going: number
+          interested: number
+          linked_creators: number
+          linked_posts: number
+          map_opens: number
+          offer_activations: number
+          offer_impressions: number
+          post_comments: number
+          post_likes: number
+          requests: number
+          shares: number
+          total_events: number
+          upcoming_events: number
+          venue_follows: number
+          venue_profile_views: number
+        }[]
+      }
+      venue_content_performance: {
+        Args: { _limit?: number; _offset?: number; _since?: string }
+        Returns: {
+          comments: number
+          created_at: string
+          event_id: string
+          event_name: string
+          likes: number
+          media_type: string
+          media_url: string
+          post_id: string
+          venue_id: string
+          views: number
+        }[]
+      }
+      venue_event_performance: {
+        Args: { _limit?: number; _offset?: number; _since?: string }
+        Returns: {
+          city: string
+          comments: number
+          ends_at: string
+          event_id: string
+          going: number
+          interested: number
+          likes: number
+          name: string
+          offer_activations: number
+          posts: number
+          requests: number
+          shares: number
+          starts_at: string
+          views: number
         }[]
       }
       venue_offer_stats: {
