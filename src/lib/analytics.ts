@@ -17,13 +17,19 @@ export type AnalyticsEvent =
   | 'venue_active_event_viewed'
   | 'venue_live_posts_viewed'
   | 'venue_profile_opened_from_map'
-  | 'event_detail_opened_from_map';
+  | 'event_detail_opened_from_map'
+  | 'offer_impression'
+  | 'offer_opened'
+  | 'offer_activated'
+  | 'offer_shared'
+  | 'offer_expired';
 
-export type RsvpSurface = 'feed' | 'map' | 'discovery' | 'event_detail' | 'events' | 'venue_sheet' | 'venue_profile';
+export type RsvpSurface = 'feed' | 'map' | 'discovery' | 'event_detail' | 'events' | 'venue_sheet' | 'venue_profile' | 'venue_dashboard';
 
 export interface AnalyticsProps {
   eventId?: string;
   venueId?: string;
+  offerId?: string;
   eventType?: string | null;
   role?: string | null;
   status?: string | null;
