@@ -70,6 +70,43 @@ export default function CreatePost() {
   const [personResults, setPersonResults] = useState<TaggedPerson[]>([]);
   const [personSearchOpen, setPersonSearchOpen] = useState(false);
 
+  // Preselect the event/venue relation when the composer is opened from an
+  // event or venue surface (?eventId= / ?venueId=). Real relation, no guessing.
+  useEffect(() => {
+    if (!contextEventId && !contextVenueId) return;
+    let cancelled = false;
+    (async () => {
+      if (contextEventId) {
+        const { data } = await supabase
+          .from('events')
+          .select('id,name,cover_image_url')
+          .eq('id', contextEventId)
+          .maybeSingle();
+        if (data && !cancelled) {
+          setSelectedTag({ type: 'event', id: data.id, name: data.name, imageUrl: data.cover_image_url || undefined });
+          return;
+        }
+      }
+      if (contextVenueId) {
+        const { data } = await supabase
+          .from('venues')
+          .select('id,name,image_url,category')
+          .eq('id', contextVenueId)
+          .maybeSingle();
+        if (data && !cancelled) {
+          setSelectedTag({
+            type: 'venue',
+            id: data.id,
+            name: data.name,
+            imageUrl: data.image_url || undefined,
+            category: data.category,
+          });
+        }
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [contextEventId, contextVenueId]);
+
   useEffect(() => {
     if (taggedPerson) return;
     const q = personQuery.trim();
