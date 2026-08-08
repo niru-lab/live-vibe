@@ -1,6 +1,8 @@
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import Map, { Marker, Popup, Source, Layer, NavigationControl } from 'react-map-gl/mapbox';
 import { MapEventRsvp } from '@/components/maps/MapEventRsvp';
+import type { FilterState } from '@/components/discover/DiscoverFilters';
+import { matchesEventFilters, filterVenues, filterPosts, hasContentFilters } from '@/lib/discoverFilters';
 import { VenueSheet, type SheetVenue } from '@/components/maps/VenueSheet';
 import { track } from '@/lib/analytics';
 
@@ -196,9 +198,10 @@ interface StuttgartMapProps {
   selectedCity?: string | null;
   selectedCategory?: string | null;
   searchQuery?: string;
+  filters?: FilterState | null;
 }
 
-export function StuttgartMap({ selectedCity, selectedCategory: externalCategory, searchQuery = '' }: StuttgartMapProps) {
+export function StuttgartMap({ selectedCity, selectedCategory: externalCategory, searchQuery = '', filters = null }: StuttgartMapProps) {
   const [internalCategory, setInternalCategory] = useState<string | null>(null);
   const selectedCategory = externalCategory ?? internalCategory;
   const setSelectedCategory = (cat: string | null) => setInternalCategory(cat);
