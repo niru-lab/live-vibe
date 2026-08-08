@@ -4,7 +4,8 @@ import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { RsvpButtons } from '@/components/events/RsvpButtons';
-import { useVenueActiveEvent, useVenueLinkedPosts, useVenueProfile, type VenueEventStatus } from '@/hooks/useVenueSheet';
+import { useVenueEvents, useVenueLinkedPosts, useVenueProfile, getVenueEventState } from '@/hooks/useVenueSheet';
+import { VenueEventCard } from '@/components/maps/VenueEventCard';
 import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
@@ -26,12 +27,6 @@ export interface SheetVenue {
 
 type TabKey = 'event' | 'posts' | 'profile';
 
-const statusStyles: Record<VenueEventStatus, { label: string; className: string }> = {
-  live: { label: 'LIVE', className: 'bg-red-500 text-white animate-pulse' },
-  today: { label: 'Heute', className: 'bg-primary text-primary-foreground' },
-  upcoming: { label: 'Bald', className: 'bg-muted text-muted-foreground' },
-};
-
 interface VenueSheetProps {
   venue: SheetVenue | null;
   open: boolean;
@@ -47,17 +42,24 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>('event');
 
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+
   const {
-    data: event,
+    data: venueEvents = [],
     isLoading: eventLoading,
     isError: eventError,
-  } = useVenueActiveEvent(venue?.id, venue?.owner_profile_id);
+  } = useVenueEvents(open ? venue?.id : undefined, venue?.owner_profile_id);
+
+  const { primaryEvent, allRelevantEvents } = getVenueEventState(venueEvents);
+  const event = allRelevantEvents.find((e) => e.id === selectedEventId) ?? primaryEvent;
+  const otherEvents = allRelevantEvents.filter((e) => e.id !== event?.id);
+  const eventIndex = event ? allRelevantEvents.findIndex((e) => e.id === event.id) + 1 : 0;
   const {
     data: posts,
     isLoading: postsLoading,
     isError: postsError,
   } = useVenueLinkedPosts(open ? venue?.id : undefined, event?.id ?? null, 12);
-  const { data: counts } = useRsvpCounts(event?.id ? [event.id] : []);
+  const { data: counts } = useRsvpCounts(allRelevantEvents.map((e) => e.id));
   const { state: rawProfileState, profile, isClaimed, refetch: refetchProfile } = useVenueProfile(open ? venue?.id : undefined);
   const profileState = rawProfileState === 'found' && !isClaimed ? 'not_found' : rawProfileState;
 
@@ -80,8 +82,6 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
   }, [tab, open, venue?.id, event?.id]);
 
   if (!venue) return null;
-
-  const status = event ? statusStyles[event.status] : null;
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'event', label: 'Event' },
