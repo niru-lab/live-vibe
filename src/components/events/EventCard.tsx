@@ -1,4 +1,4 @@
-import { CalendarBlank, MapPin, Users, Clock, UserCheck, Flame } from '@phosphor-icons/react';
+import { CalendarBlank, MapPin, Users, Clock, UserCheck, Flame, Heart } from '@phosphor-icons/react';
 import { format } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { Link } from 'react-router-dom';
