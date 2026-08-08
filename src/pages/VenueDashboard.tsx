@@ -166,6 +166,8 @@ export default function VenueDashboard() {
           </Button>
         </section>
 
+        <VenueOffersSection />
+
         <section className="space-y-3">
           <h2 className="text-sm font-semibold text-foreground">Events</h2>
           {events.map((e) => (
