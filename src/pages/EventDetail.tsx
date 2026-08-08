@@ -43,6 +43,11 @@ export default function EventDetail() {
   const rsvpMutation = useRSVP();
   const deleteEventMutation = useDeleteEvent();
   const [showAttendees, setShowAttendees] = useState(false);
+  const [postCtaActive, setPostCtaActive] = useState(false);
+  const awardSocialCloud = useAwardSocialCloud();
+  const hostId = event?.creator_id;
+  const { data: isFollowingHost } = useIsFollowing(hostId);
+  const toggleFollow = useToggleFollow();
   const [showAttendeeManager, setShowAttendeeManager] = useState(false);
   const [showParticipantManager, setShowParticipantManager] = useState(false);
   const { data: pendingAttendees } = usePendingAttendees(id);
