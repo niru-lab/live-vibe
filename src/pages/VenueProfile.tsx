@@ -3,14 +3,12 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RsvpButtons } from '@/components/events/RsvpButtons';
-import { useVenueActiveEvent, useVenueProfile, useVenueLinkedPosts } from '@/hooks/useVenueSheet';
+import { useVenueEvents, useVenueProfile, useVenueLinkedPosts, getVenueEventState } from '@/hooks/useVenueSheet';
+import { VenueEventCard } from '@/components/maps/VenueEventCard';
 import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
-import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
-import { ArrowLeft, MapPin, Clock } from 'lucide-react';
+import { ArrowLeft, MapPin } from 'lucide-react';
 
 export default function VenueProfile() {
   const { id } = useParams<{ id: string }>();
@@ -30,9 +28,12 @@ export default function VenueProfile() {
         is_verified?: boolean | null;
       })
     | null;
-  const { data: event } = useVenueActiveEvent(id, venue?.owner_profile_id);
+  const { data: venueEvents = [] } = useVenueEvents(id, venue?.owner_profile_id);
+  const { primaryEvent, allRelevantEvents } = getVenueEventState(venueEvents);
+  const event = primaryEvent;
+  const otherEvents = allRelevantEvents.slice(1);
   const { data: posts, isLoading: postsLoading } = useVenueLinkedPosts(id, event?.id ?? null, 30);
-  const { data: counts } = useRsvpCounts(event?.id ? [event.id] : []);
+  const { data: counts } = useRsvpCounts(allRelevantEvents.map((e) => e.id));
 
   useEffect(() => {
     if (venue?.id) track('venue_profile_opened_from_map', { venueId: venue.id, surface: 'venue_profile' });
@@ -84,32 +85,35 @@ export default function VenueProfile() {
 
             {event && (
               <section className="mt-6 rounded-xl border border-border/60 p-4">
-                <div className="mb-1 flex items-center gap-2">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                      event.status === 'live'
-                        ? 'animate-pulse bg-red-500 text-white'
-                        : 'bg-primary text-primary-foreground'
-                    }`}
-                  >
-                    {event.status === 'live' ? 'LIVE' : event.status === 'today' ? 'Heute' : 'Bald'}
-                  </span>
-                  <h2 className="text-sm font-semibold text-foreground">{event.name}</h2>
-                </div>
-                <p className="mb-3 flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {format(new Date(event.starts_at), 'EEE, dd. MMM · HH:mm', { locale: de })} Uhr
-                </p>
-                <RsvpButtons eventId={event.id} surface="venue_profile" counts={counts?.[event.id]} />
-                <Button
-                  variant="outline"
-                  className="mt-2 min-h-[44px] w-full"
-                  onClick={() => navigate(`/events/${event.id}`)}
-                >
-                  Event Details
-                </Button>
+                <VenueEventCard
+                  event={event}
+                  surface="venue_profile"
+                  counts={counts?.[event.id]}
+                  onOpenDetail={() => navigate(`/events/${event.id}`)}
+                />
               </section>
             )}
+
+            {otherEvents.length > 0 && (
+              <section className="mt-6">
+                <h2 className="mb-2 text-sm font-semibold text-foreground">
+                  Weitere Events dieses Venues ({otherEvents.length})
+                </h2>
+                <div className="space-y-2">
+                  {otherEvents.map((e) => (
+                    <VenueEventCard
+                      key={e.id}
+                      event={e}
+                      variant="compact"
+                      surface="venue_profile"
+                      counts={counts?.[e.id]}
+                      onOpenDetail={() => navigate(`/events/${e.id}`)}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
 
             <section className="mt-6">
               <h2 className="mb-2 text-sm font-semibold text-foreground">Posts</h2>

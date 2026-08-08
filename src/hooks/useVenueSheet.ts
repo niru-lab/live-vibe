@@ -28,17 +28,53 @@ export const resolveEventStatus = (startsAt: string, endsAt: string | null): Ven
 };
 
 /**
+ * Deterministic split of a venue's relevant events into active / upcoming.
+ * Active events (now between start and end) rank first, then the nearest
+ * upcoming events chronologically. Ties break on event id for stability.
+ */
+export const getVenueEventState = (events: VenueEvent[], now: Date = new Date()) => {
+  const currentTime = now.getTime();
+  const byStart = (a: VenueEvent, b: VenueEvent) => {
+    const diff = new Date(a.starts_at).getTime() - new Date(b.starts_at).getTime();
+    return diff !== 0 ? diff : a.id.localeCompare(b.id);
+  };
+
+  const isActive = (e: VenueEvent) => {
+    const start = new Date(e.starts_at).getTime();
+    const end = e.ends_at ? new Date(e.ends_at).getTime() : start + 6 * 60 * 60 * 1000;
+    return start <= currentTime && currentTime <= end;
+  };
+
+  const activeEvents = events.filter(isActive).sort(byStart);
+  const upcomingEvents = events
+    .filter((e) => new Date(e.starts_at).getTime() > currentTime)
+    .sort(byStart);
+
+  const allRelevantEvents = [...activeEvents, ...upcomingEvents];
+
+  return {
+    activeEvents,
+    upcomingEvents,
+    primaryEvent: allRelevantEvents[0] ?? null,
+    allRelevantEvents,
+  };
+};
+
+/**
  * Real venue → event relationship in this schema: `events.creator_id` is the
  * venue owner's profile (`venues.owner_profile_id`). There is no
  * `events.venue_id` column, so we never invent one.
+ *
+ * Returns ALL currently active and upcoming events – never `.single()` and
+ * never `.limit(1)`.
  */
-export const useVenueActiveEvent = (venueId: string | undefined, ownerProfileId: string | null | undefined) => {
+export const useVenueEvents = (venueId: string | undefined, ownerProfileId: string | null | undefined) => {
   return useQuery({
-    queryKey: ['venue-active-event', venueId, ownerProfileId],
+    queryKey: ['venue-events', venueId, ownerProfileId],
     enabled: !!venueId && !!ownerProfileId,
     staleTime: 60_000,
-    queryFn: async (): Promise<VenueEvent | null> => {
-      if (!ownerProfileId) return null;
+    queryFn: async (): Promise<VenueEvent[]> => {
+      if (!ownerProfileId) return [];
       const since = new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString();
       const { data, error } = await supabase
         .from('events')
@@ -48,24 +84,25 @@ export const useVenueActiveEvent = (venueId: string | undefined, ownerProfileId:
         .is('deleted_at', null)
         .gte('starts_at', since)
         .order('starts_at', { ascending: true })
-        .limit(5);
+        .limit(50);
       if (error) throw error;
 
       const now = Date.now();
+      // Keep only events that have not ended yet (active or upcoming).
       const rows = (data ?? []).filter((e) => {
         const end = e.ends_at ? new Date(e.ends_at).getTime() : null;
         return end ? end >= now : new Date(e.starts_at).getTime() >= now - 6 * 60 * 60 * 1000;
       });
-      if (rows.length === 0) return null;
 
       const withStatus: VenueEvent[] = rows.map((e) => ({
         ...e,
         status: resolveEventStatus(e.starts_at, e.ends_at),
       }));
-      return withStatus.find((e) => e.status === 'live') ?? withStatus[0];
+      return getVenueEventState(withStatus).allRelevantEvents;
     },
   });
 };
+
 
 export interface LinkedPost {
   id: string;

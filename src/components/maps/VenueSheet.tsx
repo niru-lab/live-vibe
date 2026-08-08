@@ -3,14 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { RsvpButtons } from '@/components/events/RsvpButtons';
-import { useVenueActiveEvent, useVenueLinkedPosts, useVenueProfile, type VenueEventStatus } from '@/hooks/useVenueSheet';
+import { useVenueEvents, useVenueLinkedPosts, useVenueProfile, getVenueEventState } from '@/hooks/useVenueSheet';
+import { VenueEventCard } from '@/components/maps/VenueEventCard';
 import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
-import { format } from 'date-fns';
-import { de } from 'date-fns/locale';
-import { MapPin, Clock, ArrowRight, Image as ImageIcon } from 'lucide-react';
+import { MapPin, ArrowRight, Image as ImageIcon } from 'lucide-react';
 
 export interface SheetVenue {
   id: string;
@@ -25,12 +23,6 @@ export interface SheetVenue {
 }
 
 type TabKey = 'event' | 'posts' | 'profile';
-
-const statusStyles: Record<VenueEventStatus, { label: string; className: string }> = {
-  live: { label: 'LIVE', className: 'bg-red-500 text-white animate-pulse' },
-  today: { label: 'Heute', className: 'bg-primary text-primary-foreground' },
-  upcoming: { label: 'Bald', className: 'bg-muted text-muted-foreground' },
-};
 
 interface VenueSheetProps {
   venue: SheetVenue | null;
@@ -47,17 +39,24 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
   const navigate = useNavigate();
   const [tab, setTab] = useState<TabKey>('event');
 
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+
   const {
-    data: event,
+    data: venueEvents = [],
     isLoading: eventLoading,
     isError: eventError,
-  } = useVenueActiveEvent(venue?.id, venue?.owner_profile_id);
+  } = useVenueEvents(open ? venue?.id : undefined, venue?.owner_profile_id);
+
+  const { primaryEvent, allRelevantEvents } = getVenueEventState(venueEvents);
+  const event = allRelevantEvents.find((e) => e.id === selectedEventId) ?? primaryEvent;
+  const otherEvents = allRelevantEvents.filter((e) => e.id !== event?.id);
+  const eventIndex = event ? allRelevantEvents.findIndex((e) => e.id === event.id) + 1 : 0;
   const {
     data: posts,
     isLoading: postsLoading,
     isError: postsError,
   } = useVenueLinkedPosts(open ? venue?.id : undefined, event?.id ?? null, 12);
-  const { data: counts } = useRsvpCounts(event?.id ? [event.id] : []);
+  const { data: counts } = useRsvpCounts(allRelevantEvents.map((e) => e.id));
   const { state: rawProfileState, profile, isClaimed, refetch: refetchProfile } = useVenueProfile(open ? venue?.id : undefined);
   const profileState = rawProfileState === 'found' && !isClaimed ? 'not_found' : rawProfileState;
 
@@ -67,6 +66,10 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
     if (eventLoading) return;
     setTab(event ? 'event' : 'profile');
   }, [open, eventLoading, event?.id]);
+
+  useEffect(() => {
+    setSelectedEventId(null);
+  }, [venue?.id, open]);
 
   useEffect(() => {
     if (!open || !venue) return;
@@ -80,8 +83,6 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
   }, [tab, open, venue?.id, event?.id]);
 
   if (!venue) return null;
-
-  const status = event ? statusStyles[event.status] : null;
 
   const tabs: { key: TabKey; label: string }[] = [
     { key: 'event', label: 'Event' },
@@ -147,7 +148,7 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
             )}
             {!eventLoading && !eventError && !event && (
               <div className="py-8 text-center">
-                <p className="text-sm text-muted-foreground">Aktuell kein Event an dieser Location.</p>
+                <p className="text-sm text-muted-foreground">Keine aktuellen Events für diesen Spot</p>
                 <Button variant="outline" className="mt-3 min-h-[44px]" onClick={openVenueProfile}>
                   Venue ansehen
                 </Button>
@@ -155,39 +156,44 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
             )}
             {event && (
               <>
-                {event.cover_image_url && (
-                  <img
-                    src={event.cover_image_url}
-                    alt={event.name}
-                    loading="lazy"
-                    className="h-36 w-full rounded-xl object-cover"
-                  />
+                {allRelevantEvents.length > 1 && (
+                  <p className="text-xs font-medium text-muted-foreground" aria-live="polite">
+                    Event {eventIndex} von {allRelevantEvents.length}
+                  </p>
                 )}
-                <div className="flex items-center gap-2">
-                  {status && (
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${status.className}`}>
-                      {status.label}
-                    </span>
-                  )}
-                  <h3 className="text-sm font-semibold text-foreground">{event.name}</h3>
-                </div>
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <Clock className="h-3 w-3" />
-                  {format(new Date(event.starts_at), 'EEE, dd. MMM · HH:mm', { locale: de })} Uhr
-                </p>
-                <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <MapPin className="h-3 w-3" />
-                  {event.location_name}
-                  {event.city ? `, ${event.city}` : ''}
-                </p>
+                <VenueEventCard
+                  event={event}
+                  surface="venue_sheet"
+                  counts={counts?.[event.id]}
+                  onOpenDetail={openEventDetail}
+                />
 
-                <RsvpButtons eventId={event.id} surface="venue_sheet" counts={counts?.[event.id]} />
-
-                <Button variant="outline" className="min-h-[44px] w-full gap-1" onClick={openEventDetail}>
-                  Event Details <ArrowRight className="h-4 w-4" />
-                </Button>
+                {otherEvents.length > 0 && (
+                  <section className="pt-2">
+                    <h4 className="mb-2 text-xs font-semibold text-foreground">Weitere Events dieses Venues</h4>
+                    <div className="max-h-[45vh] space-y-2 overflow-y-auto pr-1">
+                      {otherEvents.map((e) => (
+                        <VenueEventCard
+                          key={e.id}
+                          event={e}
+                          variant="compact"
+                          surface="venue_sheet"
+                          counts={counts?.[e.id]}
+                          selected={false}
+                          onSelect={() => setSelectedEventId(e.id)}
+                          onOpenDetail={() => {
+                            track('event_detail_opened_from_map', { venueId: venue.id, eventId: e.id, surface: 'map' });
+                            onOpenChange(false);
+                            navigate(`/events/${e.id}`);
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </section>
+                )}
               </>
             )}
+
           </div>
         )}
 
@@ -263,7 +269,11 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
                 {typeof profile?.category === 'string' && profile.category && (
                   <span className="rounded-full bg-muted px-2 py-0.5">{profile.category}</span>
                 )}
-                {event && <span className="rounded-full bg-muted px-2 py-0.5">1 Event geplant</span>}
+                {allRelevantEvents.length > 0 && (
+                  <span className="rounded-full bg-muted px-2 py-0.5">
+                    {allRelevantEvents.length} {allRelevantEvents.length === 1 ? 'Event' : 'Events'} geplant
+                  </span>
+                )}
                 <span className="rounded-full bg-muted px-2 py-0.5">{posts?.length ?? 0} Posts</span>
               </div>
               <Button className="min-h-[44px] w-full gap-1" onClick={openVenueProfile}>
