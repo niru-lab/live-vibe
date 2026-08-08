@@ -44,6 +44,11 @@ export default function EventDetail() {
   const { data: myParticipation } = useMyParticipation(id);
   const setParticipation = useSetParticipation();
 
+  useEffect(() => {
+    if (event?.id) track('event_detail_viewed', { eventId: event.id, eventType: event.category });
+  }, [event?.id, event?.category]);
+
+
   const handleDeleteEvent = async () => {
     if (!event) return;
     try { await deleteEventMutation.mutateAsync(event.id); toast({ title: 'Event gelöscht', description: 'Das Event wurde erfolgreich entfernt.' }); navigate('/events'); }
