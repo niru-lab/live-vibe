@@ -74,13 +74,35 @@ export default function EventDetail() {
 
   const handleRSVP = async (status: 'going' | 'interested' | null) => {
     if (!user) { navigate(`/auth?redirect=${encodeURIComponent(`/events/${event.id}`)}`); return; }
+    track('event_rsvp_cta_clicked', { eventId: event.id, status, surface: 'event_detail' });
     try {
       await rsvpMutation.mutateAsync({ eventId: event.id, status, surface: 'event_detail' });
-      if (status === 'going') toast({ title: '✅ Zusage bestätigt!', description: `Du gehst zu "${event.name}" 🎉` });
+      if (status === 'going') {
+        toast({ title: '✅ Zusage bestätigt!', description: `Du gehst zu "${event.name}" 🎉` });
+        // Rewarded once per event — toggling RSVP cannot farm points.
+        awardSocialCloud.mutate({ action: 'first_event_rsvp', refType: 'event', refId: event.id });
+        setPostCtaActive(true);
+      }
       else if (status === 'interested') toast({ title: '❤️ Als interessiert markiert' });
       else toast({ title: 'Status entfernt', description: 'Du wurdest von der Liste entfernt.' });
     } catch { toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' }); }
   };
+
+  const handleFollowHost = async () => {
+    if (!user) { navigate('/auth'); return; }
+    if (!hostId) return;
+    try {
+      await toggleFollow.mutateAsync({ targetProfileId: hostId, isFollowing: !!isFollowingHost });
+      if (!isFollowingHost) {
+        track('venue_follow_from_event', { eventId: event.id, surface: 'event_detail' });
+        awardSocialCloud.mutate({ action: 'venue_follow', refType: 'profile', refId: hostId });
+        toast({ title: 'Du folgst jetzt diesem Spot' });
+      } else {
+        toast({ title: 'Nicht mehr gefolgt' });
+      }
+    } catch { toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' }); }
+  };
+
 
   const handleShare = async () => {
     try { await navigator.share({ title: event.name, text: `Check out ${event.name} at ${event.location_name}!`, url: window.location.href }); }
