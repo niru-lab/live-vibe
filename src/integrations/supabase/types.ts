@@ -746,6 +746,45 @@ export type Database = {
           },
         ]
       }
+      offer_activations: {
+        Row: {
+          activated_at: string
+          id: string
+          offer_id: string
+          profile_id: string
+          status: string
+        }
+        Insert: {
+          activated_at?: string
+          id?: string
+          offer_id: string
+          profile_id: string
+          status?: string
+        }
+        Update: {
+          activated_at?: string
+          id?: string
+          offer_id?: string
+          profile_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "offer_activations_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "venue_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offer_activations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       outbox_events: {
         Row: {
           attempts: number
@@ -1677,6 +1716,72 @@ export type Database = {
           },
         ]
       }
+      venue_offers: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_text: string | null
+          ends_at: string
+          event_id: string | null
+          id: string
+          max_activations: number | null
+          offer_type: string
+          redemption_instruction: string | null
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_text?: string | null
+          ends_at: string
+          event_id?: string | null
+          id?: string
+          max_activations?: number | null
+          offer_type: string
+          redemption_instruction?: string | null
+          starts_at?: string
+          status?: string
+          title: string
+          updated_at?: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_text?: string | null
+          ends_at?: string
+          event_id?: string | null
+          id?: string
+          max_activations?: number | null
+          offer_type?: string
+          redemption_instruction?: string | null
+          starts_at?: string
+          status?: string
+          title?: string
+          updated_at?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_offers_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_offers_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venues: {
         Row: {
           address: string | null
@@ -1839,6 +1944,7 @@ export type Database = {
         Args: { _room_id: string; _user_id: string }
         Returns: boolean
       }
+      is_venue_owner: { Args: { _venue_id: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -1848,6 +1954,7 @@ export type Database = {
         }
         Returns: number
       }
+      offer_activation_count: { Args: { _offer_id: string }; Returns: number }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -1864,6 +1971,18 @@ export type Database = {
           joined_count: number
           profile_id: string
           username: string
+        }[]
+      }
+      venue_offer_stats: {
+        Args: { _venue_id: string }
+        Returns: {
+          activations: number
+          ends_at: string
+          event_id: string
+          offer_id: string
+          starts_at: string
+          status: string
+          title: string
         }[]
       }
     }
