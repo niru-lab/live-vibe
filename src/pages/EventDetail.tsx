@@ -175,6 +175,31 @@ export default function EventDetail() {
             </div>
           ) : (
             <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <Button
+                  className="gap-2 min-h-[48px]"
+                  variant={isGoing ? 'outline' : 'default'}
+                  aria-pressed={isGoing}
+                  aria-label={isGoing ? 'Zusage zurückziehen' : 'Zusagen'}
+                  disabled={rsvpMutation.isPending}
+                  onClick={() => handleRSVP(isGoing ? null : 'going')}
+                >
+                  <CheckCircle weight={isGoing ? 'fill' : 'thin'} className="h-5 w-5" />
+                  {isGoing ? 'Zugesagt ✓' : 'Zusagen'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className={`gap-2 min-h-[48px] ${isInterested ? 'border-primary text-primary' : ''}`}
+                  aria-pressed={isInterested}
+                  aria-label={isInterested ? 'Nicht mehr interessiert' : 'Interessiert'}
+                  disabled={rsvpMutation.isPending}
+                  onClick={() => handleRSVP(isInterested ? null : 'interested')}
+                >
+                  <Heart weight={isInterested ? 'fill' : 'thin'} className="h-5 w-5" />
+                  {isInterested ? 'Interessiert ✓' : 'Interessiert'}
+                </Button>
+              </div>
+
               {myParticipation?.status === 'requested' && (
                 <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 flex items-center justify-between gap-3">
                   <div className="flex items-center gap-2 text-sm">
