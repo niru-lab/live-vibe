@@ -40,6 +40,10 @@ export default function CreatePost() {
   const [searchParams] = useSearchParams();
   // First-post mode: only a lightweight entry from the guest activation nudge.
   const firstMode = searchParams.get('first') === '1';
+  // Contextual entry from an event/venue surface — keeps the real relation.
+  const contextEventId = searchParams.get('eventId');
+  const contextVenueId = searchParams.get('venueId');
+  const awardSocialCloud = useAwardSocialCloud();
   const [showAdvanced, setShowAdvanced] = useState(false);
   const { isEligible: isFirstPostPending } = useGuestActivation();
   // Post-activation share step: opened exactly once, after the first successful publish.
