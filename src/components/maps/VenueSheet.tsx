@@ -287,6 +287,7 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
                 )}
                 <span className="rounded-full bg-muted px-2 py-0.5">{posts?.length ?? 0} Posts</span>
               </div>
+              <LiveOfferList offers={venueLevelOffers} surface="venue_sheet" />
               <Button className="min-h-[44px] w-full gap-1" onClick={openVenueProfile}>
                 Venue Profil öffnen <ArrowRight className="h-4 w-4" />
               </Button>
