@@ -242,10 +242,13 @@ export default function Register() {
                 onBlur={(e) => (e.target.style.borderColor = '#2a2a3a')}
               />
             </div>
+            {mode === 'register' && (
+              <EulaConsent id="eula-phone" checked={acceptedTerms} onChange={setAcceptedTerms} />
+            )}
             {error && <p className="text-xs" style={{ color: '#ff6b6b' }}>{error}</p>}
             <button
               type="submit"
-              disabled={loading || !phone}
+              disabled={loading || !phone || consentMissing}
               className="w-full rounded-xl py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
               style={{ background: '#7F77DD' }}
             >
