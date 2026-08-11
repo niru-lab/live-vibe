@@ -28,6 +28,7 @@ import { ParticipantManager } from '@/components/events/ParticipantManager';
 import { useMyParticipation, useSetParticipation } from '@/hooks/useEventParticipation';
 import { Heart, PaperPlaneTilt, Hourglass } from '@phosphor-icons/react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { SafetyMenu } from '@/components/moderation/SafetyMenu';
 import { ArrowLeft, CalendarBlank, Clock, MapPin, Users, CurrencyEur, TShirt, CheckCircle, XCircle, ShareNetwork, Flame, UserCheck, Trash } from '@phosphor-icons/react';
 import { cn, getEventStatus } from '@/lib/utils';
 
@@ -129,6 +130,9 @@ export default function EventDetail() {
         <Button variant="ghost" size="icon" onClick={() => window.history.length > 1 ? navigate(-1) : navigate('/events')}><ArrowLeft weight="thin" className="h-5 w-5" /></Button>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon" onClick={handleShare}><ShareNetwork weight="thin" className="h-5 w-5" /></Button>
+          {!isCreator && event?.id && (
+            <SafetyMenu targetType="event" targetId={event.id} />
+          )}
           {isCreator && (
             <>
               <Button variant="outline" size="sm" onClick={() => setShowAttendeeManager(true)} className="gap-1.5 relative"><Users weight="thin" className="h-4 w-4" />Gäste{pendingAttendees && pendingAttendees.length > 0 && <Badge className="absolute -right-2 -top-2 h-5 w-5 rounded-full p-0 text-[10px] bg-red-500 animate-pulse">{pendingAttendees.length}</Badge>}</Button>
