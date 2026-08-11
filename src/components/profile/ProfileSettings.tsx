@@ -86,6 +86,8 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
     { icon: FileText, label: 'Impressum', to: '/impressum' },
     { icon: Scales, label: 'AGB', to: '/agb' },
     { icon: ShieldCheck, label: 'Datenschutz', to: '/datenschutz' },
+    { icon: Shield, label: 'Community-Richtlinien', to: '/community' },
+    { icon: Prohibit, label: 'Konto & Daten löschen', to: '/konto-loeschen' },
   ];
 
   return (
