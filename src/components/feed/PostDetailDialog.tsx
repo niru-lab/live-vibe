@@ -164,6 +164,12 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
           </>
         )}
       </DialogContent>
+      <ReportDialog
+        open={!!reportCommentId}
+        onOpenChange={(o) => !o && setReportCommentId(null)}
+        targetType="comment"
+        targetId={reportCommentId ?? ''}
+      />
     </Dialog>
   );
 };
