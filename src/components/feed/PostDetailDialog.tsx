@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Heart, ChatCircle, PaperPlaneTilt, Trash } from '@phosphor-icons/react';
+import { Heart, ChatCircle, PaperPlaneTilt, Trash, Flag } from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useComments, useAddComment, useDeleteComment } from '@/hooks/useComments';
 import { useProfile } from '@/hooks/useProfile';
+import { ReportDialog } from '@/components/moderation/ReportDialog';
 import type { PostWithAuthor } from '@/hooks/usePosts';
 
 interface PostDetailDialogProps {
