@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { appUrl } from '@/lib/appUrl';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from '@phosphor-icons/react';
+import { EulaConsent } from '@/components/legal/EulaConsent';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Bitte gib eine gültige E-Mail ein');
@@ -20,10 +21,17 @@ export default function Register() {
   const [countryCode] = useState('+49');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+  const consentMissing = mode === 'register' && !acceptedTerms;
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (mode === 'register' && !acceptedTerms) {
+      setError('Bitte akzeptiere AGB, Datenschutz und Community-Regeln.');
+      return;
+    }
     const result = emailSchema.safeParse(email);
     if (!result.success) {
       setError(result.error.errors[0].message);
@@ -76,6 +84,10 @@ export default function Register() {
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    if (mode === 'register' && !acceptedTerms) {
+      setError('Bitte akzeptiere AGB, Datenschutz und Community-Regeln.');
+      return;
+    }
     const fullPhone = `${countryCode}${phone.replace(/^0/, '')}`;
     const result = phoneSchema.safeParse(phone);
     if (!result.success) {
@@ -194,10 +206,13 @@ export default function Register() {
                 onBlur={(e) => (e.target.style.borderColor = '#2a2a3a')}
               />
             )}
+            {mode === 'register' && (
+              <EulaConsent id="eula-email" checked={acceptedTerms} onChange={setAcceptedTerms} />
+            )}
             {error && <p className="text-xs" style={{ color: '#ff6b6b' }}>{error}</p>}
             <button
               type="submit"
-              disabled={loading || !email || (mode === 'login' && !password)}
+              disabled={loading || !email || consentMissing || (mode === 'login' && !password)}
               className="w-full rounded-xl py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
               style={{ background: '#7F77DD' }}
             >
@@ -227,10 +242,13 @@ export default function Register() {
                 onBlur={(e) => (e.target.style.borderColor = '#2a2a3a')}
               />
             </div>
+            {mode === 'register' && (
+              <EulaConsent id="eula-phone" checked={acceptedTerms} onChange={setAcceptedTerms} />
+            )}
             {error && <p className="text-xs" style={{ color: '#ff6b6b' }}>{error}</p>}
             <button
               type="submit"
-              disabled={loading || !phone}
+              disabled={loading || !phone || consentMissing}
               className="w-full rounded-xl py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
               style={{ background: '#7F77DD' }}
             >

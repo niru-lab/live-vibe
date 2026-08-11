@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { SafetyMenu } from '@/components/moderation/SafetyMenu';
 import { ArrowLeft, MapPin, Users, Lightning, SignOut, Check, X, PaperPlaneRight, Trash, Gear, Lock } from '@phosphor-icons/react';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -165,13 +166,15 @@ const RoomDetail = () => {
             <h1 className="text-lg font-bold text-foreground truncate">{room.name}</h1>
             <p className="text-xs text-muted-foreground">{room.category}</p>
           </div>
-          {isHoster && (
+          {isHoster ? (
             <>
               <Badge>Hoster</Badge>
               <button onClick={() => setShowSettings(s => !s)} className="p-1">
                 <Gear weight="bold" className="h-5 w-5 text-muted-foreground" />
               </button>
             </>
+          ) : (
+            <SafetyMenu targetType="room" targetId={room.id} />
           )}
         </div>
 

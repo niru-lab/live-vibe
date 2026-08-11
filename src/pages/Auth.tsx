@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Sparkle, Confetti } from '@phosphor-icons/react';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { lovable } from '@/integrations/lovable/index';
+import { EulaConsent } from '@/components/legal/EulaConsent';
 import { appUrl } from '@/lib/appUrl';
 import { z } from 'zod';
 
@@ -26,6 +27,7 @@ export default function Auth() {
 
   
   const { signIn, signUp, user } = useAuth();
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const role: 'guest' | 'venue_owner' | undefined = (location.state as { role?: 'guest' | 'venue_owner' } | null)?.role;
@@ -69,6 +71,10 @@ export default function Auth() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm(true)) return;
+    if (!acceptedTerms) {
+      toast({ variant: 'destructive', title: 'Zustimmung erforderlich', description: 'Bitte akzeptiere AGB, Datenschutz und Community-Regeln.' });
+      return;
+    }
     setLoading(true);
     const { error } = await signUp(email, password, {
       username: username || undefined,
@@ -182,7 +188,8 @@ export default function Auth() {
                   <Input id="register-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
-                <Button type="submit" className="w-full" disabled={loading}>
+                <EulaConsent checked={acceptedTerms} onChange={setAcceptedTerms} />
+                <Button type="submit" className="w-full" disabled={loading || !acceptedTerms}>
                   {loading ? 'Wird erstellt...' : (
                     <span className="flex items-center gap-2">
                       <Confetti weight="thin" className="h-4 w-4" />

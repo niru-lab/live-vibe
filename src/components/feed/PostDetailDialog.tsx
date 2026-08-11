@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Heart, ChatCircle, PaperPlaneTilt, Trash } from '@phosphor-icons/react';
+import { Heart, ChatCircle, PaperPlaneTilt, Trash, Flag } from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useComments, useAddComment, useDeleteComment } from '@/hooks/useComments';
 import { useProfile } from '@/hooks/useProfile';
+import { ReportDialog } from '@/components/moderation/ReportDialog';
 import type { PostWithAuthor } from '@/hooks/usePosts';
 
 interface PostDetailDialogProps {
@@ -25,6 +26,7 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
   const addComment = useAddComment();
   const deleteComment = useDeleteComment();
   const [text, setText] = useState('');
+  const [reportCommentId, setReportCommentId] = useState<string | null>(null);
 
   const goToProfile = () => {
     if (!post?.author?.username) return;
@@ -116,13 +118,21 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
                           {formatDistanceToNow(new Date(c.created_at), { addSuffix: true, locale: de })}
                         </p>
                       </div>
-                      {isOwn && (
+                      {isOwn ? (
                         <button
                           onClick={() => deleteComment.mutate({ commentId: c.id, postId: post.id })}
                           className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity p-1"
                           aria-label="Kommentar löschen"
                         >
                           <Trash weight="thin" className="h-3.5 w-3.5" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setReportCommentId(c.id)}
+                          className="opacity-60 md:opacity-0 md:group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity p-1"
+                          aria-label="Kommentar melden"
+                        >
+                          <Flag weight="thin" className="h-3.5 w-3.5" />
                         </button>
                       )}
                     </div>
@@ -154,6 +164,12 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
           </>
         )}
       </DialogContent>
+      <ReportDialog
+        open={!!reportCommentId}
+        onOpenChange={(o) => !o && setReportCommentId(null)}
+        targetType="comment"
+        targetId={reportCommentId ?? ''}
+      />
     </Dialog>
   );
 };

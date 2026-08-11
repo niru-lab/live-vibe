@@ -9,6 +9,7 @@ import { useProfile } from '@/hooks/useProfile';
 import { useChatRequestStatus, useAcceptChatRequest, useDeclineChatRequest } from '@/hooks/useChatRequest';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { SafetyMenu } from '@/components/moderation/SafetyMenu';
 
 interface SendMessageDialogProps {
   open: boolean;
@@ -93,10 +94,16 @@ export function SendMessageDialog({ open, onOpenChange, recipient }: SendMessage
                 {recipient.display_name?.[0]}
               </AvatarFallback>
             </Avatar>
-            <div className="text-left">
+            <div className="text-left flex-1 min-w-0">
               <p className="text-sm font-semibold text-gray-900 dark:text-white">{recipient.display_name}</p>
               <p className="text-[11px] text-gray-500 dark:text-[#A0A0B0] font-normal">@{recipient.username}</p>
             </div>
+            <SafetyMenu
+              targetType="message"
+              targetId={recipient.id}
+              blockTarget={recipient}
+              onBlocked={() => onOpenChange(false)}
+            />
           </DialogTitle>
         </DialogHeader>
 
