@@ -1992,6 +1992,7 @@ export type Database = {
         Returns: number
       }
       offer_activation_count: { Args: { _offer_id: string }; Returns: number }
+      purge_user_data: { Args: { _user_id: string }; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
