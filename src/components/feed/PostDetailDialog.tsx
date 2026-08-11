@@ -26,6 +26,7 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
   const addComment = useAddComment();
   const deleteComment = useDeleteComment();
   const [text, setText] = useState('');
+  const [reportCommentId, setReportCommentId] = useState<string | null>(null);
 
   const goToProfile = () => {
     if (!post?.author?.username) return;
