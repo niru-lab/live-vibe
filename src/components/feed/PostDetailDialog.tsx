@@ -118,13 +118,21 @@ export const PostDetailDialog = ({ post, isLiked, onLike, onClose }: PostDetailD
                           {formatDistanceToNow(new Date(c.created_at), { addSuffix: true, locale: de })}
                         </p>
                       </div>
-                      {isOwn && (
+                      {isOwn ? (
                         <button
                           onClick={() => deleteComment.mutate({ commentId: c.id, postId: post.id })}
                           className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity p-1"
                           aria-label="Kommentar löschen"
                         >
                           <Trash weight="thin" className="h-3.5 w-3.5" />
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => setReportCommentId(c.id)}
+                          className="opacity-60 md:opacity-0 md:group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity p-1"
+                          aria-label="Kommentar melden"
+                        >
+                          <Flag weight="thin" className="h-3.5 w-3.5" />
                         </button>
                       )}
                     </div>
