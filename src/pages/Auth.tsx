@@ -10,6 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Sparkle, Confetti } from '@phosphor-icons/react';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { lovable } from '@/integrations/lovable/index';
+import { appUrl } from '@/lib/appUrl';
 import { z } from 'zod';
 
 const emailSchema = z.string().email('Bitte gib eine gültige E-Mail-Adresse ein');
@@ -87,7 +88,7 @@ export default function Auth() {
   const handleGoogle = async () => {
     setLoading(true);
     const { error } = await lovable.auth.signInWithOAuth('google', {
-      redirect_uri: `${window.location.origin}/auth/callback`,
+      redirect_uri: appUrl('/auth/callback'),
     });
     if (error) {
       setLoading(false);

@@ -2,13 +2,14 @@ import { useEffect, useRef } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
+import { appUrl } from '@/lib/appUrl';
 
 const REF_STORAGE_KEY = 'feyrn_ref';
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 /** Builds the personal invite link for a profile. */
 export const buildReferralUrl = (profileId?: string | null, path = '/') => {
-  const base = `${window.location.origin}${path}`;
+  const base = appUrl(path);
   if (!profileId) return base;
   const url = new URL(base);
   url.searchParams.set('ref', profileId);
