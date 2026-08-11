@@ -7,12 +7,13 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { ArrowLeft, DotsThree, ChatCircleDots, Prohibit, Check, Plus, Lock, EyeSlash } from '@phosphor-icons/react';
+import { ArrowLeft, DotsThree, ChatCircleDots, Prohibit, Flag, Check, Plus, Lock, EyeSlash } from '@phosphor-icons/react';
 import { useProfile } from '@/hooks/useProfile';
 import { useFollowStats, usePostsCount, useIsFollowing, useToggleFollow } from '@/hooks/useFollowStats';
 import { useUserPosts } from '@/hooks/useUserPosts';
 import { useIsBlockedEitherWay } from '@/hooks/useBlockUser';
 import { BlockSheet } from '@/components/safety/BlockSheet';
+import { ReportDialog } from '@/components/moderation/ReportDialog';
 import { useUserLikes, useLikePost, type PostWithAuthor } from '@/hooks/usePosts';
 import { PostDetailDialog } from '@/components/feed/PostDetailDialog';
 import { SendMessageDialog } from '@/components/messaging/SendMessageDialog';
@@ -24,6 +25,7 @@ export default function UserProfile() {
   const queryClient = useQueryClient();
   const [messageOpen, setMessageOpen] = useState(false);
   const [blockConfirmOpen, setBlockConfirmOpen] = useState(false);
+  const [reportOpen, setReportOpen] = useState(false);
   const [selectedPost, setSelectedPost] = useState<PostWithAuthor | null>(null);
   const { data: likedPosts = [] } = useUserLikes();
   const likeMutation = useLikePost();
@@ -123,6 +125,10 @@ export default function UserProfile() {
                 Nachricht senden
               </DropdownMenuItem>
               <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setReportOpen(true)} className="gap-2 cursor-pointer">
+                <Flag weight="bold" className="h-4 w-4" />
+                Profil melden
+              </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setBlockConfirmOpen(true)} className="gap-2 cursor-pointer text-destructive focus:text-destructive">
                 <Prohibit weight="bold" className="h-4 w-4" />
                 Blockieren
@@ -209,6 +215,13 @@ export default function UserProfile() {
         open={messageOpen}
         onOpenChange={setMessageOpen}
         recipient={{ id: profile.id, username: profile.username, display_name: profile.display_name, avatar_url: profile.avatar_url }}
+      />
+
+      <ReportDialog
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        targetType="profile"
+        targetId={profile.id}
       />
 
       <BlockSheet
