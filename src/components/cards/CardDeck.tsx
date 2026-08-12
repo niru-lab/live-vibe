@@ -138,17 +138,20 @@ export const CardDeck = ({ cards, sentCardIds, onSend }: CardDeckProps) => {
         </button>
       </div>
 
-      <div className="flex gap-2">
-        {peeks.map((c, i) => (
-          <PeekCard
-            key={`${c.card_id}-${i}`}
-            prompt={c.card.prompt}
-            category={c.card.category as CardCategory}
-            sent={sentCardIds.has(c.card_id)}
-            onClick={() => goTo(index + 1 + i)}
-          />
-        ))}
-      </div>
+      {peeks.length > 0 && (
+        <div className="flex gap-2">
+          {peeks.map(({ card, i }) => (
+            <PeekCard
+              key={card.card_id}
+              prompt={card.card.prompt}
+              category={card.card.category as CardCategory}
+              sent={sentCardIds.has(card.card_id)}
+              onClick={() => goTo(i)}
+            />
+          ))}
+        </div>
+      )}
+
     </div>
   );
 };
