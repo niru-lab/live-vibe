@@ -48,15 +48,15 @@ export const CardDeck = ({ cards, sentCardIds, onSend }: CardDeckProps) => {
         />
       </div>
 
-      <div className="relative mt-5">
+      <div className="relative mt-5 pb-4">
         <div
           aria-hidden
-          className="absolute left-[30px] right-[30px] top-[10px] h-[210px] rounded-[18px]"
+          className="absolute bottom-0 left-[30px] right-[30px] top-[16px] rounded-[18px]"
           style={{ backgroundColor: tokens.back }}
         />
         <div
           aria-hidden
-          className="absolute left-4 right-4 top-[5px] h-[216px] rounded-[18px]"
+          className="absolute bottom-2 left-4 right-4 top-[8px] rounded-[18px]"
           style={{ backgroundColor: tokens.middle }}
         />
         <div key={tick} className="relative animate-in fade-in slide-in-from-top-1 duration-150 motion-reduce:animate-none">
