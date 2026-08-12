@@ -12,7 +12,13 @@ import {
 import { DotsThree, Flag, Prohibit, Lock, CheckCircle } from '@phosphor-icons/react';
 import { BlockSheet } from '@/components/safety/BlockSheet';
 import { CardCard } from '@/components/cards/CardCard';
-import { useCardAnswer, useCardReport, logCardInteraction, type ReceivedBatch } from '@/hooks/useCards';
+import {
+  useCardAnswer,
+  useCardReport,
+  useCardRespond,
+  logCardInteraction,
+  type ReceivedBatch,
+} from '@/hooks/useCards';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { CARD_REPORT_REASONS, FEYRN_CARDS_CONFIG, type CardCategory } from '@/lib/cards';
@@ -22,6 +28,7 @@ export const ReceivedCardItem = ({ batch }: { batch: ReceivedBatch }) => {
   const { toast } = useToast();
   const answer = useCardAnswer();
   const report = useCardReport();
+  const respond = useCardRespond();
 
   const [index, setIndex] = useState(0);
   const [answerText, setAnswerText] = useState('');
@@ -30,6 +37,29 @@ export const ReceivedCardItem = ({ batch }: { batch: ReceivedBatch }) => {
 
   const card = batch.cards[index];
   const answered = card ? batch.answeredCardIds.has(card.id) : false;
+  const isPending = batch.status === 'pending';
+
+  const handleRespond = (accept: boolean) => {
+    respond.mutate(
+      { batchId: batch.id, accept },
+      {
+        onSuccess: () =>
+          toast({
+            title: accept ? 'Karten angenommen' : 'Abgelehnt',
+            description: accept
+              ? 'Du kannst jetzt antworten.'
+              : 'Die Karten werden nicht mehr angezeigt.',
+          }),
+        onError: (error: unknown) =>
+          toast({
+            title: 'Fehler',
+            description: error instanceof Error ? error.message : 'Aktion fehlgeschlagen.',
+            variant: 'destructive',
+          }),
+      },
+    );
+  };
+
 
   if (!card) return null;
 
@@ -136,51 +166,92 @@ export const ReceivedCardItem = ({ batch }: { batch: ReceivedBatch }) => {
         <p className="rounded-xl bg-muted/40 p-3 text-sm text-muted-foreground">{batch.message}</p>
       )}
 
-      <CardCard prompt={card.prompt} category={card.category as CardCategory} compact />
-
-      {answered ? (
-        <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <CheckCircle weight="fill" className="h-4 w-4 text-primary" />
-          Beantwortet
-        </p>
-      ) : showForm ? (
-        <div className="space-y-2">
-          <Textarea
-            value={answerText}
-            onChange={(e) => setAnswerText(e.target.value)}
-            maxLength={FEYRN_CARDS_CONFIG.maxAnswerLength}
-            rows={3}
-            placeholder="Deine Antwort…"
-          />
-          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Lock weight="fill" className="h-3 w-3" />
-            Nur du und @{batch.sender?.username ?? 'die Person'} sehen diese Antwort.
-          </p>
+      {isPending ? (
+        <div className="space-y-3">
+          <div className="relative">
+            <div className="pointer-events-none select-none blur-[6px]" aria-hidden="true">
+              <CardCard prompt={card.prompt} category={card.category as CardCategory} compact />
+            </div>
+            <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-background/40">
+              <p className="px-4 text-center text-sm text-muted-foreground">
+                {batch.cards.length > 1
+                  ? `${batch.cards.length} Karten warten auf dich`
+                  : 'Eine Karte wartet auf dich'}
+              </p>
+            </div>
+          </div>
           <div className="flex gap-2">
             <Button
-              onClick={handleAnswer}
-              disabled={answer.isPending || !answerText.trim()}
               className="min-h-[44px] flex-1"
+              disabled={respond.isPending}
+              onClick={() => handleRespond(true)}
             >
-              {answer.isPending ? 'Senden…' : 'Antwort senden'}
+              Annehmen
             </Button>
-            <Button variant="outline" className="min-h-[44px]" onClick={() => setShowForm(false)}>
-              Abbrechen
+            <Button
+              variant="outline"
+              className="min-h-[44px]"
+              disabled={respond.isPending}
+              onClick={() => handleRespond(false)}
+            >
+              Ablehnen
             </Button>
           </div>
         </div>
       ) : (
-        <div className="flex gap-2">
-          <Button className="min-h-[44px] flex-1" onClick={() => setShowForm(true)}>
-            Antworten
-          </Button>
-          {batch.cards.length > 1 && (
-            <Button variant="outline" className="min-h-[44px]" onClick={handleSkip}>
-              Überspringen
-            </Button>
+        <>
+          <CardCard prompt={card.prompt} category={card.category as CardCategory} compact />
+
+          {answered ? (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <CheckCircle weight="fill" className="h-4 w-4 text-primary" />
+              Beantwortet
+            </p>
+          ) : showForm ? (
+            <div className="space-y-2">
+              <Textarea
+                value={answerText}
+                onChange={(e) => setAnswerText(e.target.value)}
+                maxLength={FEYRN_CARDS_CONFIG.maxAnswerLength}
+                rows={3}
+                placeholder="Deine Antwort…"
+              />
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Lock weight="fill" className="h-3 w-3" />
+                Nur du und @{batch.sender?.username ?? 'die Person'} sehen diese Antwort.
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleAnswer}
+                  disabled={answer.isPending || !answerText.trim()}
+                  className="min-h-[44px] flex-1"
+                >
+                  {answer.isPending ? 'Senden…' : 'Antwort senden'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="min-h-[44px]"
+                  onClick={() => setShowForm(false)}
+                >
+                  Abbrechen
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <Button className="min-h-[44px] flex-1" onClick={() => setShowForm(true)}>
+                Antworten
+              </Button>
+              {batch.cards.length > 1 && (
+                <Button variant="outline" className="min-h-[44px]" onClick={handleSkip}>
+                  Überspringen
+                </Button>
+              )}
+            </div>
           )}
-        </div>
+        </>
       )}
+
 
       {batch.sender && (
         <BlockSheet

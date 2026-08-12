@@ -134,7 +134,7 @@ export const useReceivedCards = () => {
         .from('card_send_batches')
         .select(BATCH_SELECT)
         .eq('recipient_id', profile!.id)
-        .not('status', 'in', '("blocked","reported")')
+        .not('status', 'in', '("blocked","reported","skipped")')
         .order('sent_at', { ascending: false });
 
       if (error) throw error;
@@ -199,6 +199,26 @@ export const useSentCards = () => {
         cards: (b.card_send_items ?? []).map((i: any) => i.card_pool as PoolCard),
         answers: (b.card_answers ?? []) as { card_id: string; answer_text: string }[],
       }));
+    },
+  });
+};
+
+/** Recipient accepts or declines a received batch before answering. */
+export const useCardRespond = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({ batchId, accept }: { batchId: string; accept: boolean }) => {
+      const { data, error } = await supabase.rpc('respond_card_batch', {
+        _batch_id: batchId,
+        _accept: accept,
+      });
+      if (error) throw error;
+      return data as string;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['received-cards'] });
+      queryClient.invalidateQueries({ queryKey: ['sent-cards'] });
     },
   });
 };

@@ -2378,6 +2378,10 @@ export type Database = {
         Args: { _batch_id: string; _details?: string; _reason: string }
         Returns: undefined
       }
+      respond_card_batch: {
+        Args: { _accept: boolean; _batch_id: string }
+        Returns: string
+      }
       send_card_batch: {
         Args: {
           _card_ids: string[]
