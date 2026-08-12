@@ -120,15 +120,7 @@ export const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDi
   const handleSave = async () => {
     try {
       setIsUploading(true);
-      let finalAvatarUrl = profile?.avatar_url;
-      if (avatarFile) {
-        const fileExt = avatarFile.name.split('.').pop();
-        const fileName = `${profile?.id}-${Date.now()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('post-media').upload(`avatars/${fileName}`, avatarFile, { upsert: true });
-        if (uploadError) throw uploadError;
-        const { data: { publicUrl } } = supabase.storage.from('post-media').getPublicUrl(`avatars/${fileName}`);
-        finalAvatarUrl = publicUrl;
-      }
+      const finalAvatarUrl = avatarUrl || profile?.avatar_url || null;
       await updateProfile.mutateAsync({
         username: username !== profile?.username ? username : undefined,
         display_name: displayName, bio: bio || null, city: city || null, avatar_url: finalAvatarUrl,
