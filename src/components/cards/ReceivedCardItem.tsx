@@ -12,7 +12,13 @@ import {
 import { DotsThree, Flag, Prohibit, Lock, CheckCircle } from '@phosphor-icons/react';
 import { BlockSheet } from '@/components/safety/BlockSheet';
 import { CardCard } from '@/components/cards/CardCard';
-import { useCardAnswer, useCardReport, logCardInteraction, type ReceivedBatch } from '@/hooks/useCards';
+import {
+  useCardAnswer,
+  useCardReport,
+  useCardRespond,
+  logCardInteraction,
+  type ReceivedBatch,
+} from '@/hooks/useCards';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import { CARD_REPORT_REASONS, FEYRN_CARDS_CONFIG, type CardCategory } from '@/lib/cards';
