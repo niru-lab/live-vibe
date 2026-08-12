@@ -41,6 +41,7 @@ import AGB from "./pages/legal/AGB";
 import Community from "./pages/legal/Community";
 import KontoLoeschen from "./pages/legal/KontoLoeschen";
 import BlockedUsers from "./pages/BlockedUsers";
+import Cards from "./pages/Cards";
 
 const queryClient = new QueryClient({
   defaultOptions: {
