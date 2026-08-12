@@ -59,7 +59,7 @@ export const CardDeck = ({ cards, sentCardIds, onSend }: CardDeckProps) => {
           className="absolute left-4 right-4 top-[5px] h-[216px] rounded-[18px]"
           style={{ backgroundColor: tokens.middle }}
         />
-        <div key={tick} className="relative deck-card-enter">
+        <div key={tick} className="relative animate-in fade-in slide-in-from-top-1 duration-150 motion-reduce:animate-none">
           <FeyrnCard
             prompt={current.card.prompt}
             category={current.card.category as CardCategory}
