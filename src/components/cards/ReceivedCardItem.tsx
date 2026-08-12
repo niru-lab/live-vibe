@@ -28,6 +28,7 @@ export const ReceivedCardItem = ({ batch }: { batch: ReceivedBatch }) => {
   const { toast } = useToast();
   const answer = useCardAnswer();
   const report = useCardReport();
+  const respond = useCardRespond();
 
   const [index, setIndex] = useState(0);
   const [answerText, setAnswerText] = useState('');
@@ -36,6 +37,29 @@ export const ReceivedCardItem = ({ batch }: { batch: ReceivedBatch }) => {
 
   const card = batch.cards[index];
   const answered = card ? batch.answeredCardIds.has(card.id) : false;
+  const isPending = batch.status === 'pending';
+
+  const handleRespond = (accept: boolean) => {
+    respond.mutate(
+      { batchId: batch.id, accept },
+      {
+        onSuccess: () =>
+          toast({
+            title: accept ? 'Karten angenommen' : 'Abgelehnt',
+            description: accept
+              ? 'Du kannst jetzt antworten.'
+              : 'Die Karten werden nicht mehr angezeigt.',
+          }),
+        onError: (error: unknown) =>
+          toast({
+            title: 'Fehler',
+            description: error instanceof Error ? error.message : 'Aktion fehlgeschlagen.',
+            variant: 'destructive',
+          }),
+      },
+    );
+  };
+
 
   if (!card) return null;
 
