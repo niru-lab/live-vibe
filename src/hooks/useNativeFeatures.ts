@@ -6,6 +6,30 @@ import { PushNotifications } from '@capacitor/push-notifications';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from './useProfile';
 
+const ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/webp', 'image/heic'];
+const MIME_EXT: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/heic': 'heic',
+};
+const MAX_AVATAR_BYTES = 8 * 1024 * 1024;
+
+const isCancelled = (e: unknown) => {
+  const msg = String((e as { message?: string })?.message ?? e ?? '').toLowerCase();
+  return msg.includes('cancel') || msg.includes('abbruch') || msg.includes('no image picked');
+};
+
+const dataUrlToBlob = (dataUrl: string): Blob | null => {
+  const match = /^data:([^;]+);base64,(.*)$/.exec(dataUrl);
+  if (!match) return null;
+  const [, mime, b64] = match;
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+};
+
 export const useNativeFeatures = () => {
   const isNative = Capacitor.isNativePlatform();
   const { data: profile } = useProfile();
@@ -115,7 +139,13 @@ export const useNativeFeatures = () => {
       const stale = Object.values(MIME_EXT)
         .filter((e) => e !== ext)
         .map((e) => `avatars/${userId}/avatar.${e}`);
-      if (stale.length) await supabase.storage.from('post-media').remove(stale).catch?.(() => {});
+      if (stale.length) {
+        try {
+          await supabase.storage.from('post-media').remove(stale);
+        } catch {
+          /* ignore cleanup errors */
+        }
+      }
 
       const { data } = supabase.storage.from('post-media').getPublicUrl(path);
       return `${data.publicUrl}?v=${Date.now()}`;
@@ -147,6 +177,7 @@ export const useNativeFeatures = () => {
     isNative,
     takePhoto,
     pickFromGallery,
+    uploadAvatar,
     getCurrentPosition,
   };
 };
