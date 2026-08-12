@@ -1,0 +1,59 @@
+/*
+ * FallingDeco — purely decorative confetti layer for the Cards screen.
+ * Animates only transform/opacity. Hidden under reduced motion.
+ */
+
+.feyrn-deco {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+
+  /* Light mode palette (orange) */
+  --particle-1: #FF5C00;
+  --particle-2: #FF9F5C;
+  --particle-3: #FFB27A;
+  --particle-4: #FF5C00;
+  --particle-5: #FF9F5C;
+  --particle-6: #FFC79E;
+  --particle-7: #FF7A2E;
+  --particle-8: #FF9F5C;
+}
+
+.dark .feyrn-deco {
+  /* Dark mode palette (violet) */
+  --particle-1: #7C3AED;
+  --particle-2: #A78BFA;
+  --particle-3: #8B5CF6;
+  --particle-4: #6D28D9;
+  --particle-5: #A78BFA;
+  --particle-6: #7C3AED;
+  --particle-7: #C4B5FD;
+  --particle-8: #8B5CF6;
+}
+
+@keyframes feyrn-fall {
+  0% {
+    transform: translateY(-40px) rotate(0deg);
+  }
+  100% {
+    transform: translateY(calc(100vh + 40px)) rotate(320deg);
+  }
+}
+
+.feyrn-particle {
+  position: absolute;
+  top: -40px;
+  will-change: transform;
+  animation-name: feyrn-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .feyrn-deco,
+  .feyrn-particle {
+    display: none;
+  }
+}

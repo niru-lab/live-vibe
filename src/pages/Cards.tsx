@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { CardDeck } from '@/components/cards/CardDeck';
 import { CardSendModal } from '@/components/cards/CardSendModal';
 import { ReceivedCardItem } from '@/components/cards/ReceivedCardItem';
+import { FallingDeco } from '@/components/FallingDeco';
 import {
   useCardAssignment,
   useReceivedCards,
@@ -55,64 +56,67 @@ const Cards = () => {
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-2xl px-4 pb-28 pt-4">
-        <div className="mx-auto w-full sm:max-w-[340px]">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
+      <div className="relative mx-auto max-w-2xl px-4 pb-28 pt-4">
+        <FallingDeco />
+        <div className="relative z-10">
+          <div className="mx-auto w-full sm:max-w-[340px]">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => navigate(-1)}
+                  aria-label="Zurück"
+                  className="flex h-11 w-11 items-center justify-center rounded-full text-foreground"
+                >
+                  <CaretLeft weight="bold" className="h-4 w-4" />
+                </button>
+                <div>
+                  <h1 className="text-[17px] font-medium text-foreground">Deine Karten</h1>
+                  <p className="text-xs" style={{ color: '#7A7A85' }}>
+                    {sentCount} von {total || 20} gesendet
+                  </p>
+                </div>
+              </div>
               <button
                 type="button"
-                onClick={() => navigate(-1)}
-                aria-label="Zurück"
-                className="flex h-11 w-11 items-center justify-center rounded-full text-foreground"
+                aria-label="Weitere Optionen"
+                onClick={() => navigate('/profile')}
+                className="flex h-11 w-11 items-center justify-center"
               >
-                <CaretLeft weight="bold" className="h-4 w-4" />
+                <span
+                  className="flex h-[30px] w-[30px] items-center justify-center rounded-full"
+                  style={{ backgroundColor: '#1A1A22', color: '#9A9AA5' }}
+                >
+                  <DotsThree weight="bold" className="h-4 w-4" />
+                </span>
               </button>
-              <div>
-                <h1 className="text-[17px] font-medium text-foreground">Deine Karten</h1>
-                <p className="text-xs" style={{ color: '#7A7A85' }}>
-                  {sentCount} von {total || 20} gesendet
-                </p>
-              </div>
             </div>
-            <button
-              type="button"
-              aria-label="Weitere Optionen"
-              onClick={() => navigate('/profile')}
-              className="flex h-11 w-11 items-center justify-center"
-            >
-              <span
-                className="flex h-[30px] w-[30px] items-center justify-center rounded-full"
-                style={{ backgroundColor: '#1A1A22', color: '#9A9AA5' }}
-              >
-                <DotsThree weight="bold" className="h-4 w-4" />
-              </span>
-            </button>
           </div>
-        </div>
 
-        {assignmentError && (
-          <p className="mt-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-            Kartenzuweisung fehlgeschlagen. Bitte versuche es später erneut.
-          </p>
-        )}
-
-        {loadingAssignment || isLoading ? (
-          <div className="mx-auto mt-6 w-full space-y-3 sm:max-w-[340px]">
-            <Skeleton className="h-[226px] rounded-[18px]" />
-            <Skeleton className="h-10 rounded-[10px]" />
-          </div>
-        ) : cards && cards.length > 0 ? (
-          <CardDeck cards={cards} sentCardIds={sentCardIds} onSend={setSendCard} />
-        ) : (
-          <p className="mt-6 text-sm text-muted-foreground">Noch keine Karten verfügbar.</p>
-        )}
-
-        <div className="mx-auto mt-6 w-full space-y-3 sm:max-w-[340px]">
-          {loadingReceived ? (
-            <Skeleton className="h-40 rounded-2xl" />
-          ) : (
-            received?.map((batch) => <ReceivedCardItem key={batch.id} batch={batch} />)
+          {assignmentError && (
+            <p className="mt-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+              Kartenzuweisung fehlgeschlagen. Bitte versuche es später erneut.
+            </p>
           )}
+
+          {loadingAssignment || isLoading ? (
+            <div className="mx-auto mt-6 w-full space-y-3 sm:max-w-[340px]">
+              <Skeleton className="h-[226px] rounded-[18px]" />
+              <Skeleton className="h-10 rounded-[10px]" />
+            </div>
+          ) : cards && cards.length > 0 ? (
+            <CardDeck cards={cards} sentCardIds={sentCardIds} onSend={setSendCard} />
+          ) : (
+            <p className="mt-6 text-sm text-muted-foreground">Noch keine Karten verfügbar.</p>
+          )}
+
+          <div className="mx-auto mt-6 w-full space-y-3 sm:max-w-[340px]">
+            {loadingReceived ? (
+              <Skeleton className="h-40 rounded-2xl" />
+            ) : (
+              received?.map((batch) => <ReceivedCardItem key={batch.id} batch={batch} />)
+            )}
+          </div>
         </div>
       </div>
 
