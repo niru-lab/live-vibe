@@ -92,6 +92,8 @@ const App = () => (
                   <Route path="/profile" element={<Profile />} />
                   <Route path="/u/:username" element={<UserProfile />} />
                   <Route path="/messages" element={<Messages />} />
+                  <Route path="/cards" element={<Cards />} />
+                  <Route path="/cards/received" element={<Cards />} />
                   <Route path="/roomz" element={<Roomz />} />
                   <Route path="/roomz/create" element={<CreateRoom />} />
                   <Route path="/roomz/:id" element={<RoomDetail />} />
