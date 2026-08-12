@@ -13,15 +13,15 @@ const LABELS: Record<DeckCategory, string> = {
   flirty: 'Flirty',
 };
 
-/** active background / active text, dark + light. */
+/** Active surface per category — light default, dark override. */
 const ACTIVE: Record<DeckCategory, string> = {
-  all: 'bg-[#2A2A35] text-white dark:bg-[#2A2A35] dark:text-white',
-  normal: 'bg-[#7C3AED] text-white',
-  deep: 'bg-[#3B82F6] text-white',
-  flirty: 'bg-[#EC4899] text-white',
+  all: 'bg-[#E8D5C4] text-[#1A1208] dark:bg-[#2A2A35] dark:text-white',
+  normal: 'bg-[#FF5C00] text-white dark:bg-[#7C3AED]',
+  deep: 'bg-[#FF7A2E] text-white dark:bg-[#3B82F6]',
+  flirty: 'bg-[#FF9F5C] text-white dark:bg-[#EC4899]',
 };
 
-const INACTIVE = 'bg-[#16161E] text-[#8A8A95]';
+const INACTIVE = 'bg-[#F5EBE2] text-[#8A7460] dark:bg-[#16161E] dark:text-[#8A8A95]';
 
 interface CategorySwitcherProps {
   available: DeckCategory[];
@@ -43,18 +43,15 @@ export const CategorySwitcher = ({ available, value, onChange }: CategorySwitche
             role="tab"
             aria-selected={active}
             onClick={() => onChange(cat)}
-            className={`flex min-h-[44px] flex-1 items-center justify-center py-[5px] text-[12px] ${
-              active ? `${ACTIVE[cat]} font-medium` : `${INACTIVE} font-normal`
-            } rounded-[9px] bg-clip-padding`}
-            style={{
-              // 34px visual height with a 44px touch target via transparent vertical padding
-              backgroundClip: 'content-box',
-              borderTop: '5px solid transparent',
-              borderBottom: '5px solid transparent',
-              height: 44,
-            }}
+            className="flex min-h-[44px] flex-1 items-center bg-transparent"
           >
-            {LABELS[cat]}
+            <span
+              className={`flex h-[34px] w-full items-center justify-center rounded-[9px] text-[12px] ${
+                active ? `${ACTIVE[cat]} font-medium` : `${INACTIVE} font-normal`
+              }`}
+            >
+              {LABELS[cat]}
+            </span>
           </button>
         );
       })}
