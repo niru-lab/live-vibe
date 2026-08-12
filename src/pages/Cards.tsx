@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CardCard } from '@/components/cards/CardCard';
 import { CardSendModal } from '@/components/cards/CardSendModal';
 import { ReceivedCardItem } from '@/components/cards/ReceivedCardItem';
@@ -13,33 +12,24 @@ import {
   useUserCards,
   type AssignedCard,
 } from '@/hooks/useCards';
-import { FEYRN_CARDS_CONFIG, type CardCategory } from '@/lib/cards';
+import { FEYRN_CARDS_CONFIG } from '@/lib/cards';
 import { useAuth } from '@/contexts/AuthContext';
-import { PaperPlaneTilt, Sparkle } from '@phosphor-icons/react';
+import { PaperPlaneTilt, CaretLeft } from '@phosphor-icons/react';
 import { cn } from '@/lib/utils';
-
-const FILTERS: { value: CardCategory | 'all'; label: string }[] = [
-  { value: 'all', label: 'Alle' },
-  { value: 'normal', label: 'Normal' },
-  { value: 'deep', label: 'Deep' },
-  { value: 'flirty', label: 'Flirty' },
-];
 
 const Cards = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const [filter, setFilter] = useState<CardCategory | 'all'>('all');
   const [selected, setSelected] = useState<string[]>([]);
   const [sendOpen, setSendOpen] = useState(false);
 
   const { isLoading: loadingAssignment, error: assignmentError } = useCardAssignment();
-  const { data: cards, isLoading } = useUserCards(filter === 'all' ? undefined : filter);
+  const { data: cards, isLoading } = useUserCards();
   const { data: received, isLoading: loadingReceived } = useReceivedCards();
 
-  const allCards = useUserCards();
   const selectedCards = useMemo<AssignedCard[]>(
-    () => (allCards.data ?? []).filter((c) => selected.includes(c.card_id)),
-    [allCards.data, selected],
+    () => (cards ?? []).filter((c) => selected.includes(c.card_id)),
+    [cards, selected],
   );
 
   const toggle = (cardId: string) => {
@@ -70,85 +60,60 @@ const Cards = () => {
 
   return (
     <AppLayout>
-      <div className="mx-auto max-w-2xl px-4 pt-6">
+      <div className="mx-auto max-w-2xl px-4 pt-4">
         <div className="flex items-center gap-2">
-          <Sparkle weight="fill" className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold text-foreground">Deine Feyrn Cards</h1>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-9 w-9 rounded-full glass-pill"
+            onClick={() => navigate(-1)}
+            aria-label="Zurück"
+          >
+            <CaretLeft weight="bold" className="h-4 w-4" />
+          </Button>
+          <h1 className="text-xl font-bold text-foreground">Feyrn Cards</h1>
         </div>
-        <p className="mt-1 text-sm text-muted-foreground">
-          20 Fragen, um jemanden wirklich kennenzulernen. Antworten bleiben privat.
+        <p className="mt-1 pl-11 text-sm text-muted-foreground">
+          Antworten bleiben privat — nur ihr beide seht sie.
         </p>
 
-        <Tabs defaultValue="mine" className="mt-5">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="mine" className="min-h-[44px]">
-              Meine Karten
-            </TabsTrigger>
-            <TabsTrigger value="received" className="min-h-[44px]">
-              Erhalten{received && received.length > 0 ? ` (${received.length})` : ''}
-            </TabsTrigger>
-          </TabsList>
+        {assignmentError && (
+          <p className="mt-4 rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+            Kartenzuweisung fehlgeschlagen. Bitte versuche es später erneut.
+          </p>
+        )}
 
-          <TabsContent value="mine" className="mt-4 space-y-4">
-            <div className="flex flex-wrap gap-2">
-              {FILTERS.map((f) => (
-                <Button
-                  key={f.value}
-                  size="sm"
-                  variant={filter === f.value ? 'default' : 'outline'}
-                  className="min-h-[38px] rounded-full"
-                  onClick={() => setFilter(f.value)}
-                >
-                  {f.label}
-                </Button>
-              ))}
-            </div>
+        <div className="mt-5 space-y-3">
+          {loadingReceived ? (
+            <Skeleton className="h-40 rounded-2xl" />
+          ) : (
+            received?.map((batch) => <ReceivedCardItem key={batch.id} batch={batch} />)
+          )}
+        </div>
 
-            {assignmentError && (
-              <p className="rounded-xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
-                Kartenzuweisung fehlgeschlagen. Bitte versuche es später erneut.
-              </p>
-            )}
-
-            {loadingAssignment || isLoading ? (
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {Array.from({ length: 6 }).map((_, i) => (
-                  <Skeleton key={i} className="h-28 rounded-2xl" />
-                ))}
-              </div>
-            ) : cards && cards.length > 0 ? (
-              <div className="grid grid-cols-1 gap-3 pb-24 sm:grid-cols-2">
-                {cards.map((c) => (
-                  <CardCard
-                    key={c.card_id}
-                    prompt={c.card.prompt}
-                    category={c.card.category}
-                    selected={selected.includes(c.card_id)}
-                    onClick={() => toggle(c.card_id)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-sm text-muted-foreground">Keine Karten in dieser Kategorie.</p>
-            )}
-          </TabsContent>
-
-          <TabsContent value="received" className="mt-4 space-y-3 pb-24">
-            {loadingReceived ? (
-              <>
-                <Skeleton className="h-40 rounded-2xl" />
-                <Skeleton className="h-40 rounded-2xl" />
-              </>
-            ) : received && received.length > 0 ? (
-              received.map((batch) => <ReceivedCardItem key={batch.id} batch={batch} />)
-            ) : (
-              <p className="rounded-2xl border border-border bg-card p-6 text-center text-sm text-muted-foreground">
-                Noch keine Karten erhalten.
-              </p>
-            )}
-          </TabsContent>
-        </Tabs>
+        {loadingAssignment || isLoading ? (
+          <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="aspect-[3/4] rounded-[22px]" />
+            ))}
+          </div>
+        ) : cards && cards.length > 0 ? (
+          <div className="mt-5 grid grid-cols-2 gap-3 pb-28 sm:grid-cols-3">
+            {cards.map((c) => (
+              <CardCard
+                key={c.card_id}
+                prompt={c.card.prompt}
+                category={c.card.category}
+                selected={selected.includes(c.card_id)}
+                onClick={() => toggle(c.card_id)}
+              />
+            ))}
+          </div>
+        ) : (
+          <p className="mt-5 text-sm text-muted-foreground">Noch keine Karten verfügbar.</p>
+        )}
       </div>
+
 
       {selected.length > 0 && (
         <div
