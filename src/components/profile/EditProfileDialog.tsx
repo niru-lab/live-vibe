@@ -7,7 +7,9 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Camera, Check, X, SpinnerGap } from '@phosphor-icons/react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useUpdateProfile } from '@/hooks/useProfile';
+import { useNativeFeatures } from '@/hooks/useNativeFeatures';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Profile } from '@/hooks/useProfile';
@@ -16,6 +18,9 @@ interface EditProfileDialogProps { open: boolean; onOpenChange: (open: boolean) 
 
 export const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDialogProps) => {
   const updateProfile = useUpdateProfile();
+  const { isNative, takePhoto, pickFromGallery, uploadAvatar } = useNativeFeatures();
+  const [sourceSheetOpen, setSourceSheetOpen] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [username, setUsername] = useState(profile?.username || '');
   const [displayName, setDisplayName] = useState(profile?.display_name || '');
@@ -53,9 +58,63 @@ export const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDi
     setUsername(sanitized); checkUsernameAvailability(sanitized);
   };
 
-  const handleAvatarSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarError = (error: unknown) => {
+    const code = String((error as { message?: string })?.message ?? '');
+    if (code === 'PHOTO_PICKER_CANCELLED' || code === 'CAMERA_CANCELLED') return;
+    if (code === 'PHOTO_PERMISSION_DENIED') {
+      toast.error('Zugriff auf die Mediathek verweigert. Bitte erlaube den Zugriff in den iPhone-Einstellungen.');
+      return;
+    }
+    if (code === 'CAMERA_PERMISSION_DENIED') {
+      toast.error('Zugriff auf die Kamera verweigert. Bitte erlaube den Zugriff in den iPhone-Einstellungen.');
+      return;
+    }
+    if (code === 'AVATAR_INVALID_IMAGE') {
+      toast.error('Dieses Bild kann nicht verwendet werden. Bitte wähle ein anderes Bild.');
+      return;
+    }
+    toast.error('Upload fehlgeschlagen. Bitte versuche es erneut.');
+  };
+
+  const commitAvatar = async (input: Blob | File | string) => {
+    if (isUploadingAvatar) return;
+    setIsUploadingAvatar(true);
+    try {
+      const url = await uploadAvatar(input);
+      await updateProfile.mutateAsync({ avatar_url: url });
+      setAvatarUrl(url);
+      setAvatarFile(null);
+      toast.success('Profilbild aktualisiert');
+    } catch (error) {
+      handleAvatarError(error);
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
+  const handleAvatarTap = () => {
+    if (isUploadingAvatar) return;
+    if (isNative) { setSourceSheetOpen(true); return; }
+    fileInputRef.current?.click();
+  };
+
+  const handleNativeSource = async (source: 'camera' | 'gallery') => {
+    if (isUploadingAvatar) return;
+    setSourceSheetOpen(false);
+    try {
+      const photo = source === 'camera' ? await takePhoto() : await pickFromGallery();
+      if (!photo?.dataUrl) throw new Error('AVATAR_INVALID_IMAGE');
+      await commitAvatar(photo.dataUrl);
+    } catch (error) {
+      handleAvatarError(error);
+    }
+  };
+
+  const handleAvatarSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) { setAvatarFile(file); setAvatarUrl(URL.createObjectURL(file)); }
+    e.target.value = '';
+    if (!file) return;
+    await commitAvatar(file);
   };
 
   const handleSave = async () => {
@@ -93,12 +152,38 @@ export const EditProfileDialog = ({ open, onOpenChange, profile }: EditProfileDi
                 <AvatarImage src={avatarUrl} />
                 <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-2xl text-primary-foreground">{displayName?.charAt(0).toUpperCase() || '?'}</AvatarFallback>
               </Avatar>
-              <Button type="button" size="icon" variant="secondary" className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full" onClick={() => fileInputRef.current?.click()}>
-                <Camera weight="thin" className="h-4 w-4" />
+              <Button
+                type="button"
+                size="icon"
+                variant="secondary"
+                aria-label="Profilbild ändern"
+                disabled={isUploadingAvatar}
+                className="absolute -bottom-1 -right-1 h-11 w-11 rounded-full"
+                onClick={handleAvatarTap}
+              >
+                {isUploadingAvatar
+                  ? <SpinnerGap weight="thin" className="h-4 w-4 animate-spin" />
+                  : <Camera weight="thin" className="h-4 w-4" />}
               </Button>
-              <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
+              {!isNative && (
+                <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarSelect} />
+              )}
             </div>
-            <p className="mt-2 text-xs text-muted-foreground">Tippe, um Profilbild zu ändern</p>
+            <p className="mt-2 text-xs text-muted-foreground" aria-live="polite">
+              {isUploadingAvatar ? 'Profilbild wird hochgeladen…' : 'Tippe, um Profilbild zu ändern'}
+            </p>
+            {isNative && (
+              <Sheet open={sourceSheetOpen} onOpenChange={setSourceSheetOpen}>
+                <SheetContent side="bottom" className="rounded-t-2xl">
+                  <SheetHeader><SheetTitle>Profilbild ändern</SheetTitle></SheetHeader>
+                  <div className="mt-4 flex flex-col gap-2 pb-4">
+                    <Button type="button" variant="secondary" className="h-12" disabled={isUploadingAvatar} onClick={() => handleNativeSource('camera')}>Kamera</Button>
+                    <Button type="button" variant="secondary" className="h-12" disabled={isUploadingAvatar} onClick={() => handleNativeSource('gallery')}>Aus Mediathek</Button>
+                    <Button type="button" variant="ghost" className="h-12" onClick={() => setSourceSheetOpen(false)}>Abbrechen</Button>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="username">Benutzername</Label>
