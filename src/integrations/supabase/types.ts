@@ -83,6 +83,282 @@ export type Database = {
           },
         ]
       }
+      card_answers: {
+        Row: {
+          answer_text: string
+          batch_id: string
+          card_id: string
+          created_at: string
+          id: string
+          responder_id: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          answer_text: string
+          batch_id: string
+          card_id: string
+          created_at?: string
+          id?: string
+          responder_id: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          answer_text?: string
+          batch_id?: string
+          card_id?: string
+          created_at?: string
+          id?: string
+          responder_id?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_answers_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "card_send_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_answers_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "card_pool"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_answers_responder_id_fkey"
+            columns: ["responder_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      card_interactions: {
+        Row: {
+          action: string
+          batch_id: string | null
+          created_at: string
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          action: string
+          batch_id?: string | null
+          created_at?: string
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          action?: string
+          batch_id?: string | null
+          created_at?: string
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_interactions_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "card_send_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_interactions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      card_pool: {
+        Row: {
+          category: string
+          created_at: string
+          id: string
+          is_active: boolean
+          min_age_for_flirty: number | null
+          prompt: string
+          sort_priority: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_age_for_flirty?: number | null
+          prompt: string
+          sort_priority?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          min_age_for_flirty?: number | null
+          prompt?: string
+          sort_priority?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      card_reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reported_batch_id: string
+          reporter_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reported_batch_id: string
+          reporter_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reported_batch_id?: string
+          reporter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_reports_reported_batch_id_fkey"
+            columns: ["reported_batch_id"]
+            isOneToOne: false
+            referencedRelation: "card_send_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      card_send_batches: {
+        Row: {
+          created_at: string
+          event_id: string | null
+          id: string
+          message: string | null
+          recipient_id: string
+          responded_at: string | null
+          sender_id: string
+          sent_at: string
+          status: string
+          updated_at: string
+          venue_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          message?: string | null
+          recipient_id: string
+          responded_at?: string | null
+          sender_id: string
+          sent_at?: string
+          status?: string
+          updated_at?: string
+          venue_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          message?: string | null
+          recipient_id?: string
+          responded_at?: string | null
+          sender_id?: string
+          sent_at?: string
+          status?: string
+          updated_at?: string
+          venue_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_send_batches_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_send_batches_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_send_batches_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_send_batches_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      card_send_items: {
+        Row: {
+          batch_id: string
+          card_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          batch_id: string
+          card_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          batch_id?: string
+          card_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_send_items_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "card_send_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_send_items_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "card_pool"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_requests: {
         Row: {
           created_at: string
@@ -1717,6 +1993,86 @@ export type Database = {
           },
         ]
       }
+      user_card_assignments: {
+        Row: {
+          assigned_at: string
+          assignment_version: string
+          card_id: string
+          created_at: string
+          id: string
+          position: number
+          profile_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assignment_version?: string
+          card_id: string
+          created_at?: string
+          id?: string
+          position: number
+          profile_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assignment_version?: string
+          card_id?: string
+          created_at?: string
+          id?: string
+          position?: number
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_card_assignments_card_id_fkey"
+            columns: ["card_id"]
+            isOneToOne: false
+            referencedRelation: "card_pool"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_card_assignments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_card_sets: {
+        Row: {
+          assigned_at: string
+          assignment_version: string
+          created_at: string
+          id: string
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_at?: string
+          assignment_version?: string
+          created_at?: string
+          id?: string
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_at?: string
+          assignment_version?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_card_sets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_points: {
         Row: {
           id: string
@@ -1922,8 +2278,25 @@ export type Database = {
         }
         Returns: undefined
       }
+      answer_card: {
+        Args: {
+          _answer_text: string
+          _batch_id: string
+          _card_id: string
+          _visibility?: string
+        }
+        Returns: string
+      }
       archive_old_events: { Args: never; Returns: undefined }
+      assign_user_cards: {
+        Args: { _assignment_version?: string }
+        Returns: string
+      }
       award_social_cloud: {
+        Args: { _reason: string; _ref_id?: string; _ref_type?: string }
+        Returns: number
+      }
+      award_social_cloud_once: {
         Args: { _reason: string; _ref_id?: string; _ref_type?: string }
         Returns: number
       }
@@ -2000,6 +2373,20 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      report_card_batch: {
+        Args: { _batch_id: string; _details?: string; _reason: string }
+        Returns: undefined
+      }
+      send_card_batch: {
+        Args: {
+          _card_ids: string[]
+          _event_id?: string
+          _message?: string
+          _recipient_id: string
+          _venue_id?: string
+        }
+        Returns: string
       }
       top_inviters: {
         Args: { _limit?: number }
