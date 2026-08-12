@@ -1,5 +1,5 @@
 import { cn } from '@/lib/utils';
-import { CARD_CATEGORY_LABELS, CARD_CATEGORY_STYLES, type CardCategory } from '@/lib/cards';
+import { CARD_CATEGORY_STYLES, type CardCategory } from '@/lib/cards';
 import { Check } from '@phosphor-icons/react';
 
 interface CardCardProps {
@@ -10,6 +10,7 @@ interface CardCardProps {
   compact?: boolean;
 }
 
+/** UNO-style playing card: colored frame, tilted white oval, centered prompt. */
 export const CardCard = ({ prompt, category, selected, onClick, compact }: CardCardProps) => {
   const styles = CARD_CATEGORY_STYLES[category] ?? CARD_CATEGORY_STYLES.normal;
 
@@ -20,34 +21,54 @@ export const CardCard = ({ prompt, category, selected, onClick, compact }: CardC
       disabled={!onClick}
       aria-pressed={selected}
       className={cn(
-        'group relative w-full overflow-hidden rounded-2xl border border-border bg-card p-4 text-left transition-all',
-        'min-h-[112px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        onClick && 'cursor-pointer hover:border-primary/40 active:scale-[0.99]',
-        selected && 'border-primary ring-1 ring-primary',
-        compact && 'min-h-[88px] p-3',
+        'group relative aspect-[3/4] w-full overflow-hidden rounded-[22px] p-2 transition-all',
+        'border border-border/60 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+        styles.bar,
+        onClick && 'cursor-pointer active:scale-[0.98]',
+        selected && 'ring-2 ring-primary ring-offset-2 ring-offset-background',
       )}
     >
-      <span className={cn('absolute left-0 top-0 h-full w-1', styles.bar)} aria-hidden />
+      {/* inner white deck face, rotated like an UNO oval */}
+      <span
+        aria-hidden
+        className="absolute inset-[10%] rotate-[-18deg] rounded-[50%] bg-background/95 shadow-inner"
+      />
 
-      <div className="flex items-center justify-between gap-2 pl-2">
-        <span className={cn('rounded-full px-2 py-0.5 text-[11px] font-semibold', styles.badge)}>
-          {CARD_CATEGORY_LABELS[category] ?? category}
-        </span>
-        {selected && (
-          <span className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            <Check weight="bold" className="h-3.5 w-3.5" />
-          </span>
-        )}
-      </div>
-
-      <p
+      <span
+        aria-hidden
         className={cn(
-          'mt-3 pl-2 font-medium leading-snug text-foreground',
-          compact ? 'text-sm' : 'text-[15px]',
+          'absolute left-3 top-2 text-[13px] font-black text-primary-foreground/90',
+          compact && 'text-[11px]',
         )}
       >
-        {prompt}
-      </p>
+        F
+      </span>
+      <span
+        aria-hidden
+        className={cn(
+          'absolute bottom-2 right-3 rotate-180 text-[13px] font-black text-primary-foreground/90',
+          compact && 'text-[11px]',
+        )}
+      >
+        F
+      </span>
+
+      {selected && (
+        <span className="absolute right-2 top-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-background text-primary shadow">
+          <Check weight="bold" className="h-3.5 w-3.5" />
+        </span>
+      )}
+
+      <span className="relative z-10 flex h-full w-full items-center justify-center px-4">
+        <span
+          className={cn(
+            'line-clamp-6 text-center font-semibold leading-snug text-foreground',
+            compact ? 'text-xs' : 'text-sm',
+          )}
+        >
+          {prompt}
+        </span>
+      </span>
     </button>
   );
 };
