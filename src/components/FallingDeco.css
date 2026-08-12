@@ -52,7 +52,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .feyrn-deco {
+  .feyrn-deco,
+  .feyrn-particle {
     display: none;
   }
 }
