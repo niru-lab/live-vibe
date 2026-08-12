@@ -256,6 +256,12 @@
 }
 
 @layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   * {
     @apply border-border;
   }
@@ -266,6 +272,11 @@
 }
 
 @layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+
   /* Glassmorphism */
   .glass {
     @apply bg-card/20 backdrop-blur-xl border border-white/10;
