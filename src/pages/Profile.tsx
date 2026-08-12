@@ -9,7 +9,7 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfilePostsGrid } from '@/components/profile/ProfilePostsGrid';
 import { ProfileSettings } from '@/components/profile/ProfileSettings';
 import { ReferralProgressCard } from '@/components/referral/ReferralProgressCard';
-import { Users, GearSix, ChatCircleDots } from '@phosphor-icons/react';
+import { Users, GearSix, ChatCircleDots, Cards as CardsIcon } from '@phosphor-icons/react';
 import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 
 export default function Profile() {
@@ -57,15 +57,26 @@ export default function Profile() {
               </span>
             )}
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-9 w-9 rounded-full glass-pill"
-            onClick={() => setSettingsOpen(true)}
-            aria-label="Einstellungen öffnen"
-          >
-            <GearSix weight="bold" className="h-4 w-4 text-foreground" />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full glass-pill"
+              onClick={() => navigate('/cards')}
+              aria-label="Feyrn Cards öffnen"
+            >
+              <CardsIcon weight="bold" className="h-4 w-4 text-foreground" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-9 w-9 rounded-full glass-pill"
+              onClick={() => setSettingsOpen(true)}
+              aria-label="Einstellungen öffnen"
+            >
+              <GearSix weight="bold" className="h-4 w-4 text-foreground" />
+            </Button>
+          </div>
         </header>
         <div className="px-4 pb-24">
           <ProfileHeader profile={profile || null} isLoading={isLoading} followersCount={followStats?.followers || 0} followingCount={followStats?.following || 0} postsCount={postsCount || 0} />
