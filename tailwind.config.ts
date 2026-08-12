@@ -14,9 +14,28 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Outfit", "sans-serif"],
-        display: ["Space Grotesk", "sans-serif"],
+        sans: [
+          "Satoshi",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
+        display: [
+          "Satoshi",
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Roboto",
+          "Helvetica Neue",
+          "Arial",
+          "sans-serif",
+        ],
       },
+
       fontSize: {
         "xs": ["var(--text-xs)", { lineHeight: "var(--leading-normal)", letterSpacing: "var(--tracking-wide)" }],
         "sm": ["var(--text-sm)", { lineHeight: "var(--leading-normal)", letterSpacing: "var(--tracking-normal)" }],
