@@ -109,7 +109,7 @@ export const CardDeck = ({ cards, sentCardIds, onSend }: CardDeckProps) => {
           <FeyrnCard
             prompt={current.card.prompt}
             category={current.card.category as CardCategory}
-            position={current.position}
+            position={(index % total) + 1}
             total={total}
             sent={sentCardIds.has(current.card_id)}
           />
