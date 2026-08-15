@@ -109,6 +109,8 @@ export default function VenueDashboard() {
   const topEventId = sortedEvents[0]?.event_id;
   const insight = resolveVenueInsight(overview, topEventId);
 
+  if (!isVenue) return null;
+
   if (isLoading || !overview) {
     return (
       <AppLayout>
@@ -124,7 +126,6 @@ export default function VenueDashboard() {
     );
   }
 
-  if (!isVenue) return null;
 
   if (overview.total_events === 0) {
     return (
