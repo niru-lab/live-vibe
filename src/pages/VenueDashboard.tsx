@@ -80,7 +80,8 @@ export default function VenueDashboard() {
   const { data: ownedVenue } = useOwnedVenue();
 
   useEffect(() => {
-    if (!profileLoading && profile && !isVenue) navigate('/feed', { replace: true });
+    if (profileLoading) return;
+    if (!profile || !isVenue) navigate('/feed', { replace: true });
   }, [profileLoading, profile, isVenue, navigate]);
 
   useEffect(() => {
