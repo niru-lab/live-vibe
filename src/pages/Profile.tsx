@@ -86,6 +86,24 @@ export default function Profile() {
               role={profile.role === 'venue_owner' ? 'venue_owner' : 'guest'}
             />
           )}
+          {profile?.role === 'venue_owner' && (
+            <button
+              type="button"
+              onClick={() => navigate('/dashboard')}
+              className="mb-4 flex w-full items-center justify-between rounded-2xl border border-border/60 bg-card/70 p-4 text-left transition-colors active:bg-card"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
+                  <ChartLine weight="fill" className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Venue Dashboard</p>
+                  <p className="text-xs text-muted-foreground">Events & Analytics</p>
+                </div>
+              </div>
+              <ArrowRight weight="bold" className="h-4 w-4 text-muted-foreground" />
+            </button>
+          )}
           <ProfilePostsGrid profileId={profile?.id} />
         </div>
       </div>
