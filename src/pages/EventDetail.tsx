@@ -81,21 +81,22 @@ export default function EventDetail() {
   const goingCount = attendees?.goingCount || 0;
   const expectedAttendees = event.expected_attendees || 100;
   const fillPercentage = Math.min((goingCount / expectedAttendees) * 100, 100);
+  const isPublicEvent = event.visibility === 'public';
 
-  const handleRSVP = async (status: 'going' | 'interested' | null) => {
-    if (!user) { navigate(`/auth?redirect=${encodeURIComponent(`/events/${event.id}`)}`); return; }
-    track('event_rsvp_cta_clicked', { eventId: event.id, status, surface: 'event_detail' });
+  const handlePublicRSVP = async (status: 'going' | 'interested' | null) => {
+    if (!user) { navigate('/auth'); return; }
     try {
-      await rsvpMutation.mutateAsync({ eventId: event.id, status, surface: 'event_detail' });
+      await rsvpMutation.mutateAsync({ eventId: event.id, status });
       if (status === 'going') {
-        toast({ title: '✅ Zusage bestätigt!', description: `Du gehst zu "${event.name}" 🎉` });
-        // Rewarded once per event — toggling RSVP cannot farm points.
-        awardSocialCloud.mutate({ action: 'first_event_rsvp', refType: 'event', refId: event.id });
-        setPostCtaActive(true);
+        toast({ title: '🎉 Du bist dabei!', description: `Bis zum ${format(startsAt, 'dd. MMMM', { locale: de })}!` });
+      } else if (status === 'interested') {
+        toast({ title: '❤️ Gemerkt', description: 'Wir erinnern dich kurz vorher.' });
+      } else {
+        toast({ title: 'Abgesagt', description: 'Du wurdest von der Liste entfernt.' });
       }
-      else if (status === 'interested') toast({ title: '❤️ Als interessiert markiert' });
-      else toast({ title: 'Status entfernt', description: 'Du wurdest von der Liste entfernt.' });
-    } catch { toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' }); }
+    } catch {
+      toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' });
+    }
   };
 
   const handleFollowHost = async () => {
@@ -214,30 +215,125 @@ export default function EventDetail() {
             </div>
           ) : (
             <div className="space-y-3">
-              <div className="grid grid-cols-2 gap-3">
-                <Button
-                  className="gap-2 min-h-[48px]"
-                  variant={isGoing ? 'outline' : 'default'}
-                  aria-pressed={isGoing}
-                  aria-label={isGoing ? 'Zusage zurückziehen' : 'Zusagen'}
-                  disabled={rsvpMutation.isPending}
-                  onClick={() => handleRSVP(isGoing ? null : 'going')}
-                >
-                  <CheckCircle weight={isGoing ? 'fill' : 'thin'} className="h-5 w-5" />
-                  {isGoing ? 'Zugesagt ✓' : 'Zusagen'}
-                </Button>
-                <Button
-                  variant="outline"
-                  className={`gap-2 min-h-[48px] ${isInterested ? 'border-primary text-primary' : ''}`}
-                  aria-pressed={isInterested}
-                  aria-label={isInterested ? 'Nicht mehr interessiert' : 'Interessiert'}
-                  disabled={rsvpMutation.isPending}
-                  onClick={() => handleRSVP(isInterested ? null : 'interested')}
-                >
-                  <Heart weight={isInterested ? 'fill' : 'thin'} className="h-5 w-5" />
-                  {isInterested ? 'Interessiert ✓' : 'Interessiert'}
-                </Button>
-              </div>
+              {isPublicEvent ? (
+                // PUBLIC EVENT: direct join
+                <div className="space-y-3">
+                  {userRSVP?.status === 'going' && (
+                    <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-4 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 text-green-500 font-semibold">
+                        <CheckCircle weight="fill" className="h-5 w-5" />
+                        Du bist dabei
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handlePublicRSVP(null)}
+                        disabled={rsvpMutation.isPending}
+                        className="text-muted-foreground"
+                      >
+                        Absagen
+                      </Button>
+                    </div>
+                  )}
+
+                  {userRSVP?.status === 'interested' && (
+                    <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 text-primary font-semibold">
+                        <Heart weight="fill" className="h-5 w-5" />
+                        Gemerkt
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handlePublicRSVP(null)}
+                        disabled={rsvpMutation.isPending}
+                        className="text-muted-foreground"
+                      >
+                        Entfernen
+                      </Button>
+                    </div>
+                  )}
+
+                  {!userRSVP?.status && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        variant="outline"
+                        className="gap-2"
+                        onClick={() => handlePublicRSVP('interested')}
+                        disabled={rsvpMutation.isPending}
+                      >
+                        <Heart weight="thin" className="h-4 w-4" />
+                        Merken
+                      </Button>
+                      <Button
+                        className="bg-gradient-to-r from-primary to-accent gap-2"
+                        onClick={() => handlePublicRSVP('going')}
+                        disabled={rsvpMutation.isPending}
+                      >
+                        <CheckCircle weight="thin" className="h-4 w-4" />
+                        Ich bin dabei
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // PRIVATE EVENT: keep existing request flow unchanged
+                <div className="space-y-3">
+                  {myParticipation?.status === 'requested' && (
+                    <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-2 text-sm">
+                        <Hourglass weight="thin" className="h-5 w-5 text-primary animate-pulse" />
+                        <span>Anfrage gesendet · warte auf Bestätigung</span>
+                      </div>
+                      <Button variant="ghost" size="sm" onClick={() => setParticipation.mutate({ eventId: event.id, status: null })} disabled={setParticipation.isPending}>
+                        Zurückziehen
+                      </Button>
+                    </div>
+                  )}
+                  {myParticipation?.status === 'accepted' && (
+                    <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-4 flex items-center gap-2 text-green-500 font-semibold">
+                      <CheckCircle weight="fill" className="h-5 w-5" /> Du bist dabei
+                    </div>
+                  )}
+                  {myParticipation?.status === 'declined' && (
+                    <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 flex items-center gap-2 text-sm text-muted-foreground">
+                      <XCircle weight="thin" className="h-5 w-5" /> Deine Anfrage wurde abgelehnt
+                    </div>
+                  )}
+                  {(!myParticipation || myParticipation.status === 'interested') && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        variant="outline"
+                        className="gap-2"
+                        onClick={() => {
+                          if (!user) { navigate('/auth'); return; }
+                          const next = myParticipation?.status === 'interested' ? null : 'interested';
+                          setParticipation.mutate({ eventId: event.id, status: next }, {
+                            onSuccess: () => toast({ title: next ? '❤️ Gemerkt' : 'Aus Merkliste entfernt' }),
+                          });
+                        }}
+                        disabled={setParticipation.isPending}
+                      >
+                        <Heart weight={myParticipation?.status === 'interested' ? 'fill' : 'thin'} className={cn('h-4 w-4', myParticipation?.status === 'interested' && 'text-red-500')} />
+                        {myParticipation?.status === 'interested' ? 'Gemerkt' : 'Gefällt mir'}
+                      </Button>
+                      <Button
+                        className="bg-gradient-to-r from-primary to-accent gap-2"
+                        onClick={() => {
+                          if (!user) { navigate('/auth'); return; }
+                          setParticipation.mutate({ eventId: event.id, status: 'requested' }, {
+                            onSuccess: () => toast({ title: '💬 Anfrage gesendet', description: 'Der Host wurde benachrichtigt.' }),
+                            onError: () => toast({ variant: 'destructive', title: 'Fehler', description: 'Anfrage konnte nicht gesendet werden.' }),
+                          });
+                        }}
+                        disabled={setParticipation.isPending}
+                      >
+                        <PaperPlaneTilt weight="thin" className="h-4 w-4" /> Anfragen
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
 
               <EventSocialProofCard eventId={event.id} surface="event_detail" />
 
@@ -263,63 +359,6 @@ export default function EventDetail() {
 
               <LiveOfferList offers={eventOffers} surface="event_detail" />
 
-
-
-
-
-              {myParticipation?.status === 'requested' && (
-                <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Hourglass weight="thin" className="h-5 w-5 text-primary animate-pulse" />
-                    <span>Anfrage gesendet · warte auf Bestätigung</span>
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => setParticipation.mutate({ eventId: event.id, status: null })} disabled={setParticipation.isPending}>
-                    Zurückziehen
-                  </Button>
-                </div>
-              )}
-              {myParticipation?.status === 'accepted' && (
-                <div className="rounded-2xl border border-green-500/30 bg-green-500/10 p-4 flex items-center gap-2 text-green-500 font-semibold">
-                  <CheckCircle weight="fill" className="h-5 w-5" /> Du bist dabei
-                </div>
-              )}
-              {myParticipation?.status === 'declined' && (
-                <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 flex items-center gap-2 text-sm text-muted-foreground">
-                  <XCircle weight="thin" className="h-5 w-5" /> Deine Anfrage wurde abgelehnt
-                </div>
-              )}
-              {(!myParticipation || myParticipation.status === 'interested') && (
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
-                    variant="outline"
-                    className="gap-2"
-                    onClick={() => {
-                      if (!user) { navigate('/auth'); return; }
-                      const next = myParticipation?.status === 'interested' ? null : 'interested';
-                      setParticipation.mutate({ eventId: event.id, status: next }, {
-                        onSuccess: () => toast({ title: next ? '❤️ Gemerkt' : 'Aus Merkliste entfernt' }),
-                      });
-                    }}
-                    disabled={setParticipation.isPending}
-                  >
-                    <Heart weight={myParticipation?.status === 'interested' ? 'fill' : 'thin'} className={cn('h-4 w-4', myParticipation?.status === 'interested' && 'text-red-500')} />
-                    {myParticipation?.status === 'interested' ? 'Gemerkt' : 'Gefällt mir'}
-                  </Button>
-                  <Button
-                    className="bg-gradient-to-r from-primary to-accent gap-2"
-                    onClick={() => {
-                      if (!user) { navigate('/auth'); return; }
-                      setParticipation.mutate({ eventId: event.id, status: 'requested' }, {
-                        onSuccess: () => toast({ title: '💬 Anfrage gesendet', description: 'Der Host wurde benachrichtigt.' }),
-                        onError: () => toast({ variant: 'destructive', title: 'Fehler', description: 'Anfrage konnte nicht gesendet werden.' }),
-                      });
-                    }}
-                    disabled={setParticipation.isPending}
-                  >
-                    <PaperPlaneTilt weight="thin" className="h-4 w-4" /> Anfragen
-                  </Button>
-                </div>
-              )}
               <Button variant="ghost" className="w-full gap-2" onClick={handleShare}>
                 <ShareNetwork weight="thin" className="h-4 w-4" /> Teilen
               </Button>
