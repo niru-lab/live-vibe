@@ -29,7 +29,7 @@ import { useMyParticipation, useSetParticipation } from '@/hooks/useEventPartici
 import { Heart, PaperPlaneTilt, Hourglass } from '@phosphor-icons/react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { SafetyMenu } from '@/components/moderation/SafetyMenu';
-import { ArrowLeft, CalendarBlank, Clock, MapPin, Users, CurrencyEur, TShirt, CheckCircle, XCircle, ShareNetwork, Flame, UserCheck, Trash } from '@phosphor-icons/react';
+import { ArrowLeft, CalendarBlank, Clock, MapPin, Users, CurrencyEur, TShirt, CheckCircle, XCircle, ShareNetwork, Flame, UserCheck, Trash, Camera, X } from '@phosphor-icons/react';
 import { cn, getEventStatus } from '@/lib/utils';
 
 const categoryEmojis: Record<string, string> = { club: '🎧', house_party: '🏠', bar: '🍸', festival: '🎪', concert: '🎤', other: '✨' };
@@ -49,6 +49,7 @@ export default function EventDetail() {
   const deleteEventMutation = useDeleteEvent();
   const [showAttendees, setShowAttendees] = useState(false);
   const [postCtaActive, setPostCtaActive] = useState(false);
+  const [showPostCTA, setShowPostCTA] = useState(false);
   const awardSocialCloud = useAwardSocialCloud();
   const hostId = event?.creator_id;
   const { data: isFollowingHost } = useIsFollowing(hostId);
@@ -89,10 +90,12 @@ export default function EventDetail() {
       await rsvpMutation.mutateAsync({ eventId: event.id, status });
       if (status === 'going') {
         toast({ title: '🎉 Du bist dabei!', description: `Bis zum ${format(startsAt, 'dd. MMMM', { locale: de })}!` });
+        setTimeout(() => setShowPostCTA(true), 800);
       } else if (status === 'interested') {
         toast({ title: '❤️ Gemerkt', description: 'Wir erinnern dich kurz vorher.' });
       } else {
         toast({ title: 'Abgesagt', description: 'Du wurdest von der Liste entfernt.' });
+        setShowPostCTA(false);
       }
     } catch {
       toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' });
@@ -232,6 +235,36 @@ export default function EventDetail() {
                         className="text-muted-foreground"
                       >
                         Absagen
+                      </Button>
+                    </div>
+                  )}
+
+                  {isPublicEvent && userRSVP?.status === 'going' && showPostCTA && !isCreator && (
+                    <div className="animate-in fade-in slide-in-from-bottom-2 relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-accent/10 p-4 duration-500">
+                      <button
+                        type="button"
+                        onClick={() => setShowPostCTA(false)}
+                        className="absolute right-3 top-3 rounded-full p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                        aria-label="Schließen"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                      <div className="flex items-start gap-3 pr-6">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20">
+                          <Camera weight="thin" className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold">Zeig, dass du dabei bist</p>
+                          <p className="text-xs text-muted-foreground">Poste über {event.name}</p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="mt-3 w-full gap-2"
+                        onClick={() => navigate(`/create?event_id=${event.id}&event_name=${encodeURIComponent(event.name)}`)}
+                      >
+                        <Camera weight="thin" className="h-4 w-4" />
+                        Posten
                       </Button>
                     </div>
                   )}
