@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import {
   Confetti,
   MagnifyingGlass,
@@ -25,6 +26,7 @@ import {
   ChartLineUp,
   Hourglass,
   CalendarStar,
+  SlidersHorizontal,
 } from '@phosphor-icons/react';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
 import { format, isToday, isTomorrow, addDays, isSameDay } from 'date-fns';
