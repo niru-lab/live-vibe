@@ -105,6 +105,31 @@ export default function Profile() {
             </button>
           )}
           <ProfilePostsGrid profileId={profile?.id} />
+
+          {/* Legal Links */}
+          <div className="mt-6 space-y-1">
+            <button
+              onClick={() => navigate('/impressum')}
+              className="w-full flex items-center justify-between px-2 py-2.5 text-sm text-muted-foreground hover:text-foreground transition rounded-xl hover:bg-muted/50"
+            >
+              Impressum
+              <ArrowRight weight="bold" className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => navigate('/datenschutz')}
+              className="w-full flex items-center justify-between px-2 py-2.5 text-sm text-muted-foreground hover:text-foreground transition rounded-xl hover:bg-muted/50"
+            >
+              Datenschutz
+              <ArrowRight weight="bold" className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => navigate('/agb')}
+              className="w-full flex items-center justify-between px-2 py-2.5 text-sm text-muted-foreground hover:text-foreground transition rounded-xl hover:bg-muted/50"
+            >
+              Nutzungsbedingungen
+              <ArrowRight weight="bold" className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
       <ProfileSettings open={settingsOpen} onOpenChange={setSettingsOpen} profile={profile || null} />
