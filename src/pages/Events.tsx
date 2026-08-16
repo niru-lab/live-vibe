@@ -93,16 +93,63 @@ export default function Events() {
   const setParticipation = useSetParticipation();
   const respondInvitation = useRespondToInvitation();
 
+  const availableGenres = useMemo(() => {
+    const genreSet = new Set<string>();
+    allEvents.forEach((e: any) => {
+      const genres: string[] = (e.music_genres ?? e.genres ?? []) as string[];
+      genres.forEach((g) => { if (g) genreSet.add(g); });
+    });
+    return Array.from(genreSet).sort();
+  }, [allEvents]);
+
   const filteredEvents = useMemo(() => {
     return allEvents.filter((e: any) => {
-      if (search && !`${e.name} ${e.location_name ?? ''} ${e.city ?? ''}`.toLowerCase().includes(search.toLowerCase())) {
-        return false;
-      }
+      if (
+        search &&
+        !`${e.name} ${e.location_name ?? ''} ${e.city ?? ''}`
+          .toLowerCase()
+          .includes(search.toLowerCase())
+      ) return false;
       if (activeDate && !isSameDay(new Date(e.starts_at), activeDate)) return false;
       if (category && (e.category ?? '') !== category) return false;
+      if (genre) {
+        const eventGenres: string[] = (e.music_genres ?? e.genres ?? []) as string[];
+        if (!eventGenres.includes(genre)) return false;
+      }
       return true;
     });
-  }, [allEvents, search, activeDate, category]);
+  }, [allEvents, search, activeDate, category, genre]);
+
+  const activeFilterCount = useMemo(() => {
+    let count = 0;
+    if (dateKey !== 'all') count++;
+    if (category !== null) count++;
+    return count;
+  }, [dateKey, category]);
+
+  const hasActiveFilters = search !== '' || dateKey !== 'all' || category !== null || genre !== null;
+
+  const activeFilterDescription = useMemo(() => {
+    const parts: string[] = [];
+    if (dateKey !== 'all') {
+      const label = dateFilters.find((f) => f.key === dateKey)?.label;
+      if (label) parts.push(label);
+    }
+    if (category) {
+      const label = CATEGORIES.find((c) => c.key === category)?.label;
+      if (label) parts.push(label);
+    }
+    if (genre) parts.push(genre);
+    if (search) parts.push(`"${search}"`);
+    return parts.join(', ');
+  }, [dateKey, category, genre, search, dateFilters]);
+
+  const resetAllFilters = () => {
+    setDateKey('all');
+    setCategory(null);
+    setGenre(null);
+    setSearch('');
+  };
 
   // Soft personalization (city + genre) – reorders only, never filters.
   const rankedEvents = useEventRanking(filteredEvents as any);
