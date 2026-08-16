@@ -34,10 +34,10 @@ export default function Datenschutz() {
           Verantwortlicher im Sinne der DSGVO ist:
         </p>
         <p>
-          [GRÜNDER VOLLSTÄNDIGER NAME]<br />
-          [STRASSE HAUSNUMMER]<br />
-          [PLZ ORT]<br />
-          E-Mail: [E-MAIL ADRESSE]
+          Niruban Yeyavathanan<br />
+          Breslauer Str. 70<br />
+          73432 Aalen<br />
+          E-Mail: hello@feyrn.de
         </p>
       </section>
 
@@ -117,7 +117,7 @@ export default function Datenschutz() {
           <li>Beschwerde bei der zuständigen Aufsichtsbehörde</li>
         </ul>
         <p>
-          Zur Ausübung deiner Rechte wende dich an: [E-MAIL ADRESSE]
+          Zur Ausübung deiner Rechte wende dich an: hello@feyrn.de
         </p>
       </section>
 
@@ -166,7 +166,7 @@ export default function Datenschutz() {
         </p>
       </section>
 
-      <p className="pt-6 text-xs text-muted-foreground">Stand: [DATUM DER LETZTEN AKTUALISIERUNG]</p>
+      <p className="pt-6 text-xs text-muted-foreground">Stand: 16. August 2026</p>
     </LegalPage>
   );
 }
