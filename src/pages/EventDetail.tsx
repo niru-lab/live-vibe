@@ -29,7 +29,7 @@ import { useMyParticipation, useSetParticipation } from '@/hooks/useEventPartici
 import { Heart, PaperPlaneTilt, Hourglass } from '@phosphor-icons/react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { SafetyMenu } from '@/components/moderation/SafetyMenu';
-import { ArrowLeft, CalendarBlank, Clock, MapPin, Users, CurrencyEur, TShirt, CheckCircle, XCircle, ShareNetwork, Flame, UserCheck, Trash, Camera } from '@phosphor-icons/react';
+import { ArrowLeft, CalendarBlank, Clock, MapPin, Users, CurrencyEur, TShirt, CheckCircle, XCircle, ShareNetwork, Flame, UserCheck, Trash, Camera, X } from '@phosphor-icons/react';
 import { cn, getEventStatus } from '@/lib/utils';
 
 const categoryEmojis: Record<string, string> = { club: '🎧', house_party: '🏠', bar: '🍸', festival: '🎪', concert: '🎤', other: '✨' };
