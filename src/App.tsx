@@ -103,6 +103,7 @@ const App = () => (
                   <Route path="/community" element={<Community />} />
                   <Route path="/konto-loeschen" element={<KontoLoeschen />} />
                   <Route path="/settings/privacy/blocked" element={<BlockedUsers />} />
+                  <Route path="/dashboard" element={<VenueDashboard />} />
 
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
