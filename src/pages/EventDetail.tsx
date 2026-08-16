@@ -90,10 +90,12 @@ export default function EventDetail() {
       await rsvpMutation.mutateAsync({ eventId: event.id, status });
       if (status === 'going') {
         toast({ title: '🎉 Du bist dabei!', description: `Bis zum ${format(startsAt, 'dd. MMMM', { locale: de })}!` });
+        setTimeout(() => setShowPostCTA(true), 800);
       } else if (status === 'interested') {
         toast({ title: '❤️ Gemerkt', description: 'Wir erinnern dich kurz vorher.' });
       } else {
         toast({ title: 'Abgesagt', description: 'Du wurdest von der Liste entfernt.' });
+        setShowPostCTA(false);
       }
     } catch {
       toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' });
