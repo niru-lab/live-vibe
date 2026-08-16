@@ -81,21 +81,22 @@ export default function EventDetail() {
   const goingCount = attendees?.goingCount || 0;
   const expectedAttendees = event.expected_attendees || 100;
   const fillPercentage = Math.min((goingCount / expectedAttendees) * 100, 100);
+  const isPublicEvent = event.visibility === 'public';
 
-  const handleRSVP = async (status: 'going' | 'interested' | null) => {
-    if (!user) { navigate(`/auth?redirect=${encodeURIComponent(`/events/${event.id}`)}`); return; }
-    track('event_rsvp_cta_clicked', { eventId: event.id, status, surface: 'event_detail' });
+  const handlePublicRSVP = async (status: 'going' | 'interested' | null) => {
+    if (!user) { navigate('/auth'); return; }
     try {
-      await rsvpMutation.mutateAsync({ eventId: event.id, status, surface: 'event_detail' });
+      await rsvpMutation.mutateAsync({ eventId: event.id, status });
       if (status === 'going') {
-        toast({ title: '✅ Zusage bestätigt!', description: `Du gehst zu "${event.name}" 🎉` });
-        // Rewarded once per event — toggling RSVP cannot farm points.
-        awardSocialCloud.mutate({ action: 'first_event_rsvp', refType: 'event', refId: event.id });
-        setPostCtaActive(true);
+        toast({ title: '🎉 Du bist dabei!', description: `Bis zum ${format(startsAt, 'dd. MMMM', { locale: de })}!` });
+      } else if (status === 'interested') {
+        toast({ title: '❤️ Gemerkt', description: 'Wir erinnern dich kurz vorher.' });
+      } else {
+        toast({ title: 'Abgesagt', description: 'Du wurdest von der Liste entfernt.' });
       }
-      else if (status === 'interested') toast({ title: '❤️ Als interessiert markiert' });
-      else toast({ title: 'Status entfernt', description: 'Du wurdest von der Liste entfernt.' });
-    } catch { toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' }); }
+    } catch {
+      toast({ variant: 'destructive', title: 'Fehler', description: 'Aktion konnte nicht ausgeführt werden.' });
+    }
   };
 
   const handleFollowHost = async () => {
