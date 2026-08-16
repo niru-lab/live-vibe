@@ -49,6 +49,7 @@ export default function EventDetail() {
   const deleteEventMutation = useDeleteEvent();
   const [showAttendees, setShowAttendees] = useState(false);
   const [postCtaActive, setPostCtaActive] = useState(false);
+  const [showPostCTA, setShowPostCTA] = useState(false);
   const awardSocialCloud = useAwardSocialCloud();
   const hostId = event?.creator_id;
   const { data: isFollowingHost } = useIsFollowing(hostId);
