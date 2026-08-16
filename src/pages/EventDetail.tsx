@@ -239,6 +239,36 @@ export default function EventDetail() {
                     </div>
                   )}
 
+                  {isPublicEvent && userRSVP?.status === 'going' && showPostCTA && !isCreator && (
+                    <div className="animate-in fade-in slide-in-from-bottom-2 relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-br from-primary/10 to-accent/10 p-4 duration-500">
+                      <button
+                        type="button"
+                        onClick={() => setShowPostCTA(false)}
+                        className="absolute right-3 top-3 rounded-full p-1 text-muted-foreground transition-colors hover:bg-white/10 hover:text-foreground"
+                        aria-label="Schließen"
+                      >
+                        <X className="h-4 w-4" />
+                      </button>
+                      <div className="flex items-start gap-3 pr-6">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20">
+                          <Camera weight="thin" className="h-5 w-5 text-primary" />
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-sm font-semibold">Zeig, dass du dabei bist</p>
+                          <p className="text-xs text-muted-foreground">Poste über {event.name}</p>
+                        </div>
+                      </div>
+                      <Button
+                        size="sm"
+                        className="mt-3 w-full gap-2"
+                        onClick={() => navigate(`/create?event_id=${event.id}&event_name=${encodeURIComponent(event.name)}`)}
+                      >
+                        <Camera weight="thin" className="h-4 w-4" />
+                        Posten
+                      </Button>
+                    </div>
+                  )}
+
                   {userRSVP?.status === 'interested' && (
                     <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2 text-primary font-semibold">
