@@ -340,10 +340,27 @@ export default function Events() {
               {discoverLoading ? (
                 <EventListSkeleton />
               ) : filteredEvents.length === 0 ? (
-                <EmptyState
-                  title="Keine Events gefunden"
-                  description="Passe deine Filter an oder versuche es später erneut."
-                />
+                hasActiveFilters ? (
+                  <div className="flex flex-col items-center justify-center py-20 text-center">
+                    <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted/60">
+                      <MagnifyingGlass weight="regular" className="h-10 w-10 text-muted-foreground" />
+                    </div>
+                    <h2 className="mb-2 text-lg font-semibold">Keine Events gefunden</h2>
+                    <p className="mb-6 max-w-xs text-sm text-muted-foreground">
+                      Für: {activeFilterDescription}
+                    </p>
+                    <Button variant="outline" onClick={resetAllFilters}>
+                      Filter zurücksetzen
+                    </Button>
+                  </div>
+                ) : (
+                  <EmptyState
+                    title="Keine Events gefunden"
+                    description="In deiner Stadt ist gerade nichts los. Sei der Erste und erstelle ein Event."
+                    onAction={() => navigate('/events/create')}
+                    actionLabel="Event erstellen"
+                  />
+                )
               ) : (
                 rankedEvents.map((event: any) => (
                   <EventListCard key={event.id} event={event} onClick={() => navigate(`/events/${event.id}`)} />
