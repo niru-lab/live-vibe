@@ -107,6 +107,16 @@ export default function CreatePost() {
     return () => { cancelled = true; };
   }, [contextEventId, contextVenueId]);
 
+  // Pre-fill event from URL params (e.g. coming from EventDetail RSVP CTA)
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const eventId = params.get('event_id');
+    const eventName = params.get('event_name');
+    if (eventId && eventName) {
+      setSelectedTag({ type: 'event', id: eventId, name: decodeURIComponent(eventName) });
+    }
+  }, []);
+
   useEffect(() => {
     if (taggedPerson) return;
     const q = personQuery.trim();
