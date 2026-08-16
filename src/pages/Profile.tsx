@@ -9,7 +9,7 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfilePostsGrid } from '@/components/profile/ProfilePostsGrid';
 import { ProfileSettings } from '@/components/profile/ProfileSettings';
 import { ReferralProgressCard } from '@/components/referral/ReferralProgressCard';
-import { Users, GearSix, ChatCircleDots, Cards as CardsIcon } from '@phosphor-icons/react';
+import { Users, GearSix, ChatCircleDots, Cards as CardsIcon, ChartLine, ArrowRight } from '@phosphor-icons/react';
 import { useNotificationBadges } from '@/hooks/useNotificationBadges';
 
 export default function Profile() {
