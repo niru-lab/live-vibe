@@ -75,6 +75,8 @@ export default function Events() {
   const [dateKey, setDateKey] = useState<string>('all');
   
   const [category, setCategory] = useState<string | null>(null);
+  const [genre, setGenre] = useState<string | null>(null);
+  const [filterSheetOpen, setFilterSheetOpen] = useState(false);
 
   const [myEventsView, setMyEventsView] = useState<'zugesagt' | 'anstehend' | 'vergangen'>('anstehend');
 
