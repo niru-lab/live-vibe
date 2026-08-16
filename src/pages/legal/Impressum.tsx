@@ -31,9 +31,9 @@ export default function Impressum() {
       <section className="space-y-2">
         <h2 className="font-semibold">Angaben gemäß § 5 TMG</h2>
         <p>
-          [GRÜNDER VOLLSTÄNDIGER NAME]<br />
-          [STRASSE HAUSNUMMER]<br />
-          [PLZ ORT]<br />
+          Niruban Yeyavathanan<br />
+          Breslauer Str. 70<br />
+          73432 Aalen<br />
           Deutschland
         </p>
       </section>
@@ -41,17 +41,16 @@ export default function Impressum() {
       <section className="space-y-2">
         <h2 className="font-semibold">Kontakt</h2>
         <p>
-          E-Mail: [E-MAIL ADRESSE]<br />
-          Telefon: [TELEFONNUMMER OPTIONAL]
+          E-Mail: hello@feyrn.de<br />
         </p>
       </section>
 
       <section className="space-y-2">
         <h2 className="font-semibold">Verantwortlich für den Inhalt nach § 55 Abs. 2 RStV</h2>
         <p>
-          [GRÜNDER VOLLSTÄNDIGER NAME]<br />
-          [STRASSE HAUSNUMMER]<br />
-          [PLZ ORT]
+          Niruban Yeyavathanan<br />
+          Breslauer Str. 70<br />
+          73432 Aalen
         </p>
       </section>
 
@@ -88,7 +87,7 @@ export default function Impressum() {
         </p>
       </section>
 
-      <p className="pt-6 text-xs text-muted-foreground">Stand: [DATUM DER LETZTEN AKTUALISIERUNG]</p>
+      <p className="pt-6 text-xs text-muted-foreground">Stand: 16. August 2026</p>
     </LegalPage>
   );
 }

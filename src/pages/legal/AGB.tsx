@@ -32,7 +32,7 @@ export default function AGB() {
         <h2 className="font-semibold">1. Geltungsbereich</h2>
         <p>
           Diese Nutzungsbedingungen gelten für die Nutzung der Feyrn-App und aller damit verbundenen
-          Dienste, bereitgestellt von [GRÜNDER VOLLSTÄNDIGER NAME], [STRASSE HAUSNUMMER], [PLZ ORT].
+          Dienste, bereitgestellt von Niruban Yeyavathanan, Breslauer Str. 70, 73432 Aalen.
           Mit der Registrierung akzeptierst du diese Bedingungen vollständig.
         </p>
       </section>
@@ -120,7 +120,7 @@ export default function AGB() {
         <h2 className="font-semibold">9. Meldung von Verstößen</h2>
         <p>
           Verstöße gegen diese Bedingungen kannst du direkt in der App über die Melde-Funktion
-          oder per E-Mail an [E-MAIL ADRESSE] melden. Wir bearbeiten Meldungen innerhalb von
+          oder per E-Mail an hello@feyrn.de melden. Wir bearbeiten Meldungen innerhalb von
           72 Stunden.
         </p>
       </section>
@@ -140,7 +140,7 @@ export default function AGB() {
         <h2 className="font-semibold">11. Anwendbares Recht</h2>
         <p>
           Es gilt deutsches Recht unter Ausschluss des UN-Kaufrechts. Gerichtsstand ist
-          [PLZ ORT], soweit du Kaufmann, juristische Person des öffentlichen Rechts oder
+          73432 Aalen, soweit du Kaufmann, juristische Person des öffentlichen Rechts oder
           öffentlich-rechtliches Sondervermögen bist.
         </p>
       </section>
@@ -155,7 +155,7 @@ export default function AGB() {
         </p>
       </section>
 
-      <p className="pt-6 text-xs text-muted-foreground">Stand: [DATUM DER LETZTEN AKTUALISIERUNG]</p>
+      <p className="pt-6 text-xs text-muted-foreground">Stand: 16. August 2026</p>
     </LegalPage>
   );
 }
