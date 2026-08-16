@@ -217,25 +217,93 @@ export default function Events() {
         </div>
       </div>
 
-      {/* Date chips */}
-      <ChipRow>
-        {dateFilters.map((f) => (
-          <Chip key={f.key} active={dateKey === f.key} onClick={() => setDateKey(f.key)}>
-            {f.label}
-          </Chip>
-        ))}
-      </ChipRow>
+      {/* Filter pill row */}
+      <div className="mt-4 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="flex gap-3 min-w-min items-center">
+          {/* Filter pill → opens bottom sheet */}
+          <button
+            onClick={() => setFilterSheetOpen(true)}
+            className={cn(
+              'flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-medium transition shrink-0',
+              activeFilterCount > 0
+                ? 'bg-primary text-primary-foreground'
+                : 'bg-muted/60 text-foreground/80 hover:bg-muted'
+            )}
+            aria-label="Filter öffnen"
+          >
+            <SlidersHorizontal weight="regular" className="h-4 w-4" />
+            Filter
+            {activeFilterCount > 0 && (
+              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-foreground text-primary text-xs font-bold">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
 
+          {/* Genre chips — inline, only if genre data exists */}
+          {availableGenres.length > 0 && (
+            <>
+              <Chip active={genre === null} onClick={() => setGenre(null)}>Alle Genres</Chip>
+              {availableGenres.map((g) => (
+                <Chip key={g} active={genre === g} onClick={() => setGenre(g)}>
+                  {g}
+                </Chip>
+              ))}
+            </>
+          )}
+        </div>
+      </div>
 
-      {/* Category chips */}
-      <ChipRow>
-        <Chip active={category === null} onClick={() => setCategory(null)}>Alle Arten</Chip>
-        {CATEGORIES.map((c) => (
-          <Chip key={c.key} active={category === c.key} onClick={() => setCategory(c.key)}>
-            {c.label}
-          </Chip>
-        ))}
-      </ChipRow>
+      {/* Filter bottom sheet */}
+      <Sheet open={filterSheetOpen} onOpenChange={setFilterSheetOpen}>
+        <SheetContent side="bottom" className="rounded-t-3xl pb-8">
+          <SheetHeader>
+            <SheetTitle>Filter</SheetTitle>
+          </SheetHeader>
+
+          {/* Date section */}
+          <div className="mt-6">
+            <h4 className="mb-3 text-sm font-semibold text-muted-foreground">Datum</h4>
+            <div className="flex flex-wrap gap-2">
+              {dateFilters.map((f) => (
+                <Chip key={f.key} active={dateKey === f.key} onClick={() => setDateKey(f.key)}>
+                  {f.label}
+                </Chip>
+              ))}
+            </div>
+          </div>
+
+          {/* Category section */}
+          <div className="mt-6">
+            <h4 className="mb-3 text-sm font-semibold text-muted-foreground">Art</h4>
+            <div className="flex flex-wrap gap-2">
+              <Chip active={category === null} onClick={() => setCategory(null)}>Alle Arten</Chip>
+              {CATEGORIES.map((c) => (
+                <Chip key={c.key} active={category === c.key} onClick={() => setCategory(c.key)}>
+                  {c.label}
+                </Chip>
+              ))}
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="mt-8 flex gap-3">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => {
+                setDateKey('all');
+                setCategory(null);
+              }}
+            >
+              Zurücksetzen
+            </Button>
+            <Button className="flex-1" onClick={() => setFilterSheetOpen(false)}>
+              Anwenden
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
 
 
 
