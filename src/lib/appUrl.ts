@@ -24,3 +24,20 @@ export const getSiteUrl = (): string => {
 /** Absolute URL for a path, safe for auth redirects and sharing. */
 export const appUrl = (path = '/'): string =>
   `${getSiteUrl()}${path.startsWith('/') ? path : `/${path}`}`;
+
+/**
+ * Redirect target for OAuth popups/redirects.
+ *
+ * OAuth must return to the SAME origin the user is currently on — otherwise the
+ * popup lands on a different origin, the opener can never read the result and
+ * the flow fails with "Sign in was cancelled" (e.g. in the Lovable preview).
+ * Only the native shell falls back to the configured production URL.
+ */
+export const oauthRedirectUrl = (path = '/'): string => {
+  const suffix = path.startsWith('/') ? path : `/${path}`;
+  if (typeof window === 'undefined') return `${CONFIGURED_SITE_URL ?? ''}${suffix}`;
+  const { protocol } = window.location;
+  const isNativeShell = protocol === 'capacitor:' || protocol === 'file:';
+  if (isNativeShell && CONFIGURED_SITE_URL) return `${CONFIGURED_SITE_URL}${suffix}`;
+  return `${window.location.origin}${suffix}`;
+};
