@@ -2,21 +2,21 @@ import { useNavigate } from 'react-router-dom';
 import { lovable } from '@/integrations/lovable/index';
 import { motion } from 'framer-motion';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
-import { appUrl } from '@/lib/appUrl';
+import { oauthRedirectUrl } from '@/lib/appUrl';
 
 export default function Welcome() {
   const navigate = useNavigate();
 
   const handleGoogle = async () => {
     const { error } = await lovable.auth.signInWithOAuth('google', {
-      redirect_uri: appUrl('/auth/callback'),
+      redirect_uri: oauthRedirectUrl('/auth/callback'),
     });
     if (error) console.error('Google auth error:', error);
   };
 
   const handleApple = async () => {
     const { error } = await lovable.auth.signInWithOAuth('apple', {
-      redirect_uri: appUrl('/auth/callback'),
+      redirect_uri: oauthRedirectUrl('/auth/callback'),
     });
     if (error) console.error('Apple auth error:', error);
   };
