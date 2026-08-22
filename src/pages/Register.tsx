@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { appUrl } from '@/lib/appUrl';
+import { oauthRedirectUrl } from '@/lib/appUrl';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from '@phosphor-icons/react';
 import { EulaConsent } from '@/components/legal/EulaConsent';
@@ -64,7 +64,7 @@ export default function Register() {
     const { error: authError } = await supabase.auth.signInWithOtp({
       email,
       options: {
-        emailRedirectTo: appUrl('/verify'),
+        emailRedirectTo: oauthRedirectUrl('/verify'),
         shouldCreateUser: true,
       },
     });
