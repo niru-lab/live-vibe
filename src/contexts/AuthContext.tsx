@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { appUrl } from '@/lib/appUrl';
+import { oauthRedirectUrl } from '@/lib/appUrl';
 
 interface AuthContextType {
   user: User | null;
@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signUp = async (email: string, password: string, metadata?: { username?: string; display_name?: string; role?: 'guest' | 'venue_owner' }) => {
-    const redirectUrl = appUrl('/verify');
+    const redirectUrl = oauthRedirectUrl('/verify');
     
     const { error } = await supabase.auth.signUp({
       email,

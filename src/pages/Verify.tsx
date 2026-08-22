@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { appUrl } from '@/lib/appUrl';
+import { oauthRedirectUrl } from '@/lib/appUrl';
 import { useAuth } from '@/contexts/AuthContext';
 import { resolvePostAuthRoute } from '@/lib/authRouting';
 import { motion } from 'framer-motion';
@@ -147,7 +147,7 @@ export default function Verify() {
         ? await supabase.auth.signInWithOtp({
             email: contact,
             options: {
-              emailRedirectTo: appUrl('/verify'),
+              emailRedirectTo: oauthRedirectUrl('/verify'),
               shouldCreateUser: mode === 'register',
             },
           })
