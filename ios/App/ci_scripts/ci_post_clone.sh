@@ -1,17 +1,12 @@
 #!/bin/sh
 set -e
 
-echo "Installing Homebrew..."
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" < /dev/null
+echo "Finding Node..."
+which node || true
+ls /usr/local/bin/node || true
+ls /usr/bin/node || true
+ls ~/.nvm/versions/ || true
 
-echo "Installing Node.js..."
-/opt/homebrew/bin/brew install node
-
-echo "Running npm install..."
-cd "$CI_WORKSPACE"
-/opt/homebrew/bin/npm install
-
-echo "Syncing Capacitor..."
-/opt/homebrew/bin/npx cap sync ios
+echo "PATH: $PATH"
 
 echo "Done."
