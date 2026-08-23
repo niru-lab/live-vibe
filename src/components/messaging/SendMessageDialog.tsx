@@ -10,6 +10,8 @@ import { useChatRequestStatus, useAcceptChatRequest, useDeclineChatRequest } fro
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { SafetyMenu } from '@/components/moderation/SafetyMenu';
+import { detectCrisis } from '@/lib/crisisDetection';
+import { CrisisBanner } from '@/components/safety/CrisisBanner';
 
 interface SendMessageDialogProps {
   open: boolean;
@@ -28,6 +30,8 @@ interface OptimisticMsg {
 export function SendMessageDialog({ open, onOpenChange, recipient }: SendMessageDialogProps) {
   const [content, setContent] = useState('');
   const [optimistic, setOptimistic] = useState<OptimisticMsg[]>([]);
+  const [showCrisisBanner, setShowCrisisBanner] = useState(false);
+  const [crisisDismissed, setCrisisDismissed] = useState(false);
   const sendDM = useSendDM();
   const { data: myProfile } = useProfile();
   const { data: allDms = [] } = useDirectMessages();
@@ -174,11 +178,29 @@ export function SendMessageDialog({ open, onOpenChange, recipient }: SendMessage
           )}
         </div>
 
+        {showCrisisBanner && (
+          <div className="px-5">
+            <CrisisBanner
+              onDismiss={() => {
+                setShowCrisisBanner(false);
+                setCrisisDismissed(true);
+              }}
+            />
+          </div>
+        )}
+
         <div className="px-5 py-3 border-t border-gray-200 dark:border-white/10 flex items-end gap-2 bg-white dark:bg-white/[0.02]">
           <Textarea
             data-testid="chat-input"
             value={content}
-            onChange={(e) => setContent(e.target.value)}
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setContent(newValue);
+              // Crisis detection — show banner once per conversation session
+              if (!crisisDismissed && detectCrisis(newValue)) {
+                setShowCrisisBanner(true);
+              }
+            }}
             placeholder={inputDisabled ? (isDeclined ? 'Anfrage wurde abgelehnt' : 'Anfrage zuerst annehmen') : 'Nachricht…'}
             disabled={inputDisabled}
             className="min-h-[44px] max-h-[120px] bg-white border-gray-200 text-gray-900 placeholder:text-gray-400 dark:bg-white/5 dark:border-white/10 dark:text-white dark:placeholder:text-[#A0A0B0] resize-none disabled:opacity-60"
