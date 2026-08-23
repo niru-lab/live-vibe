@@ -66,6 +66,7 @@ const App = () => (
               <Sonner />
               <BrowserRouter>
                 <SwipeBackProvider />
+                <AuthUrlHandler />
                 <OnboardingGate />
                 <ReferralCapture />
                 <Routes>
