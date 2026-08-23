@@ -14,28 +14,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Lock, SignOut, PencilSimple, Star, Shield, CaretLeft, Moon, Sun, Trash, FileText, Scales, ShieldCheck, Prohibit } from '@phosphor-icons/react';
+import { Lock, SignOut, PencilSimple, Star, Shield, CaretLeft, Moon, Sun, Trash, FileText, Scales, ShieldCheck, Prohibit, Warning } from '@phosphor-icons/react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTheme } from '@/components/ThemeProvider';
 import { EditProfileDialog } from './EditProfileDialog';
 import { PrivacySettings } from './PrivacySettings';
 import { PushSettings } from './PushSettings';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/hooks/use-toast';
+import { useDeleteAccount } from '@/hooks/useDeleteAccount';
 import type { Profile } from '@/hooks/useProfile';
 
 interface ProfileSettingsProps { open: boolean; onOpenChange: (open: boolean) => void; profile: Profile | null; }
 
 export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettingsProps) => {
   const navigate = useNavigate();
-  const { user, signOut } = useAuth();
+  const { signOut } = useAuth();
   const [editOpen, setEditOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const { theme, setTheme } = useTheme();
   const isDark = theme === 'dark';
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
+
+  const {
+    isConfirming, isDeleting, errorMessage,
+    requestDelete, cancelDelete, confirmDelete,
+  } = useDeleteAccount();
 
   const handleThemeToggle = (checked: boolean) => {
     const next = checked ? 'dark' : 'light';
@@ -50,24 +53,14 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
 
   const handleSignOut = async () => { await signOut(); onOpenChange(false); navigate('/auth'); };
 
-  const handleDeleteAccount = async () => {
-    if (!user) return;
-    setDeleting(true);
-    try {
-      // Best-effort: delete profile row (cascades on related data via FKs).
-      // Full auth.users deletion requires an admin edge function – wird nachgereicht.
-      const { error } = await supabase.from('profiles').delete().eq('user_id', user.id);
-      if (error) throw error;
-      await signOut();
-      toast({ title: 'Profil gelöscht', description: 'Deine Daten wurden entfernt.' });
-      setDeleteOpen(false);
-      onOpenChange(false);
-      navigate('/auth');
-    } catch (e: any) {
-      toast({ title: 'Fehler', description: e?.message ?? 'Löschen fehlgeschlagen.', variant: 'destructive' });
-    } finally {
-      setDeleting(false);
-    }
+  const handleRequestDelete = () => {
+    requestDelete();
+    setDeleteOpen(true);
+  };
+
+  const handleDeleteOpenChange = (open: boolean) => {
+    setDeleteOpen(open);
+    if (!open) cancelDelete();
   };
 
   const menuItems = [
@@ -185,9 +178,28 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
               <Button variant="ghost" className="w-full justify-start gap-3 h-11 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleSignOut}>
                 <SignOut weight="thin" className="h-4 w-4" /><span>Abmelden</span>
               </Button>
-              <Button variant="ghost" className="w-full justify-start gap-3 h-11 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setDeleteOpen(true)}>
-                <Trash weight="thin" className="h-4 w-4" /><span>Profil löschen</span>
-              </Button>
+            </div>
+            <Separator />
+            {/* Danger Zone */}
+            <div>
+              <div className="flex items-center gap-2 text-sm font-medium text-destructive mb-3">
+                <Warning weight="thin" className="h-4 w-4" />
+                Gefahrenzone
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm text-muted-foreground">
+                  Das Löschen deines Kontos ist dauerhaft. Alle Posts, Events, Nachrichten
+                  und Profilinformationen werden innerhalb von 30 Tagen entfernt.
+                </p>
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start gap-3 h-11 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={handleRequestDelete}
+                >
+                  <Trash weight="thin" className="h-4 w-4" />
+                  <span>Konto löschen</span>
+                </Button>
+              </div>
             </div>
           </div>
         </SheetContent>
@@ -195,25 +207,36 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
       <EditProfileDialog open={editOpen} onOpenChange={setEditOpen} profile={profile} />
       <PrivacySettings open={privacyOpen} onOpenChange={setPrivacyOpen} />
 
-      <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+      <AlertDialog open={deleteOpen} onOpenChange={handleDeleteOpenChange}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Profil endgültig löschen?</AlertDialogTitle>
+            <AlertDialogTitle>Konto wirklich löschen?</AlertDialogTitle>
             <AlertDialogDescription>
-              Dein Profil, Posts, Roomz-Mitgliedschaften und Nachrichten werden entfernt.
-              Diese Aktion kann nicht rückgängig gemacht werden.
+              Diese Aktion ist dauerhaft und unwiderruflich.
+              Dein Profil, alle Posts, Events, Nachrichten und Feyrn Cards werden gelöscht.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>Abbrechen</AlertDialogCancel>
+            <AlertDialogCancel onClick={cancelDelete} disabled={isDeleting}>Abbrechen</AlertDialogCancel>
             <AlertDialogAction
-              onClick={(e) => { e.preventDefault(); handleDeleteAccount(); }}
-              disabled={deleting}
+              onClick={(e) => { e.preventDefault(); confirmDelete(); }}
+              disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {deleting ? 'Lösche…' : 'Endgültig löschen'}
+              {isDeleting ? 'Wird gelöscht...' : 'Ja, Konto löschen'}
             </AlertDialogAction>
           </AlertDialogFooter>
+          {errorMessage && (
+            <div className="mt-4 rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+              <div className="flex items-start gap-2">
+                <Warning weight="bold" className="h-4 w-4 mt-0.5" />
+                <div>
+                  <p className="font-medium">{errorMessage}</p>
+                  <p className="text-muted-foreground">Hilfe: hello@feyrn.de</p>
+                </div>
+              </div>
+            </div>
+          )}
         </AlertDialogContent>
       </AlertDialog>
     </>
