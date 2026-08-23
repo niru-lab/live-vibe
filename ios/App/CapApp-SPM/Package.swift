@@ -12,9 +12,9 @@ let package = Package(
     ],
     dependencies: [
         .package(url: "https://github.com/ionic-team/capacitor-swift-pm.git", exact: "8.1.0"),
-        .package(name: "CapacitorCamera", path: "../../../node_modules/@capacitor/camera"),
-        .package(name: "CapacitorGeolocation", path: "../../../node_modules/@capacitor/geolocation"),
-        .package(name: "CapacitorPushNotifications", path: "../../../node_modules/@capacitor/push-notifications")
+        .package(url: "https://github.com/ionic-team/capacitor-camera.git", exact: "7.0.0"),
+        .package(url: "https://github.com/ionic-team/capacitor-geolocation.git", exact: "7.0.0"),
+        .package(url: "https://github.com/ionic-team/capacitor-push-notifications.git", exact: "7.0.0")
     ],
     targets: [
         .target(
@@ -22,9 +22,9 @@ let package = Package(
             dependencies: [
                 .product(name: "Capacitor", package: "capacitor-swift-pm"),
                 .product(name: "Cordova", package: "capacitor-swift-pm"),
-                .product(name: "CapacitorCamera", package: "CapacitorCamera"),
-                .product(name: "CapacitorGeolocation", package: "CapacitorGeolocation"),
-                .product(name: "CapacitorPushNotifications", package: "CapacitorPushNotifications")
+                .product(name: "CapacitorCamera", package: "capacitor-camera"),
+                .product(name: "CapacitorGeolocation", package: "capacitor-geolocation"),
+                .product(name: "CapacitorPushNotifications", package: "capacitor-push-notifications")
             ]
         )
     ]
