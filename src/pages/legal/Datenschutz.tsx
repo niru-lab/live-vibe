@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from '@phosphor-icons/react';
 
@@ -55,6 +55,10 @@ export default function Datenschutz() {
           <li>Nachrichten an andere Nutzer (verschlüsselt übertragen)</li>
           <li>Interaktionsdaten (Likes, Follows, Shares)</li>
           <li>Geräteinformationen und App-Nutzungsdaten (anonymisiert)</li>
+          <li>Inhalte von Direktnachrichten und Gruppen-Chats (Roomz) — nur zwischen den beteiligten Nutzern sichtbar</li>
+          <li>Antworten auf Feyrn Cards — privat, nur für Sender und Empfänger sichtbar, nicht öffentlich</li>
+          <li>Musikpräferenzen und an Posts angehängte Musiktitel (Künstler, Trackname)</li>
+          <li>Push-Benachrichtigungs-Token (nur bei expliziter Einwilligung, optional)</li>
         </ul>
       </section>
 
@@ -102,6 +106,12 @@ export default function Datenschutz() {
           Daten innerhalb von 30 Tagen gelöscht, sofern keine gesetzlichen Aufbewahrungspflichten
           entgegenstehen.
         </p>
+        <p>
+          Posts mit aktivierter 24-Stunden-Funktion werden nach Ablauf automatisch
+          aus dem Feed ausgeblendet. Die zugehörigen Mediendateien werden innerhalb
+          von 7 Tagen aus dem Speicher entfernt. Push-Tokens werden bei Deaktivierung
+          der Benachrichtigungen oder Kontolöschung sofort entfernt.
+        </p>
       </section>
 
       <section className="space-y-2">
@@ -124,9 +134,22 @@ export default function Datenschutz() {
       <section className="space-y-2">
         <h2 className="font-semibold">8. Kontolöschung</h2>
         <p>
-          Du kannst dein Konto jederzeit in den App-Einstellungen unter „Konto löschen" vollständig
-          und unwiderruflich löschen. Nach der Löschung werden alle deine personenbezogenen Daten,
-          Posts, Nachrichten und Profilinformationen innerhalb von 30 Tagen entfernt.
+          Du kannst dein Konto jederzeit in der App unter Profil → Einstellungen → „Konto löschen"
+          vollständig und unwiderruflich löschen. Eine öffentliche Anleitung findest du unter{' '}
+          <Link to="/konto-loeschen" className="underline">feyrn.de/konto-loeschen</Link>.
+        </p>
+        <p>Nach der Bestätigung werden folgende Daten gelöscht:</p>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Profil und alle Profilinformationen — sofort</li>
+          <li>Alle Posts, Kommentare und Interaktionen — sofort</li>
+          <li>Alle Nachrichten und Roomz-Inhalte — sofort</li>
+          <li>Alle Feyrn Cards und Antworten — sofort</li>
+          <li>Hochgeladene Medien (Bilder, Videos) — innerhalb von 30 Tagen</li>
+          <li>E-Mail-Adresse und Authentifizierungsdaten — sofort</li>
+          <li>Push-Benachrichtigungs-Token — sofort</li>
+        </ul>
+        <p>
+          Bei Fragen zur Datenlöschung: hello@feyrn.de
         </p>
       </section>
 
