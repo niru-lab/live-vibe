@@ -1,5 +1,5 @@
 import { Switch } from '@/components/ui/switch';
-import { BellSimple, MoonStars } from '@phosphor-icons/react';
+import { BellSimple } from '@phosphor-icons/react';
 import { usePushPreferences, useUpdatePushPreferences } from '@/hooks/usePushPreferences';
 import type { Profile } from '@/hooks/useProfile';
 
@@ -61,10 +61,6 @@ export const PushSettings = ({ profile }: PushSettingsProps) => {
               />
             </div>
           ))}
-          <p className="flex items-center gap-1.5 pt-1 text-[11px] text-muted-foreground">
-            <MoonStars weight="regular" className="h-3.5 w-3.5" />
-            Ruhezeit {prefs?.quiet_hours_start ?? 23}–{prefs?.quiet_hours_end ?? 9} Uhr, max. 3 Mitteilungen pro Tag.
-          </p>
         </div>
       )}
     </div>
