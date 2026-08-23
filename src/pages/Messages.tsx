@@ -32,16 +32,6 @@ export default function Messages() {
   const markDMRead = useMarkDMRead();
   const [tab, setTab] = useState<Tab>('chats');
   const [openChat, setOpenChat] = useState<Conversation['other'] | null>(null);
-  const [showCrisisBanner, setShowCrisisBanner] = useState(false);
-  const [crisisDismissed, setCrisisDismissed] = useState(false);
-
-  // Reset crisis banner state when a chat session closes
-  useEffect(() => {
-    if (!openChat) {
-      setShowCrisisBanner(false);
-      setCrisisDismissed(false);
-    }
-  }, [openChat]);
 
   const { data: sentMessages, isLoading: sentLoading, refetch: refetchSent } = useQuery({
     queryKey: ['sent-messages', profile?.id],
