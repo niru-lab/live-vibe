@@ -16,6 +16,8 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { SendMessageDialog } from '@/components/messaging/SendMessageDialog';
+import { detectCrisis } from '@/lib/crisisDetection';
+import { CrisisBanner } from '@/components/safety/CrisisBanner';
 
 type Tab = 'chats' | 'requests';
 
