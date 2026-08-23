@@ -75,7 +75,9 @@ export const ProfileSettings = ({ open, onOpenChange, profile }: ProfileSettings
       section: 'Profil Einstellungen', icon: Lock,
       items: [
         { icon: PencilSimple, label: 'Profil bearbeiten', onClick: () => setEditOpen(true) },
-        { icon: Star, label: 'Verifizierungsantrag (Clubs)', onClick: () => {} },
+        ...(profile?.role === 'venue_owner'
+          ? [{ icon: Star, label: 'Verifizierungsantrag (Clubs)', onClick: () => {} }]
+          : []),
         { icon: Shield, label: 'Privacy-Einstellungen', onClick: () => setPrivacyOpen(true) },
         { icon: Prohibit, label: 'Blockierte Nutzer', onClick: () => { onOpenChange(false); navigate('/settings/privacy/blocked'); } },
       ],
