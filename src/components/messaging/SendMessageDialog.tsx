@@ -10,6 +10,8 @@ import { useChatRequestStatus, useAcceptChatRequest, useDeclineChatRequest } fro
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { SafetyMenu } from '@/components/moderation/SafetyMenu';
+import { detectCrisis } from '@/lib/crisisDetection';
+import { CrisisBanner } from '@/components/safety/CrisisBanner';
 
 interface SendMessageDialogProps {
   open: boolean;
@@ -28,6 +30,8 @@ interface OptimisticMsg {
 export function SendMessageDialog({ open, onOpenChange, recipient }: SendMessageDialogProps) {
   const [content, setContent] = useState('');
   const [optimistic, setOptimistic] = useState<OptimisticMsg[]>([]);
+  const [showCrisisBanner, setShowCrisisBanner] = useState(false);
+  const [crisisDismissed, setCrisisDismissed] = useState(false);
   const sendDM = useSendDM();
   const { data: myProfile } = useProfile();
   const { data: allDms = [] } = useDirectMessages();
