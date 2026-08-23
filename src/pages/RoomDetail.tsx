@@ -16,6 +16,8 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { formatDistanceToNow } from 'date-fns';
 import { de } from 'date-fns/locale';
+import { detectCrisis } from '@/lib/crisisDetection';
+import { CrisisBanner } from '@/components/safety/CrisisBanner';
 
 const RoomDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +26,8 @@ const RoomDetail = () => {
   const { leaveRoom } = useRooms();
   const queryClient = useQueryClient();
   const [postContent, setPostContent] = useState('');
+  const [showCrisisBanner, setShowCrisisBanner] = useState(false);
+  const [crisisDismissed, setCrisisDismissed] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
 
   const { data: room, isLoading } = useQuery({
