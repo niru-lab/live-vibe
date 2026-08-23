@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=5.0" />
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="preload" href="/fonts/Satoshi-Variable.woff2" as="font" type="font/woff2" crossorigin>
+
+    <title>Feyrn</title>
+    <meta name="description" content="Feyrn - Entdecke, was gerade abgeht">
+    <meta name="author" content="Feyrn" />
+
+    <!-- PWA / Installable Web App -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0A0A0F" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Feyrn" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- TODO: Update og:title to match your application name -->
+    
+    
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8d611ebd-3399-4b38-a810-56a902e0b0e0/id-preview-62262fe5--9f6d8b6f-42e5-46a3-b92c-0b1a93b59e9d.lovable.app-1777295180629.png">
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@Lovable" />
+    <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/8d611ebd-3399-4b38-a810-56a902e0b0e0/id-preview-62262fe5--9f6d8b6f-42e5-46a3-b92c-0b1a93b59e9d.lovable.app-1777295180629.png">
+    <meta property="og:title" content="Feyrn">
+  <meta name="twitter:title" content="Feyrn">
+  <meta property="og:description" content="Feyrn - Entdecke, was gerade abgeht">
+  <meta name="twitter:description" content="Feyrn - Entdecke, was gerade abgeht">
+  <script type="module" crossorigin src="/assets/index-BVfMFAVZ.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CmOcI0Fx.css">
+</head>
+
+  <body>
+    <script>
+      // Apply saved theme before first paint to prevent flash
+      (function () {
+        try {
+          var t = localStorage.getItem('feyrn-theme') || localStorage.getItem('feyrn_theme') || 'light';
+          var root = document.documentElement;
+          root.classList.remove('light', 'dark');
+          if (t === 'dark') {
+            root.classList.add('dark');
+            root.setAttribute('data-theme', 'dark');
+          } else {
+            root.classList.add('light');
+            root.removeAttribute('data-theme');
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <div id="root"></div>
+  </body>
+</html>
