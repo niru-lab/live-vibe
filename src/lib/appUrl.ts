@@ -7,6 +7,7 @@
  * fall back to the configured production site URL.
  */
 const CONFIGURED_SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, '');
+const NATIVE_AUTH_CALLBACK = (import.meta.env.VITE_NATIVE_AUTH_CALLBACK as string | undefined) || 'de.feyrn.app://login-callback';
 
 const isNativeOrigin = () => {
   if (typeof window === 'undefined') return true;
@@ -31,13 +32,17 @@ export const appUrl = (path = '/'): string =>
  * OAuth must return to the SAME origin the user is currently on — otherwise the
  * popup lands on a different origin, the opener can never read the result and
  * the flow fails with "Sign in was cancelled" (e.g. in the Lovable preview).
- * Only the native shell falls back to the configured production URL.
+ * Only the native shell falls back to the configured production URL or the
+ * native custom URL scheme (e.g. de.feyrn.app://login-callback).
  */
 export const oauthRedirectUrl = (path = '/'): string => {
   const suffix = path.startsWith('/') ? path : `/${path}`;
   if (typeof window === 'undefined') return `${CONFIGURED_SITE_URL ?? ''}${suffix}`;
   const { protocol } = window.location;
   const isNativeShell = protocol === 'capacitor:' || protocol === 'file:';
-  if (isNativeShell && CONFIGURED_SITE_URL) return `${CONFIGURED_SITE_URL}${suffix}`;
+  if (isNativeShell) {
+    if (NATIVE_AUTH_CALLBACK) return NATIVE_AUTH_CALLBACK;
+    if (CONFIGURED_SITE_URL) return `${CONFIGURED_SITE_URL}${suffix}`;
+  }
   return `${window.location.origin}${suffix}`;
 };
