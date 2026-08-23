@@ -1,0 +1,15 @@
+{
+	"appId": "de.feyrn.app",
+	"appName": "Feyrn",
+	"webDir": "dist",
+	"plugins": {
+		"SplashScreen": {
+			"launchShowDuration": 0
+		}
+	},
+	"packageClassList": [
+		"CAPCameraPlugin",
+		"GeolocationPlugin",
+		"PushNotificationsPlugin"
+	]
+}
