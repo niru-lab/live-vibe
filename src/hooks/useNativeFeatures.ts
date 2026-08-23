@@ -36,40 +36,11 @@ export const useNativeFeatures = () => {
 
   // Push Notifications
   const initPushNotifications = useCallback(async () => {
-    if (!isNative) return;
-
-    const permResult = await PushNotifications.requestPermissions();
-    if (permResult.receive === 'granted') {
-      await PushNotifications.register();
-    }
-
-    PushNotifications.addListener('registration', async (token) => {
-      console.log('Push registration token:', token.value);
-      if (!profile) return;
-      const platform = Capacitor.getPlatform() as 'ios' | 'android' | 'web';
-      const { error } = await supabase.from('push_tokens').upsert(
-        {
-          profile_id: profile.id,
-          token: token.value,
-          platform,
-        },
-        { onConflict: 'token' },
-      );
-      if (error) console.error('Failed to store push token:', error);
-    });
-
-    PushNotifications.addListener('registrationError', (err) => {
-      console.error('Push registration error:', err.error);
-    });
-
-    PushNotifications.addListener('pushNotificationReceived', (notification) => {
-      console.log('Push notification received:', notification);
-    });
-
-    PushNotifications.addListener('pushNotificationActionPerformed', (notification) => {
-      console.log('Push notification action:', notification);
-    });
-  }, [isNative, profile]);
+    // Push notifications temporarily disabled — FCM service account pending
+    // TODO: Re-enable when FCM is configured
+    console.log('[Feyrn] Push notifications paused — FCM not configured');
+    return;
+  }, []);
 
   // Camera — explicit source, permission-checked, stable DataUrl result
   const takePhoto = useCallback(async () => {
