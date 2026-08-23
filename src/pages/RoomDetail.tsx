@@ -278,9 +278,24 @@ const RoomDetail = () => {
 
             {canPost && (
               <div className="glass rounded-2xl p-3 space-y-2">
+                {showCrisisBanner && (
+                  <CrisisBanner
+                    onDismiss={() => {
+                      setShowCrisisBanner(false);
+                      setCrisisDismissed(true);
+                    }}
+                  />
+                )}
                 <Textarea
                   value={postContent}
-                  onChange={(e) => setPostContent(e.target.value)}
+                  onChange={(e) => {
+                    const newValue = e.target.value;
+                    setPostContent(newValue);
+                    // Crisis detection — show banner once per room session
+                    if (!crisisDismissed && detectCrisis(newValue)) {
+                      setShowCrisisBanner(true);
+                    }
+                  }}
                   placeholder="Schreib etwas in den Room..."
                   className="border-0 bg-transparent resize-none min-h-[60px] focus-visible:ring-0"
                 />
