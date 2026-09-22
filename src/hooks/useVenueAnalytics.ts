@@ -74,7 +74,7 @@ export const useVenueAnalytics = () => {
 
       const [attendeesRes, participantsRes, postsRes] = await Promise.all([
         supabase.from('event_attendees').select('event_id, status, created_at').in('event_id', ids),
-        supabase.from('event_participants').select('event_id, status, created_at').in('event_id', ids),
+        supabase.from('event_attendees').select('event_id, status, created_at').in('event_id', ids),
         supabase
           .from('posts')
           .select('id, event_id, likes_count, comments_count, created_at')
