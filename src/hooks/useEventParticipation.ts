@@ -11,7 +11,7 @@ export const useMyParticipation = (eventId: string | undefined) => {
     queryFn: async () => {
       if (!eventId || !profile) return null;
       const { data, error } = await supabase
-        .from('event_participants')
+        .from('event_attendees')
         .select('*')
         .eq('event_id', eventId)
         .eq('user_id', profile.id)
@@ -37,7 +37,7 @@ export const useSetParticipation = () => {
       if (!profile) throw new Error('Not authenticated');
       if (status === null) {
         const { error } = await supabase
-          .from('event_participants')
+          .from('event_attendees')
           .delete()
           .eq('event_id', eventId)
           .eq('user_id', profile.id);
@@ -45,14 +45,14 @@ export const useSetParticipation = () => {
         return null;
       }
       const { data: existing } = await supabase
-        .from('event_participants')
+        .from('event_attendees')
         .select('id')
         .eq('event_id', eventId)
         .eq('user_id', profile.id)
         .maybeSingle();
       if (existing) {
         const { data, error } = await supabase
-          .from('event_participants')
+          .from('event_attendees')
           .update({ status })
           .eq('id', existing.id)
           .select()
@@ -61,7 +61,7 @@ export const useSetParticipation = () => {
         return data;
       }
       const { data, error } = await supabase
-        .from('event_participants')
+        .from('event_attendees')
         .insert({ event_id: eventId, user_id: profile.id, status })
         .select()
         .single();
@@ -79,7 +79,7 @@ export const useMyUpcomingParticipations = () => {
     queryFn: async () => {
       if (!profile) return [];
       const { data, error } = await supabase
-        .from('event_participants')
+        .from('event_attendees')
         .select(`*, event:events(*, creator:profiles!events_creator_id_fkey(*))`)
         .eq('user_id', profile.id)
         .in('status', ['requested', 'accepted'])
@@ -98,8 +98,8 @@ export const useEventParticipants = (eventId: string | undefined) => {
     queryFn: async () => {
       if (!eventId) return [];
       const { data, error } = await supabase
-        .from('event_participants')
-        .select(`*, profile:profiles!event_participants_user_id_fkey(*)`)
+        .from('event_attendees')
+        .select(`*, profile:profiles!event_attendees_user_id_fkey(*)`)
         .eq('event_id', eventId)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -114,7 +114,7 @@ export const useHostDecision = () => {
   return useMutation({
     mutationFn: async ({ participantId, decision, eventId }: { participantId: string; decision: 'accepted' | 'declined'; eventId: string }) => {
       const { error } = await supabase
-        .from('event_participants')
+        .from('event_attendees')
         .update({ status: decision })
         .eq('id', participantId);
       if (error) throw error;
