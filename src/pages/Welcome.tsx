@@ -24,7 +24,7 @@ export default function Welcome() {
   };
 
   return (
-    <div className="relative min-h-[100dvh] overflow-hidden bg-background px-3 py-3 text-foreground sm:px-5 sm:py-4">
+    <div className="dark relative min-h-[100dvh] overflow-hidden bg-background px-3 py-3 text-foreground sm:px-5 sm:py-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.99 }}
         animate={{ opacity: 1, scale: 1 }}
