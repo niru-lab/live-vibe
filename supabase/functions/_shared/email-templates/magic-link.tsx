@@ -17,28 +17,36 @@ import {
 interface MagicLinkEmailProps {
   siteName: string
   confirmationUrl: string
+  token?: string
 }
 
 export const MagicLinkEmail = ({
   siteName,
   confirmationUrl,
+  token,
 }: MagicLinkEmailProps) => (
   <Html lang="de" dir="ltr">
     <Head />
-    <Preview>Dein Magic Link ist da ✦</Preview>
+    <Preview>{token ? `Dein Login-Code: ${token}` : 'Dein Login-Link ist da ✦'}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Section style={hero}>
           <Text style={kicker}>FEYRN</Text>
-          <Heading style={h1}>Ein Klick und du bist drin.</Heading>
-          <Text style={subtitle}>Kein Passwort. Keine Tipparbeit. ✦</Text>
+          <Heading style={h1}>Du bist gleich drin.</Heading>
+          <Text style={subtitle}>Kein Passwort nötig. ✦</Text>
         </Section>
 
         <Section style={card}>
+          {token && (
+            <>
+              <Text style={text}>Dein Login-Code für {siteName}:</Text>
+              <Text style={{ fontSize: '32px', fontWeight: 700, letterSpacing: '8px', textAlign: 'center' as const, color: '#08080f', margin: '8px 0 16px' }}>
+                {token}
+              </Text>
+            </>
+          )}
           <Text style={text}>
-            Hier ist dein Login-Link für {siteName}. Tipp drauf und du bist
-            sofort eingeloggt — der Link läuft aber bald ab, also nicht zu
-            lange warten:
+            {token ? 'Oder tipp auf den Button:' : `Hier ist dein Login-Link für ${siteName}:`}
           </Text>
           <Section style={{ textAlign: 'center', margin: '32px 0 8px' }}>
             <Button style={button} href={confirmationUrl}>

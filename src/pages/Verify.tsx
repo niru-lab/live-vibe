@@ -38,6 +38,9 @@ export default function Verify() {
   const [status, setStatus] = useState<Status>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const routed = useRef(false);
+  const [code, setCode] = useState('');
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeError, setCodeError] = useState<string | null>(null);
 
   // Persist contact so a refresh on /verify keeps the resend action usable.
   useEffect(() => {
@@ -167,6 +170,22 @@ export default function Verify() {
     setResendMessage('Neuer Link wurde gesendet ✓');
   };
 
+  const handleCodeSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!contact || code.length < 6) return;
+    setCodeLoading(true);
+    setCodeError(null);
+    const { error } =
+      method === 'email'
+        ? await supabase.auth.verifyOtp({ email: contact, token: code, type: 'email' })
+        : await supabase.auth.verifyOtp({ phone: contact, token: code, type: 'sms' });
+    setCodeLoading(false);
+    if (error) {
+      setCodeError(/expired|invalid/i.test(error.message) ? 'Code falsch oder abgelaufen.' : error.message);
+    }
+    // on success, AuthContext picks up the session and effect (3) routes forward
+  };
+
   const isEmail = method === 'email';
 
   if (status === 'verifying' || (user && !routed.current)) {
@@ -228,26 +247,29 @@ export default function Verify() {
                 : `Wir haben einen ${mode === 'register' ? 'Registrierungscode' : 'Login-Code'} an ${contact} geschickt.`}
             </p>
 
-            {isEmail && (
-              <div
-                className="mb-6 w-full rounded-2xl p-4 text-left"
-                style={{ background: '#111120', border: '0.5px solid #2a2a3a' }}
+            <form onSubmit={handleCodeSubmit} className="mb-4 w-full space-y-3">
+              <input
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                placeholder="Code eingeben"
+                value={code}
+                onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                className="w-full rounded-xl text-center text-2xl font-semibold tracking-[0.4em] text-white outline-none"
+                style={{ background: '#111120', border: '0.5px solid #2a2a3a', padding: '14px' }}
+              />
+              {codeError && <p className="text-xs" style={{ color: '#ff6b6b' }}>{codeError}</p>}
+              <button
+                type="submit"
+                disabled={code.length < 6 || codeLoading}
+                className="w-full rounded-xl py-3.5 text-sm font-semibold text-white disabled:opacity-40"
+                style={{ background: '#7F77DD' }}
               >
-                <div className="mb-2 flex items-center gap-2">
-                  <div className="h-6 w-6 rounded-full" style={{ background: '#7F77DD' }} />
-                  <span className="text-xs font-medium text-white">Feyrn</span>
-                </div>
-                <p className="text-xs" style={{ color: '#888' }}>
-                  Klicke hier um dich bei Feyrn anzumelden:
-                </p>
-                <p className="mt-1 text-xs font-medium" style={{ color: '#7F77DD' }}>
-                  feyrn.app/verify?token=•••••
-                </p>
-              </div>
-            )}
+                {codeLoading ? 'Wird geprüft…' : 'Bestätigen →'}
+              </button>
+            </form>
 
             <p className="mb-6 text-xs" style={{ color: '#555' }}>
-              Link gültig für 15 Minuten
+              {isEmail ? 'Oder tipp auf den Link in der Mail.' : 'Code gültig für wenige Minuten.'}
             </p>
           </>
         )}
