@@ -38,36 +38,19 @@ export default function Register() {
       return;
     }
 
-    if (mode === 'login') {
-      if (!password || password.length < 6) {
-        setError('Bitte gib dein Passwort ein (mind. 6 Zeichen).');
-        return;
-      }
-      setLoading(true);
-      const { data: signInData, error: authError } = await supabase.auth.signInWithPassword({ email, password });
-      if (authError) {
-        setLoading(false);
-        const msg = authError.message?.toLowerCase() || '';
-        if (msg.includes('invalid')) {
-          setError('E-Mail oder Passwort falsch.');
-        } else {
-          setError(authError.message);
-        }
-        return;
-      }
-      setLoading(false);
-      navigate('/', { replace: true });
-      return;
-    }
-
     setLoading(true);
     const { error: authError } = await supabase.auth.signInWithOtp({
       email,
       options: {
         emailRedirectTo: oauthRedirectUrl('/verify'),
-        shouldCreateUser: true,
+        shouldCreateUser: mode === 'register',
       },
     });
+    if (authError && mode === 'login' && /signups? not allowed|not found/i.test(authError.message || '')) {
+      setLoading(false);
+      setError('Kein Konto mit dieser E-Mail gefunden. Registriere dich zuerst.');
+      return;
+    }
     setLoading(false);
     if (authError) {
       const msg = authError.message?.toLowerCase() || '';
@@ -141,8 +124,8 @@ export default function Register() {
         <h1 className="mb-2 text-xl font-bold text-white">{mode === 'login' ? 'Einloggen' : 'Konto erstellen'}</h1>
         <p className="mb-6 text-sm" style={{ color: '#888' }}>
           {mode === 'login'
-            ? 'Melde dich mit E-Mail & Passwort oder per SMS-Code an.'
-            : 'Registriere dich mit E-Mail oder Nummer — wir schicken dir einen Magic Link.'}
+            ? 'Wir schicken dir einen Login-Code — kein Passwort nötig.'
+            : 'Registriere dich mit E-Mail oder Nummer — wir schicken dir einen Code.'}
         </p>
 
         <div
@@ -195,31 +178,20 @@ export default function Register() {
               onFocus={(e) => (e.target.style.borderColor = '#7F77DD')}
               onBlur={(e) => (e.target.style.borderColor = '#2a2a3a')}
             />
-            {mode === 'login' && (
-              <input
-                type="password"
-                placeholder="Passwort"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                style={inputStyle}
-                onFocus={(e) => (e.target.style.borderColor = '#7F77DD')}
-                onBlur={(e) => (e.target.style.borderColor = '#2a2a3a')}
-              />
-            )}
             {mode === 'register' && (
               <EulaConsent id="eula-email" checked={acceptedTerms} onChange={setAcceptedTerms} />
             )}
             {error && <p className="text-xs" style={{ color: '#ff6b6b' }}>{error}</p>}
             <button
               type="submit"
-              disabled={loading || !email || consentMissing || (mode === 'login' && !password)}
+              disabled={loading || !email || consentMissing}
               className="w-full rounded-xl py-3.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:opacity-40"
               style={{ background: '#7F77DD' }}
             >
               {loading ? (
                 <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
               ) : (
-                mode === 'login' ? 'Einloggen →' : 'Registrierungslink senden →'
+                mode === 'login' ? 'Login-Code senden →' : 'Registrierungscode senden →'
               )}
             </button>
           </form>
@@ -262,7 +234,7 @@ export default function Register() {
         )}
 
         <p className="mt-4 text-center text-xs" style={{ color: '#555' }}>
-          Magic Link per Mail oder OTP per SMS. Einmal klicken — fertig.
+          Code per Mail oder SMS. Eintippen — fertig.
         </p>
       </motion.div>
     </div>

@@ -20,6 +20,7 @@ interface SignupEmailProps {
   siteUrl: string
   recipient: string
   confirmationUrl: string
+  token?: string
 }
 
 export const SignupEmail = ({
@@ -27,6 +28,7 @@ export const SignupEmail = ({
   siteUrl,
   recipient,
   confirmationUrl,
+  token,
 }: SignupEmailProps) => (
   <Html lang="de" dir="ltr">
     <Head />
@@ -51,9 +53,19 @@ export const SignupEmail = ({
             . Ab jetzt verpasst du keine Nacht mehr — Events, Crews und
             Momente, alles an einem Ort.
           </Text>
-          <Text style={text}>
-            Tipp einmal auf den Button und du bist drin:
-          </Text>
+          {token ? (
+            <>
+              <Text style={text}>Gib diesen Code in der App ein:</Text>
+              <Text style={{ fontSize: '32px', fontWeight: 700, letterSpacing: '8px', textAlign: 'center' as const, color: '#08080f', margin: '8px 0 16px' }}>
+                {token}
+              </Text>
+              <Text style={text}>Oder tipp auf den Button:</Text>
+            </>
+          ) : (
+            <Text style={text}>
+              Tipp einmal auf den Button und du bist drin:
+            </Text>
+          )}
           <Section style={{ textAlign: 'center', margin: '32px 0 8px' }}>
             <Button style={button} href={confirmationUrl}>
               Let's go ✦
