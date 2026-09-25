@@ -16,7 +16,6 @@ export default function Register() {
   const [mode, setMode] = useState<'login' | 'register'>(searchParams.get('mode') === 'register' ? 'register' : 'login');
   const [tab, setTab] = useState<'email' | 'phone'>('email');
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   const [countryCode] = useState('+49');
   const [loading, setLoading] = useState(false);
