@@ -1,3 +1,5 @@
+import { useQuery } from '@tanstack/react-query';
+import { VibeCheck, type VibeValue } from '@/components/create/VibeCheck';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
@@ -69,6 +71,23 @@ export default function CreatePost() {
   const [personQuery, setPersonQuery] = useState('');
   const [personResults, setPersonResults] = useState<TaggedPerson[]>([]);
   const [personSearchOpen, setPersonSearchOpen] = useState(false);
+  const [vibe, setVibe] = useState<VibeValue>({ crowd: null, mood: null, musicFit: null });
+  const [postAsVenue, setPostAsVenue] = useState(false);
+  const { data: myVenue } = useQuery({
+    queryKey: ['my-venue-membership', user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('venue_members')
+        .select('venue_id, venues(name)')
+        .eq('user_id', user!.id)
+        .limit(1)
+        .maybeSingle();
+      if (!data) return null;
+      const v = (data as any).venues;
+      return { id: data.venue_id as string, name: (Array.isArray(v) ? v[0] : v)?.name as string };
+    },
+  });
 
   // Preselect the event/venue relation when the composer is opened from an
   // event or venue surface (?eventId= / ?venueId=). Real relation, no guessing.
@@ -172,7 +191,7 @@ export default function CreatePost() {
       const linkedVenueId = pickedLocation?.venue_id || (selectedTag?.type === 'venue' ? selectedTag.id : null);
       const linkedEventId = selectedTag?.type === 'event' ? selectedTag.id : null;
 
-      await createPost.mutateAsync({
+      const created = await createPost.mutateAsync({
         media_url: publicUrl,
         media_type: mediaType,
         caption: caption || null,
@@ -187,7 +206,24 @@ export default function CreatePost() {
         venue_id: linkedVenueId,
         event_id: linkedEventId,
         location_id: taggedPerson?.id ?? null,
+        crowd_level: vibe.crowd,
+        mood: vibe.mood,
+        music_fit: vibe.musicFit,
+        posted_as_venue_id: postAsVenue && myVenue ? myVenue.id : null,
       });
+
+      // "Vor Ort": server checks distance (≤ 200 m) to the tagged venue.
+      if (linkedVenueId && created?.id && 'geolocation' in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            supabase
+              .rpc('verify_post_location', { _post_id: created.id, _lat: pos.coords.latitude, _lng: pos.coords.longitude })
+              .then(({ data }) => { if (data) queryClient.invalidateQueries({ queryKey: ['posts'] }); });
+          },
+          () => {},
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
+        );
+      }
 
       // Social Cloud: rewarded once per event/venue (server-side idempotent).
       if (linkedEventId) {
@@ -228,6 +264,13 @@ export default function CreatePost() {
             <p className="mt-1 text-sm text-muted-foreground">
               Foto wählen, kurz beschreiben, teilen. Mehr brauchst du nicht.
             </p>
+          </div>
+        )}
+        <VibeCheck value={vibe} onChange={setVibe} />
+        {myVenue && (
+          <div className="flex items-center justify-between rounded-xl border border-border/50 bg-card p-3">
+            <Label htmlFor="as-venue" className="text-sm">Als {myVenue.name} posten</Label>
+            <Switch id="as-venue" checked={postAsVenue} onCheckedChange={setPostAsVenue} />
           </div>
         )}
         {!simple && (<>
