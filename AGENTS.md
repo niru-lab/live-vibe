@@ -1,0 +1,3 @@
+- Roles live in `public.user_roles` (checked via `has_role`); `profiles.role` is a read-only mirror set only by the `set_account_type` RPC — prevents users from escalating their own role.
+- Profiles are created only by the `on_auth_user_created` trigger; the client never inserts profiles — avoids duplicate/racing profile creation.
+- All non-public routes sit under `ProtectedRoute`; venue-only routes under `RoleRoute` — one place for access rules.
