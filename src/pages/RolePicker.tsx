@@ -37,10 +37,7 @@ export default function RolePicker() {
   const pick = async (role: Role) => {
     if (!user || saving) return;
     setSaving(role);
-    const { error } = await supabase
-      .from('profiles')
-      .update({ role })
-      .eq('user_id', user.id);
+    const { error } = await supabase.rpc('set_account_type', { _type: role });
     if (error) {
       setSaving(null);
       toast({ variant: 'destructive', title: 'Fehler', description: error.message });
