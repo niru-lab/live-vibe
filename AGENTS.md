@@ -5,3 +5,6 @@
 - Event visibility (drafts, min_age gate, blocks) is enforced in the `events` SELECT policy, not in the UI — direct links obey it too.
 - Venue logos and event covers live in the public `post-media` bucket under `<user_id>/venue-logos|event-covers/` — the workspace blocks creating new public buckets.
 - Attendance is shown only via `event_visible_attendees` (opt-in, max 8) — no full attendee lists.
+- `posts.on_site_verified` is set only by `verify_post_location` (≤ 200 m, server-side); hidden posts use `deleted_at` and are excluded by the posts SELECT policy.
+- DMs follow the request model via `dm_allowed`: first message is a request, further messages only after acceptance — enforced in the `direct_messages` INSERT policy.
+- Push permission is requested only via `PushPrimer` after the first RSVP; every send goes through `_shared/push.ts` `sendPush` (prefs, caps, dedupe).
