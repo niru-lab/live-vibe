@@ -14,8 +14,9 @@ import StepVenueDayPattern from '@/components/venue-onboarding/steps/StepVenueDa
 import StepVenueOfferings from '@/components/venue-onboarding/steps/StepVenueOfferings';
 import StepVenuePriceTier from '@/components/venue-onboarding/steps/StepVenuePriceTier';
 import StepVenueContact, { ContactData } from '@/components/venue-onboarding/steps/StepVenueContact';
+import { StepVenueProof, StepVenueLogo, StepVenueAgreement, isProofValid, ProofData } from '@/components/venue-onboarding/steps/StepVenueVerification';
 
-const TOTAL_STEPS = 8;
+const TOTAL_STEPS = 11;
 const PHONE_RE = /^(\+49|0)[1-9][0-9]{8,11}$/;
 
 const STEP_TITLES: Record<number, { title: string; subtitle: string }> = {
@@ -27,6 +28,9 @@ const STEP_TITLES: Record<number, { title: string; subtitle: string }> = {
   6: { title: 'Was läuft bei dir? 🎁',         subtitle: 'Such alles aus was passt — min 1, max 8' },
   7: { title: 'Wie teuer ist Spaß bei dir? 💸', subtitle: 'Damit Gäste wissen worauf sie sich einlassen' },
   8: { title: 'Wie erreichen wir dich? 📱',     subtitle: 'Nur für uns — Gäste sehen das nicht' },
+  9: { title: 'Kurzer Echtheits-Check ✅',      subtitle: 'Impressum-Link oder Handelsregisternummer reicht' },
+  10: { title: 'Zeig dein Logo 🎨',             subtitle: 'Damit Gäste dich sofort erkennen' },
+  11: { title: 'Letzter Schritt 🤝',            subtitle: 'Danach kannst du direkt loslegen' },
 };
 
 export default function OnboardingVenue() {
@@ -52,6 +56,11 @@ export default function OnboardingVenue() {
   const [offerings, setOfferings] = useState<string[]>([]);
   const [priceTier, setPriceTier] = useState('');
   const [contact, setContact] = useState<ContactData>({ phone: '', whatsapp_ok: false });
+  const [venueId, setVenueId] = useState<string | null>(null);
+  const [proof, setProof] = useState<ProofData>({ contactName: '', imprintUrl: '', registerNumber: '', capacity: '' });
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [agreed, setAgreed] = useState(false);
 
   // Boot
   useEffect(() => {
@@ -75,6 +84,17 @@ export default function OnboardingVenue() {
         return;
       }
       setProfileId(data.id);
+      // Resume: venue already created → continue with verification steps.
+      const { data: member } = await supabase
+        .from('venue_members')
+        .select('venue_id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle();
+      if (member?.venue_id) {
+        setVenueId(member.venue_id);
+        setStep(9);
+      }
       setReady(true);
     })();
   }, [user, authLoading, navigate]);
@@ -97,19 +117,60 @@ export default function OnboardingVenue() {
       case 6: return offerings.length >= 1 && offerings.length <= 8;
       case 7: return priceTier.length > 0;
       case 8: return PHONE_RE.test(contact.phone.replace(/\s/g, ''));
+      case 9: return isProofValid(proof);
+      case 10: return true;
+      case 11: return agreed;
       default: return false;
     }
   })();
 
   const next = async () => {
     if (!canProceed) return;
-    if (step < TOTAL_STEPS) {
+    if (step < 8) {
       setDirection(1);
       setStep((s) => s + 1);
       return;
     }
-    // Finish
     if (!profileId || !user) return;
+    if (step > 8) {
+      setSaving(true);
+      try {
+        if (step === 9) {
+          const { error } = await supabase.from('venues').update({
+            contact_name: proof.contactName.trim(),
+            imprint_url: proof.imprintUrl.trim() || null,
+            register_number: proof.registerNumber.trim() || null,
+            capacity: proof.capacity ? Number(proof.capacity) : null,
+          }).eq('id', venueId!);
+          if (error) throw error;
+        }
+        if (step === 10 && logoFile) {
+          const ext = logoFile.name.split('.').pop() || 'png';
+          const path = `${user.id}/venue-logos/${venueId}-${Date.now()}.${ext}`;
+          const { error: upErr } = await supabase.storage.from('post-media').upload(path, logoFile);
+          if (upErr) throw upErr;
+          const { data: { publicUrl } } = supabase.storage.from('post-media').getPublicUrl(path);
+          const { error } = await supabase.from('venues').update({ logo_url: publicUrl, image_url: publicUrl }).eq('id', venueId!);
+          if (error) throw error;
+        }
+        if (step === 11) {
+          const { error } = await supabase.from('venue_agreements').insert({ venue_id: venueId!, user_id: user.id, agreement_version: 'v1' });
+          if (error) throw error;
+          const { error: profErr } = await supabase.from('profiles').update({ onboarding_complete: true }).eq('id', profileId);
+          if (profErr) throw profErr;
+          setSuccess(true);
+          return;
+        }
+        setDirection(1);
+        setStep((s) => s + 1);
+      } catch (e: any) {
+        toast.error(e?.message || 'Konnte nicht speichern');
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
+    // Step 8: create the venue, then continue with verification steps
     setSaving(true);
     try {
       const fullAddress = address.skipped ? null : `${address.street}, ${address.zip} ${address.city}`;
@@ -135,18 +196,19 @@ export default function OnboardingVenue() {
         verification_tier: 1,
       } as any;
 
-      const { error: venueErr } = await supabase.from('venues').insert(insertPayload);
+      const { data: created, error: venueErr } = await supabase.from('venues').insert(insertPayload).select('id').single();
       if (venueErr) throw venueErr;
+      setVenueId(created.id);
 
       const { error: profErr } = await supabase
         .from('profiles')
-        .update({ onboarding_complete: true, display_name: name.trim() })
+        .update({ display_name: name.trim() })
         .eq('id', profileId);
       if (profErr) throw profErr;
 
-      toast.success('Willkommen bei Feyrn! Dein Spot ist drin 🔥');
-      setSuccess(true);
-      setTimeout(() => navigate(venueHome, { replace: true, state: { startAppTour: true } }), 1600);
+      setSaving(false);
+      setDirection(1);
+      setStep(9);
     } catch (e: any) {
       console.error(e);
       toast.error(e?.message || 'Konnte Spot nicht speichern');
@@ -202,8 +264,28 @@ export default function OnboardingVenue() {
           transition={{ delay: 0.3 }}
           className="text-2xl font-bold text-white text-center px-6"
         >
-          Dein Spot ist live!
+          Danke! Wir prüfen deine Venue.
         </motion.h1>
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-3 max-w-sm px-6 text-center"
+          style={{ color: 'rgba(255,255,255,0.7)' }}
+        >
+          Du kannst schon jetzt Events anlegen und posten.
+        </motion.p>
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+          whileTap={{ scale: 0.96 }}
+          onClick={() => navigate(venueHome, { replace: true, state: { startAppTour: true } })}
+          className="mt-8 rounded-full px-8 py-4 font-semibold transition-shadow hover:shadow-[0_0_40px_rgba(236,72,153,0.55)]"
+          style={{ color: '#fff', background: 'linear-gradient(90deg, #7C3AED, #EC4899)' }}
+        >
+          Los geht's
+        </motion.button>
       </div>
     );
   }
@@ -221,7 +303,7 @@ export default function OnboardingVenue() {
       isFinal={step === TOTAL_STEPS}
       ctaLabel={step === TOTAL_STEPS ? 'Spot aktivieren 🚀' : 'Weiter'}
       onNext={next}
-      onBack={step > 1 ? back : undefined}
+      onBack={step > 1 && step !== 9 ? back : undefined}
     >
       <VenueStepTransition stepKey={step} direction={direction}>
         {step === 1 && <StepVenueType value={venueType} onChange={setVenueType} />}
@@ -238,6 +320,9 @@ export default function OnboardingVenue() {
         {step === 6 && <StepVenueOfferings value={offerings} onChange={setOfferings} />}
         {step === 7 && <StepVenuePriceTier value={priceTier} onChange={setPriceTier} />}
         {step === 8 && <StepVenueContact value={contact} onChange={setContact} />}
+        {step === 9 && <StepVenueProof value={proof} onChange={setProof} />}
+        {step === 10 && <StepVenueLogo preview={logoPreview} onFile={(f) => { setLogoFile(f); setLogoPreview(URL.createObjectURL(f)); }} />}
+        {step === 11 && <StepVenueAgreement value={agreed} onChange={setAgreed} />}
       </VenueStepTransition>
     </VenueOnboardingLayout>
   );
