@@ -75,7 +75,7 @@ export default function VenueProfile() {
                 className="mb-4 h-44 w-full rounded-xl object-cover"
               />
             )}
-            <h1 className="text-xl font-semibold text-foreground">{venue.name}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{venue.name}{venue.is_verified && <VerifiedBadge className="ml-1.5" />}</h1>
             <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="h-3 w-3" />
               {[venue.address, venue.city].filter(Boolean).join(', ') || venue.category}

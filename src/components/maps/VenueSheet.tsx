@@ -1,3 +1,4 @@
+import { VerifiedBadge } from '@/components/venue/VerifiedBadge';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
@@ -119,7 +120,7 @@ export const VenueSheet = ({ venue, open, onOpenChange }: VenueSheetProps) => {
         <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-muted" />
 
         <div className="mb-3">
-          <h2 className="text-base font-semibold text-foreground">{venue.name}</h2>
+          <h2 className="text-base font-semibold text-foreground">{venue.name}{venue.is_verified && <VerifiedBadge className="ml-1.5" />}</h2>
           <p className="flex items-center gap-1 text-xs text-muted-foreground">
             <MapPin className="h-3 w-3" />
             {[venue.address, venue.city].filter(Boolean).join(', ') || venue.category}
