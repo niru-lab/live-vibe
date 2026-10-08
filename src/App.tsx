@@ -19,6 +19,7 @@ import RolePicker from "./pages/RolePicker";
 import Auth from "./pages/Auth";
 import Register from "./pages/Register";
 import Verify from "./pages/Verify";
+import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import OnboardingVenue from "./pages/OnboardingVenue";
 import AuthCallback from "./pages/AuthCallback";
