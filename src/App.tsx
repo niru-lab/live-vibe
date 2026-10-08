@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { IconContext } from "@phosphor-icons/react";
@@ -11,6 +11,7 @@ import { OfflineBanner } from "@/components/OfflineBanner";
 import { SwipeBackProvider } from "@/components/layout/SwipeBackProvider";
 import { OnboardingGate } from "@/components/auth/OnboardingGate";
 import { AuthUrlHandler } from "@/components/auth/AuthUrlHandler";
+import { ProtectedRoute, RoleRoute } from "@/components/auth/RouteGuards";
 import { ReferralCapture } from "@/components/referral/ReferralCapture";
 import Feed from "./pages/Feed";
 import Welcome from "./pages/Welcome";
@@ -24,6 +25,7 @@ import AuthCallback from "./pages/AuthCallback";
 import Discover from "./pages/Discover";
 import Events from "./pages/Events";
 import VenueDashboard from "./pages/VenueDashboard";
+import DashboardComingSoon from "./pages/DashboardComingSoon";
 import VenueProfile from "./pages/VenueProfile";
 import CreateEvent from "./pages/CreateEvent";
 import CreatePost from "./pages/CreatePost";
@@ -70,42 +72,53 @@ const App = () => (
                 <OnboardingGate />
                 <ReferralCapture />
                 <Routes>
+                  {/* Public */}
                   <Route path="/" element={<Welcome />} />
                   <Route path="/welcome" element={<Welcome />} />
-                  <Route path="/role" element={<RolePicker />} />
-                  <Route path="/feed" element={<Feed />} />
-                  <Route path="/profile/:username" element={<UserProfile />} />
                   <Route path="/auth" element={<Auth />} />
                   <Route path="/auth/legacy" element={<Welcome />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/verify" element={<Verify />} />
-                  <Route path="/onboarding" element={<Onboarding />} />
-                  <Route path="/onboarding-venue" element={<OnboardingVenue />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
-                  <Route path="/discover" element={<Discover />} />
-                  <Route path="/map" element={<Discover />} />
-                  <Route path="/events" element={<Events />} />
-                  <Route path="/venue" element={<VenueDashboard />} />
-                  <Route path="/venues/:id" element={<VenueProfile />} />
-                  <Route path="/events/create" element={<CreateEvent />} />
-                  <Route path="/events/:id" element={<EventDetail />} />
-                  <Route path="/create" element={<CreatePost />} />
-                  <Route path="/create/carousel" element={<CreateCarousel />} />
-                  <Route path="/profile" element={<Profile />} />
-                  <Route path="/u/:username" element={<UserProfile />} />
-                  <Route path="/messages" element={<Messages />} />
-                  <Route path="/cards" element={<Cards />} />
-                  <Route path="/cards/received" element={<Cards />} />
-                  <Route path="/roomz" element={<Roomz />} />
-                  <Route path="/roomz/create" element={<CreateRoom />} />
-                  <Route path="/roomz/:id" element={<RoomDetail />} />
                   <Route path="/impressum" element={<Impressum />} />
                   <Route path="/datenschutz" element={<Datenschutz />} />
                   <Route path="/agb" element={<AGB />} />
                   <Route path="/community" element={<Community />} />
                   <Route path="/konto-loeschen" element={<KontoLoeschen />} />
-                  <Route path="/settings/privacy/blocked" element={<BlockedUsers />} />
-                  <Route path="/dashboard" element={<VenueDashboard />} />
+
+                  {/* Signed-in only */}
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/role" element={<RolePicker />} />
+                    <Route path="/onboarding/start" element={<Navigate to="/role" replace />} />
+                    <Route path="/onboarding/venue" element={<Navigate to="/onboarding-venue" replace />} />
+                    <Route path="/onboarding" element={<Onboarding />} />
+                    <Route path="/onboarding-venue" element={<OnboardingVenue />} />
+                    <Route path="/feed" element={<Feed />} />
+                    <Route path="/profile/:username" element={<UserProfile />} />
+                    <Route path="/u/:username" element={<UserProfile />} />
+                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/discover" element={<Discover />} />
+                    <Route path="/map" element={<Discover />} />
+                    <Route path="/events" element={<Events />} />
+                    <Route path="/events/create" element={<CreateEvent />} />
+                    <Route path="/events/:id" element={<EventDetail />} />
+                    <Route path="/venues/:id" element={<VenueProfile />} />
+                    <Route path="/create" element={<CreatePost />} />
+                    <Route path="/create/carousel" element={<CreateCarousel />} />
+                    <Route path="/messages" element={<Messages />} />
+                    <Route path="/cards" element={<Cards />} />
+                    <Route path="/cards/received" element={<Cards />} />
+                    <Route path="/roomz" element={<Roomz />} />
+                    <Route path="/roomz/create" element={<CreateRoom />} />
+                    <Route path="/roomz/:id" element={<RoomDetail />} />
+                    <Route path="/settings/privacy/blocked" element={<BlockedUsers />} />
+
+                    <Route element={<RoleRoute roles={["venue_owner"]} />}>
+                      <Route path="/venue/dashboard" element={<DashboardComingSoon />} />
+                      <Route path="/venue" element={<VenueDashboard />} />
+                      <Route path="/dashboard" element={<VenueDashboard />} />
+                    </Route>
+                  </Route>
 
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
