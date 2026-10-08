@@ -1,3 +1,5 @@
+import { VisibleAttendees } from '@/components/events/VisibleAttendees';
+import { VerifiedBadge } from '@/components/venue/VerifiedBadge';
 import { useState, useEffect } from 'react';
 import { track } from '@/lib/analytics';
 import { LiveOfferList } from '@/components/offers/LiveOfferCard';
@@ -176,7 +178,7 @@ export default function EventDetail() {
               return (
                 <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.href = `/profile/${creator.username}`}>
                   <Avatar className="h-8 w-8"><AvatarImage src={creator.avatar_url || ''} /><AvatarFallback>{creator.display_name?.charAt(0)}</AvatarFallback></Avatar>
-                  <div><span className="text-sm text-muted-foreground">von </span><span className="text-sm font-medium text-foreground hover:underline">@{creator.username}</span>{creator.is_verified && <CheckCircle weight="fill" className="ml-1 inline h-4 w-4 text-primary" />}</div>
+                  <div><span className="text-sm text-muted-foreground">von </span><span className="text-sm font-medium text-foreground hover:underline">@{creator.username}</span>{creator.is_verified && <VerifiedBadge className="ml-1" />}</div>
                 </div>
               );
             })()}
@@ -189,12 +191,13 @@ export default function EventDetail() {
                 {friendsAttending && friendsAttending.length > 0 && (
                   <div className="flex items-center gap-2"><div className="flex -space-x-2">{friendsAttending.slice(0, 4).map((friend) => (<Avatar key={friend.id} className="h-6 w-6 border-2 border-background"><AvatarImage src={friend.profile?.avatar_url || ''} /><AvatarFallback className="text-xs">{friend.profile?.display_name?.charAt(0)}</AvatarFallback></Avatar>))}</div><span className="text-sm text-muted-foreground">{friendsAttending.length} Freunde gehen</span></div>
                 )}
-                {attendees && attendees.going.length > 0 && (<div className="flex items-center gap-2 mt-2"><div className="flex -space-x-2">{attendees.going.slice(0, 6).map((attendee: any) => (<Avatar key={attendee.id} className="h-6 w-6 border-2 border-background"><AvatarImage src={attendee.profile?.avatar_url || ''} /><AvatarFallback className="text-xs">{attendee.profile?.display_name?.charAt(0)}</AvatarFallback></Avatar>))}</div><span className="text-sm text-muted-foreground">{attendees.going.length > 6 ? `+${attendees.going.length - 6} weitere` : ''}</span></div>)}
+                <VisibleAttendees eventId={event.id} />
               </button>
             </SheetTrigger>
             <SheetContent side="bottom" className="h-[70vh] rounded-t-3xl">
               <SheetHeader><SheetTitle>Zusagen ({goingCount})</SheetTitle></SheetHeader>
-              <div className="mt-4 space-y-3 overflow-y-auto">{attendees?.going.map((attendee: any) => (<div key={attendee.id} className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/50"><Avatar className="h-10 w-10"><AvatarImage src={attendee.profile?.avatar_url || ''} /><AvatarFallback>{attendee.profile?.display_name?.charAt(0)}</AvatarFallback></Avatar><div className="flex-1"><p className="font-medium">{attendee.profile?.display_name}</p><p className="text-sm text-muted-foreground">@{attendee.profile?.username}</p></div><UserCheck weight="thin" className="h-5 w-5 text-green-500" /></div>))}</div>
+              <p className="mt-4 text-sm text-muted-foreground">Aus Datenschutzgründen zeigen wir keine vollständige Teilnehmerliste. Du siehst nur Leute, die ihre Teilnahme zeigen wollen.</p>
+              <VisibleAttendees eventId={event.id} />
             </SheetContent>
           </Sheet>
           <div className="space-y-3 rounded-2xl border border-border/50 bg-card p-4">
