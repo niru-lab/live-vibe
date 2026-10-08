@@ -230,6 +230,11 @@ const PostCardComponent = ({ post, isLiked, onLike, onDeleted }: PostCardProps) 
                 <span>{post.comments_count}</span>
               </div>
 
+              {(post as any).on_site_verified && (
+                <span className="rounded-full border border-emerald-400/40 bg-emerald-400/10 text-emerald-400" style={{ marginLeft: 'auto', padding: '3px 7px', fontSize: '10px' }}>
+                  📍 Vor Ort
+                </span>
+              )}
               {(post.event?.name || post.location_name) && (
                 <span
                   className="truncate bg-primary/10 border border-primary/30 text-primary"
