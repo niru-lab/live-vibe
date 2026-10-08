@@ -14,6 +14,7 @@ export default function Onboarding() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [profileType, setProfileType] = useState<string>('user');
   const [username, setUsername] = useState('');
+  const [startStep, setStartStep] = useState(1);
   const [ready, setReady] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
 
@@ -26,31 +27,18 @@ export default function Onboarding() {
     (async () => {
       let { data } = await supabase
         .from('profiles')
-        .select('id, username, profile_type, onboarding_complete')
+        .select('id, username, profile_type, onboarding_complete, onboarding_step')
         .eq('user_id', user.id)
         .maybeSingle();
 
-      // Create profile on the fly if missing (e.g. trigger didn't fire for OAuth)
-      if (!data) {
-        const fallbackName =
-          (user.user_metadata as any)?.username ||
-          (user.email ? user.email.split('@')[0].replace(/\./g, '_') : 'user') +
-            '_' + user.id.slice(0, 4);
-        const display =
-          (user.user_metadata as any)?.full_name ||
-          (user.user_metadata as any)?.name ||
-          fallbackName;
-        const { data: created } = await supabase
+      // Profile is created server-side on signup; allow a short delay.
+      for (let i = 0; i < 5 && !data; i++) {
+        await new Promise((r) => setTimeout(r, 400));
+        ({ data } = await supabase
           .from('profiles')
-          .insert({
-            user_id: user.id,
-            username: fallbackName.toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 20) || `u_${user.id.slice(0, 6)}`,
-            display_name: display,
-            onboarding_complete: false,
-          } as any)
-          .select('id, username, profile_type, onboarding_complete')
-          .maybeSingle();
-        data = created;
+          .select('id, username, profile_type, onboarding_complete, onboarding_step')
+          .eq('user_id', user.id)
+          .maybeSingle());
       }
 
       if (!data) {
@@ -67,6 +55,7 @@ export default function Onboarding() {
       setProfileId(data.id);
       setProfileType(data.profile_type || 'user');
       if (data.username) setUsername(data.username);
+      setStartStep(Math.max(1, ((data as any).onboarding_step ?? 0) + 1));
       setReady(true);
     })();
   }, [user, authLoading, navigate]);
@@ -114,6 +103,7 @@ export default function Onboarding() {
       profileId={profileId!}
       userId={user!.id}
       initialUsername={username}
+      initialStep={startStep}
       onComplete={handleComplete}
     />
   );

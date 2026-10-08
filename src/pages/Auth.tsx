@@ -13,6 +13,7 @@ import { lovable } from '@/integrations/lovable/index';
 import { EulaConsent } from '@/components/legal/EulaConsent';
 import { appUrl, oauthRedirectUrl } from '@/lib/appUrl';
 import { z } from 'zod';
+import { resolvePostAuthRoute } from '@/lib/authRouting';
 
 const emailSchema = z.string().email('Bitte gib eine gültige E-Mail-Adresse ein');
 const passwordSchema = z.string().min(6, 'Passwort muss mindestens 6 Zeichen haben');
@@ -34,10 +35,15 @@ export default function Auth() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (user) {
-      navigate('/');
-    }
-  }, [user, navigate]);
+    if (!user) return;
+    const redirect = new URLSearchParams(location.search).get('redirect');
+    resolvePostAuthRoute(user)
+      .then((route) => {
+        const done = route === '/feed' || route === '/events';
+        navigate(done && redirect?.startsWith('/') ? redirect : route, { replace: true });
+      })
+      .catch(() => navigate('/role', { replace: true }));
+  }, [user, navigate, location.search]);
 
   const validateForm = (isSignUp: boolean) => {
     const newErrors: { email?: string; password?: string; username?: string } = {};

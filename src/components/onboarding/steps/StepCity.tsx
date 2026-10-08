@@ -29,7 +29,7 @@ export default function StepCity({ selected, onChange }: Props) {
   }, []);
 
   const options = useMemo(() => {
-    const base = cities ?? FALLBACK_CITIES;
+    const base = [...(cities ?? FALLBACK_CITIES), 'Ulm', 'Andere'];
     // keep any already-selected city visible even if it isn't in the source list
     return Array.from(new Set([...base, ...selected]));
   }, [cities, selected]);

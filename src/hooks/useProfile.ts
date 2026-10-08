@@ -68,3 +68,26 @@ export const useProfileById = (profileId: string | undefined) => {
     enabled: !!profileId,
   });
 };
+
+/** Own profile (read + update). */
+export const useMyProfile = () => {
+  const query = useProfile();
+  const update = useUpdateProfile();
+  return { ...query, update };
+};
+
+export type PublicProfile = { id: string; display_name: string | null; avatar_url: string | null; city: string | null; username: string | null };
+
+/** One batched query for many profiles — avoids N+1. */
+export const usePublicProfiles = (ids: string[]) => {
+  const unique = Array.from(new Set(ids.filter(Boolean))).sort();
+  return useQuery({
+    queryKey: ['public-profiles', unique],
+    enabled: unique.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase.from('public_profiles').select('*').in('id', unique);
+      if (error) throw error;
+      return Object.fromEntries((data ?? []).map((p) => [p.id, p as PublicProfile])) as Record<string, PublicProfile>;
+    },
+  });
+};
