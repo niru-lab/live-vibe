@@ -1,3 +1,4 @@
+import { notifyRsvpForPush } from '@/components/push/PushPrimer';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from './useProfile';
@@ -206,6 +207,7 @@ export const useRSVP = () => {
           surface: variables.surface,
         });
       } else {
+        notifyRsvpForPush();
         track('rsvp_status_set', { eventId: variables.eventId, status: variables.status, surface: variables.surface });
       }
     },

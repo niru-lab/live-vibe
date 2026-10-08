@@ -27,6 +27,8 @@ import Events from "./pages/Events";
 import VenueDashboard from "./pages/VenueDashboard";
 import DashboardComingSoon from "./pages/DashboardComingSoon";
 import AdminVenues from "./pages/AdminVenues";
+import AdminReports from "./pages/AdminReports";
+import { PushPrimer } from "@/components/push/PushPrimer";
 import VenueProfile from "./pages/VenueProfile";
 import CreateEvent from "./pages/CreateEvent";
 import CreatePost from "./pages/CreatePost";
@@ -72,6 +74,7 @@ const App = () => (
                 <AuthUrlHandler />
                 <OnboardingGate />
                 <ReferralCapture />
+                <PushPrimer />
                 <Routes>
                   {/* Public */}
                   <Route path="/" element={<Welcome />} />
@@ -116,6 +119,7 @@ const App = () => (
 
                     <Route element={<RoleRoute roles={["admin"]} />}>
                       <Route path="/admin/venues" element={<AdminVenues />} />
+                      <Route path="/admin/reports" element={<AdminReports />} />
                     </Route>
                     <Route element={<RoleRoute roles={["venue_owner"]} />}>
                       <Route path="/venue/dashboard" element={<DashboardComingSoon />} />
