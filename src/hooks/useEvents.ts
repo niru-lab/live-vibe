@@ -26,6 +26,7 @@ export const useEvents = (filters?: EventFilters) => {
           creator:profiles!events_creator_id_fkey(*)
         `)
         .eq('is_active', true)
+        .eq('status', 'published')
         .gte('starts_at', new Date().toISOString())
         .order('starts_at', { ascending: true });
 

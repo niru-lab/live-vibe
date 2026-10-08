@@ -1,3 +1,4 @@
+import { useMyProfile } from '@/hooks/useProfile';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -35,7 +36,9 @@ export const PrivacySettings = ({ open, onOpenChange }: PrivacySettingsProps) =>
   const [showLocation, setShowLocation] = useState(true);
   const [showInDiscover, setShowInDiscover] = useState(true);
   const [showOnlineStatus, setShowOnlineStatus] = useState(false);
-  const [showEventsAttended, setShowEventsAttended] = useState(true);
+  const { data: myProfile, update: updateMyProfile } = useMyProfile();
+  const showEventsAttended = !!myProfile?.show_attendance;
+  const setShowEventsAttended = (v: boolean) => updateMyProfile.mutate({ show_attendance: v });
   const [deleteStep, setDeleteStep] = useState<'closed' | 'reason' | 'confirm'>('closed');
   const [deleteReason, setDeleteReason] = useState('');
   const [deletePassword, setDeletePassword] = useState('');
@@ -133,7 +136,7 @@ export const PrivacySettings = ({ open, onOpenChange }: PrivacySettingsProps) =>
               <div className="flex items-center justify-between"><Label htmlFor="discover" className="flex items-center gap-2 cursor-pointer"><MagnifyingGlass weight="thin" className="h-4 w-4 text-muted-foreground" />In Discover anzeigen</Label><Switch id="discover" checked={showInDiscover} onCheckedChange={setShowInDiscover} /></div>
               <div className="flex items-center justify-between"><Label htmlFor="location" className="flex items-center gap-2 cursor-pointer"><MapPin weight="thin" className="h-4 w-4 text-muted-foreground" />Standort auf Posts zeigen</Label><Switch id="location" checked={showLocation} onCheckedChange={setShowLocation} /></div>
               <div className="flex items-center justify-between"><Label htmlFor="online" className="flex items-center gap-2 cursor-pointer"><Users weight="thin" className="h-4 w-4 text-muted-foreground" />Online-Status zeigen</Label><Switch id="online" checked={showOnlineStatus} onCheckedChange={setShowOnlineStatus} /></div>
-              <div className="flex items-center justify-between"><Label htmlFor="events" className="flex items-center gap-2 cursor-pointer"><Users weight="thin" className="h-4 w-4 text-muted-foreground" />Besuchte Events anzeigen</Label><Switch id="events" checked={showEventsAttended} onCheckedChange={setShowEventsAttended} /></div>
+              <div className="flex items-center justify-between"><Label htmlFor="events" className="flex items-center gap-2 cursor-pointer"><Users weight="thin" className="h-4 w-4 text-muted-foreground" />Zeigen, zu welchen Events ich gehe</Label><Switch id="events" checked={showEventsAttended} onCheckedChange={setShowEventsAttended} /></div>
             </div>
             <Separator />
             <div className="space-y-4">

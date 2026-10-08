@@ -46,6 +46,7 @@ const eventSchema = z.object({
   category: z.enum(['club', 'house_party', 'bar', 'festival', 'concert', 'sport', 'other']),
   music_genres: z.array(z.string()).default([]),
   visibility: z.enum(['public', 'private']),
+  min_age: z.number().int().min(0).max(30).optional(),
 }).refine((data) => {
   const [h, m] = data.starts_at_time.split(':').map(Number);
   const dt = new Date(data.starts_at);
@@ -94,7 +95,7 @@ export default function CreateEvent() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('venues')
-        .select('id, name, address, city, latitude, longitude, category')
+        .select('id, name, address, city, latitude, longitude, category, verification_status')
         .eq('owner_profile_id', profile!.id)
         .order('created_at', { ascending: true })
         .limit(1)
@@ -141,7 +142,9 @@ export default function CreateEvent() {
     if (currentSlide >= mediaItems.length - 1) setCurrentSlide(Math.max(0, mediaItems.length - 2));
   };
 
+  const publishRef = useRef(true);
   const onSubmit = async (data: EventFormData) => {
+    const publish = publishRef.current;
     if (!user) { navigate('/auth'); return; }
     setIsUploading(true);
     try {
@@ -149,7 +152,7 @@ export default function CreateEvent() {
       if (mediaItems.length > 0) {
         const coverItem = mediaItems[0];
         const fileExt = coverItem.file.name.split('.').pop();
-        const fileName = `events/${user.id}/${Date.now()}.${fileExt}`;
+        const fileName = `${user.id}/event-covers/${Date.now()}.${fileExt}`;
         const { error: uploadError } = await supabase.storage.from('post-media').upload(fileName, coverItem.file);
         if (uploadError) throw uploadError;
         const { data: { publicUrl } } = supabase.storage.from('post-media').getPublicUrl(fileName);
@@ -171,6 +174,9 @@ export default function CreateEvent() {
         dos_and_donts: data.dos_and_donts || null, category: data.category, cover_image_url: coverImageUrl,
         music_genres: data.music_genres ?? [],
         visibility: data.visibility,
+        min_age: data.min_age ?? null,
+        status: publish ? 'published' : 'draft',
+        venue_id: ownedVenue && ownedVenue.name === data.location_name ? ownedVenue.id : null,
         ...(ownedVenue && ownedVenue.name === data.location_name && ownedVenue.latitude != null && ownedVenue.longitude != null
           ? { latitude: ownedVenue.latitude, longitude: ownedVenue.longitude }
           : {}),
@@ -179,6 +185,7 @@ export default function CreateEvent() {
         const invitations = invitedFollowers.map((userId) => ({ event_id: newEvent.id, user_id: userId, status: 'invited' as const }));
         await supabase.from('event_attendees').insert(invitations);
       }
+      if (!publish) { toast({ title: 'Entwurf gespeichert', description: 'Du findest ihn unter deinen Events.' }); navigate('/events'); return; }
       toast({ title: 'Event erstellt! 🎉', description: invitedFollowers.length > 0 ? `Dein Event ist live. ${invitedFollowers.length} Einladung(en) verschickt!` : 'Dein Event ist jetzt live.' });
       if (isFirstEventPending && !shareFiredRef.current) {
         shareFiredRef.current = true;
@@ -375,6 +382,7 @@ export default function CreateEvent() {
               <div className="flex items-center gap-2"><CurrencyEur weight="thin" className="h-4 w-4 text-primary" /><h2 className="text-sm font-semibold text-foreground">Eintritt & Infos</h2></div>
               <FormField control={form.control} name="is_free" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-2.5"><div className="space-y-0.5"><FormLabel className="text-sm">Kostenlos</FormLabel></div><FormControl><Switch checked={field.value} onCheckedChange={field.onChange} /></FormControl></FormItem>)} />
               {!form.watch('is_free') && (<FormField control={form.control} name="entry_price" render={({ field }) => (<FormItem><FormLabel>Preis (€)</FormLabel><FormControl><Input type="number" {...field} onChange={e => field.onChange(parseFloat(e.target.value))} /></FormControl><FormMessage /></FormItem>)} />)}
+              <FormField control={form.control} name="min_age" render={({ field }) => (<FormItem><FormLabel>Mindestalter (optional)</FormLabel><FormControl><Input type="number" inputMode="numeric" placeholder="z.B. 18" value={field.value ?? ''} onChange={e => field.onChange(e.target.value === '' ? undefined : parseInt(e.target.value, 10))} /></FormControl><p className="text-[11px] text-muted-foreground">Jüngere Nutzer sehen dein Event nicht.</p><FormMessage /></FormItem>)} />
               <FormField control={form.control} name="dresscode" render={({ field }) => (<FormItem><FormLabel className="flex items-center gap-2"><TShirt weight="thin" className="h-4 w-4" /> Dresscode</FormLabel><FormControl><Input placeholder="z.B. All Black, Casual..." {...field} /></FormControl><FormMessage /></FormItem>)} />
             </div>
           </form>
@@ -382,8 +390,17 @@ export default function CreateEvent() {
         {/* Sticky bottom submit button */}
         <div className="sticky bottom-0 z-40 border-t border-border/50 bg-background/95 backdrop-blur-xl p-3">
           <Button
+            type="button"
+            variant="ghost"
+            className="mb-2 w-full"
+            disabled={createEvent.isPending || isUploading}
+            onClick={() => { publishRef.current = false; form.handleSubmit(onSubmit)(); }}
+          >
+            Als Entwurf speichern
+          </Button>
+          <Button
             data-testid="event-submit-btn"
-            onClick={form.handleSubmit(onSubmit)}
+            onClick={() => { publishRef.current = true; form.handleSubmit(onSubmit)(); }}
             className="w-full rounded-2xl bg-[hsl(var(--neon-purple))] hover:bg-[hsl(var(--neon-purple))]/90 text-white py-6 text-base font-semibold"
             disabled={createEvent.isPending || isUploading}
           >
