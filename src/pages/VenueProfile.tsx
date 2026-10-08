@@ -1,3 +1,4 @@
+import { VerifiedBadge } from '@/components/venue/VerifiedBadge';
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -74,7 +75,7 @@ export default function VenueProfile() {
                 className="mb-4 h-44 w-full rounded-xl object-cover"
               />
             )}
-            <h1 className="text-xl font-semibold text-foreground">{venue.name}</h1>
+            <h1 className="text-xl font-semibold text-foreground">{venue.name}{venue.is_verified && <VerifiedBadge className="ml-1.5" />}</h1>
             <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="h-3 w-3" />
               {[venue.address, venue.city].filter(Boolean).join(', ') || venue.category}
@@ -84,7 +85,7 @@ export default function VenueProfile() {
             <div className="mt-4 flex gap-2 text-xs text-muted-foreground">
               <span className="rounded-full bg-muted px-2 py-1">{venue.category}</span>
               <span className="rounded-full bg-muted px-2 py-1">{posts?.length ?? 0} Posts</span>
-              {venue.is_verified && <span className="rounded-full bg-primary/20 px-2 py-1 text-primary">Verifiziert</span>}
+              {venue.is_verified && <span className="flex items-center gap-1 rounded-full bg-primary/20 px-2 py-1 text-primary"><VerifiedBadge size={14} />Verifiziert</span>}
             </div>
 
             <div className="mt-4">

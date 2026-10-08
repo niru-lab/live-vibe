@@ -1,3 +1,7 @@
 - Roles live in `public.user_roles` (checked via `has_role`); `profiles.role` is a read-only mirror set only by the `set_account_type` RPC — prevents users from escalating their own role.
 - Profiles are created only by the `on_auth_user_created` trigger; the client never inserts profiles — avoids duplicate/racing profile creation.
 - All non-public routes sit under `ProtectedRoute`; venue-only routes under `RoleRoute` — one place for access rules.
+- Venue access is checked via `venue_members` + `is_venue_member`; verification fields (`verification_status`, `is_verified`) change only through `admin_set_venue_status` — owners can't self-verify.
+- Event visibility (drafts, min_age gate, blocks) is enforced in the `events` SELECT policy, not in the UI — direct links obey it too.
+- Venue logos and event covers live in the public `post-media` bucket under `<user_id>/venue-logos|event-covers/` — the workspace blocks creating new public buckets.
+- Attendance is shown only via `event_visible_attendees` (opt-in, max 8) — no full attendee lists.
