@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -188,6 +189,14 @@ export default function Auth() {
                   <Input id="login-password" type="password" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} required />
                   {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
                 </div>
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  disabled={loading}
+                  className="w-full text-right text-xs text-muted-foreground transition-colors hover:text-primary disabled:opacity-50"
+                >
+                  Passwort vergessen?
+                </button>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? 'Wird angemeldet...' : 'Anmelden'}
                 </Button>
