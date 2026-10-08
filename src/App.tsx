@@ -84,6 +84,7 @@ const App = () => (
                   <Route path="/auth/legacy" element={<Welcome />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/verify" element={<Verify />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="/impressum" element={<Impressum />} />
                   <Route path="/datenschutz" element={<Datenschutz />} />

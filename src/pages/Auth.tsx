@@ -59,6 +59,24 @@ export default function Auth() {
     return Object.keys(newErrors).length === 0;
   };
 
+  const handleForgotPassword = async () => {
+    const emailResult = emailSchema.safeParse(email);
+    if (!emailResult.success) {
+      setErrors({ email: 'Bitte gib zuerst deine E-Mail-Adresse ein' });
+      return;
+    }
+    setLoading(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: appUrl('/reset-password'),
+    });
+    setLoading(false);
+    if (error) {
+      toast({ variant: 'destructive', title: 'Fehler', description: error.message });
+    } else {
+      toast({ title: 'E-Mail unterwegs 📬', description: 'Check dein Postfach für den Link zum Zurücksetzen.' });
+    }
+  };
+
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!validateForm(false)) return;
