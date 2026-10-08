@@ -19,6 +19,9 @@ export const PUSH_CAPS = {
 /** Which triggers are live. Flip to false to disable a trigger without a code change elsewhere. */
 export const PUSH_TRIGGERS = {
   comment_on_your_post: true,
+  event_starts_soon: true,
+  new_message: true,
+  chat_request_accepted: true,
   event_gaining_traction: true,
   reengagement_inactive: true,
 } as const;
@@ -33,6 +36,8 @@ export interface PushRequest {
   title: string;
   body?: string;
   url?: string;
+  /** Fine-grained user toggle that must also be on (push_preferences column). */
+  prefKey?: 'event_reminders' | 'messages' | 'friends_going';
   /** Urgent pushes ignore quiet hours. Default false. */
   urgent?: boolean;
 }
@@ -121,7 +126,8 @@ export async function sendPush(supabase: any, req: PushRequest): Promise<PushSta
       req.category === 'social' ? p.social_enabled
         : req.category === 'event' ? p.event_enabled
           : p.lifecycle_enabled;
-    if (!p.enabled || !categoryEnabled) return await record('skipped_opted_out');
+    const fineEnabled = req.prefKey ? ((p as any)[req.prefKey] ?? true) : true;
+    if (!p.enabled || !categoryEnabled || !fineEnabled) return await record('skipped_opted_out');
 
     // 3. Quiet hours (non-urgent only) — skip rather than queue noise for later.
     if (!req.urgent && inQuietHours(localHour(p.timezone), p.quiet_hours_start, p.quiet_hours_end)) {
