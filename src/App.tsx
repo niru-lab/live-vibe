@@ -19,6 +19,7 @@ import RolePicker from "./pages/RolePicker";
 import Auth from "./pages/Auth";
 import Register from "./pages/Register";
 import Verify from "./pages/Verify";
+import ResetPassword from "./pages/ResetPassword";
 import Onboarding from "./pages/Onboarding";
 import OnboardingVenue from "./pages/OnboardingVenue";
 import AuthCallback from "./pages/AuthCallback";
@@ -83,6 +84,7 @@ const App = () => (
                   <Route path="/auth/legacy" element={<Welcome />} />
                   <Route path="/register" element={<Register />} />
                   <Route path="/verify" element={<Verify />} />
+                  <Route path="/reset-password" element={<ResetPassword />} />
                   <Route path="/auth/callback" element={<AuthCallback />} />
                   <Route path="/impressum" element={<Impressum />} />
                   <Route path="/datenschutz" element={<Datenschutz />} />
