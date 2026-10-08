@@ -869,10 +869,13 @@ export type Database = {
           latitude: number | null
           location_name: string
           longitude: number | null
+          min_age: number | null
           music_genres: string[]
           name: string
           starts_at: string
+          status: string
           updated_at: string
+          venue_id: string | null
           visibility: Database["public"]["Enums"]["visibility_level"]
         }
         Insert: {
@@ -895,10 +898,13 @@ export type Database = {
           latitude?: number | null
           location_name: string
           longitude?: number | null
+          min_age?: number | null
           music_genres?: string[]
           name: string
           starts_at: string
+          status?: string
           updated_at?: string
+          venue_id?: string | null
           visibility?: Database["public"]["Enums"]["visibility_level"]
         }
         Update: {
@@ -921,10 +927,13 @@ export type Database = {
           latitude?: number | null
           location_name?: string
           longitude?: number | null
+          min_age?: number | null
           music_genres?: string[]
           name?: string
           starts_at?: string
+          status?: string
           updated_at?: string
+          venue_id?: string | null
           visibility?: Database["public"]["Enums"]["visibility_level"]
         }
         Relationships: [
@@ -940,6 +949,13 @@ export type Database = {
             columns: ["creator_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
             referencedColumns: ["id"]
           },
         ]
@@ -2462,6 +2478,67 @@ export type Database = {
         }
         Relationships: []
       }
+      venue_agreements: {
+        Row: {
+          accepted_at: string
+          agreement_version: string
+          id: string
+          user_id: string
+          venue_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          agreement_version: string
+          id?: string
+          user_id: string
+          venue_id: string
+        }
+        Update: {
+          accepted_at?: string
+          agreement_version?: string
+          id?: string
+          user_id?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_agreements_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venue_members: {
+        Row: {
+          created_at: string
+          role: string
+          user_id: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          role?: string
+          user_id: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: string
+          user_id?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_members_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venue_offers: {
         Row: {
           created_at: string
@@ -2553,25 +2630,34 @@ export type Database = {
           address_skipped: boolean | null
           address_street: string | null
           address_zip: string | null
+          capacity: number | null
           category: string
           city: string | null
+          contact_name: string | null
           created_at: string
           day_pattern: string | null
           description: string | null
           id: string
           image_url: string | null
+          imprint_url: string | null
           is_verified: boolean
           latitude: number | null
+          logo_url: string | null
           longitude: number | null
           name: string
           offerings: string[] | null
+          opening_hours: Json | null
           owner_profile_id: string | null
           phone: string | null
           price_tier: string | null
+          register_number: string | null
           time_slots: string[] | null
           updated_at: string
           venue_type: string | null
+          verification_status: string
           verification_tier: number | null
+          verified_at: string | null
+          website: string | null
           whatsapp_ok: boolean | null
         }
         Insert: {
@@ -2580,25 +2666,34 @@ export type Database = {
           address_skipped?: boolean | null
           address_street?: string | null
           address_zip?: string | null
+          capacity?: number | null
           category: string
           city?: string | null
+          contact_name?: string | null
           created_at?: string
           day_pattern?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
+          imprint_url?: string | null
           is_verified?: boolean
           latitude?: number | null
+          logo_url?: string | null
           longitude?: number | null
           name: string
           offerings?: string[] | null
+          opening_hours?: Json | null
           owner_profile_id?: string | null
           phone?: string | null
           price_tier?: string | null
+          register_number?: string | null
           time_slots?: string[] | null
           updated_at?: string
           venue_type?: string | null
+          verification_status?: string
           verification_tier?: number | null
+          verified_at?: string | null
+          website?: string | null
           whatsapp_ok?: boolean | null
         }
         Update: {
@@ -2607,25 +2702,34 @@ export type Database = {
           address_skipped?: boolean | null
           address_street?: string | null
           address_zip?: string | null
+          capacity?: number | null
           category?: string
           city?: string | null
+          contact_name?: string | null
           created_at?: string
           day_pattern?: string | null
           description?: string | null
           id?: string
           image_url?: string | null
+          imprint_url?: string | null
           is_verified?: boolean
           latitude?: number | null
+          logo_url?: string | null
           longitude?: number | null
           name?: string
           offerings?: string[] | null
+          opening_hours?: Json | null
           owner_profile_id?: string | null
           phone?: string | null
           price_tier?: string | null
+          register_number?: string | null
           time_slots?: string[] | null
           updated_at?: string
           venue_type?: string | null
+          verification_status?: string
           verification_tier?: number | null
+          verified_at?: string | null
+          website?: string | null
           whatsapp_ok?: boolean | null
         }
         Relationships: [
@@ -2683,6 +2787,10 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_set_venue_status: {
+        Args: { _status: string; _venue_id: string }
+        Returns: undefined
+      }
       answer_card: {
         Args: {
           _answer_text: string
@@ -2714,6 +2822,7 @@ export type Database = {
         Args: { recipient_id: string; sender_id: string }
         Returns: boolean
       }
+      can_view_event_age: { Args: { _min_age: number }; Returns: boolean }
       can_view_profile: {
         Args: { target_id: string; viewer_id: string }
         Returns: boolean
@@ -2742,6 +2851,10 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      event_visible_attendees: {
+        Args: { _event_id: string }
+        Returns: string[]
+      }
       get_user_room_ids: { Args: { _profile_id: string }; Returns: string[] }
       has_role: {
         Args: {
@@ -2766,6 +2879,7 @@ export type Database = {
         Args: { _room_id: string; _user_id: string }
         Returns: boolean
       }
+      is_venue_member: { Args: { _venue_id: string }; Returns: boolean }
       is_venue_owner: { Args: { _venue_id: string }; Returns: boolean }
       move_to_dlq: {
         Args: {
@@ -2882,6 +2996,7 @@ export type Database = {
           title: string
         }[]
       }
+      viewer_age: { Args: never; Returns: number }
     }
     Enums: {
       app_role: "guest" | "venue_owner" | "admin"
