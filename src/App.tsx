@@ -26,6 +26,7 @@ import Discover from "./pages/Discover";
 import Events from "./pages/Events";
 import VenueDashboard from "./pages/VenueDashboard";
 import DashboardComingSoon from "./pages/DashboardComingSoon";
+import AdminVenues from "./pages/AdminVenues";
 import VenueProfile from "./pages/VenueProfile";
 import CreateEvent from "./pages/CreateEvent";
 import CreatePost from "./pages/CreatePost";
@@ -113,6 +114,9 @@ const App = () => (
                     <Route path="/roomz/:id" element={<RoomDetail />} />
                     <Route path="/settings/privacy/blocked" element={<BlockedUsers />} />
 
+                    <Route element={<RoleRoute roles={["admin"]} />}>
+                      <Route path="/admin/venues" element={<AdminVenues />} />
+                    </Route>
                     <Route element={<RoleRoute roles={["venue_owner"]} />}>
                       <Route path="/venue/dashboard" element={<DashboardComingSoon />} />
                       <Route path="/venue" element={<VenueDashboard />} />

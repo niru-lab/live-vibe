@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { CaretLeft } from '@phosphor-icons/react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 import VenueDashboard from './VenueDashboard';
 
@@ -22,15 +21,29 @@ const Equalizer = () => (
   </div>
 );
 
-/** Verified venues see the dashboard; everyone else gets the waitlist page. */
+/** Approved venues see the dashboard; pending/rejected venues get the status + waitlist page. */
 export default function DashboardComingSoon() {
-  const { data: profile, isLoading } = useProfile();
+  const { user } = useAuth();
+  const { data: status, isLoading } = useQuery({
+    queryKey: ['my-venue-status', user?.id],
+    enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('venue_members')
+        .select('venues(verification_status)')
+        .eq('user_id', user!.id)
+        .limit(1)
+        .maybeSingle();
+      const v = (data as any)?.venues;
+      return (Array.isArray(v) ? v[0] : v)?.verification_status as string | undefined;
+    },
+  });
   if (isLoading) return null;
-  if (profile?.is_verified) return <VenueDashboard />;
-  return <ComingSoon />;
+  if (status === 'approved') return <VenueDashboard />;
+  return <ComingSoon status={status} />;
 }
 
-function ComingSoon() {
+function ComingSoon({ status }: { status?: string }) {
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -70,6 +83,9 @@ function ComingSoon() {
         <h1 className="mt-8 text-[34px] font-bold leading-tight tracking-tight sm:text-5xl" style={{ color: '#fff' }}>
           Unser Dashboard steht noch in der Schlange vorm Türsteher. 🕺
         </h1>
+        <span className="mt-6 rounded-full px-4 py-1.5 text-sm" style={{ color: '#fff', background: 'rgba(255,255,255,0.06)', border: '0.5px solid rgba(255,255,255,0.15)' }}>
+          {status === 'rejected' ? 'Verifizierung abgelehnt – schreib uns, wir klären das.' : 'Verifizierung läuft ⏳'}
+        </span>
         <p className="mt-4 text-base" style={{ color: 'rgba(255,255,255,0.6)' }}>
           Keine Sorge – wir kennen den DJ. Bald siehst du hier, wer wann bei dir feiert.
         </p>
