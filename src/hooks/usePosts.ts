@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from './useProfile';
 import type { Tables, TablesInsert } from '@/integrations/supabase/types';
@@ -8,6 +8,7 @@ export type PostWithAuthor = Post & {
   author: Tables<'profiles'> | null;
   event?: Tables<'events'> | null;
   location?: Tables<'profiles'> | null;
+  posted_as_venue?: { id: string; name: string; is_verified: boolean } | null;
 };
 
 export const usePosts = (city?: string) => {
@@ -161,5 +162,38 @@ export const useDeletePost = () => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['userPosts'] });
     },
+  });
+};
+
+export type FeedMode = 'all' | 'city' | 'onsite';
+const PAGE_SIZE = 20;
+
+/** Paged feed (cursor = created_at). Authors come in the same query (one join, no N+1). */
+export const useInfinitePosts = (opts: { city?: string; mode: FeedMode; myCity?: string | null }) => {
+  return useInfiniteQuery({
+    queryKey: ['posts', 'infinite', opts.city ?? null, opts.mode, opts.myCity ?? null],
+    initialPageParam: null as string | null,
+    queryFn: async ({ pageParam }) => {
+      let query = supabase
+        .from('posts')
+        .select(`
+          *,
+          author:profiles!posts_author_id_fkey(*),
+          event:events(*),
+          location:profiles!posts_location_id_fkey(*),
+          posted_as_venue:venues!posts_posted_as_venue_id_fkey(id, name, is_verified)
+        `)
+        .order('created_at', { ascending: false })
+        .limit(PAGE_SIZE);
+      if (pageParam) query = query.lt('created_at', pageParam);
+      const city = opts.mode === 'city' ? opts.myCity : opts.city;
+      if (city) query = query.ilike('city', `%${city}%`);
+      if (opts.mode === 'onsite') query = query.eq('on_site_verified', true);
+      // Blocked users are filtered server-side by the posts policy (can_see_user).
+      const { data, error } = await query;
+      if (error) throw error;
+      return data as unknown as PostWithAuthor[];
+    },
+    getNextPageParam: (last) => (last.length === PAGE_SIZE ? last[last.length - 1].created_at : null),
   });
 };

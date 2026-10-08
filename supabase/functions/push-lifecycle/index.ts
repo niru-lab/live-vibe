@@ -32,7 +32,7 @@ Deno.serve(async (req) => {
     Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
   );
 
-  const result: Record<string, number> = { traction: 0, reengagement: 0 };
+  const result: Record<string, number> = { traction: 0, reengagement: 0, starts_soon: 0, messages: 0, accepted: 0 };
 
   try {
     // ── Trigger: an event you host is gaining traction (venue owners) ──
@@ -105,6 +105,90 @@ Deno.serve(async (req) => {
           url: '/discover',
         });
         result.reengagement++;
+      }
+    }
+
+    // ── Trigger: event you RSVP'd to starts in ~2 h (run this job hourly) ──
+    if (PUSH_TRIGGERS.event_starts_soon) {
+      const from = new Date(Date.now() + 90 * 60_000).toISOString();
+      const to = new Date(Date.now() + 150 * 60_000).toISOString();
+      const { data: soon } = await supabase
+        .from('events')
+        .select('id, name')
+        .eq('status', 'published')
+        .gte('starts_at', from)
+        .lte('starts_at', to)
+        .limit(200);
+      for (const ev of soon ?? []) {
+        const { data: going } = await supabase
+          .from('event_attendees')
+          .select('user_id')
+          .eq('event_id', ev.id)
+          .eq('status', 'going');
+        for (const a of going ?? []) {
+          await sendPush(supabase, {
+            profileId: a.user_id,
+            category: 'event',
+            prefKey: 'event_reminders',
+            triggerKey: 'event_starts_soon',
+            dedupeKey: `starts_soon:${ev.id}:${a.user_id}`,
+            title: `„${ev.name}" startet in 2 Std. 🎉`,
+            body: 'Mach dich bereit!',
+            url: `/events/${ev.id}`,
+            urgent: true,
+          });
+          result.starts_soon++;
+        }
+      }
+    }
+
+    // ── Trigger: new unread direct message (last hour, one push per sender) ──
+    if (PUSH_TRIGGERS.new_message) {
+      const { data: msgs } = await supabase
+        .from('direct_messages')
+        .select('id, sender_id, recipient_id, status')
+        .eq('is_read', false)
+        .gte('created_at', iso(3600_000))
+        .limit(500);
+      const seen = new Set<string>();
+      for (const m of msgs ?? []) {
+        const k = `${m.sender_id}:${m.recipient_id}`;
+        if (seen.has(k)) continue;
+        seen.add(k);
+        await sendPush(supabase, {
+          profileId: m.recipient_id,
+          category: 'social',
+          prefKey: 'messages',
+          triggerKey: 'new_message',
+          dedupeKey: `dm:${m.id}`,
+          title: m.status === 'pending' ? 'Neue Nachrichtenanfrage 💬' : 'Neue Nachricht 💬',
+          url: '/messages',
+          urgent: true,
+        });
+        result.messages++;
+      }
+    }
+
+    // ── Trigger: your chat request was accepted (last hour) ──
+    if (PUSH_TRIGGERS.chat_request_accepted) {
+      const { data: acc } = await supabase
+        .from('chat_requests')
+        .select('id, sender_id')
+        .eq('status', 'accepted')
+        .gte('updated_at', iso(3600_000))
+        .limit(500);
+      for (const r of acc ?? []) {
+        await sendPush(supabase, {
+          profileId: r.sender_id,
+          category: 'social',
+          prefKey: 'messages',
+          triggerKey: 'chat_request_accepted',
+          dedupeKey: `chat_accepted:${r.id}`,
+          title: 'Deine Anfrage wurde angenommen ✓',
+          body: 'Ihr könnt jetzt schreiben.',
+          url: '/messages',
+        });
+        result.accepted++;
       }
     }
 

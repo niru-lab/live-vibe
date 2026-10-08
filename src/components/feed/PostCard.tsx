@@ -1,3 +1,4 @@
+import { VerifiedBadge } from '@/components/venue/VerifiedBadge';
 import { memo, useState } from 'react';
 import { Heart, ChatCircle, DotsThreeVertical, Trash, Flag, Prohibit } from '@phosphor-icons/react';
 import { formatDistanceToNow } from 'date-fns';
@@ -124,7 +125,7 @@ const PostCardComponent = ({ post, isLiked, onLike, onDeleted }: PostCardProps) 
                   minWidth: 0,
                 }}
               >
-                {author?.username || author?.display_name || 'unbekannt'}
+                {post.posted_as_venue ? <>{post.posted_as_venue.name}{post.posted_as_venue.is_verified && <VerifiedBadge size={12} className="ml-1" />}</> : (author?.username || author?.display_name || 'unbekannt')}
               </span>
               <span className="text-muted-foreground/60" style={{ fontSize: '10px' }}>·</span>
               <span className="text-muted-foreground/60 shrink-0" style={{ fontSize: '10px' }}>
@@ -230,6 +231,11 @@ const PostCardComponent = ({ post, isLiked, onLike, onDeleted }: PostCardProps) 
                 <span>{post.comments_count}</span>
               </div>
 
+              {(post as any).on_site_verified && (
+                <span className="rounded-full border border-primary/40 bg-primary/10 text-primary" style={{ marginLeft: 'auto', padding: '3px 7px', fontSize: '10px' }}>
+                  📍 Vor Ort
+                </span>
+              )}
               {(post.event?.name || post.location_name) && (
                 <span
                   className="truncate bg-primary/10 border border-primary/30 text-primary"

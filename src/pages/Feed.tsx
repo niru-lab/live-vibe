@@ -1,9 +1,10 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useState } from 'react';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePosts, useLikePost, useUserLikes } from '@/hooks/usePosts';
+import { useInfinitePosts, useLikePost, useUserLikes, type FeedMode } from '@/hooks/usePosts';
+import { useProfile } from '@/hooks/useProfile';
 import { useFeedAlgorithm } from '@/hooks/useFeedAlgorithm';
 import { useTaggedPosts } from '@/hooks/useEvents';
 import { useLivePosts } from '@/hooks/useLivePosts';
@@ -31,7 +32,21 @@ export default function Feed() {
   const postParam = searchParams.get('post');
   const [selectedCity, setSelectedCity] = useState<string>('all');
   const [openPost, setOpenPost] = useState<PostWithAuthor | null>(null);
-  const { data: rawPosts, isLoading: postsLoading } = usePosts(selectedCity === 'all' ? undefined : selectedCity);
+  const [mode, setMode] = useState<FeedMode>('all');
+  const { data: myProfile } = useProfile();
+  const feedQuery = useInfinitePosts({ city: selectedCity === 'all' ? undefined : selectedCity, mode, myCity: myProfile?.city });
+  const rawPosts = useMemo(() => feedQuery.data?.pages.flat(), [feedQuery.data]);
+  const postsLoading = feedQuery.isLoading;
+  const sentinelRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && feedQuery.hasNextPage && !feedQuery.isFetchingNextPage) feedQuery.fetchNextPage();
+    }, { rootMargin: '400px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [feedQuery.hasNextPage, feedQuery.isFetchingNextPage, feedQuery.fetchNextPage]);
   const posts = useFeedAlgorithm(rawPosts);
   const { data: taggedPosts, isLoading: taggedLoading } = useTaggedPosts(venueFilter || undefined);
   const { data: likedPosts = [] } = useUserLikes();
@@ -102,6 +117,21 @@ export default function Feed() {
             </span>
           </div>
         )}
+        {!venueFilter && (
+          <div className="mb-3 flex gap-2" role="tablist" aria-label="Feed-Filter">
+            {([['all', 'Alle'], ['city', 'Meine Stadt'], ['onsite', 'Vor Ort']] as [FeedMode, string][]).map(([m, l]) => (
+              <button
+                key={m}
+                role="tab"
+                aria-selected={mode === m}
+                onClick={() => setMode(m)}
+                className={`rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${mode === m ? 'border-primary bg-primary/15 text-foreground' : 'border-border/50 text-muted-foreground hover:border-primary/50'}`}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
+        )}
         {isLoading || (!venueFilter && activationLoading) ? (
           <div className="space-y-4">
             {[...Array(3)].map((_, i) => (
@@ -165,6 +195,8 @@ export default function Feed() {
                 />
               </button>
             ))}
+            {!venueFilter && <div ref={sentinelRef} className="h-8" aria-hidden />}
+            {feedQuery.isFetchingNextPage && <Skeleton className="h-40 w-full rounded-[18px]" />}
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-20 text-center">

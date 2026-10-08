@@ -14,7 +14,10 @@ export const PushSettings = ({ profile }: PushSettingsProps) => {
   const update = useUpdatePushPreferences(profile?.id);
 
   const enabled = prefs?.enabled ?? true;
-  const rows: { key: 'social_enabled' | 'event_enabled' | 'lifecycle_enabled'; label: string; hint: string }[] = [
+  const rows: { key: 'social_enabled' | 'event_enabled' | 'lifecycle_enabled' | 'event_reminders' | 'messages' | 'friends_going'; label: string; hint: string }[] = [
+    { key: 'event_reminders', label: 'Event-Erinnerungen', hint: '2 Std. bevor dein Event startet.' },
+    { key: 'messages', label: 'Nachrichten', hint: 'Neue Nachrichten und angenommene Anfragen.' },
+    { key: 'friends_going', label: 'Freunde gehen hin', hint: 'Wenn Leute, denen du folgst, zusagen.' },
     {
       key: 'social_enabled',
       label: isVenue ? 'Reaktionen auf deine Inhalte' : 'Reaktionen auf deine Posts',

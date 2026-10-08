@@ -1387,6 +1387,7 @@ export type Database = {
           city_id: string | null
           comments_count: number
           created_at: string
+          crowd_level: number | null
           deleted_at: string | null
           event_id: string | null
           expires_at: string | null
@@ -1399,10 +1400,14 @@ export type Database = {
           longitude: number | null
           media_type: string
           media_url: string
+          mood: number | null
           music_artist: string | null
+          music_fit: boolean | null
           music_title: string | null
           music_url: string | null
+          on_site_verified: boolean
           post_type: Database["public"]["Enums"]["post_type"]
+          posted_as_venue_id: string | null
           venue_id: string | null
         }
         Insert: {
@@ -1412,6 +1417,7 @@ export type Database = {
           city_id?: string | null
           comments_count?: number
           created_at?: string
+          crowd_level?: number | null
           deleted_at?: string | null
           event_id?: string | null
           expires_at?: string | null
@@ -1424,10 +1430,14 @@ export type Database = {
           longitude?: number | null
           media_type?: string
           media_url: string
+          mood?: number | null
           music_artist?: string | null
+          music_fit?: boolean | null
           music_title?: string | null
           music_url?: string | null
+          on_site_verified?: boolean
           post_type?: Database["public"]["Enums"]["post_type"]
+          posted_as_venue_id?: string | null
           venue_id?: string | null
         }
         Update: {
@@ -1437,6 +1447,7 @@ export type Database = {
           city_id?: string | null
           comments_count?: number
           created_at?: string
+          crowd_level?: number | null
           deleted_at?: string | null
           event_id?: string | null
           expires_at?: string | null
@@ -1449,10 +1460,14 @@ export type Database = {
           longitude?: number | null
           media_type?: string
           media_url?: string
+          mood?: number | null
           music_artist?: string | null
+          music_fit?: boolean | null
           music_title?: string | null
           music_url?: string | null
+          on_site_verified?: boolean
           post_type?: Database["public"]["Enums"]["post_type"]
+          posted_as_venue_id?: string | null
           venue_id?: string | null
         }
         Relationships: [
@@ -1496,6 +1511,13 @@ export type Database = {
             columns: ["location_id"]
             isOneToOne: false
             referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_posted_as_venue_id_fkey"
+            columns: ["posted_as_venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
             referencedColumns: ["id"]
           },
           {
@@ -1688,8 +1710,11 @@ export type Database = {
         Row: {
           enabled: boolean
           event_enabled: boolean
+          event_reminders: boolean
+          friends_going: boolean
           id: string
           lifecycle_enabled: boolean
+          messages: boolean
           profile_id: string
           quiet_hours_end: number
           quiet_hours_start: number
@@ -1700,8 +1725,11 @@ export type Database = {
         Insert: {
           enabled?: boolean
           event_enabled?: boolean
+          event_reminders?: boolean
+          friends_going?: boolean
           id?: string
           lifecycle_enabled?: boolean
+          messages?: boolean
           profile_id: string
           quiet_hours_end?: number
           quiet_hours_start?: number
@@ -1712,8 +1740,11 @@ export type Database = {
         Update: {
           enabled?: boolean
           event_enabled?: boolean
+          event_reminders?: boolean
+          friends_going?: boolean
           id?: string
           lifecycle_enabled?: boolean
+          messages?: boolean
           profile_id?: string
           quiet_hours_end?: number
           quiet_hours_start?: number
@@ -1796,6 +1827,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          last_seen: string
           platform: string
           profile_id: string
           token: string
@@ -1804,6 +1836,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          last_seen?: string
           platform: string
           profile_id: string
           token: string
@@ -1812,6 +1845,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          last_seen?: string
           platform?: string
           profile_id?: string
           token?: string
@@ -2787,6 +2821,27 @@ export type Database = {
         }
         Returns: undefined
       }
+      admin_get_post: {
+        Args: { _post_id: string }
+        Returns: {
+          author_id: string
+          caption: string
+          deleted_at: string
+          id: string
+          media_url: string
+        }[]
+      }
+      admin_hide_post: {
+        Args: { _post_id: string; _report_id?: string }
+        Returns: undefined
+      }
+      admin_resolve_report: {
+        Args: {
+          _report_id: string
+          _status: Database["public"]["Enums"]["report_status"]
+        }
+        Returns: undefined
+      }
       admin_set_venue_status: {
         Args: { _status: string; _venue_id: string }
         Returns: undefined
@@ -2846,6 +2901,10 @@ export type Database = {
         Returns: boolean
       }
       delete_expired_posts: { Args: never; Returns: undefined }
+      dm_allowed: {
+        Args: { _recipient: string; _sender: string }
+        Returns: boolean
+      }
       email_queue_dispatch: { Args: never; Returns: undefined }
       enqueue_email: {
         Args: { payload: Json; queue_name: string }
@@ -2995,6 +3054,10 @@ export type Database = {
           status: string
           title: string
         }[]
+      }
+      verify_post_location: {
+        Args: { _lat: number; _lng: number; _post_id: string }
+        Returns: boolean
       }
       viewer_age: { Args: never; Returns: number }
     }
