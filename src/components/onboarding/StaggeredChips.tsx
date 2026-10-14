@@ -47,7 +47,7 @@ export default function StaggeredChips({
   };
 
   return (
-    <div className="flex min-w-0 flex-col gap-4 pb-1">
+    <div className="dark flex min-w-0 flex-col gap-4 pb-1">
       {allowCustom && (
         <div className="flex min-w-0 items-center gap-2">
           <input
