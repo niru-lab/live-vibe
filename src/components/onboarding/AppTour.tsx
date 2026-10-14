@@ -195,6 +195,7 @@ export default function AppTour() {
     if (!user) return;
     try {
       sessionStorage.setItem(SESSION_DISMISS_KEY, user.id);
+      sessionStorage.removeItem(`${SESSION_STEP_KEY}:${user.id}`);
     } catch {
       /* noop */
     }
@@ -222,6 +223,11 @@ export default function AppTour() {
       if (!target) return;
       setRect(null);
       setStep(index);
+      try {
+        if (user) sessionStorage.setItem(`${SESSION_STEP_KEY}:${user.id}`, String(index));
+      } catch {
+        /* noop */
+      }
       if (target.path && target.path !== location.pathname) navigate(target.path);
     },
     [location.pathname, navigate, steps],
