@@ -66,7 +66,7 @@ export default function Welcome() {
               variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
               className="mb-4 text-[11px] font-bold uppercase tracking-[0.24em] text-primary sm:text-xs"
             >
-              Stuttgart · Aalen · Frankfurt
+              Jetzt in ganz Deutschland
             </motion.p>
 
             <motion.h1
