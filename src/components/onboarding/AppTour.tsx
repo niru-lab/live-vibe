@@ -124,7 +124,16 @@ export default function AppTour() {
       if (sessionStorage.getItem(SESSION_DISMISS_KEY) === user.id) return;
 
       setRole(data.role === 'venue_owner' ? 'venue_owner' : 'guest');
-      setStep(0);
+      // Resume at the saved step if the tour remounts mid-run (e.g. route change)
+      let savedStep = 0;
+      try {
+        const raw = sessionStorage.getItem(`${SESSION_STEP_KEY}:${user.id}`);
+        const parsed = raw ? parseInt(raw, 10) : 0;
+        if (Number.isFinite(parsed) && parsed > 0) savedStep = parsed;
+      } catch {
+        /* noop */
+      }
+      setStep(savedStep);
       setTimeout(() => {
         if (!cancelled) setActive(true);
       }, 400);
