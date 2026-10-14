@@ -90,6 +90,7 @@ const VENUE_STEPS: TourStep[] = [
 ];
 
 const SESSION_DISMISS_KEY = 'feyrn_app_tour_dismissed_session';
+const SESSION_STEP_KEY = 'feyrn_app_tour_step';
 
 export default function AppTour() {
   const { user, loading } = useAuth();
