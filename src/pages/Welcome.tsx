@@ -87,7 +87,7 @@ export default function Welcome() {
               variants={{ hidden: { opacity: 0, y: 12 }, visible: { opacity: 1, y: 0 } }}
               className="mx-auto mt-6 max-w-lg text-sm leading-relaxed text-muted-foreground sm:text-base"
             >
-              Was heute Nacht läuft. Und wer dabei ist.
+              Was heute Nacht läuft.
             </motion.p>
 
             <motion.div
