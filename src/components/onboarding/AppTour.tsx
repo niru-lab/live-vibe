@@ -230,7 +230,7 @@ export default function AppTour() {
       }
       if (target.path && target.path !== location.pathname) navigate(target.path);
     },
-    [location.pathname, navigate, steps],
+    [location.pathname, navigate, steps, user],
   );
 
   const next = () => (step >= steps.length - 1 ? finish(true) : goTo(step + 1));
