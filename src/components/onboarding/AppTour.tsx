@@ -90,6 +90,7 @@ const VENUE_STEPS: TourStep[] = [
 ];
 
 const SESSION_DISMISS_KEY = 'feyrn_app_tour_dismissed_session';
+const SESSION_STEP_KEY = 'feyrn_app_tour_step';
 
 export default function AppTour() {
   const { user, loading } = useAuth();
@@ -123,7 +124,16 @@ export default function AppTour() {
       if (sessionStorage.getItem(SESSION_DISMISS_KEY) === user.id) return;
 
       setRole(data.role === 'venue_owner' ? 'venue_owner' : 'guest');
-      setStep(0);
+      // Resume at the saved step if the tour remounts mid-run (e.g. route change)
+      let savedStep = 0;
+      try {
+        const raw = sessionStorage.getItem(`${SESSION_STEP_KEY}:${user.id}`);
+        const parsed = raw ? parseInt(raw, 10) : 0;
+        if (Number.isFinite(parsed) && parsed > 0) savedStep = parsed;
+      } catch {
+        /* noop */
+      }
+      setStep(savedStep);
       setTimeout(() => {
         if (!cancelled) setActive(true);
       }, 400);
@@ -185,6 +195,7 @@ export default function AppTour() {
     if (!user) return;
     try {
       sessionStorage.setItem(SESSION_DISMISS_KEY, user.id);
+      sessionStorage.removeItem(`${SESSION_STEP_KEY}:${user.id}`);
     } catch {
       /* noop */
     }
@@ -212,9 +223,14 @@ export default function AppTour() {
       if (!target) return;
       setRect(null);
       setStep(index);
+      try {
+        if (user) sessionStorage.setItem(`${SESSION_STEP_KEY}:${user.id}`, String(index));
+      } catch {
+        /* noop */
+      }
       if (target.path && target.path !== location.pathname) navigate(target.path);
     },
-    [location.pathname, navigate, steps],
+    [location.pathname, navigate, steps, user],
   );
 
   const next = () => (step >= steps.length - 1 ? finish(true) : goTo(step + 1));
