@@ -28,7 +28,7 @@ export default function StaggeredChips({
   const [customs, setCustoms] = useState<Option[]>([]);
   const [input, setInput] = useState('');
 
-  const all = useMemo(() => {
+  const all = useMemo<Option[]>(() => {
     const entries = [...customs, ...options];
     const restored = selected
       .filter(label => !entries.some(option => option.label === label))
