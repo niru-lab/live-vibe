@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
-import { Plus } from '@phosphor-icons/react';
+import { Check, Plus } from '@phosphor-icons/react';
+import { Button } from '@/components/ui/button';
 
 interface Option {
   label: string;
@@ -16,11 +17,7 @@ interface Props {
   customPlaceholder?: string;
 }
 
-/**
- * Two-row marquee chip layout.
- * Row 1 scrolls left → right, Row 2 scrolls right → left.
- * Pauses on hover/touch. Optional custom input below.
- */
+/** Wrapping choices keep every option and custom selection fully visible. */
 export default function StaggeredChips({
   options,
   selected,
@@ -31,14 +28,13 @@ export default function StaggeredChips({
   const [customs, setCustoms] = useState<Option[]>([]);
   const [input, setInput] = useState('');
 
-  const all = useMemo(() => [...customs, ...options], [customs, options]);
-
-  const [rowA, rowB] = useMemo(() => {
-    const a: Option[] = [];
-    const b: Option[] = [];
-    all.forEach((o, i) => (i % 2 === 0 ? a.push(o) : b.push(o)));
-    return [a, b];
-  }, [all]);
+  const all = useMemo(() => {
+    const entries = [...customs, ...options];
+    const restored = selected
+      .filter(label => !entries.some(option => option.label === label))
+      .map(label => ({ label }));
+    return [...restored, ...entries];
+  }, [customs, options, selected]);
 
   const addCustom = () => {
     const v = input.trim();
@@ -51,138 +47,57 @@ export default function StaggeredChips({
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 10,
-          marginLeft: -18,
-          marginRight: -18,
-          overflow: 'hidden',
-          maskImage:
-            'linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%)',
-          WebkitMaskImage:
-            'linear-gradient(90deg, transparent 0, #000 24px, #000 calc(100% - 24px), transparent 100%)',
-        }}
-      >
-        <MarqueeRow items={rowA} selected={selected} onToggle={onToggle} direction="left" speed={42} />
-        <MarqueeRow items={rowB} selected={selected} onToggle={onToggle} direction="right" speed={52} />
-      </div>
-
+    <div className="flex min-w-0 flex-col gap-4 pb-1">
       {allowCustom && (
-        <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+        <div className="flex min-w-0 items-center gap-2">
           <input
             type="text"
             value={input}
             onChange={e => setInput(e.target.value.slice(0, 40))}
-            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addCustom(); } }}
-            placeholder={customPlaceholder}
-            style={{
-              flex: 1,
-              background: 'rgba(255,255,255,0.05)',
-              border: '0.5px solid rgba(255,255,255,0.12)',
-              borderRadius: 12,
-              color: '#fff',
-              padding: '12px 14px',
-              fontSize: 14,
-              outline: 'none',
-              backdropFilter: 'blur(8px)',
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                addCustom();
+              }
             }}
+            aria-label={customPlaceholder}
+            placeholder={customPlaceholder}
+            className="h-11 min-w-0 flex-1 rounded-lg border border-input bg-muted/40 px-3 text-sm text-foreground caret-primary outline-none backdrop-blur-sm transition-colors placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
           />
-          <button
+          <Button
+            type="button"
             onClick={addCustom}
             disabled={!input.trim()}
             aria-label="Hinzufügen"
-            style={{
-              width: 44,
-              borderRadius: 12,
-              border: 'none',
-              background: 'linear-gradient(90deg, #7C3AED 0%, #EC4899 100%)',
-              color: '#fff',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: input.trim() ? 'pointer' : 'not-allowed',
-              opacity: input.trim() ? 1 : 0.4,
-              transition: 'opacity 180ms',
-            }}
+            title="Hinzufügen"
+            size="icon"
+            className="h-11 w-11 shrink-0 rounded-lg"
           >
             <Plus size={18} weight="bold" />
-          </button>
+          </Button>
         </div>
       )}
 
-      <style>{`
-        @keyframes feyrnMarqueeLeft {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        @keyframes feyrnMarqueeRight {
-          0% { transform: translateX(-50%); }
-          100% { transform: translateX(0); }
-        }
-        .feyrn-marquee-track:hover { animation-play-state: paused; }
-      `}</style>
-    </div>
-  );
-}
-
-function MarqueeRow({
-  items, selected, onToggle, direction, speed,
-}: {
-  items: Option[];
-  selected: string[];
-  onToggle: (l: string) => void;
-  direction: 'left' | 'right';
-  speed: number; // seconds per loop
-}) {
-  // Duplicate items so the loop is seamless.
-  const loop = [...items, ...items];
-
-  return (
-    <div style={{ overflow: 'hidden', width: '100%' }}>
-      <div
-        className="feyrn-marquee-track"
-        style={{
-          display: 'inline-flex',
-          gap: 8,
-          paddingLeft: 8,
-          paddingRight: 8,
-          whiteSpace: 'nowrap',
-          animation: `${direction === 'left' ? 'feyrnMarqueeLeft' : 'feyrnMarqueeRight'} ${speed}s linear infinite`,
-          willChange: 'transform',
-        }}
-      >
-        {loop.map((o, idx) => {
-          const sel = selected.includes(o.label);
+      <div className="flex min-w-0 flex-wrap gap-2 p-1">
+        {all.map(o => {
+          const active = selected.includes(o.label);
           return (
-            <button
-              key={`${o.label}-${idx}`}
+            <Button
+              key={o.label}
+              type="button"
+              variant="outline"
+              aria-pressed={active}
               onClick={() => onToggle(o.label)}
-              style={{
-                flex: '0 0 auto',
-                padding: '11px 18px',
-                borderRadius: 9999,
-                fontSize: 14,
-                fontWeight: 500,
-                whiteSpace: 'nowrap',
-                color: sel ? '#fff' : 'rgba(255,255,255,0.75)',
-                background: sel
-                  ? 'rgba(124, 58, 237, 0.28)'
-                  : 'rgba(255,255,255,0.05)',
-                border: sel
-                  ? '1px solid rgba(127, 119, 221, 0.9)'
-                  : '0.5px solid rgba(255,255,255,0.15)',
-                transform: sel ? 'scale(1.04)' : 'scale(1)',
-                transition: 'background 180ms, color 180ms, border 180ms, transform 180ms',
-                cursor: 'pointer',
-                backdropFilter: 'blur(8px)',
-              }}
+              className={`h-auto min-h-11 max-w-full gap-1.5 whitespace-normal rounded-full border px-4 py-2.5 text-left text-sm font-medium backdrop-blur-sm transition-colors ${
+                active
+                  ? 'border-primary bg-primary/20 text-foreground hover:border-primary hover:bg-primary/30 hover:text-foreground'
+                  : 'border-border bg-muted/40 text-muted-foreground hover:border-primary/60 hover:bg-primary/10 hover:text-foreground'
+              }`}
             >
-              {o.emoji ? <span style={{ marginRight: 6 }}>{o.emoji}</span> : null}
-              {o.label}
-            </button>
+              {o.emoji && <span className="shrink-0" aria-hidden="true">{o.emoji}</span>}
+              <span className="min-w-0 break-words [overflow-wrap:anywhere]">{o.label}</span>
+              {active && <Check className="shrink-0" size={14} weight="bold" aria-hidden="true" />}
+            </Button>
           );
         })}
       </div>
