@@ -30,6 +30,11 @@ export const BottomNav = () => {
 
   return (
     <>
+      <div
+        aria-hidden
+        className="scroll-edge-bottom pointer-events-none fixed inset-x-0 bottom-0 z-40"
+        style={{ height: 'calc(env(safe-area-inset-bottom) + 112px)' }}
+      />
       <nav
         className="fixed left-4 right-4 z-50 mx-auto max-w-md"
         style={{ bottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}

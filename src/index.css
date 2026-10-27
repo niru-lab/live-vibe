@@ -523,3 +523,19 @@
     background: rgba(255, 255, 255, 0.25) !important;
   }
 }
+
+@layer utilities {
+  /* Soft scroll edge: blur fades in under floating bottom UI instead of a hard line */
+  .scroll-edge-bottom {
+    background: linear-gradient(to top, hsl(var(--background) / 0.85), hsl(var(--background) / 0));
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    mask-image: linear-gradient(to top, #000 40%, transparent);
+    -webkit-mask-image: linear-gradient(to top, #000 40%, transparent);
+  }
+}
+
+/* Concentric corners: nested containers get a smaller radius than their parent */
+.rounded-3xl .rounded-3xl { border-radius: 1rem; }
+.rounded-2xl .rounded-2xl { border-radius: 0.75rem; }
+.rounded-3xl .rounded-2xl { border-radius: 1rem; }
