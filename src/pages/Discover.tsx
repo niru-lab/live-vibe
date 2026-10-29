@@ -38,6 +38,7 @@ export default function Discover() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [filters, setFilters] = useState<FilterState | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [filterResetKey, setFilterResetKey] = useState(0);
   const userTouchedCity = useRef(false);
   const queryClient = useQueryClient();
 
@@ -52,7 +53,8 @@ export default function Discover() {
     if (selectedCity) return;
     const raw = profile?.city?.trim().toLowerCase();
     if (!raw) return;
-    const canonical = CITY_ALIASES[raw] || profile!.city;
+    const canonical = CITY_ALIASES[raw] || profile?.city;
+    if (!canonical) return;
     setSelectedCity(canonical);
   }, [profile?.city, selectedCity]);
 
@@ -93,7 +95,7 @@ export default function Discover() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <DiscoverFilters onFiltersChange={(f) => {
+              <DiscoverFilters key={filterResetKey} onFiltersChange={(f) => {
                 userTouchedCity.current = true;
                 setSelectedCity(f.city);
                 setFilters(f);
@@ -104,10 +106,17 @@ export default function Discover() {
             </div>
           </div>
         </header>
-        <div className="relative flex-1 min-h-0">
+        <div className="relative flex-1 min-h-0 mb-[calc(96px+env(safe-area-inset-bottom))]">
           <Suspense fallback={<Skeleton className="absolute inset-0 rounded-none" />}>
             <div className="absolute inset-0">
-              <StuttgartMap selectedCity={selectedCity} selectedCategory={selectedCategory} searchQuery={searchQuery} filters={filters} />
+              <StuttgartMap selectedCity={selectedCity} selectedCategory={selectedCategory} searchQuery={searchQuery} filters={filters} onResetFilters={() => {
+                userTouchedCity.current = true;
+                setSearchQuery('');
+                setSelectedCity(null);
+                setSelectedCategory(null);
+                setFilters(null);
+                setFilterResetKey(key => key + 1);
+              }} />
             </div>
           </Suspense>
         </div>

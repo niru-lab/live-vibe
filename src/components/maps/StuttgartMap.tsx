@@ -21,6 +21,8 @@ import { de } from 'date-fns/locale';
 import { getEventStatus } from '@/lib/utils';
 
 import { MAPBOX_TOKEN } from '@/lib/mapbox';
+import { EventSocialContext } from '@/components/events/EventSocialContext';
+import { approximateDistanceKm, isInMapArea, type MapArea } from '@/lib/mapArea';
 
 // feyrn dark map style
 const MAP_STYLE = 'mapbox://styles/mapbox/dark-v11';
@@ -199,20 +201,51 @@ interface StuttgartMapProps {
   selectedCategory?: string | null;
   searchQuery?: string;
   filters?: FilterState | null;
+  onResetFilters?: () => void;
 }
 
-export function StuttgartMap({ selectedCity, selectedCategory: externalCategory, searchQuery = '', filters = null }: StuttgartMapProps) {
+export function StuttgartMap({ selectedCity, selectedCategory: externalCategory, searchQuery = '', filters = null, onResetFilters }: StuttgartMapProps) {
   const [internalCategory, setInternalCategory] = useState<string | null>(null);
   const selectedCategory = externalCategory ?? internalCategory;
   const setSelectedCategory = (cat: string | null) => setInternalCategory(cat);
   const [legendCollapsed, setLegendCollapsed] = useState(true);
   const [popupInfo, setPopupInfo] = useState<any>(null);
   const [sheetVenue, setSheetVenue] = useState<SheetVenue | null>(null);
-  const { data: events } = useEvents();
-  const { data: venues } = useVenues();
+  const { data: events, isLoading: eventsLoading } = useEvents();
+  const { data: venues, isLoading: venuesLoading } = useVenues();
   const navigate = useNavigate();
   const mapRef = useRef<MapRef>(null);
   const { data: profile } = useProfile();
+  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
+  const [searchArea, setSearchArea] = useState<MapArea | null>(null);
+  const [areaDirty, setAreaDirty] = useState(false);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([48.7758, 9.1829]);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    setSearchArea(null);
+    setAreaDirty(false);
+    setSelectedEventId(null);
+    setPopupInfo(null);
+  }, [selectedCity, searchQuery, filters, externalCategory]);
+
+  useEffect(() => {
+    if (!selectedEventId) return;
+    const card = cardRefs.current[selectedEventId];
+    const rail = card?.parentElement;
+    if (card && rail) rail.scrollTo({ left: card.offsetLeft - rail.offsetLeft - 12, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }, [selectedEventId]);
+
+  const searchThisArea = () => {
+    const bounds = mapRef.current?.getBounds();
+    const center = mapRef.current?.getCenter();
+    if (!bounds || !center) return;
+    setSearchArea({ west: bounds.getWest(), east: bounds.getEast(), south: bounds.getSouth(), north: bounds.getNorth() });
+    setMapCenter([center.lat, center.lng]);
+    setAreaDirty(false);
+    setSelectedEventId(null);
+    setPopupInfo(null);
+  };
 
   useEffect(() => {
     track('event_map_viewed', { surface: 'map' });
@@ -227,7 +260,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       const { data, error } = await supabase
         .from('event_attendees')
         .select('event_id')
-        .eq('user_id', profile!.id)
+        .eq('user_id', profile?.id ?? '')
         .eq('status', 'going')
         .eq('host_accepted', true);
       if (error) throw error;
@@ -350,6 +383,8 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
           coords = fuzzed.coords;
         }
 
+        if (!isInMapArea(coords[0], coords[1], searchArea)) return null;
+
         return {
           type: 'Feature' as const,
           properties: {
@@ -366,7 +401,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       .filter(Boolean);
 
     return { type: 'FeatureCollection' as const, features };
-  }, [matchingEvents, effectiveCity, acceptedHouseParties]);
+  }, [matchingEvents, effectiveCity, acceptedHouseParties, searchArea]);
 
   // Build venue markers
   const venueMarkers = useMemo(() => {
@@ -376,10 +411,10 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       if (selectedCategory && selectedCategory !== 'event' && v.category !== selectedCategory) return false;
       if (selectedCategory === 'event') return false;
       if (searchLower && !searchCity && !v.name.toLowerCase().includes(searchLower) && !v.address.toLowerCase().includes(searchLower) && !v.category.toLowerCase().includes(searchLower) && !v.city?.toLowerCase().includes(searchLower)) return false;
-      return true;
+      return isInMapArea(v.latitude, v.longitude, searchArea);
     });
     return filtered;
-  }, [venues, matchingEvents, filters, effectiveCity, selectedCategory, searchLower, searchCity]);
+  }, [venues, matchingEvents, filters, effectiveCity, selectedCategory, searchLower, searchCity, searchArea]);
 
   const matchingVenueIds = useMemo(() => new Set(venueMarkers.map((v: any) => v.id)), [venueMarkers]);
 
@@ -412,11 +447,15 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
           coords = fuzzed.coords;
           directionLabel = fuzzed.label;
         }
+        if (!isInMapArea(coords[0], coords[1], searchArea)) return null;
         if (searchLower && !searchCity && !event.name.toLowerCase().includes(searchLower) && !event.location_name.toLowerCase().includes(searchLower) && !(event.address || '').toLowerCase().includes(searchLower) && !event.city?.toLowerCase().includes(searchLower)) return null;
         return { ...event, coords, isPrivateHouseParty, directionLabel };
       })
       .filter(Boolean) as any[];
-  }, [matchingEvents, effectiveCity, selectedCategory, searchLower, searchCity, acceptedHouseParties]);
+  }, [matchingEvents, effectiveCity, selectedCategory, searchLower, searchCity, acceptedHouseParties, searchArea]);
+
+  const visibleMoments = (hasContentFilters(filters) ? [] : (momentXPosts || [])).filter(post =>
+    post.latitude !== null && post.longitude !== null && isInMapArea(post.latitude, post.longitude, searchArea));
 
   const getCategoryCount = useCallback((category: string) => {
     const cityFilter = (city?: string | null) =>
@@ -428,7 +467,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   const postCount = (venueId: string) => filteredVenuePosts?.[venueId]?.length || 0;
 
   return (
-    <div data-testid="map-container" className="relative w-full h-[500px] rounded-xl overflow-hidden border border-border/50">
+    <div data-testid="map-container" className="relative h-full w-full overflow-hidden bg-background">
       <VenueSheet venue={sheetVenue} open={!!sheetVenue} onOpenChange={(open) => !open && setSheetVenue(null)} />
       <Map
         ref={mapRef}
@@ -442,6 +481,10 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         mapStyle={MAP_STYLE}
         mapboxAccessToken={MAPBOX_TOKEN}
         attributionControl={false}
+        onMoveEnd={(event) => {
+          setMapCenter([event.viewState.latitude, event.viewState.longitude]);
+          if (event.originalEvent) setAreaDirty(true);
+        }}
       >
         <NavigationControl position="top-right" showCompass={false} />
 
@@ -501,25 +544,21 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
               onClick={e => {
                 e.originalEvent.stopPropagation();
                 track('event_marker_opened', { eventId: event.id, eventType: event.category, surface: 'map' });
+                setSelectedEventId(event.id);
                 setPopupInfo({ type: 'event', data: event });
               }}
 
             >
-              <div
-                className="rounded-full border-2 border-white/80 cursor-pointer animate-pulse"
-                style={{
-                  width: size,
-                  height: size,
-                  backgroundColor: categoryColors.event,
-                  boxShadow: `0 0 12px ${categoryColors.event}`,
-                }}
-              />
+              <Button variant="default" size="icon" data-testid="map-event-marker" aria-label={`Event ${event.name} auf der Karte auswählen`} aria-pressed={selectedEventId === event.id}
+                className={`h-7 w-7 rounded-full border-2 border-background shadow-lg transition-transform motion-reduce:transition-none ${selectedEventId === event.id ? 'scale-125 ring-4 ring-primary/30' : 'hover:scale-110'}`}>
+                <Calendar className="h-3.5 w-3.5" />
+              </Button>
             </Marker>
           );
         })}
 
         {/* Moment X Markers — pulsing neon-purple pins */}
-        {(hasContentFilters(filters) ? [] : (momentXPosts || [])).map(post => (
+        {visibleMoments.map(post => (
           <Marker
             key={`mx-${post.id}`}
             latitude={post.latitude!}
@@ -698,6 +737,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
                     Event ansehen
                   </Button>
                   <MapEventRsvp eventId={popupInfo.data.id} />
+                  <EventSocialContext eventId={popupInfo.data.id} />
 
                 </>
               )}
@@ -747,8 +787,49 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         )}
       </Map>
 
+      {(areaDirty || searchArea) && (
+        <div className="absolute left-1/2 top-3 z-10 flex -translate-x-1/2 gap-2 whitespace-nowrap">
+          {areaDirty && <Button size="sm" onClick={searchThisArea} className="gap-2 shadow-lg"><MapPin className="h-4 w-4" />In diesem Bereich suchen</Button>}
+          {searchArea && <Button size="sm" variant="secondary" onClick={() => { setSearchArea(null); setAreaDirty(false); }}>Bereich zurücksetzen</Button>}
+        </div>
+      )}
+
+      {eventMarkers.length > 0 && (
+        <div data-testid="map-event-cards" role="region" aria-label="Events auf der Karte" className="absolute bottom-3 left-0 right-0 z-10 flex gap-3 overflow-x-auto px-3 py-1 [scrollbar-width:none]">
+          {eventMarkers.map(event => (
+            <div key={event.id} ref={node => { cardRefs.current[event.id] = node; }} data-testid="map-event-card" data-selected={selectedEventId === event.id}
+              className={`w-[min(300px,calc(100vw-48px))] shrink-0 rounded-lg border bg-card/95 p-3 shadow-lg backdrop-blur-xl transition-colors ${selectedEventId === event.id ? 'border-primary ring-1 ring-primary/40' : 'border-border'}`}>
+              <Button variant="ghost" onClick={() => {
+                setSelectedEventId(event.id);
+                setPopupInfo(null);
+                mapRef.current?.flyTo({ center: [event.coords[1], event.coords[0]], duration: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 700 });
+              }} aria-label={`Event ${event.name} auf der Karte hervorheben`} aria-pressed={selectedEventId === event.id} className="h-auto w-full justify-start gap-3 p-0 text-left hover:bg-transparent">
+                {event.cover_image_url ? <img src={event.cover_image_url} alt="" className="h-12 w-12 shrink-0 rounded-md object-cover" /> : <Calendar className="h-8 w-8 shrink-0 text-primary" />}
+                <span className="min-w-0 whitespace-normal">
+                  <span className="block truncate text-sm font-semibold text-foreground">{event.name}</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">{format(new Date(event.starts_at), 'EEE, d. MMM · HH:mm', { locale: de })} Uhr</span>
+                  <span className="mt-1 block text-xs text-muted-foreground">{event.isPrivateHouseParty ? `${event.directionLabel} von ${event.city}` : event.city} · ca. {approximateDistanceKm(mapCenter, event.coords).toFixed(1).replace('.', ',')} km vom Kartenzentrum</span>
+                </span>
+              </Button>
+              <EventSocialContext eventId={event.id} />
+              <Button variant="ghost" size="sm" className="mt-1 h-8 w-full text-primary" onClick={() => navigate(`/events/${event.id}`)}>Event ansehen</Button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!eventsLoading && !venuesLoading && !eventMarkers.length && !venueMarkers.length && !visibleMoments.length && (
+        <div className="absolute inset-x-4 top-1/2 z-10 -translate-y-1/2 bg-background/90 px-4 py-5 text-center backdrop-blur-xl">
+          <p className="font-semibold text-foreground">{searchArea ? 'Hier ist gerade nichts zu sehen' : 'Keine passenden Treffer'}</p>
+          <div className="mt-3 flex flex-wrap justify-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => { setSearchArea(null); setAreaDirty(false); setInternalCategory(null); onResetFilters?.(); }}>Suche zurücksetzen</Button>
+            <Button size="sm" onClick={() => navigate('/events')}>Events entdecken</Button>
+          </div>
+        </div>
+      )}
+
       {/* Legend - bottom left, compact, collapsible, glassmorphism */}
-      <div className="absolute bottom-4 left-4 z-10 max-w-[160px]">
+      <div className="absolute top-3 left-3 z-10 max-w-[160px]">
         {legendCollapsed ? (
           <button
             onClick={() => setLegendCollapsed(false)}
