@@ -483,8 +483,10 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         attributionControl={false}
         onMoveEnd={(event) => {
           setMapCenter([event.viewState.latitude, event.viewState.longitude]);
-          if (event.originalEvent) setAreaDirty(true);
+          if ('originalEvent' in event && event.originalEvent) setAreaDirty(true);
         }}
+        onDragEnd={() => setAreaDirty(true)}
+        onWheel={() => setAreaDirty(true)}
       >
         <NavigationControl position="top-right" showCompass={false} />
 
