@@ -9,3 +9,5 @@
 - DMs follow the request model via `dm_allowed`: first message is a request, further messages only after acceptance — enforced in the `direct_messages` INSERT policy.
 - Push permission is requested only via `PushPrimer` after the first RSVP; every send goes through `_shared/push.ts` `sendPush` (prefs, caps, dedupe).
 - Onboarding chip choices share a wrapping layout in `StaggeredChips`; keep selection rules in the individual steps so visual fixes cannot change single/multi-select behavior.
+- Discover area-search and card-to-pin navigation use the map's privacy-adjusted display coordinates, never raw private-event coordinates — preserves location privacy across both surfaces.
+- Event-card crew previews use `EventSocialContext` with `event_visible_attendees` intersected with following IDs and public profiles — never broaden opt-in attendee visibility for social context.

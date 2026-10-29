@@ -35,6 +35,7 @@ import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useVenueActivation } from '@/hooks/useVenueActivation';
 import { VenueFirstEventNudge } from '@/components/events/VenueFirstEventNudge';
+import { EventSocialContext } from '@/components/events/EventSocialContext';
 
 const CATEGORIES: { key: string; label: string }[] = [
   { key: 'club', label: 'Club' },
@@ -349,16 +350,19 @@ export default function Events() {
                     <p className="mb-6 max-w-xs text-sm text-muted-foreground">
                       Für: {activeFilterDescription}
                     </p>
-                    <Button variant="outline" onClick={resetAllFilters}>
-                      Filter zurücksetzen
-                    </Button>
+                    <div className="flex flex-wrap justify-center gap-2">
+                      <Button variant="outline" onClick={resetAllFilters}>Filter zurücksetzen</Button>
+                      <Button onClick={() => navigate('/discover')}>Auf der Karte entdecken</Button>
+                    </div>
                   </div>
                 ) : (
                   <EmptyState
                     title="Keine Events gefunden"
-                    description="In deiner Stadt ist gerade nichts los. Sei der Erste und erstelle ein Event."
+                    description="Gerade sind keine Events verfügbar."
                     onAction={() => navigate('/events/create')}
                     actionLabel="Event erstellen"
+                    onSecondaryAction={() => navigate('/discover')}
+                    secondaryLabel="Karte entdecken"
                   />
                 )
               ) : (
@@ -557,10 +561,10 @@ function EventListCard({ event, onClick, pendingNote = false }: { event: any; on
           <CalendarBlank weight="regular" className="h-4 w-4 shrink-0" />
           <span>{dateLabel}</span>
         </div>
-        <div className="flex items-center gap-5 text-sm text-muted-foreground pt-1">
+        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground pt-1">
           <span className="flex items-center gap-1.5">
             <Clock weight="regular" className="h-4 w-4" />
-            {format(starts, 'HH:mm')}
+            {format(starts, 'HH:mm')} Uhr
           </span>
           <span className="flex items-center gap-1.5">
             <CurrencyEur weight="regular" className="h-4 w-4" />
@@ -573,6 +577,7 @@ function EventListCard({ event, onClick, pendingNote = false }: { event: any; on
             </span>
           )}
         </div>
+        <EventSocialContext eventId={event.id} />
         <div className="pt-1" onClick={(e) => e.stopPropagation()}>
           <RsvpButtons eventId={event.id} surface="events" />
         </div>
@@ -599,9 +604,9 @@ function EventListSkeleton() {
   );
 }
 
-interface EmptyStateProps { title: string; description: string; onAction?: () => void; actionLabel?: string; }
+interface EmptyStateProps { title: string; description: string; onAction?: () => void; actionLabel?: string; onSecondaryAction?: () => void; secondaryLabel?: string; }
 
-function EmptyState({ title, description, onAction, actionLabel }: EmptyStateProps) {
+function EmptyState({ title, description, onAction, actionLabel, onSecondaryAction, secondaryLabel }: EmptyStateProps) {
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
       <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted/60">
@@ -609,7 +614,10 @@ function EmptyState({ title, description, onAction, actionLabel }: EmptyStatePro
       </div>
       <h2 className="mb-2 text-lg font-semibold">{title}</h2>
       <p className="mb-6 max-w-xs text-sm text-muted-foreground">{description}</p>
-      {onAction && actionLabel && <Button onClick={onAction} variant="outline">{actionLabel}</Button>}
+      <div className="flex flex-wrap justify-center gap-2">
+        {onAction && actionLabel && <Button onClick={onAction} variant="outline">{actionLabel}</Button>}
+        {onSecondaryAction && secondaryLabel && <Button onClick={onSecondaryAction}>{secondaryLabel}</Button>}
+      </div>
     </div>
   );
 }

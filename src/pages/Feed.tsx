@@ -204,21 +204,24 @@ export default function Feed() {
               <Confetti weight="thin" className="h-10 w-10 text-muted-foreground" />
             </div>
             <h2 className="mb-2 text-lg font-semibold text-foreground">
-              {venueFilter ? 'Keine Posts für diese Location' : 'Noch keine Posts'}
+              {venueFilter ? 'Keine Posts für diese Location' : selectedCity !== 'all' || mode !== 'all' ? 'Keine passenden Posts' : 'Noch keine Posts'}
             </h2>
             <p className="mb-6 max-w-xs text-sm text-muted-foreground">
               {venueFilter 
                 ? 'Für diese Location wurden noch keine Posts geteilt.'
-                : 'Sei der Erste, der einen Moment teilt und zeige, wo es gerade abgeht!'}
+                : selectedCity !== 'all' || mode !== 'all' ? 'Mit anderen Filtern findest du vielleicht deinen nächsten Vibe.' : 'Teile deinen ersten Moment.'}
             </p>
             {venueFilter ? (
               <Button onClick={() => setSearchParams({})} variant="outline">
                 Zurück zum Feed
               </Button>
             ) : (
-              <Button onClick={() => navigate('/create')} variant="outline">
-                Ersten Post erstellen
-              </Button>
+              <div className="flex flex-wrap justify-center gap-2">
+                {selectedCity !== 'all' || mode !== 'all' ? (
+                  <Button variant="outline" onClick={() => { setSelectedCity('all'); setMode('all'); }}>Filter zurücksetzen</Button>
+                ) : <Button onClick={() => navigate('/create')} variant="outline">Moment teilen</Button>}
+                <Button onClick={() => navigate('/discover')}>Karte entdecken</Button>
+              </div>
             )}
           </div>
         )}
