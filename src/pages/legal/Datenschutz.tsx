@@ -178,6 +178,14 @@ export default function Datenschutz() {
           Standortdaten werden nicht dauerhaft gespeichert und nicht an Dritte weitergegeben.
           Du kannst den Standortzugriff jederzeit in den Geräteeinstellungen deaktivieren.
         </p>
+        <p>
+          Wenn du auf der Karte „Mitzählen“ wählst, prüft Feyrn bei geöffneter App etwa alle 5 Minuten, ob du dich
+          im Umkreis von 200 m um ein gerade laufendes Event befindest. Dein Standort wird dabei nicht gespeichert;
+          gespeichert wird nur, dass du bei diesem Event vor Ort bist, und dieser Eintrag wird nach 30 Minuten
+          automatisch gelöscht. Andere sehen nur eine anonyme Gesamtzahl, und erst ab 3 Personen. Rechtsgrundlage
+          ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du jederzeit widerrufen kannst, indem du den
+          Standortzugriff deaktivierst.
+        </p>
       </section>
 
       <section className="space-y-2">

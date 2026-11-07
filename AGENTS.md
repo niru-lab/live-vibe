@@ -11,3 +11,4 @@
 - Onboarding chip choices share a wrapping layout in `StaggeredChips`; keep selection rules in the individual steps so visual fixes cannot change single/multi-select behavior.
 - Discover area-search and card-to-pin navigation use the map's privacy-adjusted display coordinates, never raw private-event coordinates — preserves location privacy across both surfaces.
 - Event-card crew previews use `EventSocialContext` with `event_visible_attendees` intersected with following IDs and public profiles — never broaden opt-in attendee visibility for social context.
+- Discover heat (bubble size + heatmap) comes only from `event_heat` (RSVPs, event/venue posts, nearby count) scored in `src/lib/eventHeat.ts`; nearby presence is written only via `ping_event_presence` (opt-in, foreground, ≤ 200 m, live events, 30-min expiry) and suppressed below 3 server-side — never use `expected_attendees` or expose individual presence.
