@@ -790,7 +790,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       </Map>
 
       {(areaDirty || searchArea) && (
-        <div className="absolute left-1/2 top-3 z-10 flex -translate-x-1/2 gap-2 whitespace-nowrap">
+        <div className="absolute left-3 right-12 top-3 z-10 flex flex-wrap justify-center gap-2">
           {areaDirty && <Button size="sm" onClick={searchThisArea} className="gap-2 shadow-lg"><MapPin className="h-4 w-4" />In diesem Bereich suchen</Button>}
           {searchArea && <Button size="sm" variant="secondary" onClick={() => { setSearchArea(null); setAreaDirty(false); }}>Bereich zurücksetzen</Button>}
         </div>
@@ -831,7 +831,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       )}
 
       {/* Legend - bottom left, compact, collapsible, glassmorphism */}
-      <div className="absolute top-3 left-3 z-10 max-w-[160px]">
+      <div className={`absolute left-3 z-10 max-w-[160px] ${eventMarkers.length ? 'bottom-48' : 'bottom-3'}`}>
         {legendCollapsed ? (
           <button
             onClick={() => setLegendCollapsed(false)}
