@@ -11,6 +11,8 @@ import { RoomzSheet } from '@/components/discover/RoomzSheet';
 import { useQueryClient } from '@tanstack/react-query';
 import { useProfile } from '@/hooks/useProfile';
 import { markSessionExploring } from '@/lib/nudgeConfig';
+import { useEventPresence } from '@/hooks/useEventPresence';
+import { PresencePrimer } from '@/components/discover/PresencePrimer';
 
 const StuttgartMap = lazy(() => import('@/components/maps/StuttgartMap').then(m => ({ default: m.StuttgartMap })));
 
@@ -41,6 +43,7 @@ export default function Discover() {
   const [filterResetKey, setFilterResetKey] = useState(0);
   const userTouchedCity = useRef(false);
   const queryClient = useQueryClient();
+  const { consent: presenceConsent, decide: decidePresence } = useEventPresence(!!profile);
 
   // Self-propelled exploring → suppress activation nudges for this session.
   useEffect(() => {
@@ -119,6 +122,7 @@ export default function Discover() {
               }} />
             </div>
           </Suspense>
+          <PresencePrimer open={!!profile && presenceConsent === null} onDecide={decidePresence} />
         </div>
 
       </div>

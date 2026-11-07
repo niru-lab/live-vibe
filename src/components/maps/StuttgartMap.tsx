@@ -23,6 +23,8 @@ import { getEventStatus } from '@/lib/utils';
 import { MAPBOX_TOKEN } from '@/lib/mapbox';
 import { EventSocialContext } from '@/components/events/EventSocialContext';
 import { approximateDistanceKm, isInMapArea, type MapArea } from '@/lib/mapArea';
+import { useEventHeat } from '@/hooks/useEventHeat';
+import { heatMarkerSize, heatPhase, heatScore } from '@/lib/eventHeat';
 
 // feyrn dark map style
 const MAP_STYLE = 'mapbox://styles/mapbox/dark-v11';
@@ -179,7 +181,7 @@ const heatmapLayer: any = {
   type: 'heatmap',
   source: 'events-heatmap',
   paint: {
-    'heatmap-weight': ['interpolate', ['linear'], ['get', 'intensity'], 0, 0, 10, 1],
+    'heatmap-weight': ['interpolate', ['linear'], ['get', 'intensity'], 0, 0, 20, 1],
     'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 0, 1, 15, 3],
     'heatmap-color': [
       'interpolate', ['linear'], ['heatmap-density'],
@@ -363,6 +365,16 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
   );
   const matchingEventIds = useMemo(() => new Set(matchingEvents.map((e: any) => e.id)), [matchingEvents]);
 
+  // Real heat: RSVPs + photos posted there + people nearby (live only, ≥3) — never the creator's estimate.
+  const { data: heatSignals } = useEventHeat(matchingEvents.map((e: any) => e.id));
+  const heatById = useMemo(() => {
+    const out: Record<string, number> = {};
+    (matchingEvents || []).forEach((e: any) => {
+      out[e.id] = heatScore(heatSignals?.[e.id], heatPhase(e.starts_at, e.ends_at));
+    });
+    return out;
+  }, [matchingEvents, heatSignals]);
+
   const heatmapData = useMemo(() => {
     const features = (matchingEvents || [])
       .map(event => {
@@ -388,7 +400,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
         return {
           type: 'Feature' as const,
           properties: {
-            intensity: (event.expected_attendees || 50) / 50,
+            intensity: 0.5 + (heatById[event.id] || 0),
             name: event.name,
             id: event.id,
           },
@@ -401,7 +413,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
       .filter(Boolean);
 
     return { type: 'FeatureCollection' as const, features };
-  }, [matchingEvents, effectiveCity, acceptedHouseParties, searchArea]);
+  }, [matchingEvents, effectiveCity, acceptedHouseParties, searchArea, heatById]);
 
   // Build venue markers
   const venueMarkers = useMemo(() => {
@@ -536,7 +548,7 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
 
         {/* Event Markers */}
         {eventMarkers.map(event => {
-          const size = Math.min(14 + (event.expected_attendees || 0) / 20, 30);
+          const size = heatMarkerSize(heatById[event.id] || 0);
           return (
             <Marker
               key={event.id}
@@ -552,7 +564,8 @@ export function StuttgartMap({ selectedCity, selectedCategory: externalCategory,
 
             >
               <Button variant="default" size="icon" data-testid="map-event-marker" aria-label={`Event ${event.name} auf der Karte auswählen`} aria-pressed={selectedEventId === event.id}
-                className={`h-7 w-7 rounded-full border-2 border-background shadow-lg transition-transform motion-reduce:transition-none ${selectedEventId === event.id ? 'scale-125 ring-4 ring-primary/30' : 'hover:scale-110'}`}>
+                style={{ width: size, height: size, boxShadow: size > 28 ? `0 0 ${size - 16}px hsl(var(--primary) / 0.55)` : undefined }}
+                className={`rounded-full border-2 border-background shadow-lg transition-transform motion-reduce:transition-none ${selectedEventId === event.id ? 'scale-125 ring-4 ring-primary/30' : 'hover:scale-110'}`}>
                 <Calendar className="h-3.5 w-3.5" />
               </Button>
             </Marker>

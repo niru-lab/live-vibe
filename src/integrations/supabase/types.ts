@@ -848,6 +848,46 @@ export type Database = {
         }
         Relationships: []
       }
+      event_presence: {
+        Row: {
+          event_id: string
+          last_seen: string
+          profile_id: string
+        }
+        Insert: {
+          event_id: string
+          last_seen?: string
+          profile_id: string
+        }
+        Update: {
+          event_id?: string
+          last_seen?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_presence_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_presence_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_presence_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           address: string
@@ -2910,6 +2950,16 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      event_heat: {
+        Args: { _event_ids: string[] }
+        Returns: {
+          event_id: string
+          going_count: number
+          nearby_count: number
+          onsite_post_count: number
+          post_count: number
+        }[]
+      }
       event_visible_attendees: {
         Args: { _event_id: string }
         Returns: string[]
@@ -2950,6 +3000,10 @@ export type Database = {
         Returns: number
       }
       offer_activation_count: { Args: { _offer_id: string }; Returns: number }
+      ping_event_presence: {
+        Args: { _lat: number; _lng: number }
+        Returns: number
+      }
       purge_user_data: { Args: { _user_id: string }; Returns: undefined }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
