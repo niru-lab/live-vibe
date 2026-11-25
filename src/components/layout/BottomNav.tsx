@@ -4,6 +4,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { PostTypeSelector } from '@/components/create/PostTypeSelector';
 import { useNotificationBadges } from '@/hooks/useNotificationBadges';
+import { VenueCreateSheet } from '@/components/create/VenueCreateSheet';
+import { useMyRoles } from '@/components/auth/RouteGuards';
 
 const navItems = [
   { icon: House, label: 'Feed', path: '/feed', badgeKey: null },
@@ -18,6 +20,9 @@ export const BottomNav = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [showPostSelector, setShowPostSelector] = useState(false);
+  const [showVenueCreate, setShowVenueCreate] = useState(false);
+  const { data: roles } = useMyRoles();
+  const isVenue = !!roles?.includes('venue_owner');
   const { eventBadge, messagesBadge, profileBadge } = useNotificationBadges();
 
   const getBadgeCount = (key: string | null): number => {
@@ -50,7 +55,7 @@ export const BottomNav = () => {
                   <button
                     key={path}
                     data-testid="create-post-btn"
-                    onClick={() => navigate('/create')}
+                    onClick={() => (isVenue ? setShowVenueCreate(true) : navigate('/create'))}
                     onContextMenu={(e) => { e.preventDefault(); setShowPostSelector(true); }}
                     className="relative -mt-8 flex flex-col items-center"
                   >
@@ -106,6 +111,7 @@ export const BottomNav = () => {
         open={showPostSelector}
         onOpenChange={setShowPostSelector}
       />
+      {isVenue && <VenueCreateSheet open={showVenueCreate} onOpenChange={setShowVenueCreate} />}
     </>
   );
 };

@@ -235,6 +235,11 @@ export const OfferFormDialog = ({ venueId, offer, open, onOpenChange }: OfferFor
               Angebot veröffentlichen
             </Button>
           </div>
+          {!offer && (
+            <p className="text-center text-[11px] text-muted-foreground">
+              Beim Veröffentlichen bekommen alle, die bei dir die Glocke 🔔 aktiviert haben, sofort eine Mitteilung (nur verifizierte Spots).
+            </p>
+          )}
         </div>
       </DialogContent>
     </Dialog>

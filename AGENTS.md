@@ -7,7 +7,8 @@
 - Attendance is shown only via `event_visible_attendees` (opt-in, max 8) — no full attendee lists.
 - `posts.on_site_verified` is set only by `verify_post_location` (≤ 200 m, server-side); hidden posts use `deleted_at` and are excluded by the posts SELECT policy.
 - DMs follow the request model via `dm_allowed`: first message is a request, further messages only after acceptance — enforced in the `direct_messages` INSERT policy.
-- Push permission is requested only via `PushPrimer` after the first RSVP; every send goes through `_shared/push.ts` `sendPush` (prefs, caps, dedupe).
+- Push permission is requested only after an explicit ask — `PushPrimer` after the first RSVP, or ringing a profile bell — both via `registerForPush`; every send goes through `_shared/push.ts` `sendPush` (prefs, caps, dedupe).
+- Profile bell (`profile_subscriptions`, own rows only via RLS): every new post/story of the account and every published deal of its venue pushes to bell subscribers via the outbox (`bell_recipients_for_post` / `bell_recipients_for_offer`, enforce blocks + visibility). Bell pushes use category `subscription`: no caps, no quiet hours by product decision, and they don't count toward other caps. Venue accounts only notify once their venue is `approved`.
 - Onboarding chip choices share a wrapping layout in `StaggeredChips`; keep selection rules in the individual steps so visual fixes cannot change single/multi-select behavior.
 - Discover area-search and card-to-pin navigation use the map's privacy-adjusted display coordinates, never raw private-event coordinates — preserves location privacy across both surfaces.
 - Event-card crew previews use `EventSocialContext` with `event_visible_attendees` intersected with following IDs and public profiles — never broaden opt-in attendee visibility for social context.

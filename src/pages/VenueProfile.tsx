@@ -10,6 +10,7 @@ import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
 import { LiveOfferList } from '@/components/offers/LiveOfferCard';
+import { BellButton } from '@/components/profile/BellButton';
 import { useVenueLiveOffers } from '@/hooks/useVenueOffers';
 import { ArrowLeft, MapPin } from 'lucide-react';
 
@@ -75,7 +76,10 @@ export default function VenueProfile() {
                 className="mb-4 h-44 w-full rounded-xl object-cover"
               />
             )}
-            <h1 className="text-xl font-semibold text-foreground">{venue.name}{venue.is_verified && <VerifiedBadge className="ml-1.5" />}</h1>
+            <div className="flex items-start justify-between gap-3">
+              <h1 className="text-xl font-semibold text-foreground">{venue.name}{venue.is_verified && <VerifiedBadge className="ml-1.5" />}</h1>
+              <BellButton targetProfileId={venue.owner_profile_id} targetName={venue.name} isVenue className="shrink-0" />
+            </div>
             <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="h-3 w-3" />
               {[venue.address, venue.city].filter(Boolean).join(', ') || venue.category}

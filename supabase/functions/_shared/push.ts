@@ -3,7 +3,14 @@
 // All caps live here so they are easy to audit and tune.
 import { fcmConfigured, sendFcm } from './fcm.ts';
 
-export type PushCategory = 'social' | 'event' | 'lifecycle';
+export type PushCategory = 'social' | 'event' | 'lifecycle' | 'subscription';
+
+/**
+ * 'subscription' = the user rang the bell on an account (posts, stories, deals).
+ * It is an explicit per-account opt-in, so it skips caps and quiet hours by product decision;
+ * the master switch, dedupe and the bell itself still apply.
+ */
+const UNCAPPED: PushCategory[] = ['subscription'];
 
 
 /** Conservative defaults. Tune here — no other file hardcodes limits. */
@@ -19,6 +26,8 @@ export const PUSH_CAPS = {
 /** Which triggers are live. Flip to false to disable a trigger without a code change elsewhere. */
 export const PUSH_TRIGGERS = {
   comment_on_your_post: true,
+  bell_new_post: true,
+  bell_new_deal: true,
   event_starts_soon: true,
   new_message: true,
   chat_request_accepted: true,
@@ -78,7 +87,8 @@ async function countSince(supabase: any, profileId: string, since: string, categ
     .eq('profile_id', profileId)
     .eq('status', 'delivered')
     .gte('created_at', since);
-  if (category) q = q.eq('category', category);
+  // Bell pushes are opt-in per account and never eat into the caps of other pushes.
+  q = category ? q.eq('category', category) : q.neq('category', 'subscription');
   const { count } = await q;
   return count ?? 0;
 }
@@ -123,31 +133,35 @@ export async function sendPush(supabase: any, req: PushRequest): Promise<PushSta
       quiet_hours_start: 23, quiet_hours_end: 9, timezone: 'Europe/Berlin',
     };
     const categoryEnabled =
-      req.category === 'social' ? p.social_enabled
-        : req.category === 'event' ? p.event_enabled
-          : p.lifecycle_enabled;
+      req.category === 'subscription' ? true
+        : req.category === 'social' ? p.social_enabled
+          : req.category === 'event' ? p.event_enabled
+            : p.lifecycle_enabled;
+    const uncapped = UNCAPPED.includes(req.category);
     const fineEnabled = req.prefKey ? ((p as any)[req.prefKey] ?? true) : true;
     if (!p.enabled || !categoryEnabled || !fineEnabled) return await record('skipped_opted_out');
 
     // 3. Quiet hours (non-urgent only) — skip rather than queue noise for later.
-    if (!req.urgent && inQuietHours(localHour(p.timezone), p.quiet_hours_start, p.quiet_hours_end)) {
+    if (!req.urgent && !uncapped && inQuietHours(localHour(p.timezone), p.quiet_hours_start, p.quiet_hours_end)) {
       return await record('skipped_quiet_hours');
     }
 
-    // 4. Layered frequency caps: hour → day → week, then per category.
-    const [h, d, w, cd, cw] = await Promise.all([
-      countSince(supabase, req.profileId, hoursAgo(1)),
-      countSince(supabase, req.profileId, hoursAgo(24)),
-      countSince(supabase, req.profileId, hoursAgo(24 * 7)),
-      countSince(supabase, req.profileId, hoursAgo(24), req.category),
-      countSince(supabase, req.profileId, hoursAgo(24 * 7), req.category),
-    ]);
-    const cat = PUSH_CAPS.perCategory[req.category];
-    if (
-      h >= PUSH_CAPS.global.hour || d >= PUSH_CAPS.global.day || w >= PUSH_CAPS.global.week ||
-      cd >= cat.day || cw >= cat.week
-    ) {
-      return await record('skipped_cap');
+    // 4. Layered frequency caps: hour → day → week, then per category (bell pushes are uncapped).
+    if (!uncapped) {
+      const [h, d, w, cd, cw] = await Promise.all([
+        countSince(supabase, req.profileId, hoursAgo(1)),
+        countSince(supabase, req.profileId, hoursAgo(24)),
+        countSince(supabase, req.profileId, hoursAgo(24 * 7)),
+        countSince(supabase, req.profileId, hoursAgo(24), req.category),
+        countSince(supabase, req.profileId, hoursAgo(24 * 7), req.category),
+      ]);
+      const cat = PUSH_CAPS.perCategory[req.category as Exclude<PushCategory, 'subscription'>];
+      if (
+        h >= PUSH_CAPS.global.hour || d >= PUSH_CAPS.global.day || w >= PUSH_CAPS.global.week ||
+        cd >= cat.day || cw >= cat.week
+      ) {
+        return await record('skipped_cap');
+      }
     }
 
     // 5. Device tokens.

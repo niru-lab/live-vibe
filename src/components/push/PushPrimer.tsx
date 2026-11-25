@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { motion, AnimatePresence } from 'framer-motion';
-import { supabase } from '@/integrations/supabase/client';
+import { registerForPush } from '@/lib/pushRegistration';
 import { useProfile } from '@/hooks/useProfile';
 
 const SHOWN_KEY = 'feyrn-push-primed';
@@ -34,22 +34,7 @@ export const PushPrimer = () => {
 
   const accept = async () => {
     setOpen(false);
-    if (!Capacitor.isNativePlatform() || !profile) return;
-    try {
-      const { PushNotifications } = await import('@capacitor/push-notifications');
-      const perm = await PushNotifications.requestPermissions();
-      if (perm.receive !== 'granted') return;
-      await PushNotifications.addListener('registration', async ({ value }) => {
-        const platform = Capacitor.getPlatform() === 'ios' ? 'ios' : 'android';
-        await supabase.from('push_tokens').upsert(
-          { profile_id: profile.id, token: value, platform, last_seen: new Date().toISOString(), updated_at: new Date().toISOString() },
-          { onConflict: 'token' },
-        );
-      });
-      await PushNotifications.register();
-    } catch (e) {
-      console.warn('Push registration failed', e);
-    }
+    if (profile) await registerForPush(profile.id);
   };
 
   return (

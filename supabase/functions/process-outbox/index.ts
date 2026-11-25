@@ -42,6 +42,10 @@ Deno.serve(async (req) => {
         switch (evt.event_type) {
           case 'post_created':
             await handlePostCreated(supabase, evt.payload);
+            await handleBellPost(supabase, evt.payload);
+            break;
+          case 'offer_published':
+            await handleBellDeal(supabase, evt.payload);
             break;
           case 'like_added':
             await handleLikeAdded(supabase, evt.payload);
@@ -277,4 +281,98 @@ async function handleRsvpChanged(supabase: any, payload: any) {
       body: `Jemand hat mit "${status}" geantwortet`,
     });
   }
+}
+
+// ── BELL (profile subscriptions) ──────────────────────────
+// Recipients come from SQL (blocks, visibility and "only verified venues" are enforced there).
+// No caps by product decision; dedupe keys include the recipient so retries never double-push.
+
+const BELL_CONCURRENCY = 20;
+
+async function inBatches<T>(items: T[], fn: (item: T) => Promise<unknown>) {
+  for (let i = 0; i < items.length; i += BELL_CONCURRENCY) {
+    await Promise.all(items.slice(i, i + BELL_CONCURRENCY).map(fn));
+  }
+}
+
+/**
+ * In-app notifications for a bell event, written once even if the outbox retries the event.
+ * `body` distinguishes two different deals of the same venue.
+ */
+async function insertBellNotificationsOnce(supabase: any, type: 'bell_post' | 'bell_deal', refId: string, rows: any[]) {
+  if (rows.length === 0) return;
+  let q = supabase.from('notifications').select('id', { count: 'exact', head: true })
+    .eq('type', type).eq('ref_id', refId)
+    .gte('created_at', new Date(Date.now() - 24 * 3600_000).toISOString());
+  if (type === 'bell_deal') q = q.eq('body', rows[0].body);
+  const { count } = await q;
+  if ((count ?? 0) > 0) return;
+  const { error } = await supabase.from('notifications').insert(rows);
+  if (error) console.error('bell notifications insert failed', type, refId, error.message);
+}
+
+async function handleBellPost(supabase: any, payload: any) {
+  if (!PUSH_TRIGGERS.bell_new_post) return;
+  const { post_id } = payload;
+  const { data: rows, error } = await supabase.rpc('bell_recipients_for_post', { _post_id: post_id });
+  if (error) throw error;
+  if (!rows || rows.length === 0) return;
+
+  const first = rows[0];
+  const what = first.is_story ? 'eine neue Story' : 'einen neuen Beitrag';
+  const title = `${first.author_name} hat ${what} gepostet`;
+
+  await insertBellNotificationsOnce(supabase, 'bell_post', post_id, rows.map((r: any) => ({
+    recipient_id: r.subscriber_id,
+    actor_id: r.author_id,
+    type: 'bell_post',
+    ref_type: 'post',
+    ref_id: post_id,
+    title,
+  })));
+
+  await inBatches(rows, (r: any) =>
+    sendPush(supabase, {
+      profileId: r.subscriber_id,
+      category: 'subscription',
+      triggerKey: 'bell_new_post',
+      dedupeKey: `bell:post:${post_id}:${r.subscriber_id}`,
+      title,
+      body: 'Jetzt ansehen 👀',
+      url: `/feed?post=${post_id}`,
+    }),
+  );
+}
+
+async function handleBellDeal(supabase: any, payload: any) {
+  if (!PUSH_TRIGGERS.bell_new_deal) return;
+  const { offer_id } = payload;
+  const { data: rows, error } = await supabase.rpc('bell_recipients_for_offer', { _offer_id: offer_id });
+  if (error) throw error;
+  if (!rows || rows.length === 0) return;
+
+  const first = rows[0];
+  const title = `🔥 Live-Deal bei ${first.venue_name}`;
+  const body = first.display_text ? `${first.display_text} · ${first.offer_title}` : first.offer_title;
+
+  await insertBellNotificationsOnce(supabase, 'bell_deal', first.venue_id, rows.map((r: any) => ({
+    recipient_id: r.subscriber_id,
+    type: 'bell_deal',
+    ref_type: 'venue',
+    ref_id: r.venue_id,
+    title,
+    body,
+  })));
+
+  await inBatches(rows, (r: any) =>
+    sendPush(supabase, {
+      profileId: r.subscriber_id,
+      category: 'subscription',
+      triggerKey: 'bell_new_deal',
+      dedupeKey: `bell:deal:${offer_id}:${r.subscriber_id}`,
+      title,
+      body,
+      url: `/venues/${r.venue_id}`,
+    }),
+  );
 }

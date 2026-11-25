@@ -1,3 +1,4 @@
+import { BellButton } from '@/components/profile/BellButton';
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -176,6 +177,11 @@ export default function UserProfile() {
                 <Button data-testid="message-btn" onClick={() => setMessageOpen(true)} variant="outline" size="icon">
                   <ChatCircleDots weight="bold" className="h-4 w-4" />
                 </Button>
+                <BellButton
+                  targetProfileId={profile.id}
+                  targetName={profile.display_name || `@${profile.username}`}
+                  isVenue={profile.role === 'venue_owner'}
+                />
               </div>
             </div>
           </div>

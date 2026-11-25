@@ -1572,6 +1572,24 @@ export type Database = {
           },
         ]
       }
+      profile_subscriptions: {
+        Row: {
+          created_at: string
+          subscriber_id: string
+          target_id: string
+        }
+        Insert: {
+          created_at?: string
+          subscriber_id: string
+          target_id: string
+        }
+        Update: {
+          created_at?: string
+          subscriber_id?: string
+          target_id?: string
+        }
+        Relationships: []
+      }
       privacy_settings: {
         Row: {
           created_at: string
@@ -3155,6 +3173,8 @@ export type Database = {
         | "event_created_by_followed_user"
         | "event_accepted"
         | "event_declined"
+        | "bell_post"
+        | "bell_deal"
       outbox_status: "pending" | "processing" | "done" | "failed"
       post_type: "normal" | "moment_x"
       profile_type: "user" | "club" | "organizer" | "eventer"
@@ -3328,6 +3348,8 @@ export const Constants = {
         "event_created_by_followed_user",
         "event_accepted",
         "event_declined",
+        "bell_post",
+        "bell_deal",
       ],
       outbox_status: ["pending", "processing", "done", "failed"],
       post_type: ["normal", "moment_x"],
