@@ -93,7 +93,7 @@ Deno.serve(async (req) => {
 // ── HANDLERS ──────────────────────────────────────────────
 
 async function handlePostCreated(supabase: any, payload: any) {
-  const { post_id, author_id, post_type, city_id, latitude, longitude } = payload;
+  const { post_id, author_id } = payload;
 
   // Points: +10 for posting
   await supabase.rpc('add_points', {
@@ -140,41 +140,7 @@ async function handlePostCreated(supabase: any, payload: any) {
       { onConflict: 'user_id,post_id', ignoreDuplicates: true }
     );
   }
-
-  // Hotspot update for moment_x posts
-  if (post_type === 'moment_x' && latitude && longitude && city_id) {
-    const cellId = latLngToCell(latitude, longitude);
-    const now = new Date();
-    const windowStart = new Date(
-      now.getFullYear(), now.getMonth(), now.getDate(), now.getHours()
-    ).toISOString();
-    const windowEnd = new Date(
-      now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1
-    ).toISOString();
-
-    await supabase.from('hotspot_cells').upsert(
-      {
-        city_id,
-        cell_id: cellId,
-        window_start: windowStart,
-        window_end: windowEnd,
-        post_count: 1,
-        engagement_score: 1,
-        center_lat: latitude,
-        center_lng: longitude,
-      },
-      { onConflict: 'city_id,cell_id,window_start' }
-    );
-
-    // Increment existing
-    await supabase.rpc('increment_hotspot', {
-      p_city_id: city_id,
-      p_cell_id: cellId,
-      p_window_start: windowStart,
-    }).catch(() => {
-      // RPC may not exist yet, the upsert above handles creation
-    });
-  }
+  // Discover heat comes from event_heat (RSVPs, posts, presence); hotspot_cells was never read and is no longer written.
 }
 
 async function handleLikeAdded(supabase: any, payload: any) {
@@ -311,11 +277,4 @@ async function handleRsvpChanged(supabase: any, payload: any) {
       body: `Jemand hat mit "${status}" geantwortet`,
     });
   }
-}
-
-// Simple geohash-like cell ID (precision ~100m)
-function latLngToCell(lat: number, lng: number): string {
-  const latCell = Math.floor(lat * 100);
-  const lngCell = Math.floor(lng * 100);
-  return `${latCell}_${lngCell}`;
 }

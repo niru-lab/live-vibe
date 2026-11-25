@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useLocationConsent } from '@/hooks/useLocationConsent';
 
 interface PrivacySettingsProps { open: boolean; onOpenChange: (open: boolean) => void; }
 
@@ -33,7 +34,7 @@ export const PrivacySettings = ({ open, onOpenChange }: PrivacySettingsProps) =>
   const navigate = useNavigate();
   const [profileVisibility, setProfileVisibility] = useState('public');
   const [whoCanMessage, setWhoCanMessage] = useState('followers');
-  const [showLocation, setShowLocation] = useState(true);
+  const location = useLocationConsent();
   const [showInDiscover, setShowInDiscover] = useState(true);
   const [showOnlineStatus, setShowOnlineStatus] = useState(false);
   const { data: myProfile, update: updateMyProfile } = useMyProfile();
@@ -134,7 +135,19 @@ export const PrivacySettings = ({ open, onOpenChange }: PrivacySettingsProps) =>
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground"><MagnifyingGlass weight="thin" className="h-4 w-4" />Auffindbarkeit</div>
               <div className="flex items-center justify-between"><Label htmlFor="discover" className="flex items-center gap-2 cursor-pointer"><MagnifyingGlass weight="thin" className="h-4 w-4 text-muted-foreground" />In Discover anzeigen</Label><Switch id="discover" checked={showInDiscover} onCheckedChange={setShowInDiscover} /></div>
-              <div className="flex items-center justify-between"><Label htmlFor="location" className="flex items-center gap-2 cursor-pointer"><MapPin weight="thin" className="h-4 w-4 text-muted-foreground" />Standort auf Posts zeigen</Label><Switch id="location" checked={showLocation} onCheckedChange={setShowLocation} /></div>
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="location" className="flex items-center gap-2 cursor-pointer"><MapPin weight="thin" className="h-4 w-4 text-muted-foreground" />Standort nutzen</Label>
+                  <Switch
+                    id="location"
+                    data-testid="privacy-location-switch"
+                    checked={location.enabled}
+                    disabled={location.isLoading || location.saving}
+                    onCheckedChange={(on) => { if (on) location.enable('privacy_settings'); else location.disable('privacy_settings'); }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Für Live-Kreise auf der Karte und „Vor Ort“-Posts. Anonym, nur wenn die App offen ist. Aus = sofort gelöscht.</p>
+              </div>
               <div className="flex items-center justify-between"><Label htmlFor="online" className="flex items-center gap-2 cursor-pointer"><Users weight="thin" className="h-4 w-4 text-muted-foreground" />Online-Status zeigen</Label><Switch id="online" checked={showOnlineStatus} onCheckedChange={setShowOnlineStatus} /></div>
               <div className="flex items-center justify-between"><Label htmlFor="events" className="flex items-center gap-2 cursor-pointer"><Users weight="thin" className="h-4 w-4 text-muted-foreground" />Zeigen, zu welchen Events ich gehe</Label><Switch id="events" checked={showEventsAttended} onCheckedChange={setShowEventsAttended} /></div>
             </div>
