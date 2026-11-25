@@ -50,6 +50,8 @@ import Community from "./pages/legal/Community";
 import KontoLoeschen from "./pages/legal/KontoLoeschen";
 import BlockedUsers from "./pages/BlockedUsers";
 import Cards from "./pages/Cards";
+import Deals from "./pages/Deals";
+import ScanDeals from "./pages/ScanDeals";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -115,6 +117,8 @@ const App = () => (
                     <Route path="/create/carousel" element={<CreateCarousel />} />
                     <Route path="/messages" element={<Messages />} />
                     <Route path="/cards" element={<Cards />} />
+                    <Route path="/deals" element={<Deals />} />
+                    <Route path="/scan" element={<ScanDeals />} />
                     <Route path="/cards/received" element={<Cards />} />
                     <Route path="/roomz" element={<Roomz />} />
                     <Route path="/roomz/create" element={<CreateRoom />} />

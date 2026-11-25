@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Plus, Tag } from '@phosphor-icons/react';
+import { useNavigate } from 'react-router-dom';
+import { Plus, QrCode, Tag } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { OfferFormDialog } from '@/components/offers/OfferFormDialog';
 import { useManagedOffers, useMyVenue, useUpdateOffer, useVenueOfferStats } from '@/hooks/useVenueOffers';
@@ -21,10 +22,11 @@ export const VenueOffersSection = () => {
   const update = useUpdateOffer();
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<VenueOffer | null>(null);
+  const navigate = useNavigate();
 
   if (!venueId) return null;
 
-  const activationsFor = (id: string) => stats.find((s) => s.offer_id === id)?.activations ?? 0;
+  const statFor = (id: string) => stats.find((s) => s.offer_id === id);
 
   const openNew = () => {
     setEditing(null);
@@ -35,11 +37,16 @@ export const VenueOffersSection = () => {
     <section className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <Tag weight="fill" className="h-4 w-4 text-primary" /> Live Offers
+          <Tag weight="fill" className="h-4 w-4 text-primary" /> Live-Deals
         </h2>
-        <Button size="sm" variant="outline" onClick={openNew}>
-          <Plus weight="bold" className="mr-1 h-3 w-3" /> Angebot erstellen
-        </Button>
+        <div className="flex gap-2">
+          <Button size="sm" variant="outline" onClick={() => navigate('/scan')} data-testid="dashboard-scan">
+            <QrCode weight="bold" className="mr-1 h-3 w-3" /> Scannen
+          </Button>
+          <Button size="sm" variant="outline" onClick={openNew}>
+            <Plus weight="bold" className="mr-1 h-3 w-3" /> Deal
+          </Button>
+        </div>
       </div>
 
       {!isLoading && offers.length === 0 && (
@@ -69,8 +76,20 @@ export const VenueOffersSection = () => {
               </span>
             </div>
             <div className="mt-3 flex items-center justify-between">
-              <span className="text-[11px] text-muted-foreground">
-                {activationsFor(o.id)} Aktivierungen{o.event_id ? ' · mit Event verknüpft' : ''}
+              <span className="text-[11px] text-muted-foreground" data-testid="deal-funnel">
+                {(() => {
+                  const st = statFor(o.id);
+                  const act = st?.activations ?? 0;
+                  const red = st?.redemptions ?? 0;
+                  const failed = st?.failed_scans ?? 0;
+                  return (
+                    <>
+                      <b className="text-foreground">{act}</b>{o.max_activations ? `/${o.max_activations}` : ''} aktiviert · <b className="text-foreground">{red}</b> eingelöst
+                      {failed > 0 && <> · <span className="text-destructive">{failed} abgelehnt</span></>}
+                      {o.event_id ? ' · mit Event' : ''}
+                    </>
+                  );
+                })()}
               </span>
               <div className="flex gap-2">
                 {state === 'live' && (

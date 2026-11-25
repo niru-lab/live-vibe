@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, Confetti, Fire } from '@phosphor-icons/react';
+import { Camera, Confetti, Fire, QrCode } from '@phosphor-icons/react';
 import { toast } from 'sonner';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { OfferFormDialog } from '@/components/offers/OfferFormDialog';
@@ -34,6 +34,7 @@ export const VenueCreateSheet = ({ open, onOpenChange }: VenueCreateSheetProps) 
         : 'Angebot für heute – Mitteilungen an deine Follower starten, sobald dein Spot verifiziert ist',
     },
     { id: 'event', icon: Confetti, title: 'Event', description: 'Erstelle ein Event mit allen Details', onClick: () => go('/events/create') },
+    { id: 'scan', icon: QrCode, title: 'Deal scannen', description: 'QR-Code eines Gasts einlösen · Barkeeper einladen', onClick: () => go('/scan') },
   ];
 
   return (

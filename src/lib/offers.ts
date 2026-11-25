@@ -13,6 +13,39 @@ export type OfferType =
 
 export type OfferStatus = 'draft' | 'scheduled' | 'active' | 'expired' | 'paused' | 'archived';
 
+/** What the deal is for. 'alcohol' deals are always 18+ (enforced in the database). */
+export type OfferCategory = 'food' | 'drinks' | 'alcohol' | 'entry' | 'other';
+
+export const OFFER_CATEGORY_LABELS: Record<OfferCategory, string> = {
+  drinks: 'Getränke (alkoholfrei)',
+  alcohol: 'Getränke mit Alkohol',
+  food: 'Essen',
+  entry: 'Eintritt',
+  other: 'Sonstiges',
+};
+
+export const OFFER_CATEGORY_EMOJI: Record<OfferCategory, string> = {
+  drinks: '🥤', alcohol: '🍸', food: '🍔', entry: '🎟️', other: '✨',
+};
+
+/** Ticket colours per category (gradient from → to). */
+export const OFFER_CATEGORY_COLORS: Record<OfferCategory, [string, string]> = {
+  alcohol: ['#7C3AED', '#C026D3'],
+  drinks: ['#0EA5E9', '#6366F1'],
+  food: ['#F97316', '#EF4444'],
+  entry: ['#EC4899', '#F43F5E'],
+  other: ['#14B8A6', '#6366F1'],
+};
+
+export const OFFER_CATEGORY_OPTIONS = (Object.keys(OFFER_CATEGORY_LABELS) as OfferCategory[]).map((value) => ({
+  value,
+  label: OFFER_CATEGORY_LABELS[value],
+  emoji: OFFER_CATEGORY_EMOJI[value],
+}));
+
+export const asCategory = (c: string | null | undefined): OfferCategory =>
+  c && c in OFFER_CATEGORY_LABELS ? (c as OfferCategory) : 'other';
+
 export interface VenueOffer {
   id: string;
   venue_id: string;
@@ -26,6 +59,10 @@ export interface VenueOffer {
   status: OfferStatus;
   redemption_instruction: string | null;
   max_activations: number | null;
+  category: OfferCategory;
+  image_url: string | null;
+  conditions: string | null;
+  min_age: number | null;
   created_at: string;
   updated_at: string;
 }
@@ -97,11 +134,15 @@ export interface OfferDraft {
   redemption_instruction: string;
   max_activations: string;
   event_id: string | null;
+  category: OfferCategory;
+  image_url: string | null;
+  conditions: string;
 }
 
 export const validateOfferDraft = (draft: OfferDraft, now: Date = new Date()): string[] => {
   const errors: string[] = [];
-  if (!draft.title.trim()) errors.push('Titel ist erforderlich.');
+  if (!draft.title.trim()) errors.push('Beschreib kurz, was es gibt (z. B. „auf alle Longdrinks“).');
+  if (draft.conditions.length > 200) errors.push('Bedingungen dürfen höchstens 200 Zeichen haben.');
   if (!draft.offer_type) errors.push('Angebotstyp ist erforderlich.');
   if (!draft.starts_at || !draft.ends_at) errors.push('Gültigkeitszeitraum ist erforderlich.');
   if (draft.starts_at && draft.ends_at) {
@@ -114,4 +155,62 @@ export const validateOfferDraft = (draft: OfferDraft, now: Date = new Date()): s
     errors.push('Aktivierungslimit muss größer als 0 sein.');
   }
   return errors;
+};
+
+/** Suggested big ticket value per deal type (venue can overwrite it). */
+export const DEFAULT_DISPLAY_TEXT: Record<OfferType, string> = {
+  two_for_one: '2 FÜR 1',
+  discount_percent: '-20 %',
+  fixed_price: '5 €',
+  free_entry: 'GRATIS',
+  special: 'SPECIAL',
+};
+
+/**
+ * "Heute Abend" preset: 20:00 → 02:00 next day.
+ * Already past 20:00 → starts now. Between midnight and 02:00 → now until 02:00, at least 1 h.
+ */
+export const tonightWindow = (now: Date = new Date()): { start: Date; end: Date } => {
+  const at = (base: Date, dayOffset: number, h: number) => {
+    const d = new Date(base);
+    d.setDate(d.getDate() + dayOffset);
+    d.setHours(h, 0, 0, 0);
+    return d;
+  };
+  const h = now.getHours();
+  if (h < 2) {
+    const end = at(now, 0, 2);
+    return { start: now, end: end.getTime() - now.getTime() >= 3_600_000 ? end : new Date(now.getTime() + 3_600_000) };
+  }
+  const evening = at(now, 0, 20);
+  return { start: now > evening ? now : evening, end: at(now, 1, 2) };
+};
+
+/** "K7Q4M2" → "K7Q-4M2" for reading out at the bar. */
+export const formatShortCode = (code: string): string => {
+  const c = code.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  return c.length === 6 ? `${c.slice(0, 3)}-${c.slice(3)}` : c;
+};
+
+export type WalletCardState = 'ready' | 'upcoming' | 'redeemed' | 'expired';
+
+/** State of a wallet ticket for display; the server stays the authority when scanning. */
+export const walletCardState = (
+  item: { status: string; starts_at: string; ends_at: string },
+  now: Date = new Date(),
+): WalletCardState => {
+  if (item.status === 'redeemed') return 'redeemed';
+  const t = now.getTime();
+  if (t >= new Date(item.ends_at).getTime()) return 'expired';
+  if (t < new Date(item.starts_at).getTime()) return 'upcoming';
+  return 'ready';
+};
+
+/** Human message for errors raised by claim_deal. */
+export const claimErrorMessage = (message: string): string => {
+  if (message.includes('deal_sold_out')) return 'Leider schon vergriffen 😕';
+  if (message.includes('deal_expired')) return 'Der Deal ist schon abgelaufen.';
+  if (message.includes('deal_age_restricted')) return 'Dieser Deal ist erst ab 18.';
+  if (message.includes('deal_own_venue')) return 'Deals deines eigenen Spots kannst du nicht aktivieren.';
+  return 'Konnte nicht aktiviert werden. Bitte versuch es nochmal.';
 };

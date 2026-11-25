@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { SquaresFour, BookmarkSimple, Play, Heart, ChatCircle, MusicNote } from '@phosphor-icons/react';
+import { useState, type ReactNode } from 'react';
+import { SquaresFour, BookmarkSimple, Play, Heart, ChatCircle, MusicNote, Ticket } from '@phosphor-icons/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PostDetailDialog } from '@/components/feed/PostDetailDialog';
@@ -7,9 +7,15 @@ import { useUserPosts, useTaggedPosts } from '@/hooks/useUserPosts';
 import { useUserLikes, useLikePost } from '@/hooks/usePosts';
 import type { PostWithAuthor } from '@/hooks/usePosts';
 
-interface ProfilePostsGridProps { profileId?: string; }
+interface ProfilePostsGridProps {
+  profileId?: string;
+  /** Optional third tab "Deals". */
+  deals?: { count: number; content: ReactNode };
+  tab?: string;
+  onTabChange?: (tab: string) => void;
+}
 
-export const ProfilePostsGrid = ({ profileId }: ProfilePostsGridProps) => {
+export const ProfilePostsGrid = ({ profileId, deals, tab, onTabChange }: ProfilePostsGridProps) => {
   const { data: userPosts, isLoading: postsLoading } = useUserPosts(profileId);
   const { data: taggedPosts, isLoading: taggedLoading } = useTaggedPosts(profileId);
   const { data: likedPosts = [] } = useUserLikes();
@@ -19,17 +25,23 @@ export const ProfilePostsGrid = ({ profileId }: ProfilePostsGridProps) => {
 
   return (
     <div className="mt-6">
-      <Tabs defaultValue="posts" className="w-full">
-        <TabsList className="grid w-full grid-cols-2 bg-transparent border-b border-border rounded-none p-0 h-auto">
+      <Tabs defaultValue="posts" value={tab} onValueChange={onTabChange} className="w-full">
+        <TabsList className={`grid w-full ${deals ? 'grid-cols-3' : 'grid-cols-2'} bg-transparent border-b border-border rounded-none p-0 h-auto`}>
           <TabsTrigger value="posts" className="gap-2 rounded-none bg-transparent py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
             <SquaresFour weight="bold" className="h-4 w-4" /><span>Beiträge</span>
           </TabsTrigger>
           <TabsTrigger value="tagged" className="gap-2 rounded-none bg-transparent py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
             <BookmarkSimple weight="bold" className="h-4 w-4" /><span>Markiert</span>
           </TabsTrigger>
+          {deals && (
+            <TabsTrigger value="deals" data-testid="profile-deals-tab" className="gap-2 rounded-none bg-transparent py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-bold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
+              <Ticket weight="bold" className="h-4 w-4" /><span>Deals{deals.count ? ` (${deals.count})` : ''}</span>
+            </TabsTrigger>
+          )}
         </TabsList>
         <TabsContent value="posts" className="mt-4"><PostsGrid posts={userPosts} isLoading={postsLoading} onPostClick={setSelectedPost} emptyMessage="Noch keine Beiträge" /></TabsContent>
         <TabsContent value="tagged" className="mt-4"><PostsGrid posts={taggedPosts} isLoading={taggedLoading} onPostClick={setSelectedPost} emptyMessage="Noch keine Markierungen" /></TabsContent>
+        {deals && <TabsContent value="deals" className="mt-4">{deals.content}</TabsContent>}
       </Tabs>
       <PostDetailDialog
         post={selectedPost}

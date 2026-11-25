@@ -1,4 +1,6 @@
 import { BellButton } from '@/components/profile/BellButton';
+import { VenueDealsList } from '@/components/offers/VenueDealsList';
+import { useVenueByOwner, useVenueDeals } from '@/hooks/useVenueOffers';
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -51,6 +53,11 @@ export default function UserProfile() {
   const { data: postsCount } = usePostsCount(profile?.id);
   const { data: isFollowing } = useIsFollowing(profile?.id);
   const { data: posts } = useUserPosts(profile?.id);
+  // Deals are public only on venue accounts; guests' activated deals stay private in their wallet.
+  const isVenueAccount = profile?.role === 'venue_owner';
+  const { data: ownerVenue } = useVenueByOwner(profile?.id, isVenueAccount);
+  const { data: venueDeals } = useVenueDeals(isVenueAccount ? ownerVenue?.id : undefined);
+  const [section, setSection] = useState<'posts' | 'deals'>('posts');
   const toggleFollow = useToggleFollow();
   const { isBlocked, ready: blockReady } = useIsBlockedEitherWay(profile?.id);
 
@@ -150,7 +157,7 @@ export default function UserProfile() {
               <p data-testid="profile-username" className="text-sm text-muted-foreground">@{profile.username}</p>
               {profile.bio && <p className="mt-3 text-xs max-w-xs leading-relaxed text-muted-foreground">{profile.bio}</p>}
 
-              <div className="mt-5 grid grid-cols-3 w-full max-w-[280px]">
+              <div className={`mt-5 grid w-full ${isVenueAccount ? 'grid-cols-4 max-w-[340px]' : 'grid-cols-3 max-w-[280px]'}`}>
                 <div className="flex flex-col items-center px-2">
                   <span className="text-foreground font-bold text-[24px] leading-tight">{postsCount || 0}</span>
                   <span className="text-[12px] mt-0.5 text-muted-foreground">Posts</span>
@@ -163,6 +170,12 @@ export default function UserProfile() {
                   <span data-testid="follower-count" className="text-foreground font-bold text-[24px] leading-tight">{followStats?.followers || 0}</span>
                   <span className="text-[12px] mt-0.5 text-muted-foreground">Followers</span>
                 </div>
+                {isVenueAccount && (
+                  <button type="button" onClick={() => setSection('deals')} data-testid="profile-deals-stat" className="flex flex-col items-center px-2 border-l border-border transition-opacity hover:opacity-80">
+                    <span className="text-foreground font-bold text-[24px] leading-tight">{venueDeals?.length ?? 0}</span>
+                    <span className="text-[12px] mt-0.5 text-muted-foreground">Deals</span>
+                  </button>
+                )}
               </div>
 
               <div className="mt-5 flex gap-2 w-full max-w-[280px]">
@@ -188,9 +201,24 @@ export default function UserProfile() {
 
           </div>
 
-          {/* Posts grid */}
+          {isVenueAccount && (
+            <div className="mb-3 flex gap-1 rounded-full bg-muted/50 p-1" role="tablist">
+              {(['posts', 'deals'] as const).map((k) => (
+                <button key={k} type="button" role="tab" aria-selected={section === k} onClick={() => setSection(k)}
+                  data-testid={k === 'deals' ? 'profile-deals-tab' : undefined}
+                  className={`flex-1 rounded-full py-1.5 text-sm transition ${section === k ? 'bg-background font-semibold text-foreground shadow' : 'text-muted-foreground'}`}>
+                  {k === 'posts' ? 'Beiträge' : `Deals${venueDeals?.length ? ` (${venueDeals.length})` : ''}`}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {isVenueAccount && section === 'deals' ? (
+            <VenueDealsList venueId={ownerVenue?.id} venueName={ownerVenue?.name} />
+          ) : (
+          /* Posts grid */
           <div>
-            <h2 className="text-sm font-semibold text-foreground mb-3">Beiträge</h2>
+            {!isVenueAccount && <h2 className="text-sm font-semibold text-foreground mb-3">Beiträge</h2>}
             {!posts || posts.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 text-center rounded-2xl border border-border bg-card">
                 <Lock weight="thin" className="h-8 w-8 text-muted-foreground mb-2" />
@@ -214,6 +242,7 @@ export default function UserProfile() {
               </div>
             )}
           </div>
+          )}
         </div>
 
 

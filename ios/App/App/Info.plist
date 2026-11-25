@@ -46,7 +46,7 @@
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Feyrn benötigt Zugriff auf deine Fotos, um Profilbilder und Posts hochzuladen.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Feyrn benötigt Zugriff auf deine Kamera, um Fotos für Posts und dein Profil aufzunehmen.</string>
+	<string>Feyrn benötigt Zugriff auf deine Kamera, um Fotos für Posts und dein Profil aufzunehmen und Deal-QR-Codes von Gästen zu scannen.</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>

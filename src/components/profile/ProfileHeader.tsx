@@ -16,9 +16,12 @@ interface ProfileHeaderProps {
   followersCount: number;
   followingCount: number;
   postsCount: number;
+  /** Shown as 4th stat when set (venue deals or the user's own open tickets). */
+  dealsCount?: number;
+  onDealsClick?: () => void;
 }
 
-export const ProfileHeader = ({ profile, isLoading, followersCount, followingCount, postsCount }: ProfileHeaderProps) => {
+export const ProfileHeader = ({ profile, isLoading, followersCount, followingCount, postsCount, dealsCount, onDealsClick }: ProfileHeaderProps) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [followListOpen, setFollowListOpen] = useState(false);
@@ -71,7 +74,7 @@ export const ProfileHeader = ({ profile, isLoading, followersCount, followingCou
                 </button>
               )}
               {!isLoading && profile?.bio && <p className="mt-3 text-xs max-w-xs leading-relaxed text-muted-foreground">{profile.bio}</p>}
-              <div className="mt-5 grid grid-cols-3 w-full max-w-[280px]">
+              <div className={`mt-5 grid w-full ${dealsCount !== undefined ? 'grid-cols-4 max-w-[340px]' : 'grid-cols-3 max-w-[280px]'}`}>
                 <div className="flex flex-col items-center px-2">
                   <span className="text-foreground font-bold text-[24px] leading-tight">{postsCount}</span>
                   <span className="text-[12px] mt-0.5 text-muted-foreground">Posts</span>
@@ -84,6 +87,12 @@ export const ProfileHeader = ({ profile, isLoading, followersCount, followingCou
                   <span className="text-foreground font-bold text-[24px] leading-tight">{formatNumber(followersCount)}</span>
                   <span className="text-[12px] mt-0.5 text-muted-foreground">Followers</span>
                 </button>
+                {dealsCount !== undefined && (
+                  <button type="button" onClick={onDealsClick} data-testid="profile-deals-stat" className="flex flex-col items-center px-2 border-l border-border transition-opacity hover:opacity-80">
+                    <span className="text-foreground font-bold text-[24px] leading-tight">{dealsCount}</span>
+                    <span className="text-[12px] mt-0.5 text-muted-foreground">Deals</span>
+                  </button>
+                )}
               </div>
             </div>
         </div>

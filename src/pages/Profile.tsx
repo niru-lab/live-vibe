@@ -9,8 +9,12 @@ import { ProfileHeader } from '@/components/profile/ProfileHeader';
 import { ProfilePostsGrid } from '@/components/profile/ProfilePostsGrid';
 import { ProfileSettings } from '@/components/profile/ProfileSettings';
 import { ReferralProgressCard } from '@/components/referral/ReferralProgressCard';
-import { Users, GearSix, ChatCircleDots, Cards as CardsIcon, ChartLine, ArrowRight } from '@phosphor-icons/react';
+import { Users, GearSix, ChatCircleDots, Cards as CardsIcon, ChartLine, ArrowRight, QrCode } from '@phosphor-icons/react';
 import { useNotificationBadges } from '@/hooks/useNotificationBadges';
+import { DealWallet } from '@/components/offers/DealWallet';
+import { VenueDealsList } from '@/components/offers/VenueDealsList';
+import { useVenueByOwner, useVenueDeals } from '@/hooks/useVenueOffers';
+import { useOpenDealsCount, useScanVenues } from '@/hooks/useDealWallet';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -20,6 +24,20 @@ export default function Profile() {
   const { data: postsCount } = usePostsCount(profile?.id);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const { messagesBadge } = useNotificationBadges();
+  const [tab, setTab] = useState('posts');
+  const isVenue = profile?.role === 'venue_owner';
+  // Guests: private wallet. Venue accounts: their own running deals (as the public sees them).
+  const openDeals = useOpenDealsCount();
+  const { data: myVenue } = useVenueByOwner(profile?.id, isVenue);
+  const { data: venueDeals } = useVenueDeals(isVenue ? myVenue?.id : undefined);
+  const dealsCount = isVenue ? (venueDeals?.length ?? 0) : openDeals;
+  // Bar staff (guest accounts invited by a venue) get a shortcut to the scanner.
+  const { data: scanVenues } = useScanVenues();
+  const staffVenues = isVenue ? [] : (scanVenues ?? []);
+  const showDeals = () => {
+    setTab('deals');
+    requestAnimationFrame(() => document.querySelector('[data-testid="profile-deals-tab"]')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+  };
 
   if (!authLoading && !user) {
     return (
@@ -79,7 +97,7 @@ export default function Profile() {
           </div>
         </header>
         <div className="px-4 pb-24">
-          <ProfileHeader profile={profile || null} isLoading={isLoading} followersCount={followStats?.followers || 0} followingCount={followStats?.following || 0} postsCount={postsCount || 0} />
+          <ProfileHeader profile={profile || null} isLoading={isLoading} followersCount={followStats?.followers || 0} followingCount={followStats?.following || 0} postsCount={postsCount || 0} dealsCount={profile ? dealsCount : undefined} onDealsClick={showDeals} />
           {profile && (
             <ReferralProgressCard
               profileId={profile.id}
@@ -104,7 +122,36 @@ export default function Profile() {
               <ArrowRight weight="bold" className="h-4 w-4 text-muted-foreground" />
             </button>
           )}
-          <ProfilePostsGrid profileId={profile?.id} />
+          {staffVenues.length > 0 && (
+            <button
+              type="button"
+              onClick={() => navigate('/scan')}
+              data-testid="profile-staff-scan"
+              className="mb-4 flex w-full items-center justify-between rounded-2xl border border-primary/40 bg-primary/10 p-4 text-left"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/20">
+                  <QrCode weight="bold" className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold">Deals scannen</p>
+                  <p className="text-xs text-muted-foreground">Barkeeper · {staffVenues.map((v) => v.venue_name).join(', ')}</p>
+                </div>
+              </div>
+              <ArrowRight weight="bold" className="h-4 w-4 text-muted-foreground" />
+            </button>
+          )}
+          <ProfilePostsGrid
+            profileId={profile?.id}
+            tab={tab}
+            onTabChange={setTab}
+            deals={profile ? {
+              count: dealsCount,
+              content: isVenue
+                ? <VenueDealsList venueId={myVenue?.id} venueName={myVenue?.name} readOnly />
+                : <DealWallet />,
+            } : undefined}
+          />
 
           {/* Legal Links */}
           <div className="mt-6 space-y-1">

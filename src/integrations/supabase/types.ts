@@ -1257,23 +1257,35 @@ export type Database = {
       offer_activations: {
         Row: {
           activated_at: string
+          claim_token: string
           id: string
           offer_id: string
           profile_id: string
+          redeemed_at: string | null
+          redeemed_by: string | null
+          short_code: string
           status: string
         }
         Insert: {
           activated_at?: string
+          claim_token: string
           id?: string
           offer_id: string
           profile_id: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          short_code: string
           status?: string
         }
         Update: {
           activated_at?: string
+          claim_token?: string
           id?: string
           offer_id?: string
           profile_id?: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          short_code?: string
           status?: string
         }
         Relationships: [
@@ -2634,15 +2646,58 @@ export type Database = {
           },
         ]
       }
+      deal_scans: {
+        Row: {
+          activation_id: string | null
+          created_at: string
+          id: string
+          offer_id: string | null
+          result: string
+          scanned_by: string | null
+          scanner_user_id: string | null
+          venue_id: string
+        }
+        Insert: {
+          activation_id?: string | null
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          result: string
+          scanned_by?: string | null
+          scanner_user_id?: string | null
+          venue_id: string
+        }
+        Update: {
+          activation_id?: string | null
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          result?: string
+          scanned_by?: string | null
+          scanner_user_id?: string | null
+          venue_id?: string
+        }
+        Relationships: []
+      }
+      venue_staff: {
+        Row: { added_by: string | null; created_at: string; user_id: string; venue_id: string }
+        Insert: { added_by?: string | null; created_at?: string; user_id: string; venue_id: string }
+        Update: { added_by?: string | null; created_at?: string; user_id?: string; venue_id?: string }
+        Relationships: []
+      }
       venue_offers: {
         Row: {
+          category: string
+          conditions: string | null
           created_at: string
           description: string | null
           display_text: string | null
           ends_at: string
           event_id: string | null
           id: string
+          image_url: string | null
           max_activations: number | null
+          min_age: number | null
           offer_type: string
           redemption_instruction: string | null
           starts_at: string
@@ -2652,13 +2707,17 @@ export type Database = {
           venue_id: string
         }
         Insert: {
+          category?: string
+          conditions?: string | null
           created_at?: string
           description?: string | null
           display_text?: string | null
           ends_at: string
           event_id?: string | null
           id?: string
+          image_url?: string | null
           max_activations?: number | null
+          min_age?: number | null
           offer_type: string
           redemption_instruction?: string | null
           starts_at?: string
@@ -2668,13 +2727,17 @@ export type Database = {
           venue_id: string
         }
         Update: {
+          category?: string
+          conditions?: string | null
           created_at?: string
           description?: string | null
           display_text?: string | null
           ends_at?: string
           event_id?: string | null
           id?: string
+          image_url?: string | null
           max_activations?: number | null
+          min_age?: number | null
           offer_type?: string
           redemption_instruction?: string | null
           starts_at?: string
@@ -2872,6 +2935,77 @@ export type Database = {
       }
     }
     Functions: {
+      accept_staff_invite: {
+        Args: { _code: string }
+        Returns: { venue_id: string; venue_name: string }[]
+      }
+      claim_deal: {
+        Args: { _offer_id: string }
+        Returns: { activation_id: string; claim_token: string; short_code: string; status: string }[]
+      }
+      create_staff_invite: {
+        Args: { _venue_id: string }
+        Returns: { code: string; expires_at: string }[]
+      }
+      feed_live_deals: {
+        Args: never
+        Returns: Database["public"]["Tables"]["venue_offers"]["Row"][]
+      }
+      list_venue_staff: {
+        Args: { _venue_id: string }
+        Returns: { avatar_url: string | null; created_at: string; display_name: string | null; profile_id: string | null; user_id: string; username: string | null }[]
+      }
+      my_deal_wallet: {
+        Args: never
+        Returns: {
+          activated_at: string
+          activation_id: string
+          category: string
+          claim_token: string
+          conditions: string | null
+          display_text: string | null
+          ends_at: string
+          image_url: string | null
+          offer_id: string
+          offer_type: string
+          redeemed_at: string | null
+          redemption_instruction: string | null
+          short_code: string
+          starts_at: string
+          status: string
+          title: string
+          venue_id: string
+          venue_image_url: string | null
+          venue_name: string
+        }[]
+      }
+      my_scan_venues: {
+        Args: never
+        Returns: { is_staff_only: boolean; venue_id: string; venue_name: string }[]
+      }
+      offers_remaining: {
+        Args: { _offer_ids: string[] }
+        Returns: { offer_id: string; remaining: number | null; taken: number }[]
+      }
+      redeem_deal: {
+        Args: { _code: string; _venue_id: string }
+        Returns: {
+          category: string | null
+          display_text: string | null
+          guest_avatar_url: string | null
+          guest_display_name: string | null
+          guest_username: string | null
+          offer_id: string | null
+          offer_title: string | null
+          offer_type: string | null
+          redeemed_at: string | null
+          result: string
+        }[]
+      }
+      remove_venue_staff: {
+        Args: { _user_id: string; _venue_id: string }
+        Returns: undefined
+      }
       add_points: {
         Args: {
           p_delta: number
@@ -3134,7 +3268,10 @@ export type Database = {
           activations: number
           ends_at: string
           event_id: string
+          failed_scans: number
+          max_activations: number | null
           offer_id: string
+          redemptions: number
           starts_at: string
           status: string
           title: string

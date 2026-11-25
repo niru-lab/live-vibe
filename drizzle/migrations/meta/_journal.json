@@ -43,6 +43,13 @@
       "when": 1795610000000,
       "tag": "0005_profile_bell_deal_push",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1795620000000,
+      "tag": "0006_deal_wallet_redeem",
+      "breakpoints": true
     }
   ]
 }
