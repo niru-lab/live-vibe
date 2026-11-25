@@ -851,16 +851,19 @@ export type Database = {
       event_presence: {
         Row: {
           event_id: string
+          has_rsvp: boolean
           last_seen: string
           profile_id: string
         }
         Insert: {
           event_id: string
+          has_rsvp?: boolean
           last_seen?: string
           profile_id: string
         }
         Update: {
           event_id?: string
+          has_rsvp?: boolean
           last_seen?: string
           profile_id?: string
         }
@@ -2956,6 +2959,8 @@ export type Database = {
           event_id: string
           going_count: number
           nearby_count: number
+          nearby_going_count: number
+          nearby_walkin_count: number
           onsite_post_count: number
           post_count: number
         }[]
@@ -3000,6 +3005,10 @@ export type Database = {
         Returns: number
       }
       offer_activation_count: { Args: { _offer_id: string }; Returns: number }
+      my_location_status: {
+        Args: never
+        Returns: { decided: boolean; enabled: boolean }[]
+      }
       ping_event_presence: {
         Args: { _lat: number; _lng: number }
         Returns: number
@@ -3032,6 +3041,10 @@ export type Database = {
         Returns: string
       }
       set_account_type: { Args: { _type: string }; Returns: undefined }
+      set_location_enabled: {
+        Args: { _enabled: boolean; _source?: string }
+        Returns: boolean
+      }
       top_inviters: {
         Args: { _limit?: number }
         Returns: {

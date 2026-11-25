@@ -22,6 +22,9 @@ import { useGuestActivation } from '@/hooks/useGuestActivation';
 import { FirstActionShareModal } from '@/components/share/FirstActionShareModal';
 import { useAwardSocialCloud } from '@/hooks/useSocialCloud';
 import { track } from '@/lib/analytics';
+import { useLocationConsent } from '@/hooks/useLocationConsent';
+import { LocationPromptSheet } from '@/components/location/LocationPromptSheet';
+import { readPosition } from '@/lib/geo';
 import { ArrowLeft, Camera, VideoCamera, MapPin, Sparkle, Lightning, SpinnerGap, Clock, Tag, InstagramLogo, UserPlus, X, CaretDown } from '@phosphor-icons/react';
 
 interface TaggedPerson {
@@ -50,6 +53,8 @@ export default function CreatePost() {
   const { isEligible: isFirstPostPending } = useGuestActivation();
   // Post-activation share step: opened exactly once, after the first successful publish.
   const [shareOpen, setShareOpen] = useState(false);
+  const locationConsent = useLocationConsent();
+  const [locationPromptOpen, setLocationPromptOpen] = useState(false);
   const shareFiredRef = useRef(false);
   const simple = firstMode && !showAdvanced;
 
@@ -158,21 +163,47 @@ export default function CreatePost() {
     if (file) { setSelectedFile(file); const url = URL.createObjectURL(file); setPreviewUrl(url); }
   };
 
-  const handleSubmit = async () => {
+  // Location off + photo/video → explain "Vor Ort" first. Posting without location always works.
+  const handleSubmit = () => {
     if (!user || !profile) { navigate('/auth'); return; }
+    if (!validatePost()) return;
+    if (selectedFile && !locationConsent.enabled && !locationConsent.isLoading) {
+      setLocationPromptOpen(true);
+      return;
+    }
+    submitPost(locationConsent.enabled);
+  };
 
+  const acceptLocationPrompt = async () => {
+    setLocationPromptOpen(false);
+    const on = await locationConsent.enable('post_hint');
+    submitPost(on);
+  };
+
+  const declineLocationPrompt = () => {
+    setLocationPromptOpen(false);
+    submitPost(false);
+  };
+
+  const validatePost = (): boolean => {
     // Moment X requires a location
     if (isMomentX && !pickedLocation) {
       setLocationError(true);
       toast({ variant: 'destructive', title: 'Location fehlt', description: 'Für Moment X musst du eine Location wählen.' });
-      return;
+      return false;
     }
     setLocationError(false);
 
     if (!selectedFile && !caption.trim()) {
       toast({ variant: 'destructive', title: 'Leerer Post', description: 'Bitte füge ein Foto/Video hinzu oder schreibe etwas.' });
-      return;
+      return false;
     }
+    return true;
+  };
+
+  const submitPost = async (withLocation: boolean) => {
+    if (!user || !profile) { navigate('/auth'); return; }
+    if (!validatePost()) return;
     setIsUploading(true);
     try {
       let publicUrl = '';
@@ -212,17 +243,14 @@ export default function CreatePost() {
         posted_as_venue_id: postAsVenue && myVenue ? myVenue.id : null,
       });
 
-      // "Vor Ort": server checks distance (≤ 200 m) to the tagged venue.
-      if (linkedVenueId && created?.id && 'geolocation' in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          (pos) => {
-            supabase
-              .rpc('verify_post_location', { _post_id: created.id, _lat: pos.coords.latitude, _lng: pos.coords.longitude })
-              .then(({ data }) => { if (data) queryClient.invalidateQueries({ queryKey: ['posts'] }); });
-          },
-          () => {},
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 },
-        );
+      // "Vor Ort": only with location on; server checks distance (≤ 200 m) to the tagged venue.
+      if (withLocation && linkedVenueId && created?.id) {
+        readPosition().then((pos) => {
+          if (!pos) return;
+          supabase
+            .rpc('verify_post_location', { _post_id: created.id, _lat: pos.lat, _lng: pos.lng })
+            .then(({ data }) => { if (data) queryClient.invalidateQueries({ queryKey: ['posts'] }); });
+        });
       }
 
       // Social Cloud: rewarded once per event/venue (server-side idempotent).
@@ -450,6 +478,14 @@ export default function CreatePost() {
           </div>
         )}
       </div>
+
+      <LocationPromptSheet
+        open={locationPromptOpen}
+        variant="post"
+        busy={locationConsent.saving}
+        onAccept={acceptLocationPrompt}
+        onDecline={declineLocationPrompt}
+      />
 
       <FirstActionShareModal
         open={shareOpen}

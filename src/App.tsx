@@ -30,6 +30,7 @@ import DashboardComingSoon from "./pages/DashboardComingSoon";
 import AdminVenues from "./pages/AdminVenues";
 import AdminReports from "./pages/AdminReports";
 import { PushPrimer } from "@/components/push/PushPrimer";
+import { LocationGate } from "@/components/location/LocationGate";
 import VenueProfile from "./pages/VenueProfile";
 import CreateEvent from "./pages/CreateEvent";
 import CreatePost from "./pages/CreatePost";
@@ -76,6 +77,7 @@ const App = () => (
                 <OnboardingGate />
                 <ReferralCapture />
                 <PushPrimer />
+                <LocationGate />
                 <Routes>
                   {/* Public */}
                   <Route path="/" element={<Welcome />} />

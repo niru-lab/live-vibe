@@ -179,12 +179,21 @@ export default function Datenschutz() {
           Du kannst den Standortzugriff jederzeit in den Geräteeinstellungen deaktivieren.
         </p>
         <p>
-          Wenn du auf der Karte „Mitzählen“ wählst, prüft Feyrn bei geöffneter App etwa alle 5 Minuten, ob du dich
-          im Umkreis von 200 m um ein gerade laufendes Event befindest. Dein Standort wird dabei nicht gespeichert;
-          gespeichert wird nur, dass du bei diesem Event vor Ort bist, und dieser Eintrag wird nach 30 Minuten
-          automatisch gelöscht. Andere sehen nur eine anonyme Gesamtzahl, und erst ab 3 Personen. Rechtsgrundlage
-          ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), die du jederzeit widerrufen kannst, indem du den
-          Standortzugriff deaktivierst.
+          Wenn du der Standortnutzung zustimmst (beim ersten Start der App oder später im Profil unter „Privacy“),
+          prüft Feyrn bei geöffneter App etwa alle 5 Minuten, ob du dich bei einem gerade laufenden Event befindest:
+          im Umkreis von 100 m, wenn du für das Event zugesagt hast, sonst im Umkreis von 50 m. Gezählt wirst du nur
+          beim nächstgelegenen Event. Dein Standort wird dabei nicht gespeichert; gespeichert wird nur, bei welchem
+          Event du vor Ort bist und ob du zugesagt hast, und dieser Eintrag wird nach 30 Minuten automatisch gelöscht.
+          Andere sehen nur eine anonyme Gesamtzahl, und erst ab 3 Personen. Mit Standort kann ein Post außerdem als
+          „Vor Ort“ bestätigt werden (Abstand höchstens 200 m zum markierten Spot); ohne Standort wird er normal
+          veröffentlicht. Rechtsgrundlage ist deine Einwilligung (Art. 6 Abs. 1 lit. a DSGVO). Du kannst sie jederzeit
+          im Profil unter „Privacy → Standort nutzen“ widerrufen; deine Einträge werden dann sofort gelöscht.
+        </p>
+        <p>
+          Hast du die Standortnutzung abgelehnt, erinnert dich Feyrn höchstens einmal pro Woche innerhalb der App
+          daran, wenn du die App innerhalb einer Stunde ein zweites Mal öffnest, und nach dreimaligem „Nicht jetzt“
+          gar nicht mehr. Dafür merkt sich nur dein Gerät, wann die App zuletzt geöffnet wurde; diese Angabe wird
+          nicht an uns übertragen.
         </p>
       </section>
 
