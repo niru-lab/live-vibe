@@ -514,6 +514,75 @@ export type Database = {
           },
         ]
       }
+      deal_scans: {
+        Row: {
+          activation_id: string | null
+          created_at: string
+          id: string
+          offer_id: string | null
+          result: string
+          scanned_by: string | null
+          scanner_user_id: string | null
+          venue_id: string
+        }
+        Insert: {
+          activation_id?: string | null
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          result: string
+          scanned_by?: string | null
+          scanner_user_id?: string | null
+          venue_id: string
+        }
+        Update: {
+          activation_id?: string | null
+          created_at?: string
+          id?: string
+          offer_id?: string | null
+          result?: string
+          scanned_by?: string | null
+          scanner_user_id?: string | null
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deal_scans_activation_id_fkey"
+            columns: ["activation_id"]
+            isOneToOne: false
+            referencedRelation: "offer_activations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_scans_offer_id_fkey"
+            columns: ["offer_id"]
+            isOneToOne: false
+            referencedRelation: "venue_offers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_scans_scanned_by_fkey"
+            columns: ["scanned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_scans_scanned_by_fkey"
+            columns: ["scanned_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deal_scans_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       direct_messages: {
         Row: {
           content: string
@@ -851,16 +920,19 @@ export type Database = {
       event_presence: {
         Row: {
           event_id: string
+          has_rsvp: boolean
           last_seen: string
           profile_id: string
         }
         Insert: {
           event_id: string
+          has_rsvp?: boolean
           last_seen?: string
           profile_id: string
         }
         Update: {
           event_id?: string
+          has_rsvp?: boolean
           last_seen?: string
           profile_id?: string
         }
@@ -1254,23 +1326,35 @@ export type Database = {
       offer_activations: {
         Row: {
           activated_at: string
+          claim_token: string
           id: string
           offer_id: string
           profile_id: string
+          redeemed_at: string | null
+          redeemed_by: string | null
+          short_code: string
           status: string
         }
         Insert: {
           activated_at?: string
+          claim_token: string
           id?: string
           offer_id: string
           profile_id: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          short_code: string
           status?: string
         }
         Update: {
           activated_at?: string
+          claim_token?: string
           id?: string
           offer_id?: string
           profile_id?: string
+          redeemed_at?: string | null
+          redeemed_by?: string | null
+          short_code?: string
           status?: string
         }
         Relationships: [
@@ -1291,6 +1375,20 @@ export type Database = {
           {
             foreignKeyName: "offer_activations_profile_id_fkey"
             columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offer_activations_redeemed_by_fkey"
+            columns: ["redeemed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "offer_activations_redeemed_by_fkey"
+            columns: ["redeemed_by"]
             isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
@@ -1618,6 +1716,53 @@ export type Database = {
             foreignKeyName: "privacy_settings_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profile_subscriptions: {
+        Row: {
+          created_at: string
+          subscriber_id: string
+          target_id: string
+        }
+        Insert: {
+          created_at?: string
+          subscriber_id: string
+          target_id: string
+        }
+        Update: {
+          created_at?: string
+          subscriber_id?: string
+          target_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_subscriptions_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_subscriptions_subscriber_id_fkey"
+            columns: ["subscriber_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_subscriptions_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profile_subscriptions_target_id_fkey"
+            columns: ["target_id"]
+            isOneToOne: false
             referencedRelation: "public_profiles"
             referencedColumns: ["id"]
           },
@@ -2615,13 +2760,17 @@ export type Database = {
       }
       venue_offers: {
         Row: {
+          category: string
+          conditions: string | null
           created_at: string
           description: string | null
           display_text: string | null
           ends_at: string
           event_id: string | null
           id: string
+          image_url: string | null
           max_activations: number | null
+          min_age: number | null
           offer_type: string
           redemption_instruction: string | null
           starts_at: string
@@ -2631,13 +2780,17 @@ export type Database = {
           venue_id: string
         }
         Insert: {
+          category?: string
+          conditions?: string | null
           created_at?: string
           description?: string | null
           display_text?: string | null
           ends_at: string
           event_id?: string | null
           id?: string
+          image_url?: string | null
           max_activations?: number | null
+          min_age?: number | null
           offer_type: string
           redemption_instruction?: string | null
           starts_at?: string
@@ -2647,13 +2800,17 @@ export type Database = {
           venue_id: string
         }
         Update: {
+          category?: string
+          conditions?: string | null
           created_at?: string
           description?: string | null
           display_text?: string | null
           ends_at?: string
           event_id?: string | null
           id?: string
+          image_url?: string | null
           max_activations?: number | null
+          min_age?: number | null
           offer_type?: string
           redemption_instruction?: string | null
           starts_at?: string
@@ -2672,6 +2829,101 @@ export type Database = {
           },
           {
             foreignKeyName: "venue_offers_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venue_staff: {
+        Row: {
+          added_by: string | null
+          created_at: string
+          user_id: string
+          venue_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          created_at?: string
+          user_id: string
+          venue_id: string
+        }
+        Update: {
+          added_by?: string | null
+          created_at?: string
+          user_id?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_staff_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_staff_added_by_fkey"
+            columns: ["added_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_staff_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venue_staff_invites: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          used_at: string | null
+          used_by: string | null
+          venue_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at?: string
+          used_at?: string | null
+          used_by?: string | null
+          venue_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          used_at?: string | null
+          used_by?: string | null
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_staff_invites_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_staff_invites_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_staff_invites_venue_id_fkey"
             columns: ["venue_id"]
             isOneToOne: false
             referencedRelation: "venues"
@@ -2851,6 +3103,13 @@ export type Database = {
       }
     }
     Functions: {
+      accept_staff_invite: {
+        Args: { _code: string }
+        Returns: {
+          venue_id: string
+          venue_name: string
+        }[]
+      }
       add_points: {
         Args: {
           p_delta: number
@@ -2908,7 +3167,32 @@ export type Database = {
         Args: { _reason: string; _ref_id?: string; _ref_type?: string }
         Returns: number
       }
+      bell_author_allowed: {
+        Args: { _profile_id: string; _venue_id?: string }
+        Returns: boolean
+      }
+      bell_recipients_for_offer: {
+        Args: { _offer_id: string }
+        Returns: {
+          display_text: string
+          offer_title: string
+          subscriber_id: string
+          venue_id: string
+          venue_name: string
+        }[]
+      }
+      bell_recipients_for_post: {
+        Args: { _post_id: string }
+        Returns: {
+          author_id: string
+          author_name: string
+          is_story: boolean
+          is_venue: boolean
+          subscriber_id: string
+        }[]
+      }
       calculate_level: { Args: { pts: number }; Returns: number }
+      can_scan_venue: { Args: { _venue_id: string }; Returns: boolean }
       can_see_user: {
         Args: { target_id: string; viewer_id: string }
         Returns: boolean
@@ -2923,6 +3207,15 @@ export type Database = {
         Returns: boolean
       }
       chat_request_status: { Args: { _a: string; _b: string }; Returns: string }
+      claim_deal: {
+        Args: { _offer_id: string }
+        Returns: {
+          activation_id: string
+          claim_token: string
+          short_code: string
+          status: string
+        }[]
+      }
       create_notification: {
         Args: {
           _actor: string
@@ -2934,6 +3227,13 @@ export type Database = {
           _type: Database["public"]["Enums"]["notification_type"]
         }
         Returns: undefined
+      }
+      create_staff_invite: {
+        Args: { _venue_id: string }
+        Returns: {
+          code: string
+          expires_at: string
+        }[]
       }
       current_profile_id: { Args: never; Returns: string }
       delete_email: {
@@ -2956,6 +3256,8 @@ export type Database = {
           event_id: string
           going_count: number
           nearby_count: number
+          nearby_going_count: number
+          nearby_walkin_count: number
           onsite_post_count: number
           post_count: number
         }[]
@@ -2963,6 +3265,35 @@ export type Database = {
       event_visible_attendees: {
         Args: { _event_id: string }
         Returns: string[]
+      }
+      feed_live_deals: {
+        Args: never
+        Returns: {
+          category: string
+          conditions: string | null
+          created_at: string
+          description: string | null
+          display_text: string | null
+          ends_at: string
+          event_id: string | null
+          id: string
+          image_url: string | null
+          max_activations: number | null
+          min_age: number | null
+          offer_type: string
+          redemption_instruction: string | null
+          starts_at: string
+          status: string
+          title: string
+          updated_at: string
+          venue_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "venue_offers"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_user_room_ids: { Args: { _profile_id: string }; Returns: string[] }
       has_role: {
@@ -2990,6 +3321,17 @@ export type Database = {
       }
       is_venue_member: { Args: { _venue_id: string }; Returns: boolean }
       is_venue_owner: { Args: { _venue_id: string }; Returns: boolean }
+      list_venue_staff: {
+        Args: { _venue_id: string }
+        Returns: {
+          avatar_url: string
+          created_at: string
+          display_name: string
+          profile_id: string
+          user_id: string
+          username: string
+        }[]
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -2999,12 +3341,60 @@ export type Database = {
         }
         Returns: number
       }
+      my_deal_wallet: {
+        Args: never
+        Returns: {
+          activated_at: string
+          activation_id: string
+          category: string
+          claim_token: string
+          conditions: string
+          display_text: string
+          ends_at: string
+          image_url: string
+          offer_id: string
+          offer_type: string
+          redeemed_at: string
+          redemption_instruction: string
+          short_code: string
+          starts_at: string
+          status: string
+          title: string
+          venue_id: string
+          venue_image_url: string
+          venue_name: string
+        }[]
+      }
+      my_location_status: {
+        Args: never
+        Returns: {
+          decided: boolean
+          enabled: boolean
+        }[]
+      }
+      my_scan_venues: {
+        Args: never
+        Returns: {
+          is_staff_only: boolean
+          venue_id: string
+          venue_name: string
+        }[]
+      }
       offer_activation_count: { Args: { _offer_id: string }; Returns: number }
+      offers_remaining: {
+        Args: { _offer_ids: string[] }
+        Returns: {
+          offer_id: string
+          remaining: number
+          taken: number
+        }[]
+      }
       ping_event_presence: {
         Args: { _lat: number; _lng: number }
         Returns: number
       }
       purge_user_data: { Args: { _user_id: string }; Returns: undefined }
+      random_code: { Args: { _len: number }; Returns: string }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }
         Returns: {
@@ -3012,6 +3402,25 @@ export type Database = {
           msg_id: number
           read_ct: number
         }[]
+      }
+      redeem_deal: {
+        Args: { _code: string; _venue_id: string }
+        Returns: {
+          category: string
+          display_text: string
+          guest_avatar_url: string
+          guest_display_name: string
+          guest_username: string
+          offer_id: string
+          offer_title: string
+          offer_type: string
+          redeemed_at: string
+          result: string
+        }[]
+      }
+      remove_venue_staff: {
+        Args: { _user_id: string; _venue_id: string }
+        Returns: undefined
       }
       report_card_batch: {
         Args: { _batch_id: string; _details?: string; _reason: string }
@@ -3032,6 +3441,10 @@ export type Database = {
         Returns: string
       }
       set_account_type: { Args: { _type: string }; Returns: undefined }
+      set_location_enabled: {
+        Args: { _enabled: boolean; _source?: string }
+        Returns: boolean
+      }
       top_inviters: {
         Args: { _limit?: number }
         Returns: {
@@ -3103,7 +3516,10 @@ export type Database = {
           activations: number
           ends_at: string
           event_id: string
+          failed_scans: number
+          max_activations: number
           offer_id: string
+          redemptions: number
           starts_at: string
           status: string
           title: string
@@ -3142,6 +3558,8 @@ export type Database = {
         | "event_created_by_followed_user"
         | "event_accepted"
         | "event_declined"
+        | "bell_post"
+        | "bell_deal"
       outbox_status: "pending" | "processing" | "done" | "failed"
       post_type: "normal" | "moment_x"
       profile_type: "user" | "club" | "organizer" | "eventer"
@@ -3315,6 +3733,8 @@ export const Constants = {
         "event_created_by_followed_user",
         "event_accepted",
         "event_declined",
+        "bell_post",
+        "bell_deal",
       ],
       outbox_status: ["pending", "processing", "done", "failed"],
       post_type: ["normal", "moment_x"],

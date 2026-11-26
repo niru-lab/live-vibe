@@ -50,6 +50,13 @@
       "when": 1795620000000,
       "tag": "0006_deal_wallet_redeem",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1795677351366,
+      "tag": "0007_location_consent_presence",
+      "breakpoints": true
     }
   ]
 }
