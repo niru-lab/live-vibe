@@ -6,7 +6,6 @@ import { useEventRanking } from '@/hooks/useEventRanking';
 import { useProfile } from '@/hooks/useProfile';
 import { useMyRSVPs, useMyInvitations, useRespondToInvitation } from '@/hooks/useEventAttendees';
 import { useMyUpcomingParticipations, useSetParticipation } from '@/hooks/useEventParticipation';
-import { RsvpButtons } from '@/components/events/RsvpButtons';
 
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -17,25 +16,28 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import {
   Confetti,
   MagnifyingGlass,
-  MapPin,
-  CalendarBlank,
-  Clock,
-  CurrencyEur,
-  MusicNote,
   Plus,
   ChartLineUp,
-  Hourglass,
   CalendarStar,
   SlidersHorizontal,
+  ArrowsClockwise,
+  SquaresFour,
+  Question,
+  CheckCircle,
 } from '@phosphor-icons/react';
+import { useQueryClient } from '@tanstack/react-query';
+import { EventHeroCard } from '@/components/events/EventHeroCard';
+import { EventRequestCard } from '@/components/events/EventRequestCard';
+import { EventsPromoCard } from '@/components/events/EventsPromoCard';
+import { useRsvpCounts } from '@/hooks/useEventAttendees';
+import { useMyPosition } from '@/hooks/useMyPosition';
 import { FeyrnLogo } from '@/components/brand/FeyrnLogo';
-import { format, isToday, isTomorrow, addDays, isSameDay } from 'date-fns';
+import { format, addDays, isSameDay } from 'date-fns';
 import { de } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useVenueActivation } from '@/hooks/useVenueActivation';
 import { VenueFirstEventNudge } from '@/components/events/VenueFirstEventNudge';
-import { EventSocialContext } from '@/components/events/EventSocialContext';
 
 const CATEGORIES: { key: string; label: string }[] = [
   { key: 'club', label: 'Club' },
@@ -125,8 +127,9 @@ export default function Events() {
     let count = 0;
     if (dateKey !== 'all') count++;
     if (category !== null) count++;
+    if (genre !== null) count++;
     return count;
-  }, [dateKey, category]);
+  }, [dateKey, category, genre]);
 
   const hasActiveFilters = search !== '' || dateKey !== 'all' || category !== null || genre !== null;
 
@@ -161,8 +164,33 @@ export default function Events() {
   const [venueNudgeDismissed, setVenueNudgeDismissed] = useState(false);
   const showVenueActivation = venueActivationEligible && !venueNudgeDismissed;
 
+  const queryClient = useQueryClient();
+  const [refreshing, setRefreshing] = useState(false);
+  const refresh = async () => {
+    setRefreshing(true);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['events'] }),
+      queryClient.invalidateQueries({ queryKey: ['rsvp-counts'] }),
+      queryClient.invalidateQueries({ queryKey: ['my-rsvp-map'] }),
+    ]);
+    setTimeout(() => setRefreshing(false), 400);
+  };
+  const { data: myPosition } = useMyPosition();
+
   const pending = participations.filter((p: any) => p.status === 'requested');
   const accepted = participations.filter((p: any) => p.status === 'accepted');
+
+  // One batched count query for every card on screen ("248 sind dabei", crowd badge, +N avatars).
+  const countIds = useMemo(() => {
+    const ids = new Set<string>();
+    rankedEvents.forEach((e: any) => ids.add(e.id));
+    pending.forEach((p: any) => p.event?.id && ids.add(p.event.id));
+    invitations.forEach((i: any) => i.event?.id && ids.add(i.event.id));
+    (myEvents ?? []).forEach((e: any) => e?.id && ids.add(e.id));
+    (myRSVPs ?? []).forEach((r: any) => r.event?.id && ids.add(r.event.id));
+    return Array.from(ids);
+  }, [rankedEvents, pending, invitations, myEvents, myRSVPs]);
+  const { data: counts } = useRsvpCounts(countIds);
 
   return (
     <AppLayout>
@@ -177,16 +205,27 @@ export default function Events() {
             </div>
             <FeyrnLogo size="sm" />
           </div>
-          {isVenueOwner && (
+          <div className="flex items-center gap-2">
+            {isVenueOwner && (
+              <button
+                onClick={() => navigate('/venue')}
+                aria-label="Venue Dashboard"
+                className="flex h-9 items-center gap-2 rounded-full bg-muted/60 px-3 text-xs text-foreground"
+              >
+                <ChartLineUp weight="bold" className="h-4 w-4 text-primary" />
+                Dashboard
+              </button>
+            )}
             <button
-              onClick={() => navigate('/venue')}
-              aria-label="Venue Dashboard"
-              className="flex h-9 items-center gap-2 rounded-full bg-muted/60 px-3 text-xs text-foreground"
+              onClick={refresh}
+              disabled={refreshing}
+              aria-label="Aktualisieren"
+              data-testid="events-refresh"
+              className="flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-sm ring-1 ring-border/50 transition active:scale-95"
             >
-              <ChartLineUp weight="bold" className="h-4 w-4 text-primary" />
-              Dashboard
+              <ArrowsClockwise weight="bold" className={cn('h-5 w-5 text-foreground', refreshing && 'animate-spin')} />
             </button>
-          )}
+          </div>
         </div>
       </header>
 
@@ -207,7 +246,7 @@ export default function Events() {
 
       {/* Search */}
       <div className="px-5 pt-3">
-        <div className="flex h-12 items-center gap-3 rounded-2xl bg-muted/60 px-4">
+        <div className="flex h-12 items-center gap-3 rounded-full bg-muted/60 px-5">
           <MagnifyingGlass weight="regular" className="h-5 w-5 text-muted-foreground" />
           <input
             value={search}
@@ -218,41 +257,27 @@ export default function Events() {
         </div>
       </div>
 
-      {/* Filter pill row */}
-      <div className="mt-4 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        <div className="flex gap-3 min-w-min items-center">
-          {/* Filter pill → opens bottom sheet */}
-          <button
-            onClick={() => setFilterSheetOpen(true)}
-            className={cn(
-              'flex items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-medium transition shrink-0',
-              activeFilterCount > 0
-                ? 'bg-primary text-primary-foreground'
-                : 'bg-muted/60 text-foreground/80 hover:bg-muted'
-            )}
-            aria-label="Filter öffnen"
-          >
-            <SlidersHorizontal weight="regular" className="h-4 w-4" />
-            Filter
-            {activeFilterCount > 0 && (
-              <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-foreground text-primary text-xs font-bold">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
-
-          {/* Genre chips — inline, only if genre data exists */}
-          {availableGenres.length > 0 && (
-            <>
-              <Chip active={genre === null} onClick={() => setGenre(null)}>Alle Genres</Chip>
-              {availableGenres.map((g) => (
-                <Chip key={g} active={genre === g} onClick={() => setGenre(g)}>
-                  {g}
-                </Chip>
-              ))}
-            </>
+      {/* Filter: one centred button; date, type and genre live in the sheet */}
+      <div className="mt-4 flex justify-center px-5">
+        <button
+          onClick={() => setFilterSheetOpen(true)}
+          data-testid="events-filter-btn"
+          className={cn(
+            'flex items-center gap-2 rounded-full border px-6 py-2.5 text-sm font-semibold transition',
+            activeFilterCount > 0
+              ? 'border-primary bg-primary text-primary-foreground'
+              : 'border-border bg-card text-foreground hover:border-primary/50'
           )}
-        </div>
+          aria-label="Filter öffnen"
+        >
+          <SlidersHorizontal weight="bold" className="h-4 w-4" />
+          Filter
+          {activeFilterCount > 0 && (
+            <span className="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-foreground text-primary text-xs font-bold">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
       </div>
 
       {/* Filter bottom sheet */}
@@ -287,6 +312,19 @@ export default function Events() {
             </div>
           </div>
 
+          {/* Genre section (only when events carry genres) */}
+          {availableGenres.length > 0 && (
+            <div className="mt-6">
+              <h4 className="mb-3 text-sm font-semibold text-muted-foreground">Genre</h4>
+              <div className="flex flex-wrap gap-2">
+                <Chip active={genre === null} onClick={() => setGenre(null)}>Alle Genres</Chip>
+                {availableGenres.map((g) => (
+                  <Chip key={g} active={genre === g} onClick={() => setGenre(g)}>{g}</Chip>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Action buttons */}
           <div className="mt-8 flex gap-3">
             <Button
@@ -295,6 +333,7 @@ export default function Events() {
               onClick={() => {
                 setDateKey('all');
                 setCategory(null);
+                setGenre(null);
               }}
             >
               Zurücksetzen
@@ -311,32 +350,22 @@ export default function Events() {
       {/* Tabs */}
       <div className="px-5 pt-4">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full bg-transparent border-b border-border rounded-none p-0 h-auto justify-start gap-6">
-            <TabsTrigger value="discover" className="rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
-              Entdecken
+          <TabsList className="grid w-full grid-cols-3 bg-transparent border-b border-border rounded-none p-0 h-auto">
+            <TabsTrigger value="discover" className="gap-2 rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
+              <SquaresFour weight="bold" className="h-4 w-4" /> Entdecken
             </TabsTrigger>
-            <TabsTrigger value="requested" className="rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
-              Angefragt
+            <TabsTrigger value="requested" className="gap-2 rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
+              <Question weight="bold" className="h-4 w-4" /> Angefragt
               {(pending.length + invitations.length) > 0 && (
                 <Badge className="ml-1.5 h-5 min-w-5 rounded-full bg-primary px-1.5 text-xs text-primary-foreground border-0">{pending.length + invitations.length}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="my-events" className="rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
-              Meine
+            <TabsTrigger value="my-events" className="gap-2 rounded-none bg-transparent px-0 py-3 text-muted-foreground data-[state=active]:bg-transparent data-[state=active]:text-foreground data-[state=active]:font-semibold data-[state=active]:tab-underline-active data-[state=active]:shadow-none">
+              <CheckCircle weight="bold" className="h-4 w-4" /> Meine
             </TabsTrigger>
           </TabsList>
 
           <div className="pt-5 pb-2" data-testid="events-list">
-            {/* FAB */}
-            <button
-              data-testid="create-event-btn"
-              onClick={() => navigate('/events/create')}
-              className="fixed bottom-28 right-5 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg hover:scale-105 transition"
-              aria-label="Event erstellen"
-            >
-              <Plus weight="bold" className="h-7 w-7" />
-            </button>
-
             <TabsContent value="discover" className="mt-0 space-y-4">
               {discoverLoading ? (
                 <EventListSkeleton />
@@ -366,9 +395,17 @@ export default function Events() {
                   />
                 )
               ) : (
-                rankedEvents.map((event: any) => (
-                  <EventListCard key={event.id} event={event} onClick={() => navigate(`/events/${event.id}`)} />
-                ))
+                <>
+                  {rankedEvents.map((event: any) => (
+                    <EventHeroCard key={event.id} event={event} counts={counts?.[event.id]} myPosition={myPosition} />
+                  ))}
+                  <EventsPromoCard
+                    title="Noch mehr Events?"
+                    subtitle="Entdecke die Karte!"
+                    onClick={() => navigate('/discover')}
+                    testId="events-map-promo"
+                  />
+                </>
               )}
             </TabsContent>
 
@@ -378,16 +415,26 @@ export default function Events() {
               ) : partLoading || invitesLoading ? (
                 <EventListSkeleton />
               ) : pending.length === 0 && invitations.length === 0 ? (
-                <EmptyState title="Keine offenen Anfragen" description="Frag ein Event an oder warte auf Einladungen." onAction={() => setActiveTab('discover')} actionLabel="Events entdecken" />
+                <EmptyState
+                  title="Noch keine Anfrage?"
+                  description="Such dir ein Event aus und frag an – hier siehst du dann, ob du dabei bist."
+                  onAction={() => setActiveTab('discover')}
+                  actionLabel="Events entdecken"
+                />
               ) : (
                 <>
                   {invitations.length > 0 && (
                     <section className="space-y-3">
                       <SectionLabel title={`Einladungen (${invitations.length})`} />
-                      {invitations.map((inv: any) => (
-                        <div key={inv.id} className="rounded-2xl border border-primary/40 bg-card overflow-hidden">
-                          <EventListCard event={inv.event} onClick={() => navigate(`/events/${inv.event?.id}`)} />
-                          <div className="flex gap-2 border-t border-border/50 px-3 py-2">
+                      {invitations.filter((inv: any) => inv.event).map((inv: any) => (
+                        <EventRequestCard
+                          key={inv.id}
+                          event={inv.event}
+                          status="invited"
+                          going={counts?.[inv.event.id]?.going}
+                          myPosition={myPosition}
+                          footer={
+                          <div className="flex gap-2">
                             <Button size="sm" variant="ghost" className="flex-1 text-muted-foreground" onClick={() => respondInvitation.mutate({ attendeeId: inv.id, accept: false }, { onSuccess: () => toast.success('Einladung abgelehnt') })} disabled={respondInvitation.isPending}>
                               Ablehnen
                             </Button>
@@ -395,26 +442,42 @@ export default function Events() {
                               Annehmen
                             </Button>
                           </div>
-                        </div>
+                          }
+                        />
                       ))}
                     </section>
                   )}
 
                   {pending.length > 0 && (
                     <section className="space-y-3">
-                      <SectionLabel icon={<Hourglass weight="regular" className="h-4 w-4" />} title={`Ausstehend (${pending.length})`} />
-                      {pending.map((p: any) => (
-                        <div key={p.id} className="rounded-2xl border border-primary/30 bg-card overflow-hidden">
-                          <EventListCard event={p.event} onClick={() => navigate(`/events/${p.event?.id}`)} pendingNote />
-                          <div className="border-t border-border/50 px-4 py-2">
-                            <Button size="sm" variant="ghost" className="w-full text-muted-foreground" onClick={() => setParticipation.mutate({ eventId: p.event.id, status: null }, { onSuccess: () => toast.success('Anfrage zurückgezogen') })} disabled={setParticipation.isPending}>
-                              Zurückziehen
-                            </Button>
-                          </div>
-                        </div>
+                      <SectionLabel title={`Ausstehend (${pending.length})`} />
+                      {pending.filter((p: any) => p.event).map((p: any) => (
+                        <EventRequestCard
+                          key={p.id}
+                          event={p.event}
+                          status="requested"
+                          going={counts?.[p.event.id]?.going}
+                          myPosition={myPosition}
+                          footer={
+                            <button
+                              type="button"
+                              className="w-full py-1 text-center text-xs font-medium text-muted-foreground"
+                              onClick={() => setParticipation.mutate({ eventId: p.event.id, status: null }, { onSuccess: () => toast.success('Anfrage zurückgezogen') })}
+                              disabled={setParticipation.isPending}
+                            >
+                              Anfrage zurückziehen
+                            </button>
+                          }
+                        />
                       ))}
                     </section>
                   )}
+                  <EventsPromoCard
+                    title="Noch mehr Events?"
+                    subtitle="Such dir dein nächstes aus."
+                    onClick={() => setActiveTab('discover')}
+                    testId="events-requested-promo"
+                  />
                 </>
               )}
             </TabsContent>
@@ -445,6 +508,9 @@ export default function Events() {
 
                   return (
                     <>
+                      <Button variant="outline" className="w-full gap-2 rounded-full" onClick={() => navigate('/events/create')} data-testid="create-event-btn">
+                        <Plus weight="bold" className="h-4 w-4" /> Event erstellen
+                      </Button>
                       <div className="flex gap-2">
                         <button onClick={() => setMyEventsView('zugesagt')} className={cn('rounded-full px-4 py-1.5 text-xs font-medium transition', myEventsView === 'zugesagt' ? 'bg-primary text-primary-foreground' : 'bg-muted/60 text-muted-foreground')}>
                           Zugesagt ({zugesagt.length})
@@ -465,7 +531,7 @@ export default function Events() {
                         />
                       ) : (
                         list.map((event: any) => (
-                          <EventListCard key={event.id} event={event} onClick={() => navigate(`/events/${event.id}`)} />
+                          <EventHeroCard key={event.id} event={event} counts={counts?.[event.id]} myPosition={myPosition} />
                         ))
                       )}
                     </>
@@ -483,14 +549,6 @@ export default function Events() {
 }
 
 /* ---------- Subcomponents ---------- */
-
-function ChipRow({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mt-4 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-      <div className="flex gap-3 min-w-min">{children}</div>
-    </div>
-  );
-}
 
 function Chip({ active, onClick, children }: { active?: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
@@ -517,88 +575,11 @@ function SectionLabel({ title, icon }: { title: string; icon?: React.ReactNode }
   );
 }
 
-const categoryEmojis: Record<string, string> = { club: '🎧', house_party: '🏠', bar: '🍸', festival: '🎪', concert: '🎤', other: '✨' };
-
-function EventListCard({ event, onClick, pendingNote = false }: { event: any; onClick: () => void; pendingNote?: boolean }) {
-  if (!event) return null;
-  const starts = new Date(event.starts_at);
-  const dateLabel = isToday(starts)
-    ? `Heute, ${format(starts, 'd. MMM', { locale: de })}`
-    : isTomorrow(starts)
-    ? `Morgen, ${format(starts, 'd. MMM', { locale: de })}`
-    : format(starts, 'EEE, d. MMM', { locale: de });
-
-  const genres: string[] = (event.music_genres ?? event.genres ?? []) as string[];
-  const firstGenre = genres?.[0];
-
-  return (
-    <article
-      onClick={onClick}
-      data-testid="event-card"
-      className="cursor-pointer overflow-hidden rounded-2xl bg-card border border-border/60 transition hover:border-primary/40"
-    >
-      <div className="relative aspect-[16/9] bg-muted">
-        {event.cover_image_url ? (
-          <img src={event.cover_image_url} alt={event.name} className="h-full w-full object-cover" loading="lazy" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-accent/20">
-            <span className="text-5xl">{categoryEmojis[event.category] || '🎉'}</span>
-          </div>
-        )}
-      </div>
-      <div className="p-4 space-y-2.5">
-        <h3 className="font-display text-lg font-bold text-foreground line-clamp-1">{event.name}</h3>
-        {pendingNote && (
-          <p className="text-xs text-primary flex items-center gap-1">
-            <Hourglass weight="regular" className="h-3 w-3 animate-pulse" /> Ausstehend — warte auf Bestätigung
-          </p>
-        )}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <MapPin weight="regular" className="h-4 w-4 shrink-0" />
-          <span className="line-clamp-1">{event.location_name || event.city || 'Unbekannt'}</span>
-        </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <CalendarBlank weight="regular" className="h-4 w-4 shrink-0" />
-          <span>{dateLabel}</span>
-        </div>
-        <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-muted-foreground pt-1">
-          <span className="flex items-center gap-1.5">
-            <Clock weight="regular" className="h-4 w-4" />
-            {format(starts, 'HH:mm')} Uhr
-          </span>
-          <span className="flex items-center gap-1.5">
-            <CurrencyEur weight="regular" className="h-4 w-4" />
-            {event.is_free ? 'Frei' : `€${event.entry_price ?? '–'}`}
-          </span>
-          {firstGenre && (
-            <span className="flex items-center gap-1.5">
-              <MusicNote weight="regular" className="h-4 w-4" />
-              {firstGenre}
-            </span>
-          )}
-        </div>
-        <EventSocialContext eventId={event.id} />
-        <div className="pt-1" onClick={(e) => e.stopPropagation()}>
-          <RsvpButtons eventId={event.id} surface="events" />
-        </div>
-      </div>
-
-    </article>
-  );
-}
-
 function EventListSkeleton() {
   return (
     <div className="space-y-4">
       {[...Array(3)].map((_, i) => (
-        <div key={i} className="rounded-2xl overflow-hidden border border-border/60">
-          <Skeleton className="aspect-[16/9] w-full" />
-          <div className="p-4 space-y-2">
-            <Skeleton className="h-5 w-2/3" />
-            <Skeleton className="h-4 w-1/2" />
-            <Skeleton className="h-4 w-1/3" />
-          </div>
-        </div>
+        <Skeleton key={i} className="aspect-[16/9] w-full rounded-[28px]" />
       ))}
     </div>
   );
@@ -608,15 +589,15 @@ interface EmptyStateProps { title: string; description: string; onAction?: () =>
 
 function EmptyState({ title, description, onAction, actionLabel, onSecondaryAction, secondaryLabel }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-muted/60">
-        <Confetti weight="regular" className="h-10 w-10 text-muted-foreground" />
+    <div className="flex flex-col items-center justify-center rounded-3xl bg-[#FBEBDD]/70 px-6 py-12 text-center dark:bg-primary/10" data-testid="events-empty">
+      <div className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-background/70">
+        <Confetti weight="duotone" className="h-10 w-10 text-primary" />
       </div>
-      <h2 className="mb-2 text-lg font-semibold">{title}</h2>
+      <h2 className="mb-2 text-lg font-bold">{title}</h2>
       <p className="mb-6 max-w-xs text-sm text-muted-foreground">{description}</p>
       <div className="flex flex-wrap justify-center gap-2">
-        {onAction && actionLabel && <Button onClick={onAction} variant="outline">{actionLabel}</Button>}
-        {onSecondaryAction && secondaryLabel && <Button onClick={onSecondaryAction}>{secondaryLabel}</Button>}
+        {onAction && actionLabel && <Button onClick={onAction} className="rounded-full px-6">{actionLabel}</Button>}
+        {onSecondaryAction && secondaryLabel && <Button onClick={onSecondaryAction} variant="outline" className="rounded-full px-6">{secondaryLabel}</Button>}
       </div>
     </div>
   );
