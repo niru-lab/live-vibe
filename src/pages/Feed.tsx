@@ -24,6 +24,7 @@ import { FirstPostRescueCard } from '@/components/feed/FirstPostRescueCard';
 import { useEngagementNudge, ENGAGEMENT_DISMISS_KEY } from '@/hooks/useEngagementNudge';
 import { EngagementNudgeCard } from '@/components/feed/EngagementNudgeCard';
 import { FeedDealsStrip } from '@/components/feed/FeedDealsStrip';
+import { OpenReviewsCard } from '@/components/reviews/OpenReviewsCard';
 
 export default function Feed() {
   const { user, loading: authLoading } = useAuth();
@@ -118,6 +119,7 @@ export default function Feed() {
             </span>
           </div>
         )}
+        {!venueFilter && <OpenReviewsCard className="mb-4" />}
         {!venueFilter && <FeedDealsStrip />}
         {!venueFilter && (
           <div className="mb-3 flex gap-2" role="tablist" aria-label="Feed-Filter">

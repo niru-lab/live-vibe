@@ -15,6 +15,7 @@ import { DealWallet } from '@/components/offers/DealWallet';
 import { VenueDealsList } from '@/components/offers/VenueDealsList';
 import { useVenueByOwner, useVenueDeals } from '@/hooks/useVenueOffers';
 import { useOpenDealsCount, useScanVenues } from '@/hooks/useDealWallet';
+import { OpenReviewsCard } from '@/components/reviews/OpenReviewsCard';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -122,6 +123,7 @@ export default function Profile() {
               <ArrowRight weight="bold" className="h-4 w-4 text-muted-foreground" />
             </button>
           )}
+          {!isVenue && <OpenReviewsCard className="mb-4" />}
           {staffVenues.length > 0 && (
             <button
               type="button"

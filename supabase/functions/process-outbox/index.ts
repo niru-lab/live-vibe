@@ -47,6 +47,9 @@ Deno.serve(async (req) => {
           case 'offer_published':
             await handleBellDeal(supabase, evt.payload);
             break;
+          case 'review_digest':
+            await handleReviewDigest(supabase, evt.payload);
+            break;
           case 'like_added':
             await handleLikeAdded(supabase, evt.payload);
             break;
@@ -375,4 +378,24 @@ async function handleBellDeal(supabase: any, payload: any) {
       url: `/venues/${r.venue_id}`,
     }),
   );
+}
+
+// ── REVIEWS ───────────────────────────────────────────────
+// One bundled push per person (the digest job already groups all open venues of a night).
+async function handleReviewDigest(supabase: any, payload: any) {
+  if (!PUSH_TRIGGERS.review_digest) return;
+  const { profile_id, count, is_reminder } = payload;
+  const n = Number(count) || 1;
+  const title = is_reminder
+    ? `Noch ${n} Bewertung${n === 1 ? '' : 'en'} offen ⭐`
+    : n === 1 ? 'Wie war dein Abend? 🌙' : `Du warst in ${n} Spots 🌙 Wie war's?`;
+  await sendPush(supabase, {
+    profileId: profile_id,
+    category: 'lifecycle',
+    triggerKey: 'review_digest',
+    dedupeKey: `review-digest:${profile_id}:${new Date().toISOString().slice(0, 10)}:${is_reminder ? 'r' : 'n'}`,
+    title,
+    body: `Bewerte deine Spots und hol dir bis zu ${n * 8 + 5} Punkte.`,
+    url: '/reviews',
+  });
 }

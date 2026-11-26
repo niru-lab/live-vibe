@@ -27,6 +27,7 @@ export const PUSH_CAPS = {
 export const PUSH_TRIGGERS = {
   comment_on_your_post: true,
   bell_new_post: true,
+  review_digest: true,
   bell_new_deal: true,
   event_starts_soon: true,
   new_message: true,

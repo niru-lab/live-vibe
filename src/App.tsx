@@ -52,6 +52,7 @@ import KontoLoeschen from "./pages/legal/KontoLoeschen";
 import BlockedUsers from "./pages/BlockedUsers";
 import Cards from "./pages/Cards";
 import Deals from "./pages/Deals";
+import Reviews from "./pages/Reviews";
 import ScanDeals from "./pages/ScanDeals";
 
 const queryClient = new QueryClient({
@@ -120,6 +121,7 @@ const App = () => (
                     <Route path="/messages" element={<Messages />} />
                     <Route path="/cards" element={<Cards />} />
                     <Route path="/deals" element={<Deals />} />
+                    <Route path="/reviews" element={<Reviews />} />
                     <Route path="/scan" element={<ScanDeals />} />
                     <Route path="/cards/received" element={<Cards />} />
                     <Route path="/roomz" element={<Roomz />} />

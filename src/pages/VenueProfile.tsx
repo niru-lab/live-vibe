@@ -10,6 +10,7 @@ import { VenueProfileFallback } from '@/components/maps/VenueProfileFallback';
 import { useRsvpCounts } from '@/hooks/useEventAttendees';
 import { track } from '@/lib/analytics';
 import { VenueDealsList } from '@/components/offers/VenueDealsList';
+import { VenueRatingBadge, VenueReviewsPanel } from '@/components/reviews/VenueRating';
 import { BellButton } from '@/components/profile/BellButton';
 import { ArrowLeft, MapPin } from 'lucide-react';
 
@@ -77,6 +78,7 @@ export default function VenueProfile() {
               <h1 className="text-xl font-semibold text-foreground">{venue.name}{venue.is_verified && <VerifiedBadge className="ml-1.5" />}</h1>
               <BellButton targetProfileId={venue.owner_profile_id} targetName={venue.name} isVenue className="shrink-0" />
             </div>
+            <VenueRatingBadge venueId={venue.id} onClick={() => document.getElementById('venue-reviews')?.scrollIntoView({ behavior: 'smooth' })} />
             <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
               <MapPin className="h-3 w-3" />
               {[venue.address, venue.city].filter(Boolean).join(', ') || venue.category}
@@ -92,6 +94,11 @@ export default function VenueProfile() {
             <section className="mt-5" aria-label="Deals">
               <h2 className="mb-2 text-sm font-semibold text-foreground">Deals</h2>
               <VenueDealsList venueId={venue.id} venueName={venue.name} />
+            </section>
+
+            <section className="mt-6" aria-label="Bewertungen" id="venue-reviews">
+              <h2 className="mb-2 text-sm font-semibold text-foreground">Bewertungen</h2>
+              <VenueReviewsPanel venueId={venue.id} />
             </section>
 
             {event && (

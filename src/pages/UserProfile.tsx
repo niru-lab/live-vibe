@@ -1,5 +1,6 @@
 import { BellButton } from '@/components/profile/BellButton';
 import { VenueDealsList } from '@/components/offers/VenueDealsList';
+import { VenueRatingBadge, VenueReviewsPanel } from '@/components/reviews/VenueRating';
 import { useVenueByOwner, useVenueDeals } from '@/hooks/useVenueOffers';
 import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -57,7 +58,7 @@ export default function UserProfile() {
   const isVenueAccount = profile?.role === 'venue_owner';
   const { data: ownerVenue } = useVenueByOwner(profile?.id, isVenueAccount);
   const { data: venueDeals } = useVenueDeals(isVenueAccount ? ownerVenue?.id : undefined);
-  const [section, setSection] = useState<'posts' | 'deals'>('posts');
+  const [section, setSection] = useState<'posts' | 'deals' | 'reviews'>('posts');
   const toggleFollow = useToggleFollow();
   const { isBlocked, ready: blockReady } = useIsBlockedEitherWay(profile?.id);
 
@@ -155,6 +156,7 @@ export default function UserProfile() {
               </Avatar>
               <p className="mt-3 text-base font-bold text-foreground">{profile.display_name}</p>
               <p data-testid="profile-username" className="text-sm text-muted-foreground">@{profile.username}</p>
+              {isVenueAccount && ownerVenue?.id && <VenueRatingBadge venueId={ownerVenue.id} onClick={() => setSection('reviews')} />}
               {profile.bio && <p className="mt-3 text-xs max-w-xs leading-relaxed text-muted-foreground">{profile.bio}</p>}
 
               <div className={`mt-5 grid w-full ${isVenueAccount ? 'grid-cols-4 max-w-[340px]' : 'grid-cols-3 max-w-[280px]'}`}>
@@ -203,17 +205,19 @@ export default function UserProfile() {
 
           {isVenueAccount && (
             <div className="mb-3 flex gap-1 rounded-full bg-muted/50 p-1" role="tablist">
-              {(['posts', 'deals'] as const).map((k) => (
+              {(['posts', 'deals', 'reviews'] as const).map((k) => (
                 <button key={k} type="button" role="tab" aria-selected={section === k} onClick={() => setSection(k)}
-                  data-testid={k === 'deals' ? 'profile-deals-tab' : undefined}
+                  data-testid={k === 'deals' ? 'profile-deals-tab' : k === 'reviews' ? 'profile-reviews-tab' : undefined}
                   className={`flex-1 rounded-full py-1.5 text-sm transition ${section === k ? 'bg-background font-semibold text-foreground shadow' : 'text-muted-foreground'}`}>
-                  {k === 'posts' ? 'Beiträge' : `Deals${venueDeals?.length ? ` (${venueDeals.length})` : ''}`}
+                  {k === 'posts' ? 'Beiträge' : k === 'deals' ? `Deals${venueDeals?.length ? ` (${venueDeals.length})` : ''}` : 'Bewertungen'}
                 </button>
               ))}
             </div>
           )}
 
-          {isVenueAccount && section === 'deals' ? (
+          {isVenueAccount && section === 'reviews' ? (
+            <VenueReviewsPanel venueId={ownerVenue?.id} />
+          ) : isVenueAccount && section === 'deals' ? (
             <VenueDealsList venueId={ownerVenue?.id} venueName={ownerVenue?.name} />
           ) : (
           /* Posts grid */
