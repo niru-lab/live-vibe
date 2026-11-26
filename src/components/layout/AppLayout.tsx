@@ -1,6 +1,5 @@
 import { ReactNode } from 'react';
 import { BottomNav } from './BottomNav';
-import AppTour from '@/components/onboarding/AppTour';
 
 interface AppLayoutProps {
   children: ReactNode;
@@ -19,7 +18,6 @@ export const AppLayout = ({ children, hideNav = false }: AppLayoutProps) => {
         {children}
       </main>
       {!hideNav && <BottomNav />}
-      <AppTour />
     </div>
   );
 };

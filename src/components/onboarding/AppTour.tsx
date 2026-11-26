@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { setTourActive } from '@/lib/tourState';
 
 type Role = 'guest' | 'venue_owner';
 
@@ -92,6 +93,14 @@ const VENUE_STEPS: TourStep[] = [
 const SESSION_DISMISS_KEY = 'feyrn_app_tour_dismissed_session';
 const SESSION_STEP_KEY = 'feyrn_app_tour_step';
 
+/** The tour only starts on the main tabs — never during sign-up, onboarding or on legal pages. */
+const TOUR_START_PATHS = ['/feed', '/discover', '/events', '/profile'];
+
+/**
+ * Mounted ONCE in App (inside the router), not per page: the tour navigates between
+ * tabs, and a per-page instance was destroyed on every step that changed the route —
+ * without sessionStorage (e.g. preview iframes) it then restarted at step 1.
+ */
 export default function AppTour() {
   const { user, loading } = useAuth();
   const location = useLocation();
@@ -104,34 +113,39 @@ export default function AppTour() {
   const bootedFor = useRef<string | null>(null);
   const cardRef = useRef<HTMLDivElement | null>(null);
 
-  // Boot: decide once per signed-in user whether the tour should run
+  const userId = user?.id;
+  const onStartPath = TOUR_START_PATHS.some((p) => location.pathname === p || location.pathname.startsWith(`${p}/`));
+
+  // Boot: decide once per signed-in user whether the tour should run.
+  // Keyed on the user id (not the user object, which changes on token refresh),
+  // and a cancelled boot is retried instead of being skipped forever.
   useEffect(() => {
-    if (loading || !user) return;
-    if (bootedFor.current === user.id) return;
-    bootedFor.current = user.id;
+    if (loading || !userId || !onStartPath) return;
+    if (bootedFor.current === userId) return;
+    bootedFor.current = userId;
 
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('role, onboarding_complete, app_tour_completed_at')
-        .eq('user_id', user.id)
+        .eq('user_id', userId)
         .maybeSingle();
-      if (cancelled || !data) return;
-      if (!data.onboarding_complete) return;
+      if (cancelled) { bootedFor.current = null; return; }
+      if (error || !data) { bootedFor.current = null; return; }
+      if (!data.onboarding_complete) { bootedFor.current = null; return; } // check again after onboarding
       if (data.app_tour_completed_at) return;
-      // Isolated, non-authoritative guard against re-mount flicker within a session
-      if (sessionStorage.getItem(SESSION_DISMISS_KEY) === user.id) return;
+      // Non-authoritative guard for this browser session (the DB flag is the real one)
+      try { if (sessionStorage.getItem(SESSION_DISMISS_KEY) === userId) return; } catch { /* storage blocked */ }
 
       setRole(data.role === 'venue_owner' ? 'venue_owner' : 'guest');
-      // Resume at the saved step if the tour remounts mid-run (e.g. route change)
       let savedStep = 0;
       try {
-        const raw = sessionStorage.getItem(`${SESSION_STEP_KEY}:${user.id}`);
+        const raw = sessionStorage.getItem(`${SESSION_STEP_KEY}:${userId}`);
         const parsed = raw ? parseInt(raw, 10) : 0;
         if (Number.isFinite(parsed) && parsed > 0) savedStep = parsed;
       } catch {
-        /* noop */
+        /* storage blocked — in-memory state is enough now that the tour is mounted once */
       }
       setStep(savedStep);
       setTimeout(() => {
@@ -142,10 +156,20 @@ export default function AppTour() {
     return () => {
       cancelled = true;
     };
-  }, [user, loading]);
+  }, [userId, loading, onStartPath]);
+
+  // Signed out → forget, so the next account is checked again.
+  useEffect(() => {
+    if (!userId) { bootedFor.current = null; setActive(false); }
+  }, [userId]);
+
+  useEffect(() => {
+    setTourActive(active);
+    return () => setTourActive(false);
+  }, [active]);
 
   const steps = role === 'venue_owner' ? VENUE_STEPS : GUEST_STEPS;
-  const current = steps[step];
+  const current = steps[Math.min(step, steps.length - 1)];
 
   // Measure spotlight target; degrade gracefully to a centered card if missing
   useLayoutEffect(() => {
