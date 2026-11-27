@@ -1,7 +1,13 @@
-import { ShieldCheck, Star } from '@phosphor-icons/react';
+import { useState } from 'react';
+import { ArrowBendDownRight, Flag, ShieldCheck, Star } from '@phosphor-icons/react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useVenueRating, useVenueReviews } from '@/hooks/useReviews';
+import { Textarea } from '@/components/ui/textarea';
+import { ReportDialog } from '@/components/moderation/ReportDialog';
+import { useProfile } from '@/hooks/useProfile';
+import { useToast } from '@/hooks/use-toast';
+import { useReplyToReview, useVenueRating, useVenueReviews, type PublicReview } from '@/hooks/useReviews';
 import {
   MIN_REVIEWS_FOR_AVERAGE, PROOF_LABELS, REVIEW_CATEGORIES, distributionShares, formatRating, nightLabel,
 } from '@/lib/reviews';
@@ -30,7 +36,103 @@ export const VenueRatingBadge = ({ venueId, onClick }: { venueId: string | null 
 };
 
 /** "Bewertungen" tab: overall score, category bars, distribution, latest reviews, disclosure. Public. */
-export const VenueReviewsPanel = ({ venueId }: { venueId: string | null | undefined }) => {
+const REPLY_MAX = 500;
+
+/** One review: header, text (or "hidden after reports"), venue reply, report + reply actions. */
+const ReviewCard = ({ review: r, venueId, venueName, myProfileId }: {
+  review: PublicReview; venueId: string; venueName?: string | null; myProfileId?: string | null;
+}) => {
+  const { toast } = useToast();
+  const reply = useReplyToReview(venueId);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(r.reply_text ?? '');
+  const proof = PROOF_LABELS[r.proof_type];
+  const canReport = !!myProfileId && myProfileId !== r.author_profile_id;
+
+  const save = (text: string) =>
+    reply.mutate({ reviewId: r.review_id, text }, {
+      onSuccess: () => { setEditing(false); toast({ title: text.trim() ? 'Antwort veröffentlicht' : 'Antwort gelöscht' }); },
+      onError: (e) => toast({ variant: 'destructive', title: 'Antwort fehlgeschlagen', description: (e as Error).message }),
+    });
+
+  return (
+    <article className="rounded-2xl border border-border/50 bg-card p-4" data-testid="venue-review">
+      <div className="flex items-center gap-2.5">
+        <Avatar className="h-8 w-8">
+          <AvatarImage src={r.author_avatar_url || ''} />
+          <AvatarFallback className="text-xs">{(r.author_display_name || r.author_username || '?').charAt(0)}</AvatarFallback>
+        </Avatar>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-semibold">{r.author_display_name || (r.author_username ? `@${r.author_username}` : 'Gast')}</p>
+          <p className="text-[11px] text-muted-foreground">
+            {nightLabel(r.night)}{proof ? ` · ${proof.emoji} ${proof.label}` : ''}
+          </p>
+        </div>
+        <StarDisplay value={r.rating_overall} size={13} />
+      </div>
+      {r.comment && <p className="mt-2.5 whitespace-pre-wrap text-sm text-foreground/90">{r.comment}</p>}
+      {r.comment_hidden && (
+        <p className="mt-2.5 text-xs italic text-muted-foreground" data-testid="review-text-hidden">
+          Text nach mehreren Meldungen ausgeblendet – wird geprüft. Die Sterne zählen weiter.
+        </p>
+      )}
+      <p className="mt-2 text-[11px] text-muted-foreground">
+        🎧 {r.rating_music} · 🙋 {r.rating_service} · 🍸 {r.rating_drinks} · ⏱️ {r.rating_wait}
+      </p>
+
+      {r.reply_text && !editing && (
+        <div className="mt-3 rounded-xl bg-muted/60 p-3" data-testid="review-reply">
+          <p className="flex items-center gap-1.5 text-xs font-semibold">
+            <ArrowBendDownRight className="h-3.5 w-3.5" /> Antwort von {venueName || 'der Venue'}
+          </p>
+          <p className="mt-1 whitespace-pre-wrap text-sm text-foreground/90">{r.reply_text}</p>
+        </div>
+      )}
+
+      {editing && (
+        <div className="mt-3 space-y-2" data-testid="review-reply-editor">
+          <Textarea
+            value={draft}
+            onChange={(e) => setDraft(e.target.value.slice(0, REPLY_MAX))}
+            rows={3}
+            placeholder="Sachlich antworten – z. B. bedanken oder erklären, was ihr verbessert."
+            autoFocus
+          />
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] text-muted-foreground">{draft.length}/{REPLY_MAX} · öffentlich sichtbar</span>
+            <div className="flex gap-2">
+              {r.reply_text && (
+                <Button size="sm" variant="ghost" disabled={reply.isPending} onClick={() => save('')}>Löschen</Button>
+              )}
+              <Button size="sm" variant="ghost" disabled={reply.isPending} onClick={() => { setEditing(false); setDraft(r.reply_text ?? ''); }}>Abbrechen</Button>
+              <Button size="sm" disabled={reply.isPending || !draft.trim()} onClick={() => save(draft)}>Veröffentlichen</Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {(r.can_reply || canReport) && !editing && (
+        <div className="mt-2 flex justify-end gap-3 text-xs text-muted-foreground">
+          {r.can_reply && (
+            <button type="button" className="font-semibold text-primary" onClick={() => setEditing(true)} data-testid="review-reply-button">
+              {r.reply_text ? 'Antwort bearbeiten' : 'Antworten'}
+            </button>
+          )}
+          {canReport && (
+            <button type="button" className="flex items-center gap-1" onClick={() => setReportOpen(true)} data-testid="review-report-button">
+              <Flag className="h-3.5 w-3.5" /> Melden
+            </button>
+          )}
+        </div>
+      )}
+      {canReport && <ReportDialog open={reportOpen} onOpenChange={setReportOpen} targetType="review" targetId={r.review_id} />}
+    </article>
+  );
+};
+
+export const VenueReviewsPanel = ({ venueId, venueName }: { venueId: string | null | undefined; venueName?: string | null }) => {
+  const { data: me } = useProfile();
   const { data: summary, isLoading } = useVenueRating(venueId);
   const { data: reviews = [] } = useVenueReviews(venueId);
   if (isLoading) return <Skeleton className="h-48 w-full rounded-3xl" />;
@@ -96,36 +198,16 @@ export const VenueReviewsPanel = ({ venueId }: { venueId: string | null | undefi
 
       {reviews.length > 0 && (
         <div className="space-y-3">
-          {reviews.map((r) => {
-            const proof = PROOF_LABELS[r.proof_type];
-            return (
-              <article key={r.review_id} className="rounded-2xl border border-border/50 bg-card p-4" data-testid="venue-review">
-                <div className="flex items-center gap-2.5">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={r.author_avatar_url || ''} />
-                    <AvatarFallback className="text-xs">{(r.author_display_name || r.author_username || '?').charAt(0)}</AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{r.author_display_name || (r.author_username ? `@${r.author_username}` : 'Gast')}</p>
-                    <p className="text-[11px] text-muted-foreground">
-                      {nightLabel(r.night)}{proof ? ` · ${proof.emoji} ${proof.label}` : ''}
-                    </p>
-                  </div>
-                  <StarDisplay value={r.rating_overall} size={13} />
-                </div>
-                {r.comment && <p className="mt-2.5 whitespace-pre-wrap text-sm text-foreground/90">{r.comment}</p>}
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  🎧 {r.rating_music} · 🙋 {r.rating_service} · 🍸 {r.rating_drinks} · ⏱️ {r.rating_wait}
-                </p>
-              </article>
-            );
-          })}
+          {reviews.map((r) => (
+            <ReviewCard key={r.review_id} review={r} venueId={venueId!} venueName={venueName} myProfileId={me?.id} />
+          ))}
         </div>
       )}
 
       <p className="px-2 text-center text-[11px] leading-relaxed text-muted-foreground">
         Bewerten können nur Gäste mit nachgewiesenem Besuch (Deal eingelöst, vor Ort gepostet oder vor Ort gewesen) – keine Venues, keine Mitarbeiter.
         Für jede Bewertung gibt es Social-Cloud-Punkte, unabhängig von der Note. Neuere Bewertungen zählen stärker.
+        Venues können öffentlich antworten, aber keine Bewertung löschen – das entscheidet nur unser Team nach einer Meldung.
       </p>
     </div>
   );

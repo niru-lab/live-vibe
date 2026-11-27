@@ -79,6 +79,7 @@ export function notificationHref(n: {
 }): string {
   if (n.type === 'follow' && n.actor?.username) return `/profile/${n.actor.username}`;
   if (n.ref_type === 'reviews') return '/reviews';
+  if (n.type === 'review_reply' && n.ref_id) return `/venues/${n.ref_id}#venue-reviews`;
   if (n.ref_type === 'venue' && n.ref_id) return `/venues/${n.ref_id}`;
   if (n.type === 'bell_post' && n.ref_id) return `/feed?post=${n.ref_id}`;
   if (n.ref_type === 'event' && n.ref_id) return `/events/${n.ref_id}`;

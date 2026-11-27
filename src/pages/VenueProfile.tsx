@@ -1,6 +1,6 @@
 import { VerifiedBadge } from '@/components/venue/VerifiedBadge';
 import { useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -17,6 +17,7 @@ import { ArrowLeft, MapPin } from 'lucide-react';
 export default function VenueProfile() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { hash } = useLocation();
 
   const { state: profileState, profile, isClaimed, refetch } = useVenueProfile(id);
   const venue = profile as
@@ -38,6 +39,14 @@ export default function VenueProfile() {
   const otherEvents = allRelevantEvents.slice(1);
   const { data: posts, isLoading: postsLoading } = useVenueLinkedPosts(id, event?.id ?? null, 30);
   const { data: counts } = useRsvpCounts(allRelevantEvents.map((e) => e.id));
+
+  // Deep link from "Venue hat auf deine Bewertung geantwortet" → jump to the reviews section.
+  const venueLoaded = !!venue?.id;
+  useEffect(() => {
+    if (hash !== '#venue-reviews' || !venueLoaded) return;
+    const t = window.setTimeout(() => document.getElementById('venue-reviews')?.scrollIntoView({ behavior: 'smooth' }), 300);
+    return () => window.clearTimeout(t);
+  }, [hash, venueLoaded]);
 
   useEffect(() => {
     if (venue?.id) track('venue_profile_opened_from_map', { venueId: venue.id, surface: 'venue_profile' });
@@ -98,7 +107,7 @@ export default function VenueProfile() {
 
             <section className="mt-6" aria-label="Bewertungen" id="venue-reviews">
               <h2 className="mb-2 text-sm font-semibold text-foreground">Bewertungen</h2>
-              <VenueReviewsPanel venueId={venue.id} />
+              <VenueReviewsPanel venueId={venue.id} venueName={venue.name} />
             </section>
 
             {event && (

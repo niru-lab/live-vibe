@@ -216,7 +216,7 @@ export default function UserProfile() {
           )}
 
           {isVenueAccount && section === 'reviews' ? (
-            <VenueReviewsPanel venueId={ownerVenue?.id} />
+            <VenueReviewsPanel venueId={ownerVenue?.id} venueName={ownerVenue?.name} />
           ) : isVenueAccount && section === 'deals' ? (
             <VenueDealsList venueId={ownerVenue?.id} venueName={ownerVenue?.name} />
           ) : (

@@ -5,7 +5,7 @@ import type { Database } from '@/integrations/supabase/types';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ReviewRatings } from '@/lib/reviews';
 
-// Contract of drizzle/migrations/0008_venue_reviews.sql. Keep generated types untouched.
+// Contract of drizzle/migrations/0008_venue_reviews.sql + 0009_review_reports_replies.sql. Keep generated types untouched.
 export type OpenReview = {
   invitation_id: string; venue_id: string; venue_name: string;
   venue_image_url: string | null; night: string; proof_type: string; expires_at: string;
@@ -17,10 +17,17 @@ export type RatingSummary = {
 };
 export type PublicReview = {
   review_id: string; rating_overall: number; rating_music: number; rating_service: number;
-  rating_drinks: number; rating_wait: number; comment: string | null; proof_type: string;
-  night: string; created_at: string; author_username: string;
+  rating_drinks: number; rating_wait: number; comment: string | null; comment_hidden: boolean; proof_type: string;
+  night: string; created_at: string; author_profile_id: string; author_username: string;
   author_display_name: string | null; author_avatar_url: string | null;
+  reply_text: string | null; reply_at: string | null; can_reply: boolean;
 };
+export type AdminReview = {
+  review_id: string; venue_id: string; venue_name: string; author_username: string; rating_overall: number;
+  comment: string | null; comment_hidden: boolean; reply_text: string | null; status: string;
+  guest_reports: number; venue_reports: number; created_at: string;
+};
+export type ReviewModerationAction = 'remove' | 'hide_text' | 'keep';
 type ReviewFunctions = {
   my_open_reviews: { Args: Record<PropertyKey, never>; Returns: OpenReview[] };
   venue_rating_summary: { Args: { _venue_id: string }; Returns: RatingSummary[] };
@@ -30,6 +37,9 @@ type ReviewFunctions = {
     Returns: { review_id: string; points: number; night_bonus: number }[];
   };
   skip_venue_review: { Args: { _invitation_id: string }; Returns: number };
+  reply_to_review: { Args: { _review_id: string; _text: string | null }; Returns: undefined };
+  admin_reviews_by_ids: { Args: { _ids: string[] }; Returns: AdminReview[] };
+  admin_moderate_review: { Args: { _review_id: string; _action: string; _reason?: string | null }; Returns: undefined };
 };
 type ReviewDatabase = Omit<Database, 'public'> & {
   public: Omit<Database['public'], 'Functions'> & {
@@ -118,3 +128,41 @@ export const useVenueReviews = (venueId: string | null | undefined, limit = 20) 
       return data ?? [];
     },
   });
+
+/** Venue owner/members reply publicly (once, editable; empty text deletes). Bar staff can't. */
+export const useReplyToReview = (venueId: string | null | undefined) => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ reviewId, text }: { reviewId: string; text: string }) => {
+      const { error } = await reviewClient.rpc('reply_to_review', { _review_id: reviewId, _text: text.trim() || null });
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['venue-reviews', venueId] }),
+  });
+};
+
+/** Admin: reported reviews with guest/venue report counts. */
+export const useAdminReviews = (ids: string[]) =>
+  useQuery({
+    queryKey: ['admin-reviews', ids],
+    enabled: ids.length > 0,
+    queryFn: async (): Promise<AdminReview[]> => {
+      const { data, error } = await reviewClient.rpc('admin_reviews_by_ids', { _ids: ids });
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+export const useModerateReview = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ reviewId, action, reason }: { reviewId: string; action: ReviewModerationAction; reason?: string }) => {
+      const { error } = await reviewClient.rpc('admin_moderate_review', { _review_id: reviewId, _action: action, _reason: reason ?? null });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['admin-reports'] });
+      qc.invalidateQueries({ queryKey: ['admin-reviews'] });
+    },
+  });
+};
