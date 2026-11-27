@@ -3103,65 +3103,6 @@ export type Database = {
       }
     }
     Functions: {
-      my_open_reviews: {
-        Args: never
-        Returns: {
-          expires_at: string
-          invitation_id: string
-          night: string
-          proof_type: string
-          venue_id: string
-          venue_image_url: string | null
-          venue_name: string
-        }[]
-      }
-      skip_venue_review: { Args: { _invitation_id: string }; Returns: number }
-      submit_venue_review: {
-        Args: {
-          _comment?: string | null
-          _drinks: number
-          _invitation_id: string
-          _music: number
-          _overall: number
-          _service: number
-          _wait: number
-        }
-        Returns: { night_bonus: number; points: number; review_id: string }[]
-      }
-      venue_rating_summary: {
-        Args: { _venue_id: string }
-        Returns: {
-          avg_drinks: number | null
-          avg_music: number | null
-          avg_overall: number | null
-          avg_service: number | null
-          avg_wait: number | null
-          dist_1: number
-          dist_2: number
-          dist_3: number
-          dist_4: number
-          dist_5: number
-          review_count: number
-        }[]
-      }
-      venue_reviews_list: {
-        Args: { _before?: string | null; _limit?: number; _venue_id: string }
-        Returns: {
-          author_avatar_url: string | null
-          author_display_name: string | null
-          author_username: string | null
-          comment: string | null
-          created_at: string
-          night: string
-          proof_type: string
-          rating_drinks: number
-          rating_music: number
-          rating_overall: number
-          rating_service: number
-          rating_wait: number
-          review_id: string
-        }[]
-      }
       accept_staff_invite: {
         Args: { _code: string }
         Returns: {
@@ -3619,7 +3560,6 @@ export type Database = {
         | "event_declined"
         | "bell_post"
         | "bell_deal"
-        | "review_request"
       outbox_status: "pending" | "processing" | "done" | "failed"
       post_type: "normal" | "moment_x"
       profile_type: "user" | "club" | "organizer" | "eventer"
@@ -3795,7 +3735,6 @@ export const Constants = {
         "event_declined",
         "bell_post",
         "bell_deal",
-        "review_request",
       ],
       outbox_status: ["pending", "processing", "done", "failed"],
       post_type: ["normal", "moment_x"],
