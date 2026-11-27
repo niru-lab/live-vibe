@@ -2,12 +2,41 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useProfile } from '@/hooks/useProfile';
 import type { Database } from '@/integrations/supabase/types';
+import type { SupabaseClient } from '@supabase/supabase-js';
 import type { ReviewRatings } from '@/lib/reviews';
 
-type Fns = Database['public']['Functions'];
-export type OpenReview = Fns['my_open_reviews']['Returns'][number];
-export type RatingSummary = Fns['venue_rating_summary']['Returns'][number];
-export type PublicReview = Fns['venue_reviews_list']['Returns'][number];
+// Contract of drizzle/migrations/0008_venue_reviews.sql. Keep generated types untouched.
+export type OpenReview = {
+  invitation_id: string; venue_id: string; venue_name: string;
+  venue_image_url: string | null; night: string; proof_type: string; expires_at: string;
+};
+export type RatingSummary = {
+  review_count: number; avg_overall: number | null; avg_music: number | null;
+  avg_service: number | null; avg_drinks: number | null; avg_wait: number | null;
+  dist_1: number; dist_2: number; dist_3: number; dist_4: number; dist_5: number;
+};
+export type PublicReview = {
+  review_id: string; rating_overall: number; rating_music: number; rating_service: number;
+  rating_drinks: number; rating_wait: number; comment: string | null; proof_type: string;
+  night: string; created_at: string; author_username: string;
+  author_display_name: string | null; author_avatar_url: string | null;
+};
+type ReviewFunctions = {
+  my_open_reviews: { Args: Record<PropertyKey, never>; Returns: OpenReview[] };
+  venue_rating_summary: { Args: { _venue_id: string }; Returns: RatingSummary[] };
+  venue_reviews_list: { Args: { _venue_id: string; _limit?: number; _before?: string }; Returns: PublicReview[] };
+  submit_venue_review: {
+    Args: { _invitation_id: string; _overall: number; _music: number; _service: number; _drinks: number; _wait: number; _comment?: string | null };
+    Returns: { review_id: string; points: number; night_bonus: number }[];
+  };
+  skip_venue_review: { Args: { _invitation_id: string }; Returns: number };
+};
+type ReviewDatabase = Omit<Database, 'public'> & {
+  public: Omit<Database['public'], 'Functions'> & {
+    Functions: Database['public']['Functions'] & ReviewFunctions;
+  };
+};
+const reviewClient = supabase as SupabaseClient<ReviewDatabase>;
 
 /** The user's open review invitations (proven visits, open 7 days). Server-side, so they survive reinstalls. */
 export const useOpenReviews = () => {
@@ -17,7 +46,7 @@ export const useOpenReviews = () => {
     enabled: !!profile?.id && profile.role !== 'venue_owner',
     staleTime: 60_000,
     queryFn: async (): Promise<OpenReview[]> => {
-      const { data, error } = await supabase.rpc('my_open_reviews');
+      const { data, error } = await reviewClient.rpc('my_open_reviews');
       if (error) throw error;
       return data ?? [];
     },
@@ -35,7 +64,7 @@ export const useSubmitReview = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async ({ invitationId, ratings, comment }: { invitationId: string; ratings: ReviewRatings; comment: string }) => {
-      const { data, error } = await supabase.rpc('submit_venue_review', {
+      const { data, error } = await reviewClient.rpc('submit_venue_review', {
         _invitation_id: invitationId,
         _overall: ratings.overall,
         _music: ratings.music,
@@ -56,7 +85,7 @@ export const useSkipReview = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (invitationId: string) => {
-      const { data, error } = await supabase.rpc('skip_venue_review', { _invitation_id: invitationId });
+      const { data, error } = await reviewClient.rpc('skip_venue_review', { _invitation_id: invitationId });
       if (error) throw error;
       return { nightBonus: Number(data ?? 0) };
     },
@@ -70,7 +99,8 @@ export const useVenueRating = (venueId: string | null | undefined) =>
     enabled: !!venueId,
     staleTime: 5 * 60_000,
     queryFn: async (): Promise<RatingSummary | null> => {
-      const { data, error } = await supabase.rpc('venue_rating_summary', { _venue_id: venueId! });
+      if (!venueId) return null;
+      const { data, error } = await reviewClient.rpc('venue_rating_summary', { _venue_id: venueId });
       if (error) throw error;
       return (Array.isArray(data) ? data[0] : data) ?? null;
     },
@@ -82,7 +112,8 @@ export const useVenueReviews = (venueId: string | null | undefined, limit = 20) 
     enabled: !!venueId,
     staleTime: 60_000,
     queryFn: async (): Promise<PublicReview[]> => {
-      const { data, error } = await supabase.rpc('venue_reviews_list', { _venue_id: venueId!, _limit: limit });
+      if (!venueId) return [];
+      const { data, error } = await reviewClient.rpc('venue_reviews_list', { _venue_id: venueId, _limit: limit });
       if (error) throw error;
       return data ?? [];
     },
