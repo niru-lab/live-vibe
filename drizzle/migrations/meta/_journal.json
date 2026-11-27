@@ -71,6 +71,13 @@
       "when": 1795815333881,
       "tag": "0009_review_reports_replies",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1795816579868,
+      "tag": "0010_apply_pending_reviews",
+      "breakpoints": true
     }
   ]
 }

@@ -2193,6 +2193,67 @@ export type Database = {
           },
         ]
       }
+      review_invitations: {
+        Row: {
+          created_at: string
+          digest_sent_at: string | null
+          expires_at: string
+          id: string
+          night: string
+          profile_id: string
+          proof_type: string
+          reminded_at: string | null
+          status: string
+          venue_id: string
+        }
+        Insert: {
+          created_at?: string
+          digest_sent_at?: string | null
+          expires_at?: string
+          id?: string
+          night: string
+          profile_id: string
+          proof_type: string
+          reminded_at?: string | null
+          status?: string
+          venue_id: string
+        }
+        Update: {
+          created_at?: string
+          digest_sent_at?: string | null
+          expires_at?: string
+          id?: string
+          night?: string
+          profile_id?: string
+          proof_type?: string
+          reminded_at?: string | null
+          status?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_invitations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_invitations_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_invitations_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       room_members: {
         Row: {
           id: string
@@ -2836,6 +2897,118 @@ export type Database = {
           },
         ]
       }
+      venue_reviews: {
+        Row: {
+          comment: string | null
+          comment_hidden: boolean
+          created_at: string
+          id: string
+          invitation_id: string
+          night: string
+          points_awarded: number
+          profile_id: string
+          proof_type: string
+          rating_drinks: number
+          rating_music: number
+          rating_overall: number
+          rating_service: number
+          rating_wait: number
+          removed_reason: string | null
+          replied_by: string | null
+          reply_at: string | null
+          reply_text: string | null
+          status: string
+          venue_id: string
+        }
+        Insert: {
+          comment?: string | null
+          comment_hidden?: boolean
+          created_at?: string
+          id?: string
+          invitation_id: string
+          night: string
+          points_awarded?: number
+          profile_id: string
+          proof_type: string
+          rating_drinks: number
+          rating_music: number
+          rating_overall: number
+          rating_service: number
+          rating_wait: number
+          removed_reason?: string | null
+          replied_by?: string | null
+          reply_at?: string | null
+          reply_text?: string | null
+          status?: string
+          venue_id: string
+        }
+        Update: {
+          comment?: string | null
+          comment_hidden?: boolean
+          created_at?: string
+          id?: string
+          invitation_id?: string
+          night?: string
+          points_awarded?: number
+          profile_id?: string
+          proof_type?: string
+          rating_drinks?: number
+          rating_music?: number
+          rating_overall?: number
+          rating_service?: number
+          rating_wait?: number
+          removed_reason?: string | null
+          replied_by?: string | null
+          reply_at?: string | null
+          reply_text?: string | null
+          status?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "venue_reviews_invitation_id_fkey"
+            columns: ["invitation_id"]
+            isOneToOne: true
+            referencedRelation: "review_invitations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_reviews_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_reviews_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_reviews_replied_by_fkey"
+            columns: ["replied_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_reviews_replied_by_fkey"
+            columns: ["replied_by"]
+            isOneToOne: false
+            referencedRelation: "public_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "venue_reviews_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       venue_staff: {
         Row: {
           added_by: string | null
@@ -3134,12 +3307,37 @@ export type Database = {
         Args: { _post_id: string; _report_id?: string }
         Returns: undefined
       }
+      admin_moderate_review: {
+        Args: { _action: string; _reason?: string; _review_id: string }
+        Returns: undefined
+      }
+      admin_remove_review: {
+        Args: { _reason: string; _review_id: string }
+        Returns: undefined
+      }
       admin_resolve_report: {
         Args: {
           _report_id: string
           _status: Database["public"]["Enums"]["report_status"]
         }
         Returns: undefined
+      }
+      admin_reviews_by_ids: {
+        Args: { _ids: string[] }
+        Returns: {
+          author_username: string
+          comment: string
+          comment_hidden: boolean
+          created_at: string
+          guest_reports: number
+          rating_overall: number
+          reply_text: string
+          review_id: string
+          status: string
+          venue_id: string
+          venue_name: string
+          venue_reports: number
+        }[]
       }
       admin_set_venue_status: {
         Args: { _status: string; _venue_id: string }
@@ -3158,6 +3356,19 @@ export type Database = {
       assign_user_cards: {
         Args: { _assignment_version?: string }
         Returns: string
+      }
+      award_night_bonus: {
+        Args: { _night: string; _pid: string; _ref: string }
+        Returns: number
+      }
+      award_review_points: {
+        Args: {
+          _delta: number
+          _profile_id: string
+          _reason: string
+          _ref: string
+        }
+        Returns: undefined
       }
       award_social_cloud: {
         Args: { _reason: string; _ref_id?: string; _ref_type?: string }
@@ -3192,6 +3403,10 @@ export type Database = {
         }[]
       }
       calculate_level: { Args: { pts: number }; Returns: number }
+      can_review_venue: {
+        Args: { _profile_id: string; _venue_id: string }
+        Returns: boolean
+      }
       can_scan_venue: { Args: { _venue_id: string }; Returns: boolean }
       can_see_user: {
         Args: { target_id: string; viewer_id: string }
@@ -3372,6 +3587,18 @@ export type Database = {
           enabled: boolean
         }[]
       }
+      my_open_reviews: {
+        Args: never
+        Returns: {
+          expires_at: string
+          invitation_id: string
+          night: string
+          proof_type: string
+          venue_id: string
+          venue_image_url: string
+          venue_name: string
+        }[]
+      }
       my_scan_venues: {
         Args: never
         Returns: {
@@ -3380,6 +3607,7 @@ export type Database = {
           venue_name: string
         }[]
       }
+      nightlife_night: { Args: { _ts: string }; Returns: string }
       offer_activation_count: { Args: { _offer_id: string }; Returns: number }
       offers_remaining: {
         Args: { _offer_ids: string[] }
@@ -3388,6 +3616,15 @@ export type Database = {
           remaining: number
           taken: number
         }[]
+      }
+      open_review_invitation: {
+        Args: {
+          _at: string
+          _profile_id: string
+          _proof: string
+          _venue_id: string
+        }
+        Returns: undefined
       }
       ping_event_presence: {
         Args: { _lat: number; _lng: number }
@@ -3422,6 +3659,10 @@ export type Database = {
         Args: { _user_id: string; _venue_id: string }
         Returns: undefined
       }
+      reply_to_review: {
+        Args: { _review_id: string; _text: string }
+        Returns: undefined
+      }
       report_card_batch: {
         Args: { _batch_id: string; _details?: string; _reason: string }
         Returns: undefined
@@ -3429,6 +3670,10 @@ export type Database = {
       respond_card_batch: {
         Args: { _accept: boolean; _batch_id: string }
         Returns: string
+      }
+      review_report_counts_as_guest: {
+        Args: { _reporter: string; _venue_id: string }
+        Returns: boolean
       }
       send_card_batch: {
         Args: {
@@ -3440,10 +3685,28 @@ export type Database = {
         }
         Returns: string
       }
+      send_review_digests: { Args: never; Returns: number }
       set_account_type: { Args: { _type: string }; Returns: undefined }
       set_location_enabled: {
         Args: { _enabled: boolean; _source?: string }
         Returns: boolean
+      }
+      skip_venue_review: { Args: { _invitation_id: string }; Returns: number }
+      submit_venue_review: {
+        Args: {
+          _comment?: string
+          _drinks: number
+          _invitation_id: string
+          _music: number
+          _overall: number
+          _service: number
+          _wait: number
+        }
+        Returns: {
+          night_bonus: number
+          points: number
+          review_id: string
+        }[]
       }
       top_inviters: {
         Args: { _limit?: number }
@@ -3525,6 +3788,45 @@ export type Database = {
           title: string
         }[]
       }
+      venue_rating_summary: {
+        Args: { _venue_id: string }
+        Returns: {
+          avg_drinks: number
+          avg_music: number
+          avg_overall: number
+          avg_service: number
+          avg_wait: number
+          dist_1: number
+          dist_2: number
+          dist_3: number
+          dist_4: number
+          dist_5: number
+          review_count: number
+        }[]
+      }
+      venue_reviews_list: {
+        Args: { _before?: string; _limit?: number; _venue_id: string }
+        Returns: {
+          author_avatar_url: string
+          author_display_name: string
+          author_profile_id: string
+          author_username: string
+          can_reply: boolean
+          comment: string
+          comment_hidden: boolean
+          created_at: string
+          night: string
+          proof_type: string
+          rating_drinks: number
+          rating_music: number
+          rating_overall: number
+          rating_service: number
+          rating_wait: number
+          reply_at: string
+          reply_text: string
+          review_id: string
+        }[]
+      }
       verify_post_location: {
         Args: { _lat: number; _lng: number; _post_id: string }
         Returns: boolean
@@ -3560,6 +3862,8 @@ export type Database = {
         | "event_declined"
         | "bell_post"
         | "bell_deal"
+        | "review_request"
+        | "review_reply"
       outbox_status: "pending" | "processing" | "done" | "failed"
       post_type: "normal" | "moment_x"
       profile_type: "user" | "club" | "organizer" | "eventer"
@@ -3570,6 +3874,8 @@ export type Database = {
         | "violence"
         | "illegal"
         | "other"
+        | "fake"
+        | "personal_data"
       report_status: "pending" | "reviewed" | "actioned" | "dismissed"
       report_target:
         | "post"
@@ -3578,6 +3884,7 @@ export type Database = {
         | "event"
         | "message"
         | "comment"
+        | "review"
       visibility_level: "public" | "followers" | "private"
     }
     CompositeTypes: {
@@ -3735,6 +4042,8 @@ export const Constants = {
         "event_declined",
         "bell_post",
         "bell_deal",
+        "review_request",
+        "review_reply",
       ],
       outbox_status: ["pending", "processing", "done", "failed"],
       post_type: ["normal", "moment_x"],
@@ -3746,9 +4055,19 @@ export const Constants = {
         "violence",
         "illegal",
         "other",
+        "fake",
+        "personal_data",
       ],
       report_status: ["pending", "reviewed", "actioned", "dismissed"],
-      report_target: ["post", "profile", "room", "event", "message", "comment"],
+      report_target: [
+        "post",
+        "profile",
+        "room",
+        "event",
+        "message",
+        "comment",
+        "review",
+      ],
       visibility_level: ["public", "followers", "private"],
     },
   },
