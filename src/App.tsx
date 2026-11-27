@@ -31,6 +31,7 @@ import AdminVenues from "./pages/AdminVenues";
 import AdminReports from "./pages/AdminReports";
 import { PushPrimer } from "@/components/push/PushPrimer";
 import { LocationGate } from "@/components/location/LocationGate";
+import { PushBridge } from "@/components/push/PushBridge";
 import AppTour from "@/components/onboarding/AppTour";
 import VenueProfile from "./pages/VenueProfile";
 import CreateEvent from "./pages/CreateEvent";
@@ -81,6 +82,7 @@ const App = () => (
                 <OnboardingGate />
                 <ReferralCapture />
                 <PushPrimer />
+                <PushBridge />
                 <LocationGate />
                 <AppTour />
                 <Routes>

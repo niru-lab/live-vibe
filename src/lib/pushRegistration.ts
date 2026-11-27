@@ -8,11 +8,13 @@ let listenerProfileId: string | null = null;
  * Only call right after the user explicitly asked for notifications (PushPrimer "Ja", or ringing a bell).
  * Returns true when the device can receive pushes.
  */
-export async function registerForPush(profileId: string): Promise<boolean> {
+export async function registerForPush(profileId: string, opts: { prompt?: boolean } = {}): Promise<boolean> {
+  const prompt = opts.prompt ?? true;
   if (!Capacitor.isNativePlatform()) return false;
   try {
     const { PushNotifications } = await import('@capacitor/push-notifications');
     const current = await PushNotifications.checkPermissions();
+    if (current.receive !== 'granted' && !prompt) return false; // silent refresh never asks
     const perm = current.receive === 'granted' ? current : await PushNotifications.requestPermissions();
     if (perm.receive !== 'granted') return false;
     // One token listener per app session; it always stores for the latest profile.
@@ -34,4 +36,11 @@ export async function registerForPush(profileId: string): Promise<boolean> {
     console.warn('Push registration failed', e);
     return false;
   }
+}
+
+/** Push tap → in-app route. Only same-app paths, never external URLs. */
+export function pushTargetPath(data: unknown): string | null {
+  const url = (data as { url?: unknown } | null)?.url;
+  if (typeof url !== 'string' || !url.startsWith('/') || url.startsWith('//')) return null;
+  return url;
 }

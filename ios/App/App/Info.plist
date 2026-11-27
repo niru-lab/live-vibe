@@ -45,8 +45,6 @@
 	<true/>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Feyrn zeigt dir Events und Venues in deiner Nähe.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Feyrn zeigt dir Events und Venues in deiner Nähe.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Feyrn benötigt Zugriff auf deine Fotos, um Profilbilder und Posts hochzuladen.</string>
 	<key>NSCameraUsageDescription</key>

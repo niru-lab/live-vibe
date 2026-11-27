@@ -2,6 +2,7 @@
 // Every push goes through `sendPush()` — never insert into push_sends directly.
 // All caps live here so they are easy to audit and tune.
 import { fcmConfigured, sendFcm } from './fcm.ts';
+import { apnsConfigured, sendApns } from './apns.ts';
 
 export type PushCategory = 'social' | 'event' | 'lifecycle' | 'subscription';
 
@@ -172,18 +173,18 @@ export async function sendPush(supabase: any, req: PushRequest): Promise<PushSta
       .eq('profile_id', req.profileId);
     if (!tokens || tokens.length === 0) return await record('skipped_no_token');
 
-    // 6. Delivery via FCM HTTP v1 (Legacy Server Key is dead). Without a
-    //    service account we record the decision honestly instead of pretending.
-    if (!fcmConfigured()) return await record('skipped_no_provider');
+    // 6. Delivery: iOS tokens are raw APNs tokens (Capacitor) → straight to Apple; Android → FCM HTTP v1.
+    //    Without a provider for a platform we record the decision honestly instead of pretending.
+    const sendable = tokens.filter((t: any) => (t.platform === 'ios' ? apnsConfigured() : fcmConfigured()));
+    if (sendable.length === 0) return await record('skipped_no_provider');
 
+    const data = { url: req.url ?? '/', category: req.category, trigger: req.triggerKey };
     const results = await Promise.all(
-      tokens.map((t: any) =>
-        sendFcm({
-          token: t.token,
-          title: req.title,
-          body: req.body,
-          data: { url: req.url ?? '/', category: req.category, trigger: req.triggerKey },
-        }).then((r) => ({ token: t.token, r })),
+      sendable.map((t: any) =>
+        (t.platform === 'ios'
+          ? sendApns({ token: t.token, title: req.title, body: req.body, data })
+          : sendFcm({ token: t.token, title: req.title, body: req.body, data })
+        ).then((r) => ({ token: t.token, r })),
       ),
     );
 
