@@ -7,3 +7,6 @@
 # Heatmap mit echten Signalen
 - [x] Kreise wachsen mit Zusagen, Fotos vor Ort und Leuten in der Nähe (ab 3, nur live, anonym).
 - [x] Einmalige Standort-Abfrage „Mitzählen" auf Discover; Datenschutzerklärung ergänzt.
+# Release
+- [x] Migration 0011 einspielen und Zeitplan sowie Funktion in der Datenbank prüfen.
+- [x] Alle neun Edge Functions neu bereitstellen und den Abschluss prüfen.

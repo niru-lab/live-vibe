@@ -3536,6 +3536,7 @@ export type Database = {
       }
       is_venue_member: { Args: { _venue_id: string }; Returns: boolean }
       is_venue_owner: { Args: { _venue_id: string }; Returns: boolean }
+      kick_process_outbox: { Args: never; Returns: undefined }
       list_venue_staff: {
         Args: { _venue_id: string }
         Returns: {
