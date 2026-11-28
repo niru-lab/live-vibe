@@ -43,6 +43,8 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Feyrn nutzt deinen Standort nur, während du die App geöffnet hast – für Events und Venues in deiner Nähe. Im Hintergrund wird dein Standort nicht verwendet.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Feyrn zeigt dir Events und Venues in deiner Nähe.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
